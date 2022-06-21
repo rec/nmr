@@ -4,6 +4,8 @@ import functools
 import xmod
 from typing import Sequence, Union
 
+__all__ = 'WORDS', 'Nmbr', 'nmbr'
+
 COUNT = 1628
 FILE = Path(__file__).parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())
@@ -84,10 +86,11 @@ class Nmbr:
 nmbr = xmod(Nmbr())
 
 
-def main(count=32):
+def main():
     import random
     import sys
 
+    count = int((sys.argv + ['32'])[1])
     for i in range(count):
         r = random.randint(0, sys.maxsize)
         print(f'{r}:', *nmbr(r))
