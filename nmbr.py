@@ -1,55 +1,105 @@
+"""
+🔢 ``nmbr``: memorable names for large numbers 🔢
+
+EXAMPLE
+=========
+
+.. code-block:: python
+
+    import nmbr
+
+    assert nmbr(0) == ['the']
+    assert nmbr(2718281828) == ['asks', 'cool', 'laws']
+
+    for i in range(5):
+        print(*nmbr(i))
+
+    # Prints
+    #   the
+    #   of
+    #   and
+    #   to
+    #   a
+
+>>>
+    d = {'one': 1, 'two': 2, 'three': 3}
+
+    assert abbrev(d, 'one') == 1
+    assert abbrev(d, 'o') == 1
+    assert abbrev(d, 'tw') == 2
+
+    abbrev(d, 'four')  # Raises a KeyError: no such key
+    abbrev(d, 't')  # Raises a KeyError: ambiguous
+
+    # You can "curry" a specific dictionary, and save it to call:
+    curry = abbrev(d)
+"""
+
 from pathlib import Path
 import bisect
-import functools
+import threading
 import xmod
 from typing import Sequence, Union
 
-__all__ = 'WORDS', 'Nmbr', 'nmbr'
+__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr', 'to_int', 'to_name'
 
+# The minimum total number of words needed to be able to represent all 64-bit
+# integers with six words or less is 1628
 COUNT = 1628
 FILE = Path(__file__).parent / 'words.txt'
-WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())
+WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
 
 
 class Nmbr:
-    def __init__(self, words=WORDS):
-        assert len(set(words)) == len(words), 'Duplicate words'
-        self.words = words
-        self.inverse = {w: i for i, w in enumerate(words)}
-        self.limit = self.n ** self.n
+    def __init__(self, words=COUNT, signed=True):
+        if isinstance(words, int):
+            self.words = WORDS[:words]
+        else:
+            self.words = list(words)
+        assert len(set(self.words)) == len(self.words), 'Duplicate words'
 
-    def __call__(self, s: Union[int, Sequence[str]]):
-        return self.to_name(s) if isinstance(s, int) else self.to_int(s)
+        self.signed = signed
+        self.count_words = CountWords(self.n)
+        self.inverse = {w: i for i, w in enumerate(self.words)}
+
+    def __call__(self, s: Union[int, Sequence[str], str]):
+        if isinstance(s, int):
+            return self.to_name(s)
+
+        if isinstance(s, str):
+            return self.to_int(s.split())
+
+        return self.to_int(s)
 
     def to_name(self, num: int) -> Sequence[str]:
-        return [self.words[i] for i in self._to_digits(num)]
+        original = num
+        if self.signed:
+            num = abs(num * 2) - (num < 0)
+        elif num < 0:
+            raise ValueError('Only accepts non-negative numbers')
+        return [self.words[i] for i in self._to_digits(num, original)]
 
     def to_int(self, words: Sequence[str]):
+        assert len(set(words)) == len(words), 'Repeated words not allowed'
+
         indexes = [self.inverse[w] for w in reversed(words)]
-        return self._from_digits(list(self._redupe(indexes))[::-1])
+        value = self._from_digits(list(self._redupe(indexes))[::-1])
+        if not self.signed:
+            return value
+
+        num, negative = divmod(value, 2)
+        return -num - 1 if negative else num
 
     @property
     def n(self):
         return len(self.words)
 
-    @functools.lru_cache()
-    def perms(self, c):
-        if c <= 0:
-            return 1
-        return (self.n - c + 1) * self.perms(c - 1)
-
-    @functools.lru_cache()
-    def count(self, c):
-        if c <= 0:
-            return 0
-        return self.perms(c) + self.count(c - 1)
-
-    def _to_digits(self, num):
-        it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
+    def _to_digits(self, num, original):
+        it = (i + 1 for i in range(self.n) if self.count_words(i + 1) > num)
         if (word_count := next(it, None)) is None:
-            raise ValueError(f'Cannot represent {num} in base {self.n}')
+            raise ValueError(f'Cannot represent {original} in base {self.n}')
 
-        total = num - self.count(word_count - 1)
+        total = num - self.count_words(word_count - 1)
         digits = []
 
         for i in range(word_count):
@@ -65,12 +115,7 @@ class Nmbr:
             total *= self.n - (len(digits) - i - 1)
             total += d
 
-        return self.count(len(digits) - 1) + total
-
-    @staticmethod
-    def _redupe(indexes):
-        for i, num in enumerate(indexes):
-            yield num - sum(k < num for k in indexes[:i])
+        return self.count_words(len(digits) - 1) + total
 
     @staticmethod
     def _undupe(indexes):
@@ -82,8 +127,40 @@ class Nmbr:
             bisect.insort(sorted_result, i)
             yield i
 
+    @staticmethod
+    def _redupe(indexes):
+        for i, num in enumerate(indexes):
+            yield num - sum(k < num for k in indexes[:i])
+
+
+class CountWords:
+    def __init__(self, n):
+        self.n = n
+        self._perm_count = [(1, 0)]
+        self._lock = threading.Lock()
+
+    def __call__(self, c: int) -> int:
+        if len(self._perm_count) - 1 < c:
+            with self._lock:
+                perm, count = self._perm_count[-1]
+
+                for i in range(len(self._perm_count) - 1, c):
+                    perm *= self.n - i
+                    count += perm
+                    self._perm_count.append((perm, count))
+
+        return self._perm_count[c][1]
+
+    @classmethod
+    def count(cls, n: int, c: int) -> int:
+        return cls(n)(c)
+
 
 nmbr = xmod(Nmbr())
+
+to_int = nmbr.to_int
+to_name = nmbr.to_name
+count = CountWords.count
 
 
 def main():

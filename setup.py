@@ -1,5 +1,5 @@
 _classifiers = [
-    'Development Status :: 5 - Production/Stable',
+    'Development Status :: 4 - Beta',
     'Programming Language :: Python :: 3.7',
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         author_email='tom@swirly.com',
         url='https://github.com/rec/nmbr',
         py_modules=['nmbr'],
-        description='Unique name for each number',
+        description='A unique name for each number',
         long_description=open('README.rst').read(),
         license='MIT',
         classifiers=_classifiers,
