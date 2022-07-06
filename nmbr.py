@@ -82,7 +82,11 @@ class Nmbr:
     def to_int(self, words: Sequence[str]):
         assert len(set(words)) == len(words), 'Repeated words not allowed'
 
-        indexes = [self.inverse[w] for w in reversed(words)]
+        try:
+            indexes = [self.inverse[w] for w in reversed(words)]
+        except KeyError:
+            raise KeyError(*sorted(set(words) - set(self.inverse))) from None
+
         value = self._from_digits(list(self._redupe(indexes))[::-1])
         if not self.signed:
             return value
@@ -167,10 +171,14 @@ def main():
     import random
     import sys
 
-    count = int((sys.argv + ['32'])[1])
-    for i in range(count):
-        r = random.randint(0, sys.maxsize)
-        print(f'{r}:', *nmbr(r))
+    argv = sys.argv[1:]
+    if argv:
+        for a in argv:
+            print(f'{a}:', *nmbr(int(a)))
+    else:
+        for i in range(32):
+            r = random.randint(0, sys.maxsize)
+            print(f'{r}:', *nmbr(r))
 
 
 if __name__ == '__main__':
