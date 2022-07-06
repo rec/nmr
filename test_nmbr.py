@@ -1,11 +1,11 @@
-from nmbr import COUNT, Nmbr, count
+from nmbr import COUNT, Nmbr, CountWords
 import pytest
 
 
 @pytest.mark.parametrize('n', (range(1, 7)))
 def test_all_unsigned(n):
     N = Nmbr(n, signed=False)
-    m = N.count_words(n)
+    m = N.count(n)
 
     for i in range(m):
         words = N(i)
@@ -24,7 +24,7 @@ def test_all_unsigned(n):
 @pytest.mark.parametrize('n', (range(1, 7)))
 def test_all_signed(n):
     N = Nmbr(n)
-    m = N.count_words(n)
+    m = N.count(n)
     d = (m + 1) // 2
     r = range(d - m, d)
 
@@ -44,6 +44,8 @@ def test_all_signed(n):
 
 def test_count():
     M = 2 ** 64 - 1
+
+    count = CountWords.count
 
     assert count(COUNT, 6) > M > count(COUNT - 1, 6)
     assert count(COUNT, 6) > 1.0001 * M

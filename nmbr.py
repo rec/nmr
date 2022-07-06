@@ -9,39 +9,27 @@ EXAMPLE
     import nmbr
 
     assert nmbr(0) == ['the']
-    assert nmbr(2718281828) == ['asks', 'cool', 'laws']
+    assert nmbr(2718281828) == ['the', 'race', 'tie', 'hook']
 
-    for i in range(5):
-        print(*nmbr(i))
+    for i in range(-2, 3):
+        print(i, *nmbr(i))
 
     # Prints
-    #   the
-    #   of
-    #   and
-    #   to
-    #   a
+    #   -2 to
+    #   -1 of
+    #   0 the
+    #   1 and
+    #   2 a
 
->>>
-    d = {'one': 1, 'two': 2, 'three': 3}
-
-    assert abbrev(d, 'one') == 1
-    assert abbrev(d, 'o') == 1
-    assert abbrev(d, 'tw') == 2
-
-    abbrev(d, 'four')  # Raises a KeyError: no such key
-    abbrev(d, 't')  # Raises a KeyError: ambiguous
-
-    # You can "curry" a specific dictionary, and save it to call:
-    curry = abbrev(d)
 """
 
 from pathlib import Path
 import bisect
 import threading
 import xmod
-from typing import Sequence, Union
+from typing import Optional, Sequence, Union
 
-__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr', 'to_int', 'to_name'
+__all__ = 'Nmbr', 'WORDS', 'nmbr'
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
@@ -59,7 +47,7 @@ class Nmbr:
         assert len(set(self.words)) == len(self.words), 'Duplicate words'
 
         self.signed = signed
-        self.count_words = CountWords(self.n)
+        self.count = CountWords(self.n)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, s: Union[int, Sequence[str], str]):
@@ -99,11 +87,11 @@ class Nmbr:
         return len(self.words)
 
     def _to_digits(self, num, original):
-        it = (i + 1 for i in range(self.n) if self.count_words(i + 1) > num)
+        it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
         if (word_count := next(it, None)) is None:
             raise ValueError(f'Cannot represent {original} in base {self.n}')
 
-        total = num - self.count_words(word_count - 1)
+        total = num - self.count(word_count - 1)
         digits = []
 
         for i in range(word_count):
@@ -119,7 +107,7 @@ class Nmbr:
             total *= self.n - (len(digits) - i - 1)
             total += d
 
-        return self.count_words(len(digits) - 1) + total
+        return self.count(len(digits) - 1) + total
 
     @staticmethod
     def _undupe(indexes):
@@ -156,15 +144,13 @@ class CountWords:
         return self._perm_count[c][1]
 
     @classmethod
-    def count(cls, n: int, c: int) -> int:
+    def count(cls, n: int, c: Optional[int] = None) -> int:
+        if c is None:
+            c = n
         return cls(n)(c)
 
 
 nmbr = xmod(Nmbr())
-
-to_int = nmbr.to_int
-to_name = nmbr.to_name
-count = CountWords.count
 
 
 def main():
