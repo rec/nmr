@@ -3,6 +3,11 @@
 """
 🔢 ``nmbr``: memorable names for large numbers 🔢
 
+Convert an integer, even a very long one, into a short list of common, short
+non-repeating English words... or use a word list of your choice.
+
+Installs both a module named ``nmbr`` and an executable called ``nmbr.py``
+
 EXAMPLE
 =========
 
@@ -14,28 +19,29 @@ EXAMPLE
     assert nmbr(2718281828) == ['the', 'race', 'tie', 'hook']
 
     for i in range(-2, 3):
-        print(i, *nmbr(i))
+        print(i, ':', *nmbr(i))
 
     # Prints
-    #   -2 to
-    #   -1 of
-    #   0 the
-    #   1 and
-    #   2 a
+    #   -2 : to
+    #   -1 : of
+    #   0 : the
+    #   1 : and
+    #   2 : a
 
 """
-
+from functools import cached_property
 from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
+import sys
 import threading
 import xmod
 
-__all__ = 'Nmbr', 'WORDS', 'nmbr'
+__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr'
 __version__ = '0.8.0'
 
 # The minimum total number of words needed to be able to represent all 64-bit
-# integers with six words or less is 1628
+# signed integers with six words or less is 1628
 COUNT = 1628
 FILE = Path(__file__).parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
@@ -57,14 +63,14 @@ class Nmbr:
         s = try_to_int(s)
 
         if isinstance(s, int):
-            return self.to_name(s)
+            return self.int_to_name(s)
 
         if isinstance(s, str):
-            return self.to_int(s.split())
+            return self.name_to_int(s.split())
 
-        return self.to_int(s)
+        return self.name_to_int(s)
 
-    def to_name(self, num: int) -> Sequence[str]:
+    def int_to_name(self, num: int) -> Sequence[str]:
         original = num
         if self.signed:
             num = abs(num * 2) - (num < 0)
@@ -72,7 +78,7 @@ class Nmbr:
             raise ValueError('Only accepts non-negative numbers')
         return [self.words[i] for i in self._to_digits(num, original)]
 
-    def to_int(self, words: Sequence[str]) -> int:
+    def name_to_int(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
             raise ValueError('Repeated words not allowed')
@@ -92,6 +98,14 @@ class Nmbr:
     @property
     def n(self):
         return len(self.words)
+
+    @cached_property
+    def maxint(self):
+        return self.count() // 2 - 1 if self.signed else self.count() - 1
+
+    @cached_property
+    def minint(self):
+        return -self.count() // 2 if self.signed else 0
 
     def _to_digits(self, num, original):
         it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
@@ -154,9 +168,6 @@ class CountWords:
         return self._perm_count[c][1]
 
 
-nmbr = xmod(Nmbr())
-
-
 def try_to_int(s):
     try:
         return int(s)
@@ -173,11 +184,10 @@ def try_to_int(s):
 def main():
     import itertools
     import random
-    import sys
 
     def rnd():
         for i in range(128):
-            r = random.randint(0, sys.maxsize)
+            r = int(10 ** random.uniform(0, 50))
             print(f'{r}:', *nmbr(r))
 
     def is_int(s):
@@ -216,7 +226,11 @@ def main():
             raise
 
     if empty:
-        args()
+        rnd()
+
+
+nmbr = xmod(Nmbr())
+count = nmbr.count
 
 
 if __name__ == '__main__':
