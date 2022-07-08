@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 """
 🔢 ``nmbr``: memorable names for large numbers 🔢
 
@@ -24,10 +26,13 @@ EXAMPLE
 """
 
 from pathlib import Path
+from typing import Optional, Sequence, Union
 import bisect
+import itertools
+import random
+import sys
 import threading
 import xmod
-from typing import Optional, Sequence, Union
 
 __all__ = 'Nmbr', 'WORDS', 'nmbr'
 
@@ -68,7 +73,9 @@ class Nmbr:
         return [self.words[i] for i in self._to_digits(num, original)]
 
     def to_int(self, words: Sequence[str]):
-        assert len(set(words)) == len(words), 'Repeated words not allowed'
+        words = list(words)
+        if len(set(words)) != len(words):
+            raise ValueError('Repeated words not allowed')
 
         try:
             indexes = [self.inverse[w] for w in reversed(words)]
@@ -131,7 +138,10 @@ class CountWords:
         self._perm_count = [(1, 0)]
         self._lock = threading.Lock()
 
-    def __call__(self, c: int) -> int:
+    def __call__(self, c: Optional[int] = None) -> int:
+        if c is None:
+            c = self.n
+
         if len(self._perm_count) - 1 < c:
             with self._lock:
                 perm, count = self._perm_count[-1]
@@ -143,28 +153,59 @@ class CountWords:
 
         return self._perm_count[c][1]
 
-    @classmethod
-    def count(cls, n: int, c: Optional[int] = None) -> int:
-        if c is None:
-            c = n
-        return cls(n)(c)
-
 
 nmbr = xmod(Nmbr())
 
 
-def main():
-    import random
-    import sys
-
-    argv = sys.argv[1:]
-    if argv:
-        for a in argv:
-            print(f'{a}:', *nmbr(int(a)))
-    else:
+def main(argv=sys.argv, print=print, randint=random.randint, stdin=sys.stdin):
+    def rnd():
         for i in range(32):
-            r = random.randint(0, sys.maxsize)
+            r = randint(0, sys.maxsize)
             print(f'{r}:', *nmbr(r))
+
+    def is_int(s):
+        try:
+            int(s)
+        except Exception:
+            return False
+        return True
+
+    def args():
+        for numeric, items in itertools.groupby(sys.argv[1:], is_int):
+            if numeric:
+                yield from items
+            else:
+                yield list(items)
+
+    def stdin_lines():
+        if stdin.isatty():
+            return
+
+        for line in (line for i in stdin if (line := i.strip())):
+            parts = line.split()
+            nums = sum(is_int(i) for i in parts)
+            if nums == 0:
+                yield parts
+            elif nums == len(parts):
+                yield from parts
+            else:
+                msg = f'Line mixes numbers and words: "{line}"'
+                print(msg, file=sys.stderr)
+
+    empty = True
+    for i in itertools.chain(args(), stdin_lines()):
+        empty = False
+        try:
+            if isinstance(i, str):
+                print(f'{i}:', *nmbr(int(i)))
+            else:
+                print(f'{" ".join(i)}:', nmbr(i))
+        except Exception as e:
+            print('ERROR:', e, file=sys.stderr)
+            raise
+
+    if empty:
+        args()
 
 
 if __name__ == '__main__':

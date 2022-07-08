@@ -1,4 +1,4 @@
-from nmbr import COUNT, Nmbr, CountWords
+from nmbr import COUNT, CountWords, Nmbr
 import pytest
 
 
@@ -45,7 +45,8 @@ def test_all_signed(n):
 def test_count():
     M = 2 ** 64 - 1
 
-    count = CountWords.count
+    def count(n, i):
+        return CountWords(n)(i)
 
     assert count(COUNT, 6) > M > count(COUNT - 1, 6)
     assert count(COUNT, 6) > 1.0001 * M

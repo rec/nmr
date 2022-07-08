@@ -16,14 +16,15 @@ if __name__ == '__main__':
 
     setup(
         name='nmbr',
-        version=nmbr.__version__,
         author='Tom Ritchford',
         author_email='tom@swirly.com',
-        url='https://github.com/rec/nmbr',
-        py_modules=['nmbr'],
-        description='A unique name for each number',
-        long_description=open('README.rst').read(),
-        license='MIT',
         classifiers=_classifiers,
+        description='A unique name for each number',
         keywords=['Numbers'],
+        license='MIT',
+        long_description=open('README.rst').read(),
+        py_modules=['nmbr'],
+        scripts=['nmbr.py'],
+        url='https://github.com/rec/nmbr',
+        version=nmbr.__version__,
     )
