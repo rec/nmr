@@ -157,32 +157,38 @@ class CountWords:
 nmbr = xmod(Nmbr())
 
 
-def main(argv=sys.argv, print=print, randint=random.randint, stdin=sys.stdin):
+def main():
     def rnd():
         for i in range(32):
-            r = randint(0, sys.maxsize)
+            r = random.randint(0, sys.maxsize)
             print(f'{r}:', *nmbr(r))
 
+    def to_ints(it):
+        for i in it:
+            try:
+                yield int(i)
+            except Exception:
+                if i.lower().startswith('0x'):
+                    i = i[2:]
+                try:
+                    yield int(i, 16)
+                except Exception:
+                    yield i
+
     def is_int(s):
-        try:
-            int(s)
-        except Exception:
-            return False
-        return True
+        return isinstance(s, int)
 
     def args():
-        for numeric, items in itertools.groupby(sys.argv[1:], is_int):
-            if numeric:
-                yield from items
-            else:
-                yield list(items)
+        args = sys.argv[1:]
+        for num, it in itertools.groupby(to_ints(args), is_int):
+            yield from it if num else [list(it)]
 
     def stdin_lines():
-        if stdin.isatty():
+        if sys.stdin.isatty():
             return
 
-        for line in (line for i in stdin if (line := i.strip())):
-            parts = line.split()
+        for line in (line for i in sys.stdin if (line := i.strip())):
+            parts = list(to_ints(line.split()))
             nums = sum(is_int(i) for i in parts)
             if nums == 0:
                 yield parts
@@ -196,8 +202,8 @@ def main(argv=sys.argv, print=print, randint=random.randint, stdin=sys.stdin):
     for i in itertools.chain(args(), stdin_lines()):
         empty = False
         try:
-            if isinstance(i, str):
-                print(f'{i}:', *nmbr(int(i)))
+            if isinstance(i, int):
+                print(f'{i}:', *nmbr(i))
             else:
                 print(f'{" ".join(i)}:', nmbr(i))
         except Exception as e:
