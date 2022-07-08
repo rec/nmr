@@ -28,9 +28,6 @@ EXAMPLE
 from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
-import itertools
-import random
-import sys
 import threading
 import xmod
 
@@ -56,6 +53,8 @@ class Nmbr:
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, s: Union[int, Sequence[str], str]):
+        s = try_to_int(s)
+
         if isinstance(s, int):
             return self.to_name(s)
 
@@ -72,7 +71,7 @@ class Nmbr:
             raise ValueError('Only accepts non-negative numbers')
         return [self.words[i] for i in self._to_digits(num, original)]
 
-    def to_int(self, words: Sequence[str]):
+    def to_int(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
             raise ValueError('Repeated words not allowed')
@@ -157,30 +156,35 @@ class CountWords:
 nmbr = xmod(Nmbr())
 
 
+def try_to_int(s):
+    try:
+        return int(s)
+    except Exception:
+        pass
+    try:
+        if s.lower().startswith('0x'):
+            return int(s[2:], 16)
+    except Exception:
+        pass
+    return s
+
+
 def main():
+    import itertools
+    import random
+    import sys
+
     def rnd():
-        for i in range(32):
+        for i in range(128):
             r = random.randint(0, sys.maxsize)
             print(f'{r}:', *nmbr(r))
-
-    def to_ints(it):
-        for i in it:
-            try:
-                yield int(i)
-            except Exception:
-                if i.lower().startswith('0x'):
-                    i = i[2:]
-                try:
-                    yield int(i, 16)
-                except Exception:
-                    yield i
 
     def is_int(s):
         return isinstance(s, int)
 
     def args():
-        args = sys.argv[1:]
-        for num, it in itertools.groupby(to_ints(args), is_int):
+        args = (try_to_int(a) for a in sys.argv[1:])
+        for num, it in itertools.groupby(args, is_int):
             yield from it if num else [list(it)]
 
     def stdin_lines():
@@ -188,7 +192,7 @@ def main():
             return
 
         for line in (line for i in sys.stdin if (line := i.strip())):
-            parts = list(to_ints(line.split()))
+            parts = [try_to_int(s) for s in line.split()]
             nums = sum(is_int(i) for i in parts)
             if nums == 0:
                 yield parts
