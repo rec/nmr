@@ -32,6 +32,7 @@ import threading
 import xmod
 
 __all__ = 'Nmbr', 'WORDS', 'nmbr'
+__version__ = '0.8.0'
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
