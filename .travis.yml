@@ -5,7 +5,7 @@ python:
 
 matrix:
   include:
-    - python: 3.9-dev
+    - python: 3.10.2
       dist: xenial
 
 install:
@@ -16,5 +16,9 @@ script:
   - flake8
   - coverage run -m pytest
 
-after_success:
-- bash <(curl -s https://codecov.io/bash)
+# Don't compile "experimental" branches starting with x-, y-, or z-.
+branches:
+  except:
+    - /^x-.*$/
+    - /^y-.*$/
+    - /^z-.*$/
