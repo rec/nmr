@@ -44,13 +44,18 @@ def nmbr_main(
         help='Output numbers in IP4 or IP6format, if possible'
     ),
 
-    only_outputs: bool = Option(
-        False, '--only-outputs', '-o',
+    only_output: bool = Option(
+        False, '--only-output', '-o',
         help='If true, only display the output, not the input'
     ),
 
+    semver: bool = Option(
+        False, '--semver', '-s',
+        help='Print as semver'
+    ),
+
     signed: bool = Option(
-        True, '--signed/--unsigned', '-s/-u',
+        True, '--signed/--unsigned', '-i/-u',
         help='Use unsigned numbers'
     ),
 
@@ -103,13 +108,20 @@ class Main:
         return sum(self.convert(i) or 1 for i in items)
 
     def convert(self, i):
+        is_int = isinstance(i, int)
+        prefix = [i] if is_int else list(i)
+        prefix.append(':')
+
         try:
-            if isinstance(i, int):
-                print(i, ':', *self.nmbr(i))
-            else:
-                print(*i, ':', self.to_int(i))
+            value = self.nmbr(i) if is_int else [self.to_int(i)]
         except Exception as e:
             print('ERROR:', e, file=sys.stderr)
+            raise
+        else:
+            if self.only_output:
+                print(*prefix, ':', *value)
+            else:
+                print(*value)
 
     def rnd(self):
         for i in range(128):
@@ -124,6 +136,7 @@ class Main:
             yield from it if num else [list(it)]
 
     def to_int(self, i):
+        from nmbr import VERSION_DIGIT
         n = self.nmbr(i)
         if self.hex:
             return hex(n)
@@ -132,6 +145,15 @@ class Main:
                 return str(ipaddress.ip_address(n))
             except Exception:
                 pass
+        if self.semver and n >= 0:
+            d0, m0 = divmod(n, VERSION_DIGIT)
+            if not m0:
+                d1, m1 = divmod(d0, VERSION_DIGIT)
+                d2, m2 = divmod(d1, VERSION_DIGIT)
+                d3, m3 = divmod(d2, VERSION_DIGIT)
+                if not d3:
+                    return f'v{m3}.{m2}.{m1}'
+
         return str(n)
 
     def __call__(self):

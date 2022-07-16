@@ -45,6 +45,7 @@ __version__ = '0.8.0'
 COUNT = 1628
 FILE = Path(__file__).parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
+VERSION_DIGIT = 1024
 
 
 def read_words(file=None):
@@ -184,11 +185,24 @@ def try_to_int(s):
         return int(s)
     except Exception:
         pass
+
     try:
-        if s.lower().startswith('0x'):
+        sl = s.lower()
+        if sl.startswith('0x') or sl.startswith('-0x'):
             return int(s[2:], 16)
     except Exception:
         pass
+
+    try:
+        s2 = s[1:] if s.startswith('v') else s
+        p = [int(i) for i in s2.split('.')]
+        if len(p) == 3 and all(i < VERSION_DIGIT for i in p):
+            v = p[2] + VERSION_DIGIT * (p[1] + VERSION_DIGIT * p[0])
+            return v * VERSION_DIGIT
+
+    except Exception:
+        pass
+
     try:
         return int(ipaddress.ip_address(s))
     except Exception:
