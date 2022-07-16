@@ -33,6 +33,7 @@ from functools import cached_property
 from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
+import ipaddress
 import sys
 import threading
 import xmod
@@ -178,12 +179,70 @@ def try_to_int(s):
             return int(s[2:], 16)
     except Exception:
         pass
+    try:
+        return int(ipaddress.ip_address(s))
+    except Exception:
+        pass
     return s
+
+
+USAGE = """
+`nmbr` is a Python module which uniquely names every number, including
+IP addresses and hex numbers.
+
+USAGE:
+
+    nmbr [-i/--ip-address] [-x/--hex] <num-or-name>] [... <num-or-name>]
+        Converts numbers to names or vice
+
+    nmbr -h/--help - prints this message
+
+
+"""
 
 
 def main():
     import itertools
     import random
+
+    def usage(errorcode=0):
+        print(USAGE, sys.stderr)
+        sys.exit(errorcode)
+
+    to_hex = to_ip_address = False
+
+    args = []
+    for a in sys.argv[1:]:
+        ar = a.rstrip('-')
+        if not (a.startswith('-') or a[1:].isnumeric()):
+            args.append(a)
+        elif ar in ('h', 'help'):
+            usage()
+        elif ar in ('x', 'hex'):
+            to_hex = True
+        elif ar in ('i', 'ip-address'):
+            to_ip_address = True
+        else:
+            print('Unknown flag', a, file=sys.stderr)
+            usage(True)
+
+    if to_hex and to_ip_address:
+        msg = 'At most one of -i/--ip-address and -x/--hex may be set'
+        print(msg, file=sys.stderr)
+        usage(True)
+
+    def convert_lines():
+        items = itertools.chain(group_args(), stdin_lines())
+        return sum(convert(i) or 1 for i in items)
+
+    def convert(i):
+        try:
+            if isinstance(i, int):
+                print(i, ':', *nmbr(i))
+            else:
+                print(*i, ':', to_int(i))
+        except Exception as e:
+            print('ERROR:', e, file=sys.stderr)
 
     def rnd():
         for i in range(128):
@@ -193,9 +252,9 @@ def main():
     def is_int(s):
         return isinstance(s, int)
 
-    def args():
-        args = (try_to_int(a) for a in sys.argv[1:])
-        for num, it in itertools.groupby(args, is_int):
+    def group_args():
+        iargs = (try_to_int(a) for a in args)
+        for num, it in itertools.groupby(iargs, is_int):
             yield from it if num else [list(it)]
 
     def stdin_lines():
@@ -213,20 +272,18 @@ def main():
                 msg = f'Line mixes numbers and words: "{line}"'
                 print(msg, file=sys.stderr)
 
-    empty = True
-    for i in itertools.chain(args(), stdin_lines()):
-        empty = False
-        try:
-            if isinstance(i, int):
-                print(f'{i}:', *nmbr(i))
-            else:
-                print(f'{" ".join(i)}:', nmbr(i))
-        except Exception as e:
-            print('ERROR:', e, file=sys.stderr)
-            raise
+    def to_int(i):
+        n = nmbr(i)
+        if to_hex:
+            return hex(n)
+        if to_ip_address:
+            try:
+                return str(ipaddress.ip_address(n))
+            except Exception:
+                pass
+        return str(n)
 
-    if empty:
-        rnd()
+    convert_lines() or rnd()
 
 
 nmbr = xmod(Nmbr())
