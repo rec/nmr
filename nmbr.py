@@ -34,11 +34,10 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
 import ipaddress
-import sys
 import threading
 import xmod
 
-__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr'
+__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr', 'try_to_int'
 __version__ = '0.8.0'
 
 # The minimum total number of words needed to be able to represent all 64-bit
@@ -48,20 +47,31 @@ FILE = Path(__file__).parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
 
 
+def read_words(file=None):
+    lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
+    return tuple(i for i in lines if i)
+
+
 class Nmbr:
-    def __init__(self, words=COUNT, signed=True):
-        if isinstance(words, int):
-            self.words = WORDS[:words]
-        else:
-            self.words = list(words)
-        assert len(set(self.words)) == len(self.words), 'Duplicate words'
+    def __init__(self, count=None, words=None, signed=True):
+        if not isinstance(words, (list, tuple)):
+            if words is None and count is None:
+                count = COUNT
+            words = read_words(words)
+
+        if count is not None:
+            words = words[:count]
+        assert len(set(words)) == len(words), 'Duplicate words'
+        self.words = words
 
         self.signed = signed
         self.count = CountWords(self.n)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, s: Union[int, Sequence[str], str]):
-        s = try_to_int(s)
+        import nmbr
+
+        s = nmbr.try_to_int(s)
 
         if isinstance(s, int):
             return self.int_to_name(s)
@@ -186,109 +196,11 @@ def try_to_int(s):
     return s
 
 
-USAGE = """
-`nmbr` is a Python module which uniquely names every number, including
-IP addresses and hex numbers.
-
-USAGE:
-
-    nmbr [-i/--ip-address] [-x/--hex] <num-or-name>] [... <num-or-name>]
-        Converts numbers to names or vice
-
-    nmbr -h/--help - prints this message
-
-
-"""
-
-
-def main():
-    import itertools
-    import random
-
-    def usage(errorcode=0):
-        print(USAGE, sys.stderr)
-        sys.exit(errorcode)
-
-    to_hex = to_ip_address = False
-
-    args = []
-    for a in sys.argv[1:]:
-        ar = a.rstrip('-')
-        if not (a.startswith('-') or a[1:].isnumeric()):
-            args.append(a)
-        elif ar in ('h', 'help'):
-            usage()
-        elif ar in ('x', 'hex'):
-            to_hex = True
-        elif ar in ('i', 'ip-address'):
-            to_ip_address = True
-        else:
-            print('Unknown flag', a, file=sys.stderr)
-            usage(True)
-
-    if to_hex and to_ip_address:
-        msg = 'At most one of -i/--ip-address and -x/--hex may be set'
-        print(msg, file=sys.stderr)
-        usage(True)
-
-    def convert_lines():
-        items = itertools.chain(group_args(), stdin_lines())
-        return sum(convert(i) or 1 for i in items)
-
-    def convert(i):
-        try:
-            if isinstance(i, int):
-                print(i, ':', *nmbr(i))
-            else:
-                print(*i, ':', to_int(i))
-        except Exception as e:
-            print('ERROR:', e, file=sys.stderr)
-
-    def rnd():
-        for i in range(128):
-            r = int(10 ** random.uniform(0, 50))
-            print(f'{r}:', *nmbr(r))
-
-    def is_int(s):
-        return isinstance(s, int)
-
-    def group_args():
-        iargs = (try_to_int(a) for a in args)
-        for num, it in itertools.groupby(iargs, is_int):
-            yield from it if num else [list(it)]
-
-    def stdin_lines():
-        if sys.stdin.isatty():
-            return
-
-        for line in (line for i in sys.stdin if (line := i.strip())):
-            parts = [try_to_int(s) for s in line.split()]
-            nums = sum(is_int(i) for i in parts)
-            if nums == 0:
-                yield parts
-            elif nums == len(parts):
-                yield from parts
-            else:
-                msg = f'Line mixes numbers and words: "{line}"'
-                print(msg, file=sys.stderr)
-
-    def to_int(i):
-        n = nmbr(i)
-        if to_hex:
-            return hex(n)
-        if to_ip_address:
-            try:
-                return str(ipaddress.ip_address(n))
-            except Exception:
-                pass
-        return str(n)
-
-    convert_lines() or rnd()
-
-
 nmbr = xmod(Nmbr())
 count = nmbr.count
 
 
 if __name__ == '__main__':
-    main()
+    import nmbr_main
+
+    nmbr_main.main()
