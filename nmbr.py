@@ -34,6 +34,7 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
 import ipaddress
+import re
 import threading
 import xmod
 
@@ -46,6 +47,8 @@ COUNT = 1628
 FILE = Path(__file__).parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
 VERSION_DIGIT = 1024
+DEGREE_DIVISIONS = 100000000
+DEGREE_MULTIPLIER = 1000 * DEGREE_DIVISIONS
 
 
 def read_words(file=None):
@@ -179,36 +182,78 @@ class CountWords:
 
         return self._perm_count[c][1]
 
+# 38°53'23.0"N 77°00'32.0"W
+# 38.889722, -77.008889
+
+
+_DEGREE = r'(?P<degrees> \d{1,3}) °'
+_MINUTE = r'(?P<minutes> \d{1,2}) \''
+_SECOND = r'(?P<seconds> \d{1,2} (\. \d+)?) "'
+_NEWS = r'(?P<news> [NEWS])'
+
+COORD = re.compile(f'{_DEGREE} {_MINUTE} ({_SECOND})? {_NEWS}', re.VERBOSE)
+
 
 def try_to_int(s):
-    try:
-        return int(s)
-    except Exception:
-        pass
-
-    try:
-        sl = s.lower()
-        if sl.startswith('0x') or sl.startswith('-0x'):
-            return int(s[2:], 16)
-    except Exception:
-        pass
-
-    try:
+    def from_semver(s):
         s2 = s[1:] if s.startswith('v') else s
         p = [int(i) for i in s2.split('.')]
         if len(p) == 3 and all(i < VERSION_DIGIT for i in p):
             v = p[2] + VERSION_DIGIT * (p[1] + VERSION_DIGIT * p[0])
             return v * VERSION_DIGIT
 
-    except Exception:
-        pass
+    def from_hex(s):
+        sl = s.lower()
+        if sl.startswith('0x'):
+            return int(s[2:], 16)
+        if sl.startswith('-0x'):
+            return -int(s[2:], 16)
 
-    try:
+    def from_ip_address(s):
         return int(ipaddress.ip_address(s))
-    except Exception:
-        pass
+
+    def geocode_to_int(lat, lon):
+        if -90 <= lat <= 90 and -180 <= lon <= 180:
+            lat = round(DEGREE_DIVISIONS * lat)
+            lon = round(DEGREE_DIVISIONS * lon)
+            return lon + DEGREE_MULTIPLIER * lat
+
+    def from_geocode(s):
+        lat, lon = s.replace(',', ' ').split()
+        geocode_to_int(one_geocode(lat), one_geocode(lon))
+
+    def one_geocode(s):
+        try:
+            return float(s)
+        except ValueError:
+            pass
+
+        m = COORD.match(s.strip())
+        if m:
+            degrees, minutes, seconds, news = m.group(
+                'degrees', 'minutes', 'seconds', 'news'
+            )
+            mul = -1 if news in 'SW' else 1
+            return mul * (
+                int(degrees)
+                + int(minutes) / 60
+                + float(seconds or 0) / 3600
+            )
+
+    for f in int, from_hex, from_ip_address, from_semver, from_geocode:
+        try:
+            v = f(s)
+            if v is not None:
+                return v
+        except Exception:
+            pass
     return s
 
+
+# TODO: bring in the other end of the conversions from nmbr_main
+# TODO: times/dates
+# TODO: geographical coordinates 52.3544607,4.9322263
+# TODO: phone numbers?
 
 nmbr = xmod(Nmbr())
 count = nmbr.count

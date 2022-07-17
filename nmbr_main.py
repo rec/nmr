@@ -138,13 +138,16 @@ class Main:
     def to_int(self, i):
         from nmbr import VERSION_DIGIT
         n = self.nmbr(i)
+
         if self.hex:
             return hex(n)
+
         if self.ip_address:
             try:
                 return str(ipaddress.ip_address(n))
             except Exception:
                 pass
+
         if self.semver and n >= 0:
             d0, m0 = divmod(n, VERSION_DIGIT)
             if not m0:
