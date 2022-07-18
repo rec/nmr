@@ -27,18 +27,17 @@ EXAMPLE
     #   0 : the
     #   1 : and
     #   2 : a
-
 """
 from functools import cached_property
 from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
 import ipaddress
-import re
 import threading
+import uuid
 import xmod
 
-__all__ = 'Nmbr', 'WORDS', 'count', 'nmbr', 'try_to_int'
+__all__ = 'Convert', 'Nmbr', 'WORDS', 'count', 'nmbr', 'try_to_int'
 __version__ = '0.8.0'
 
 # The minimum total number of words needed to be able to represent all 64-bit
@@ -72,10 +71,10 @@ class Nmbr:
         self.count = CountWords(self.n)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def __call__(self, s: Union[int, Sequence[str], str]):
-        import nmbr
-
-        s = nmbr.try_to_int(s)
+    def __call__(self, st: Union[int, Sequence[str], str]):
+        s = try_to_int(st)
+        if s is None:
+            raise ValueError(f'Do not understand {st}, {type(st)}')
 
         if isinstance(s, int):
             return self.int_to_name(s)
@@ -182,77 +181,126 @@ class CountWords:
 
         return self._perm_count[c][1]
 
-# 38°53'23.0"N 77°00'32.0"W
-# 38.889722, -77.008889
+
+class Convert:
+    class Integer:
+        to_int = staticmethod(int)
+        from_int = staticmethod(str)
+
+    class Hex:
+        @staticmethod
+        def to_int(s: str):
+            s = s.lower()
+            if s.startswith('0x'):
+                return int(s[2:], 16)
+            if s.startswith('-0x'):
+                return -int(s[2:], 16)
+
+        from_int = staticmethod(hex)
+
+    class Semver:
+        BASE = 1024
+
+        @classmethod
+        def to_int(cls, s: str) -> Optional[int]:
+            s2 = s[1:] if s.startswith('v') else s
+            p = [int(i) for i in s2.split('.')]
+            if len(p) == 3 and all(i < cls.BASE for i in p):
+                v = p[2] + cls.BASE * (p[1] + cls.BASE * p[0])
+                return v * cls.BASE
+
+        @classmethod
+        def from_int(cls, i: int) -> Optional[str]:
+            if i >= 0:
+                d0, m0 = divmod(i, cls.BASE)
+                if not m0:
+                    d1, m1 = divmod(d0, cls.BASE)
+                    d2, m2 = divmod(d1, cls.BASE)
+                    d3, m3 = divmod(d2, cls.BASE)
+                    if not d3:
+                        return f'v{m3}.{m2}.{m1}'
+
+    class LatLong:
+        DIVISIONS = 100000000  # Each degree is divided by ten million
+        MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
+
+        @classmethod
+        def to_int(cls, s: str) -> Optional[int]:
+            from lat_long_parser import parse
+
+            lat, lon = (parse(i) for i in s.split(','))
+            if -90 <= lat <= 90 and -180 <= lon <= 180:
+                lat = round(cls.DIVISIONS * (lat + 90))
+                lon = round(cls.DIVISIONS * (lon + 180))
+                return lon + cls.MULT * lat
+
+        @classmethod
+        def from_int(cls, i: int) -> Optional[str]:
+            from lat_long_parser import to_str_deg_min_sec
+
+            lat, lon = divmod(i, cls.MULT)
+            lat = lat / cls.DIVISIONS - 90
+            lon = lon / cls.DIVISIONS - 180
+
+            if -90 <= lat <= 90 and -180 <= lon <= 180:
+                lat = to_str_deg_min_sec(lat)
+                lon = to_str_deg_min_sec(lon)
+
+                if lat.startswith('-'):
+                    lat, ns = lat[1:], 'S'
+                else:
+                    ns = 'N'
+
+                if lon.startswith('-'):
+                    lat, ew = lat[1:], 'W'
+                else:
+                    ew = 'E'
+
+                lat += ' ' * (' ' in lat) + ns
+                lon += ' ' * (' ' in lon) + ew
+
+                return f'{lat}, {lon}'
+
+    class IpAddress:
+        @staticmethod
+        def to_int(s: str) -> Optional[int]:
+            return int(ipaddress.ip_address(s))
+
+        @staticmethod
+        def from_int(i: int) -> Optional[str]:
+            return str(ipaddress.ip_address(i))
+
+    class UUID:
+        @staticmethod
+        def to_int(s: str) -> Optional[int]:
+            if len(s) == 36 and s.count('-') == 4:
+                return uuid.UUID(s)
+
+        @staticmethod
+        def from_int(i: int) -> Optional[str]:
+            return str(uuid.UUID(int=i))
+
+    CLASSES = Integer, Hex, Semver, LatLong, IpAddress, UUID
+
+    @classmethod
+    def to_int(cls, s: str) -> Optional[int]:
+        for c in cls.CLASSES:
+            try:
+                i = c.to_int(s)
+            except Exception:
+                pass
+            else:
+                if i is not None:
+                    return i
 
 
-_DEGREE = r'(?P<degrees> \d{1,3}) °'
-_MINUTE = r'(?P<minutes> \d{1,2}) \''
-_SECOND = r'(?P<seconds> \d{1,2} (\. \d+)?) "'
-_NEWS = r'(?P<news> [NEWS])'
-
-COORD = re.compile(f'{_DEGREE} {_MINUTE} ({_SECOND})? {_NEWS}', re.VERBOSE)
-
-
-def try_to_int(s):
-    def from_semver(s):
-        s2 = s[1:] if s.startswith('v') else s
-        p = [int(i) for i in s2.split('.')]
-        if len(p) == 3 and all(i < VERSION_DIGIT for i in p):
-            v = p[2] + VERSION_DIGIT * (p[1] + VERSION_DIGIT * p[0])
-            return v * VERSION_DIGIT
-
-    def from_hex(s):
-        sl = s.lower()
-        if sl.startswith('0x'):
-            return int(s[2:], 16)
-        if sl.startswith('-0x'):
-            return -int(s[2:], 16)
-
-    def from_ip_address(s):
-        return int(ipaddress.ip_address(s))
-
-    def geocode_to_int(lat, lon):
-        if -90 <= lat <= 90 and -180 <= lon <= 180:
-            lat = round(DEGREE_DIVISIONS * lat)
-            lon = round(DEGREE_DIVISIONS * lon)
-            return lon + DEGREE_MULTIPLIER * lat
-
-    def from_geocode(s):
-        lat, lon = s.replace(',', ' ').split()
-        geocode_to_int(one_geocode(lat), one_geocode(lon))
-
-    def one_geocode(s):
-        try:
-            return float(s)
-        except ValueError:
-            pass
-
-        m = COORD.match(s.strip())
-        if m:
-            degrees, minutes, seconds, news = m.group(
-                'degrees', 'minutes', 'seconds', 'news'
-            )
-            mul = -1 if news in 'SW' else 1
-            return mul * (
-                int(degrees)
-                + int(minutes) / 60
-                + float(seconds or 0) / 3600
-            )
-
-    for f in int, from_hex, from_ip_address, from_semver, from_geocode:
-        try:
-            v = f(s)
-            if v is not None:
-                return v
-        except Exception:
-            pass
-    return s
+def try_to_int(s: str) -> Union[int, str]:
+    i = Convert.to_int(s)
+    return s if i is None else i
 
 
 # TODO: bring in the other end of the conversions from nmbr_main
 # TODO: times/dates
-# TODO: geographical coordinates 52.3544607,4.9322263
 # TODO: phone numbers?
 
 nmbr = xmod(Nmbr())

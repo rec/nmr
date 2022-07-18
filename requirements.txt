@@ -1,3 +1,4 @@
 dtyper
+lat-lon-parser
 typer
 xmod
