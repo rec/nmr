@@ -1,3 +1,4 @@
+from .convert import Convert, try_to_int
 from functools import cached_property
 from pathlib import Path
 from typer import Argument, Option, Typer
@@ -129,14 +130,12 @@ class Main:
             print(f'{r}:', *self.nmbr(r))
 
     def group_args(self):
-        from nmbr import try_to_int
-
         iargs = (try_to_int(a) for a in self.to_convert)
         for num, it in itertools.groupby(iargs, is_int):
             yield from it if num else [list(it)]
 
     def to_int(self, i):
-        from nmbr import VERSION_DIGIT
+        # OBSOLETE, bad name!
         n = self.nmbr(i)
 
         if self.hex:
@@ -149,13 +148,7 @@ class Main:
                 pass
 
         if self.semver and n >= 0:
-            d0, m0 = divmod(n, VERSION_DIGIT)
-            if not m0:
-                d1, m1 = divmod(d0, VERSION_DIGIT)
-                d2, m2 = divmod(d1, VERSION_DIGIT)
-                d3, m3 = divmod(d2, VERSION_DIGIT)
-                if not d3:
-                    return f'v{m3}.{m2}.{m1}'
+            return Convert.Semver.from_int(n)
 
         return str(n)
 

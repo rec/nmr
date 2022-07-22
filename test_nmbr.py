@@ -1,4 +1,5 @@
-from nmbr import COUNT, CountWords, Nmbr, nmbr
+from nmbr import COUNT, Nmbr, nmbr
+from nmbr.count_words import CountWords
 import pytest
 
 
