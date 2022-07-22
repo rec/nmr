@@ -21,7 +21,7 @@ SETUP_DESC = {
     'license': 'MIT',
     'long_description': open('README.rst').read(),
     'py_modules': ['nmbr', 'nmbr_main'],
-    'scripts': ['nmbr'],
+    'scripts': ['scripts/nmbr'],
     'url': 'https://github.com/rec/nmbr',
 }
 

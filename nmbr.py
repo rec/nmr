@@ -302,6 +302,8 @@ def try_to_int(s: str) -> Union[int, str]:
 # TODO: bring in the other end of the conversions from nmbr_main
 # TODO: times/dates
 # TODO: phone numbers?
+# TODO: chess positions
+# TODO: go positions
 
 nmbr = xmod(Nmbr())
 count = nmbr.count
