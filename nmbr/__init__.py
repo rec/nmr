@@ -33,9 +33,9 @@ from pathlib import Path
 from typing import Optional, Sequence, Union
 import bisect
 import ipaddress
+import sys
 import threading
 import uuid
-import xmod
 
 __all__ = 'Convert', 'Nmbr', 'WORDS', 'count', 'nmbr', 'try_to_int'
 __version__ = '0.8.0'
@@ -43,7 +43,7 @@ __version__ = '0.8.0'
 # The minimum total number of words needed to be able to represent all 64-bit
 # signed integers with six words or less is 1628
 COUNT = 1628
-FILE = Path(__file__).parent / 'words.txt'
+FILE = Path(__file__).parent.parent / 'words.txt'
 WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())[:COUNT]
 VERSION_DIGIT = 1024
 DEGREE_DIVISIONS = 100000000
@@ -56,10 +56,12 @@ def read_words(file=None):
 
 
 class Nmbr:
+    COUNT = 1628
+
     def __init__(self, count=None, words=None, signed=True):
         if not isinstance(words, (list, tuple)):
             if words is None and count is None:
-                count = COUNT
+                count = self.COUNT
             words = read_words(words)
 
         if count is not None:
@@ -305,11 +307,13 @@ def try_to_int(s: str) -> Union[int, str]:
 # TODO: chess positions
 # TODO: go positions
 
-nmbr = xmod(Nmbr())
-count = nmbr.count
+nmbr = Nmbr()
+nmbr.__dict__.update(globals())
+
+sys.modules[__name__] = nmbr
 
 
 if __name__ == '__main__':
-    import nmbr_main
+    from . import __main__
 
-    nmbr_main.main()
+    __main__.main()

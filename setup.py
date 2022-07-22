@@ -30,7 +30,7 @@ if __name__ == '__main__':
 
     VERS = '__version__'
 
-    with open('nmbr.py') as fp:
+    with open('nmbr/__init__.py') as fp:
         for line in fp:
             if line.startswith(VERS):
                 vers, equals, version = line.strip().split()

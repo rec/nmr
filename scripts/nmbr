@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 if __name__ == '__main__':
-    import nmbr_main
+    from nmbr import __main__
 
     __spec__ = None
-    nmbr_main.main()
+    __main__.main()

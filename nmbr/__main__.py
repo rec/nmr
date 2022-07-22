@@ -165,3 +165,7 @@ class Main:
 
 def main():
     typer.main.get_command(app)()
+
+
+if __name__ == '__main__':
+    main()
