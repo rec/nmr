@@ -1,7 +1,6 @@
-from pathlib import Path
-from . count_words import CountWords
+from . import convert, count_words
 from functools import cached_property
-from . convert import try_to_int
+from pathlib import Path
 from typing import Sequence, Union
 import bisect
 
@@ -29,11 +28,11 @@ class Nmbr:
         self.words = words
 
         self.signed = signed
-        self.count = CountWords(self.n)
+        self.count = count_words.CountWords(self.n)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, st: Union[int, Sequence[str], str]):
-        s = try_to_int(st)
+        s = convert.try_to_int(st)
         if s is None:
             raise ValueError(f'Do not understand {st}, {type(st)}')
 
