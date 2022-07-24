@@ -59,15 +59,15 @@ _STABILITY_TABLE = (
     (1, ['and']),
     (-1, ['of']),
     (-2, ['to']),
-    (999, ['the', 'song']),
-    (-32000, ['has', 'load']),
-    (134123978423341234, ['as', 'ye', 'peak', 'hack', 'dies', 'songs']),
+    (999, ['the', 'feed']),
+    (-32000, ['has', 'lab']),
+    (134123978423341234, ['as', 'moms', 'wet', 'myth', 'hose', 'joint']),
     (
         -341279384172341314120987134123443434734134913248132481234812341823413,
         [
-            'new', 'taken', 'aged', 'hash', 'tier', 'aims', 'ash', 'dont',
-            'liz', 'field', 'gold', 'told', 'palm', 'time', 'goat', 'set',
-            'via', 'arc', 'ball', 'cute', 'arch', 'gang',
+            'new', 'comes', 'tube', 'wan', 'sofa', 'vast', 'geek', 'grey',
+            'cop', 'final', 'upon', 'prev', 'foot', 'time', 'store', 'full',
+            'bad', 'coal', 'pink', 'era', 'sept', 'dose',
         ]
     ),
 )
@@ -83,7 +83,10 @@ def test_stability():
             names = "', '".join(nmbr(number))
             print(f'    ({number}, [\'{names}\']),')
         else:
-            assert nmbr(number) == words
+            actual_words = nmbr(number)
+            if actual_words != words:
+                print(actual_words)
+            assert actual_words == words
             assert nmbr(words) == number
 
     if debug:
@@ -101,7 +104,7 @@ def test_huge_signed():
     assert nmbr(nmbr.maxint)[:8] == expected
 
     expected = [
-        'waste', 'chair', 'phase', 'motor', 'shirt', 'crime', 'claim', 'count'
+        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'taxes', 'harry'
     ]
     assert nmbr(nmbr.maxint)[-8:] == expected
     with pytest.raises(ValueError):
@@ -111,7 +114,7 @@ def test_huge_signed():
     assert nmbr(nmbr.minint)[:8] == expected
 
     expected = [
-        'waste', 'chair', 'phase', 'motor', 'shirt', 'crime', 'count', 'claim'
+        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'harry', 'taxes'
     ]
     assert nmbr(nmbr.minint)[-8:] == expected
     with pytest.raises(ValueError):
@@ -129,7 +132,7 @@ def test_huge_unsigned():
     assert n(n.maxint)[:8] == expected
 
     expected = [
-        'waste', 'chair', 'phase', 'motor', 'shirt', 'crime', 'count', 'claim'
+        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'harry', 'taxes'
     ]
     assert n(n.maxint)[-8:] == expected
     with pytest.raises(ValueError):
