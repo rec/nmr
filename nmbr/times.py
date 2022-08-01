@@ -44,16 +44,16 @@ SECONDS = {
     Interval.DAY: 60 * 60 * 24,
     Interval.WEEK: 60 * 60 * 24 * 7,
 
-    Interval.YOTTA: 10 ** 24,
-    Interval.ZETTA: 10 ** 21,
-    Interval.EXA: 10 ** 18,
-    Interval.PETA: 10 ** 15,
-    Interval.TERA: 10 ** 12,
-    Interval.GIGA: 10 ** 9,
-    Interval.MEGA: 10 ** 6,
-    Interval.KILO: 10 ** 3,
-    Interval.HECTO: 10 ** 2,
     Interval.DECA: 10 ** 1,
+    Interval.HECTO: 10 ** 2,
+    Interval.KILO: 10 ** 3,
+    Interval.MEGA: 10 ** 6,
+    Interval.GIGA: 10 ** 9,
+    Interval.TERA: 10 ** 12,
+    Interval.PETA: 10 ** 15,
+    Interval.EXA: 10 ** 18,
+    Interval.ZETTA: 10 ** 21,
+    Interval.YOTTA: 10 ** 24,
 }
 
 
