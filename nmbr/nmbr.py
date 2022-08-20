@@ -1,4 +1,4 @@
-from . import convert, count_words
+from . import count_words, types
 from functools import cached_property
 from pathlib import Path
 from typing import Sequence, Union
@@ -32,7 +32,7 @@ class Nmbr:
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, st: Union[int, Sequence[str], str]):
-        s = convert.try_to_int(st)
+        s = types.try_to_int(st)
         if s is None:
             raise ValueError(f'Do not understand {st}, {type(st)}')
 

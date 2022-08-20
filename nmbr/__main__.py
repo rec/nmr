@@ -1,4 +1,4 @@
-from . import convert
+from . import types
 from functools import cached_property
 from pathlib import Path
 from typer import Argument, Option, Typer
@@ -47,7 +47,7 @@ def nmbr_main(
     output_type: Optional[str] = Option(
         None, '--output-type', '-t',
         help='Try to convert outputs to one of these formats:'
-        f'{" ".join(convert.NAMES)}. Abbreviations are possible'
+        f'{" ".join(types.NAMES)}. Abbreviations are possible'
     ),
 
     signed: bool = Option(
@@ -72,7 +72,7 @@ def stdin_lines():
         return
 
     for line in (line for i in sys.stdin if (line := i.strip())):
-        parts = [convert.try_to_int(s) for s in line.split()]
+        parts = [types.try_to_int(s) for s in line.split()]
         nums = sum(is_int(i) for i in parts)
         if nums == 0:
             yield parts
@@ -105,7 +105,7 @@ class Main:
     @cached_property
     def converter(self):
         if self.output_type:
-            return convert.get_class(self.output_type)
+            return types.get_class(self.output_type)
 
     def run_lines(self):
         items = itertools.chain(self.group_args(), stdin_lines())
@@ -142,7 +142,7 @@ class Main:
             print(f'{r}:', *self.nmbr(r))
 
     def group_args(self):
-        iargs = (convert.try_to_int(a) for a in self.arguments)
+        iargs = (types.try_to_int(a) for a in self.arguments)
         for num, it in itertools.groupby(iargs, is_int):
             yield from it if num else [list(it)]
 
