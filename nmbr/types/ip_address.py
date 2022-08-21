@@ -8,4 +8,7 @@ class IpAddress(Type):
 
     @staticmethod
     def to_int(s: str) -> Optional[int]:
-        return int(ipaddress.ip_address(s))
+        try:
+            return int(ipaddress.ip_address(s))
+        except Exception:
+            return None

@@ -9,7 +9,11 @@ class Uuid(Type):
     @staticmethod
     def to_int(s: str) -> Optional[int]:
         if len(s) == 36 and s.count('-') == 4:
-            return uuid.UUID(s).int
+            try:
+                u = uuid.UUID(s)
+            except Exception:
+                return
+            return u.int
 
     @staticmethod
     def int_to_type(i: int) -> Optional[str]:

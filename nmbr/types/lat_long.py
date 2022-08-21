@@ -10,7 +10,11 @@ class LatLong(Type):
     def to_int(cls, s: str) -> Optional[int]:
         from lat_lon_parser import parse
 
-        lat, lon = (parse(i) for i in s.split(','))
+        try:
+            lat, lon = (parse(i) for i in s.split(','))
+        except Exception:
+            return
+
         if -90 <= lat <= 90 and -180 <= lon <= 180:
             lat = round(cls.DIVISIONS * (lat + 90))
             lon = round(cls.DIVISIONS * (lon + 180))

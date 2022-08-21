@@ -31,18 +31,18 @@ class Nmbr:
         self.count = count_words.CountWords(self.n)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def __call__(self, st: Union[int, Sequence[str], str]):
-        s = types.try_to_int(st)
-        if s is None:
-            raise ValueError(f'Do not understand {st}, {type(st)}')
+    def __call__(self, s: Union[int, Sequence[str], str]):
+        if isinstance(s, list):
+            return self.name_to_int(s)
 
         if isinstance(s, int):
             return self.int_to_name(s)
 
-        if isinstance(s, str):
-            return self.name_to_int(s.split())
+        st = types.try_to_int(s)
+        if st is not None:
+            return st
 
-        return self.name_to_int(s)
+        return self.name_to_int(s.split())
 
     def int_to_name(self, num: int) -> Sequence[str]:
         original = num

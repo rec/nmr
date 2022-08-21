@@ -7,11 +7,16 @@ class Semver(Type):
 
     @classmethod
     def to_int(cls, s: str) -> Optional[int]:
-        s2 = s[1:] if s.startswith('v') else s
-        p = [int(i) for i in s2.split('.')]
-        if len(p) == 3 and all(i < cls.BASE for i in p):
-            v = p[2] + cls.BASE * (p[1] + cls.BASE * p[0])
-            return v * cls.BASE
+        if s.startswith('v'):
+            s2 = s[1:]
+            try:
+                p = [int(i) for i in s2.split('.')]
+            except Exception:
+                return
+
+            if len(p) == 3 and all(i < cls.BASE for i in p):
+                v = p[2] + cls.BASE * (p[1] + cls.BASE * p[0])
+                return v * cls.BASE
 
     @classmethod
     def int_to_type(cls, i: int) -> Optional[str]:

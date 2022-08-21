@@ -6,12 +6,9 @@ class Type:
 
     @classmethod
     def from_int(cls, i: int, name='str') -> str:
-        try:
-            c = str(cls.int_to_type(i))
-            if c is not None:
-                return c
-        except Exception:
-            pass
+        c = str(cls.int_to_type(i))
+        if c is not None:
+            return c
 
         raise ValueError(f'Can\'t convert "{i}" ({name}) to {cls.__name__}')
 

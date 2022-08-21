@@ -17,13 +17,9 @@ def try_to_int(s: str) -> Union[int, str]:
 
 def class_int(s: str) -> Optional[Tuple]:
     for c in CLASSES:
-        try:
-            i = c.to_int(s)
-        except Exception:
-            pass
-        else:
-            if i is not None:
-                return c, i
+        i = c.to_int(s)
+        if i is not None:
+            return c, i
 
 
 def get_class(prefix: str):
