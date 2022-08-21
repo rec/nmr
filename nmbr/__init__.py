@@ -35,9 +35,3 @@ nmbr = Nmbr()
 nmbr.__dict__.update(globals())
 
 sys.modules[__name__] = nmbr
-
-
-if __name__ == '__main__':
-    from . import __main__
-
-    __main__.main()
