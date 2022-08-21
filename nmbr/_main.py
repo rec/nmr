@@ -38,6 +38,8 @@ class Main:
     returncode = 0
 
     def __call__(self):
+        if self.output_type and not self.signed:
+            exit('ERROR: --unsigned/-u conflicts with --output_type/-o')
         self.run_lines() or self.rnd()
 
     @cached_property
@@ -47,7 +49,7 @@ class Main:
         return Nmbr(self.word_file, self.count, self.signed)
 
     @cached_property
-    def converter(self):
+    def _type_class(self):
         if self.output_type:
             return types.get_class(self.output_type)
 
@@ -56,16 +58,14 @@ class Main:
         return sum(self.run(i) or 1 for i in items)
 
     def run(self, i):
-        is_int = isinstance(i, int)
-        prefix = [i] if is_int else list(i)
-        prefix.append(':')
-
         try:
-            value = self.nmbr(i)
-            if not is_int:
-                if self.converter:
-                    value = self.converter.from_int(value, i)
-                value = [value]
+            if self._type_class and isinstance(i, int):
+                value = i
+            else:
+                value = self.nmbr(i)
+
+            if self._type_class:
+                value = [self._type_class.int_to_str(value)]
 
         except Exception as e:
             if self.raise_exceptions:
@@ -75,6 +75,7 @@ class Main:
             print('ERROR:', e, file=sys.stderr)
 
         else:
+            prefix = [i] if isinstance(i, int) else list(i)
             if self.label:
                 print(*prefix, ':', *value)
             else:

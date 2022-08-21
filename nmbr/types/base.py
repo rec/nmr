@@ -19,6 +19,10 @@ class Base:
     def int_to_type(cls, i: int) -> Optional[Any]:
         return cls.type(i)
 
+    @classmethod
+    def int_to_str(cls, i: int) -> Optional[Any]:
+        return str(cls.int_to_type(i))
+
     @staticmethod
     def type_to_int(t: Any) -> int:
         return int(t)
