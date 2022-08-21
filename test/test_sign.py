@@ -2,7 +2,7 @@ from nmbr import Nmbr
 import pytest
 
 
-@pytest.mark.parametrize('n', (range(1, 7)))
+@pytest.mark.parametrize('n', range(1, 7))
 def test_all_unsigned(n):
     N = Nmbr(n, signed=False)
     m = N.count(n)
@@ -21,7 +21,7 @@ def test_all_unsigned(n):
         N(m)
 
 
-@pytest.mark.parametrize('n', (range(1, 7)))
+@pytest.mark.parametrize('n', range(1, 7))
 def test_all_signed(n):
     N = Nmbr(n)
     m = N.count(n)
