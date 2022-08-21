@@ -1,11 +1,11 @@
-from typing import Optional, Union
+from typing import Optional, Tuple, Union
 import ipaddress
 import uuid
 
 
 class _Base:
     @classmethod
-    def from_int(cls, i: int, name) -> str:
+    def from_int(cls, i: int, name='str') -> str:
         try:
             c = cls._from_int(i)
             if c is not None:
@@ -62,7 +62,7 @@ class LatLong(_Base):
 
     @classmethod
     def to_int(cls, s: str) -> Optional[int]:
-        from lat_long_parser import parse
+        from lat_lon_parser import parse
 
         lat, lon = (parse(i) for i in s.split(','))
         if -90 <= lat <= 90 and -180 <= lon <= 180:
@@ -72,7 +72,7 @@ class LatLong(_Base):
 
     @classmethod
     def _from_int(cls, i: int) -> Optional[str]:
-        from lat_long_parser import to_str_deg_min_sec
+        from lat_lon_parser import to_str_deg_min_sec
 
         lat, lon = divmod(i, cls.MULT)
         lat = lat / cls.DIVISIONS - 90
@@ -112,7 +112,7 @@ class UUID(_Base):
     @staticmethod
     def to_int(s: str) -> Optional[int]:
         if len(s) == 36 and s.count('-') == 4:
-            return uuid.UUID(s)
+            return uuid.UUID(s).int
 
     @staticmethod
     def from_int(i: int) -> Optional[str]:
@@ -124,6 +124,11 @@ NAMES = tuple(c.__name__.lower() for c in CLASSES)
 
 
 def try_to_int(s: str) -> Union[int, str]:
+    ci = class_int(s)
+    return s if ci is None else ci[1]
+
+
+def class_int(s: str) -> Optional[Tuple]:
     for c in CLASSES:
         try:
             i = c.to_int(s)
@@ -131,8 +136,7 @@ def try_to_int(s: str) -> Union[int, str]:
             pass
         else:
             if i is not None:
-                return i
-    return s
+                return c, i
 
 
 def get_class(prefix: str):
