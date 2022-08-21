@@ -1,13 +1,15 @@
-from typing import Optional, Tuple, Union
+from typing import Any, Optional, Tuple, Union
 import ipaddress
 import uuid
 
 
 class _Base:
+    type = staticmethod(str)
+
     @classmethod
     def from_int(cls, i: int, name='str') -> str:
         try:
-            c = cls._from_int(i)
+            c = str(cls.int_to_type(i))
             if c is not None:
                 return c
         except Exception:
@@ -15,22 +17,33 @@ class _Base:
 
         raise ValueError(f'Can\'t convert "{i}" ({name}) to {cls.__name__}')
 
+    @classmethod
+    def int_to_type(cls, i: int) -> Optional[Any]:
+        return cls.type(i)
+
+    @staticmethod
+    def type_to_int(t: Any) -> int:
+        return int(t)
+
+    @classmethod
+    def to_int(cls, s: str) -> int:
+        return cls.type_to_int(cls.type(s))
+
 
 class Integer(_Base):
-    to_int = staticmethod(int)
-    _from_int = staticmethod(str)
+    type = staticmethod(int)
 
 
 class Hex(_Base):
     @staticmethod
-    def to_int(s: str):
+    def type_to_int(s: str):
         s = s.lower()
         if s.startswith('0x'):
             return int(s[2:], 16)
         if s.startswith('-0x'):
             return -int(s[2:], 16)
 
-    _from_int = staticmethod(hex)
+    int_to_type = staticmethod(hex)
 
 
 class Semver(_Base):
@@ -45,7 +58,7 @@ class Semver(_Base):
             return v * cls.BASE
 
     @classmethod
-    def _from_int(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> Optional[str]:
         if i >= 0:
             d0, m0 = divmod(i, cls.BASE)
             if not m0:
@@ -71,7 +84,7 @@ class LatLong(_Base):
             return lon + cls.MULT * lat
 
     @classmethod
-    def _from_int(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> Optional[str]:
         from lat_lon_parser import to_str_deg_min_sec
 
         lat, lon = divmod(i, cls.MULT)
@@ -99,24 +112,24 @@ class LatLong(_Base):
 
 
 class IpAddress(_Base):
+    type = staticmethod(ipaddress.ip_address)
+
     @staticmethod
     def to_int(s: str) -> Optional[int]:
         return int(ipaddress.ip_address(s))
 
-    @staticmethod
-    def _from_int(i: int) -> Optional[str]:
-        return str(ipaddress.ip_address(i))
-
 
 class UUID(_Base):
+    type = uuid.UUID
+
     @staticmethod
     def to_int(s: str) -> Optional[int]:
         if len(s) == 36 and s.count('-') == 4:
             return uuid.UUID(s).int
 
     @staticmethod
-    def from_int(i: int) -> Optional[str]:
-        return str(uuid.UUID(int=i))
+    def int_to_type(i: int) -> Optional[str]:
+        return uuid.UUID(int=i)
 
 
 CLASSES = Integer, Hex, Semver, LatLong, IpAddress, UUID
