@@ -1,9 +1,9 @@
-from . base import Base
+from . _type import Type
 from typing import Optional
 import ipaddress
 
 
-class IpAddress(Base):
+class IpAddress(Type):
     type = staticmethod(ipaddress.ip_address)
 
     @staticmethod

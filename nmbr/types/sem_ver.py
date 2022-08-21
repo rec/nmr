@@ -1,8 +1,8 @@
-from . base import Base
+from . _type import Type
 from typing import Optional
 
 
-class Semver(Base):
+class Semver(Type):
     BASE = 1024
 
     @classmethod

@@ -1,8 +1,8 @@
-from . base import Base
+from . _type import Type
 from typing import Optional
 
 
-class LatLong(Base):
+class LatLong(Type):
     DIVISIONS = 100000000  # Each degree is divided by ten million
     MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
 

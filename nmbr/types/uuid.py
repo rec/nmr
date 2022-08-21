@@ -1,9 +1,9 @@
-from . base import Base
+from . _type import Type
 from typing import Optional
 import uuid
 
 
-class Uuid(Base):
+class Uuid(Type):
     type = uuid.UUID
 
     @staticmethod

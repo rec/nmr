@@ -1,7 +1,7 @@
-from . base import Base
+from . _type import Type
 
 
-class Hex(Base):
+class Hex(Type):
     @staticmethod
     def type_to_int(s: str):
         s = s.lower()

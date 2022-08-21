@@ -1,7 +1,7 @@
 from typing import Any, Optional
 
 
-class Base:
+class Type:
     type = staticmethod(str)
 
     @classmethod

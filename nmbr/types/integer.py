@@ -1,5 +1,5 @@
-from . base import Base
+from . _type import Type
 
 
-class Integer(Base):
+class Integer(Type):
     type = staticmethod(int)
