@@ -10,9 +10,14 @@ COUNT = 1628
 FILE = Path(__file__).parent.parent / 'words.txt'
 
 
+def read_words(file=None):
+    lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
+    return tuple(i for i in lines if i and not i.startswith('#'))
+
+
 class Nmbr:
     COUNT = 1628
-    WORDS = tuple(i.strip() for i in FILE.read_text().splitlines())
+    WORDS = read_words()
 
     def __init__(self, count=None, words=None, signed=True):
         if not isinstance(words, (list, tuple)):
@@ -118,8 +123,3 @@ class Nmbr:
     def _redupe(indexes):
         for i, num in enumerate(indexes):
             yield num - sum(k < num for k in indexes[:i])
-
-
-def read_words(file=None):
-    lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
-    return tuple(i for i in lines if i)
