@@ -7,21 +7,21 @@ def test_huge_signed():
     assert nmbr.maxint == MAX // 2 - 1
     assert nmbr.minint == - MAX // 2
 
-    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'is']
+    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
     assert nmbr(nmbr.maxint)[:8] == expected
 
     expected = [
-        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'taxes', 'harry'
+        'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'moral', 'boost'
     ]
     assert nmbr(nmbr.maxint)[-8:] == expected
     with pytest.raises(ValueError):
         nmbr(nmbr.maxint + 1)
 
-    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'is']
+    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
     assert nmbr(nmbr.minint)[:8] == expected
 
     expected = [
-        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'harry', 'taxes'
+        'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
     ]
     assert nmbr(nmbr.minint)[-8:] == expected
     with pytest.raises(ValueError):
@@ -35,11 +35,11 @@ def test_huge_unsigned():
     assert n.maxint == MAX - 1
     assert n.minint == 0
 
-    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'is']
+    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
     assert n(n.maxint)[:8] == expected
 
     expected = [
-        'kinds', 'teams', 'funny', 'tried', 'named', 'laser', 'harry', 'taxes'
+        'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
     ]
     assert n(n.maxint)[-8:] == expected
     with pytest.raises(ValueError):
