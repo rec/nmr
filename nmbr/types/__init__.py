@@ -1,12 +1,13 @@
 from . hex import Hex
 from . integer import Integer
+from . fraction import Fraction
 from . ip_address import IpAddress
 from . lat_long import LatLong
 from . sem_ver import Semver
 from . uuid import Uuid
 from typing import Optional, Tuple, Union
 
-CLASSES = Integer, Hex, Semver, LatLong, IpAddress, Uuid
+CLASSES = Hex, Fraction, Integer, IpAddress, LatLong, Semver, Uuid
 NAMES = tuple(c.__name__.lower() for c in CLASSES)
 
 
