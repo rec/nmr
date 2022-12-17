@@ -7,8 +7,8 @@ def run():
     HOMOPHONES = ROOT / 'homophones.txt'
     sys.path.append(str(ROOT.parent))
 
-    from nmbr import nmbr
-    WORDS = nmbr.Nmbr.WORDS
+    from nmr import nmr
+    WORDS = nmr.Nmr.WORDS
 
     inverted = {word: i for i, word in enumerate(WORDS)}
     removals = set()

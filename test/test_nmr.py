@@ -1,5 +1,5 @@
-from nmbr import COUNT, nmbr
-from nmbr.count_words import CountWords
+from nmr import COUNT, nmr
+from nmr.count_words import CountWords
 import pytest
 
 
@@ -35,8 +35,8 @@ _STABILITY_TABLE = (
 
 @pytest.mark.parametrize('number, words', _STABILITY_TABLE)
 def test_stability(number, words):
-    actual_words = nmbr(number)
+    actual_words = nmr(number)
     if actual_words != words:
         print(actual_words)
     assert actual_words == words
-    assert nmbr(words) == number
+    assert nmr(words) == number

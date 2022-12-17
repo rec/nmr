@@ -1,4 +1,4 @@
-from nmbr import types
+from nmr import types
 import pytest
 
 ROUND_TRIPS = (

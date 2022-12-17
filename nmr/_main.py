@@ -1,5 +1,5 @@
 from . import types
-from . __main__ import nmbr_main
+from . __main__ import nmr_main
 from functools import cached_property
 import dtyper
 import itertools
@@ -33,7 +33,7 @@ def exit(*error):
     sys.exit(bool(error))
 
 
-@dtyper.dataclass(nmbr_main)
+@dtyper.dataclass(nmr_main)
 class Main:
     returncode = 0
 
@@ -43,10 +43,10 @@ class Main:
         self.run_lines() or self.rnd()
 
     @cached_property
-    def nmbr(self):
-        from nmbr import Nmbr
+    def nmr(self):
+        from nmr import Nmr
 
-        return Nmbr(self.word_file, self.count, self.signed)
+        return Nmr(self.word_file, self.count, self.signed)
 
     @cached_property
     def _type_class(self):
@@ -62,7 +62,7 @@ class Main:
             if self._type_class and isinstance(i, int):
                 value = i
             else:
-                value = self.nmbr(i)
+                value = self.nmr(i)
 
             if self._type_class:
                 value = [self._type_class.int_to_str(value)]
@@ -84,7 +84,7 @@ class Main:
     def rnd(self):
         for i in range(128):
             r = int(10 ** random.uniform(0, 50))
-            print(f'{r}:', *self.nmbr(r))
+            print(f'{r}:', *self.nmr(r))
 
     def group_args(self):
         iargs = (types.try_to_int(a) for a in self.arguments)

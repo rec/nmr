@@ -15,7 +15,7 @@ def read_words(file=None):
     return tuple(i for i in lines if i and not i.startswith('#'))
 
 
-class Nmbr:
+class Nmr:
     COUNT = 1628
     WORDS = read_words()
 

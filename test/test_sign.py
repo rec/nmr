@@ -1,10 +1,10 @@
-from nmbr import Nmbr
+from nmr import Nmr
 import pytest
 
 
 @pytest.mark.parametrize('n', range(1, 7))
 def test_all_unsigned(n):
-    N = Nmbr(n, signed=False)
+    N = Nmr(n, signed=False)
     m = N.count(n)
 
     for i in range(m):
@@ -23,7 +23,7 @@ def test_all_unsigned(n):
 
 @pytest.mark.parametrize('n', range(1, 7))
 def test_all_signed(n):
-    N = Nmbr(n)
+    N = Nmr(n)
     m = N.count(n)
     d = (m + 1) // 2
     r = range(d - m, d)

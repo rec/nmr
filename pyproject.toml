@@ -7,9 +7,9 @@ target-version = ['py38']
 auto = true
 
 [tool.poetry]
-name = "nmbr"
+name = "nmr"
 version = "0.8.0"
-description = "🔢 ``nmbr``: name absolutely everything 🔢"
+description = "🔢 name all canonical things 🔢"
 authors = ["Tom Ritchford <tom@swirly.com>"]
 license = "MIT"
 readme = "README.rst"
