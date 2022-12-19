@@ -1,8 +1,9 @@
 """
-🔢 ``nmr``: memorable names for large numbers 🔢
+🔢 ``nmr``: name all canonical things 🔢
 
-Convert an integer, even a very long one, into a short list of common, short
-non-repeating English words... or use a word list of your choice.
+Convert each canonical thing into a number, and then that number into a unique,
+non-repeating name from a short list of common, short English words... or use a
+word list of your choice.
 
 Installs both a module named ``nmr`` and an executable called ``nmr.py``
 
