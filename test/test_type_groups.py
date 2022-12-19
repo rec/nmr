@@ -1,4 +1,4 @@
-from nmr.types import type_groups as tg
+from nmr import type_groups as tg
 import pytest
 
 ROUND_TRIP_CASES = [
