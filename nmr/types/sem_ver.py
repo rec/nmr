@@ -1,4 +1,4 @@
-from . _type import Type
+from .. type_base import Type
 from typing import Optional
 
 
