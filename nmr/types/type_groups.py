@@ -25,64 +25,64 @@ class Type:
     RADIX = 8
 
     def type_to_number(self, n):
-        g = Group[self.__class__.__name__.lower()]
+        g = Group[self.__class__.__name__.upper()]
         return g.value - 1 + Group.RADIX * (self.value - 1 + self.RADIX * n)
 
 
 class Group(Type, IntEnum):
-    math = auto()
-    science = auto()
-    music = auto()
-    place = auto()
+    MATH = auto()
+    SCIENCE = auto()
+    MUSIC = auto()
+    PLACE = auto()
 
-    time = auto()
-    network = auto()
-    game = auto()
-    commercial = auto()
+    TIME = auto()
+    NETWORK = auto()
+    GAME = auto()
+    COMMERCIAL = auto()
 
     RADIX = 16
 
 
 class Math(Type, IntEnum):
-    integer = auto()
-    fraction = auto()
-    floating = auto()
+    INTEGER = auto()
+    FRACTION = auto()
+    FLOATING = auto()
 
 
 class Science(Type, IntEnum):
-    element = auto()
-    unit = auto()
+    ELEMENT = auto()
+    UNIT = auto()
 
 
 class Music(Type, IntEnum):
-    rhythm = auto()
-    melody = auto()
+    RHYTHM = auto()
+    MELODY = auto()
 
 
 class Place(Type, IntEnum):
-    lat_long = auto()
+    LAT_LONG = auto()
 
 
 class Time(Type, IntEnum):
-    instant = auto()
+    TIME = auto()
 
 
 class Network(Type, IntEnum):
-    ip_address = auto()
-    sem_ver = auto()
-    uuid = auto()
+    IP_ADDRESS = auto()
+    SEM_VER = auto()
+    UUID = auto()
 
 
 class Game(Type, IntEnum):
-    backgammon = auto()
-    cards = auto()
-    chess = auto()
-    go = auto()
+    BACKGAMMON = auto()
+    CARDS = auto()
+    CHESS = auto()
+    GO = auto()
 
 
 class Commercial(Type, IntEnum):
-    isbn = auto()
-    upc = auto()
+    ISBN = auto()
+    UPC = auto()
 
 
 def number_to_remainder_and_type(n, strict=False):
