@@ -45,6 +45,7 @@ class Group(Type, IntEnum):
 
 class Math(Type, IntEnum):
     INTEGER = auto()
+    HEX = auto()
     FRACTION = auto()
     FLOATING = auto()
 
