@@ -2,15 +2,15 @@ from nmr.types import type_groups as tg
 import pytest
 
 ROUND_TRIP_CASES = [
-    (0, 0, tg.Math.integer),
-    (1, 0, tg.Science.element),
-    (2, 0, tg.Music.rhythm),
-    (7, 0, tg.Commercial.isbn),
+    (0, 0, tg.Math.INTEGER),
+    (1, 0, tg.Science.ELEMENT),
+    (2, 0, tg.Music.RHYTHM),
+    (7, 0, tg.Commercial.ISBN),
 
 ]
 
 NON_ROUND_TRIP_CASES = [
-    (8, 0, tg.Math.integer),
+    (8, 0, tg.Math.INTEGER),
 ]
 
 ALL_CASES = (
@@ -21,7 +21,7 @@ ALL_CASES = (
 
 
 def test_simple():
-    assert tg.number_to_remainder_and_type(8) == (0, tg.Math.integer)
+    assert tg.number_to_remainder_and_type(8) == (0, tg.Math.INTEGER)
 
 
 @pytest.mark.parametrize('n,d,t', ROUND_TRIP_CASES)
