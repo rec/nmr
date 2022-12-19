@@ -1,16 +1,42 @@
 from datetime import datetime
-from enum import Enum
+from enum import IntEnum, auto
 import datacls
 
-Interval = Enum(
-    'Interval',
-    'SECOND MINUTE HOUR DAY WEEK'
-    ' MONTH'
-    ' YEAR DECADE CENTURY MILLENIUM EPOCH EON'
-    ' YOTTA ZETTA EXA PETA TERA GIGA MEGA KILO HECTO DECA'
-    ' DECI CENTI MILLI MICRO NANO PICO FEMTO ATTO ZEPTO YOCTO'
-)
-assert len(Interval) == 32
+
+class Interval(IntEnum):
+    SECOND = auto()
+    MINUTE = auto()
+    HOUR = auto()
+    DAY = auto()
+    WEEK = auto()
+    MONTH = auto()
+    YEAR = auto()
+    DECADE = auto()
+    CENTURY = auto()
+    MILLENIUM = auto()
+    EPOCH = auto()
+    EON = auto()
+    YOTTA = auto()
+    ZETTA = auto()
+    EXA = auto()
+    PETA = auto()
+    TERA = auto()
+    GIGA = auto()
+    MEGA = auto()
+    KILO = auto()
+    HECTO = auto()
+    DECA = auto()
+    DECI = auto()
+    CENTI = auto()
+    MILLI = auto()
+    MICRO = auto()
+    NANO = auto()
+    PICO = auto()
+    FEMTO = auto()
+    ATTO = auto()
+    ZEPTO = auto()
+    YOCTO = auto()
+
 
 MICROSECONDS = {
     Interval.DECI: 100000,
