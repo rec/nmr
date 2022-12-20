@@ -19,7 +19,7 @@ class Nmr:
     COUNT = 1628
     WORDS = read_words()
 
-    def __init__(self, count=None, words=None, signed=True):
+    def __init__(self, count=None, words=None, signed=False):
         if not isinstance(words, (list, tuple)):
             if words is None and count is None:
                 count = self.COUNT
