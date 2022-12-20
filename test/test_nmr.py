@@ -7,7 +7,7 @@ def test_count():
     M = 2 ** 64 - 1
 
     def count(n, i):
-        return CountWords(n)(i)
+        return CountWords(n).count(i)
 
     assert count(COUNT, 6) > M > count(COUNT - 1, 6)
     assert count(COUNT, 6) > 1.0001 * M

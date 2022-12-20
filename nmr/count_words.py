@@ -8,7 +8,7 @@ class CountWords:
         self._perm_count = [(1, 0)]
         self._lock = threading.Lock()
 
-    def __call__(self, c: Optional[int] = None) -> int:
+    def count(self, c: Optional[int] = None) -> int:
         if c is None:
             c = self.n
 
