@@ -3,6 +3,8 @@ import pytest
 
 
 def test_huge_signed():
+    nmr = Nmr(signed=True)
+
     assert nmr.count() == MAX
     assert nmr.maxint == MAX // 2 - 1
     assert nmr.minint == - MAX // 2
@@ -29,24 +31,22 @@ def test_huge_signed():
 
 
 def test_huge_unsigned():
-    n = Nmr(signed=False)
-
-    assert n.count() == MAX
-    assert n.maxint == MAX - 1
-    assert n.minint == 0
+    assert nmr.count() == MAX
+    assert nmr.maxint == MAX - 1
+    assert nmr.minint == 0
 
     expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
-    assert n(n.maxint)[:8] == expected
+    assert nmr(nmr.maxint)[:8] == expected
 
     expected = [
         'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
     ]
-    assert n(n.maxint)[-8:] == expected
+    assert nmr(nmr.maxint)[-8:] == expected
     with pytest.raises(ValueError):
-        n(n.maxint + 1)
+        nmr(nmr.maxint + 1)
 
     expected = ['the']
-    assert n(n.minint) == expected
+    assert nmr(nmr.minint) == expected
 
 
 MAX = int(

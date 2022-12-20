@@ -23,7 +23,7 @@ def test_all_unsigned(n):
 
 @pytest.mark.parametrize('n', range(1, 7))
 def test_all_signed(n):
-    N = Nmr(n)
+    N = Nmr(n, signed=True)
     m = N.count(n)
     d = (m + 1) // 2
     r = range(d - m, d)
