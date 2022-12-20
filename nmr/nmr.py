@@ -33,7 +33,7 @@ class Nmr:
         self.words = words
 
         self.signed = signed
-        self.count = count_words.CountWords(self.n)
+        self.count = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def __call__(self, s: Union[int, Sequence[str], str]):
