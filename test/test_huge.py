@@ -1,52 +1,21 @@
-from nmr import Nmr, nmr
+from nmr import nmr
 import pytest
 
 
-def test_huge_signed():
-    nmr = Nmr(signed=True)
-
-    assert nmr.count() == MAX
-    assert nmr.maxint == MAX // 2 - 1
-    assert nmr.minint == - MAX // 2
-
-    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
-    assert nmr(nmr.maxint)[:8] == expected
-
-    expected = [
-        'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'moral', 'boost'
-    ]
-    assert nmr(nmr.maxint)[-8:] == expected
-    with pytest.raises(ValueError):
-        nmr(nmr.maxint + 1)
-
-    expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
-    assert nmr(nmr.minint)[:8] == expected
-
-    expected = [
-        'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
-    ]
-    assert nmr(nmr.minint)[-8:] == expected
-    with pytest.raises(ValueError):
-        nmr(nmr.minint - 1)
-
-
 def test_huge_unsigned():
-    assert nmr.count() == MAX
-    assert nmr.maxint == MAX - 1
-    assert nmr.minint == 0
-
+    maxint = nmr.count() - 1
     expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
-    assert nmr(nmr.maxint)[:8] == expected
+    assert nmr(maxint)[:8] == expected
 
     expected = [
         'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
     ]
-    assert nmr(nmr.maxint)[-8:] == expected
+    assert nmr(maxint)[-8:] == expected
     with pytest.raises(ValueError):
-        nmr(nmr.maxint + 1)
+        nmr(maxint + 1)
 
     expected = ['the']
-    assert nmr(nmr.minint) == expected
+    assert nmr(0) == expected
 
 
 MAX = int(
