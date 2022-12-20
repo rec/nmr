@@ -1,11 +1,10 @@
 from . import count_words, types
-from functools import cached_property
 from pathlib import Path
 from typing import Sequence, Union
 import bisect
 
 # The minimum total number of words needed to be able to represent all 64-bit
-# signed integers with six words or less is 1628
+# integers with six words or less is 1628
 COUNT = 1628
 FILE = Path(__file__).parent.parent / 'words.txt'
 
@@ -19,7 +18,7 @@ class Nmr:
     COUNT = 1628
     WORDS = read_words()
 
-    def __init__(self, count=None, words=None, signed=False):
+    def __init__(self, count=None, words=None):
         if not isinstance(words, (list, tuple)):
             if words is None and count is None:
                 count = self.COUNT
@@ -32,7 +31,6 @@ class Nmr:
         assert len(set(words)) == len(words), 'Duplicate words'
         self.words = words
 
-        self.signed = signed
         self.count = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
@@ -50,12 +48,9 @@ class Nmr:
         return self.name_to_int(s.split())
 
     def int_to_name(self, num: int) -> Sequence[str]:
-        original = num
-        if self.signed:
-            num = abs(num * 2) - (num < 0)
-        elif num < 0:
+        if num < 0:
             raise ValueError('Only accepts non-negative numbers')
-        return [self.words[i] for i in self._to_digits(num, original)]
+        return [self.words[i] for i in self._to_digits(num)]
 
     def name_to_int(self, words: Sequence[str]) -> int:
         words = list(words)
@@ -67,29 +62,16 @@ class Nmr:
         except KeyError:
             raise KeyError(*sorted(set(words) - set(self.inverse))) from None
 
-        value = self._from_digits(list(self._redupe(indexes))[::-1])
-        if not self.signed:
-            return value
-
-        num, negative = divmod(value, 2)
-        return -num - 1 if negative else num
+        return self._from_digits(list(self._redupe(indexes))[::-1])
 
     @property
     def n(self):
         return len(self.words)
 
-    @cached_property
-    def maxint(self):
-        return self.count() // 2 - 1 if self.signed else self.count() - 1
-
-    @cached_property
-    def minint(self):
-        return -self.count() // 2 if self.signed else 0
-
-    def _to_digits(self, num, original):
+    def _to_digits(self, num):
         it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
         if (word_count := next(it, None)) is None:
-            raise ValueError(f'Cannot represent {original} in base {self.n}')
+            raise ValueError(f'Cannot represent {num} in base {self.n}')
 
         total = num - self.count(word_count - 1)
         digits = []

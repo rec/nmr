@@ -43,11 +43,6 @@ def nmbr_main(
         f'{" ".join(types.NAMES)}. Abbreviations are possible'
     ),
 
-    signed: bool = Option(
-        True, '--signed/--unsigned', '-i/-u',
-        help='Use unsigned numbers'
-    ),
-
     word_file: Optional[Path] = Option(
         None, '--word-file', '-w',
         help='A file containing unique words with one word per line'

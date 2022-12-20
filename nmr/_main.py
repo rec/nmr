@@ -38,15 +38,13 @@ class Main:
     returncode = 0
 
     def __call__(self):
-        if self.output_type and not self.signed:
-            exit('ERROR: --unsigned/-u conflicts with --output_type/-o')
         self.run_lines() or self.rnd()
 
     @cached_property
     def nmr(self):
         from nmr import Nmr
 
-        return Nmr(self.word_file, self.count, self.signed)
+        return Nmr(self.word_file, self.count)
 
     @cached_property
     def _type_class(self):
