@@ -9,7 +9,7 @@ auto = true
 [tool.poetry]
 name = "nmr"
 version = "0.9.1"
-description = "🔢 name all canonical things 🔢"
+description = "🌐 Name all canonical things 🌐"
 authors = ["Tom Ritchford <tom@swirly.com>"]
 license = "MIT"
 readme = "README.rst"
