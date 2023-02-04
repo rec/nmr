@@ -12,7 +12,7 @@ version = "0.9.2"
 description = "🌐 Name all canonical things 🌐"
 authors = ["Tom Ritchford <tom@swirly.com>"]
 license = "MIT"
-readme = "README.rst"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.8"
