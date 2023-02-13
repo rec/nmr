@@ -27,7 +27,6 @@ EXAMPLE
     #   1 : and
     #   2 : a
 """
-__version__ = '0.8.0'
 
 from . nmr import Nmr
 import sys
