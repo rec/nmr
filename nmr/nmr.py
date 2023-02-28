@@ -20,7 +20,7 @@ class Nmr:
 
     def __init__(self, count=None, words=None):
         if not isinstance(words, (list, tuple)):
-            if words is None and count is None:
+            if words is count is None:
                 count = self.COUNT
                 words = self.WORDS
             else:
