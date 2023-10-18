@@ -29,6 +29,16 @@ doks = "^1.0.1"
 flake8 = "^5.0.4"
 pytest = "^7.2.0"
 
+
+[tool.coverage]
+[tool.coverage.run]
+branch = "True"
+source = "num_name"
+
+[tool.coverage.report]
+fail_under = "100"
+skip_covered = "True"
+exclude_lines = ["", "pragma: no cover", "if False:", "if __name__ == .__main__.:", "raise NotImplementedError"]
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
