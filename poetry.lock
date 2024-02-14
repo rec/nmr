@@ -100,17 +100,17 @@ toml = ["tomli"]
 
 [[package]]
 name = "datacls"
-version = "4.7.1"
+version = "4.8.0"
 description = "🗂 Take the edge off `dataclass` 🗂"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "datacls-4.7.1-py3-none-any.whl", hash = "sha256:f025fe964d619d4fa8a4a30dab05a771ff8c95a7a6a61ff0847bd5a2d9c8a244"},
-    {file = "datacls-4.7.1.tar.gz", hash = "sha256:69ac012a6d5c25d88ffbc6056a1525d15a668960df41a11945719fd9827784c1"},
+    {file = "datacls-4.8.0-py3-none-any.whl", hash = "sha256:3b2f0f526e1162b3e946267e7ec7d445659a94500045c8ab62e4d846d3d3ae73"},
+    {file = "datacls-4.8.0.tar.gz", hash = "sha256:608c8250e6af609a8291f9c748b494713254fdc88352f0611743ab421de51c64"},
 ]
 
 [package.dependencies]
-dtyper = "*"
+dtyper = ">=2.5.0"
 xmod = "*"
 
 [[package]]
@@ -144,13 +144,13 @@ toml = "*"
 
 [[package]]
 name = "dtyper"
-version = "2.5.0"
+version = "2.5.1"
 description = "🗝 Fix and improve `typer` 🗝"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "dtyper-2.5.0-py3-none-any.whl", hash = "sha256:8c78dcc614b69883f31616449cd02c0270285b3ad88c34577146c3179ccd6835"},
-    {file = "dtyper-2.5.0.tar.gz", hash = "sha256:7fc8d81845243b3e0a90ba320a8db5b9c1058e0800a47d939a8728a987633ea6"},
+    {file = "dtyper-2.5.1-py3-none-any.whl", hash = "sha256:50d2257dae1dfca1380f8a1c1495e88e096b9fa55ca829555a9b4e7c78ce8873"},
+    {file = "dtyper-2.5.1.tar.gz", hash = "sha256:7644462564c99e7eca8a1635c4b5841c118c16443d72237fc0e2c992a111fba0"},
 ]
 
 [package.dependencies]
@@ -188,13 +188,13 @@ pyflakes = ">=2.5.0,<2.6.0"
 
 [[package]]
 name = "impall"
-version = "1.5.2"
+version = "1.5.3"
 description = "🛎 Test-import all modules 🛎"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "impall-1.5.2-py3-none-any.whl", hash = "sha256:464a517bf858c98aab2f6321a8f6a3fd894aa406912036f7c4c255747ae72fd8"},
-    {file = "impall-1.5.2.tar.gz", hash = "sha256:88e15b4e6075d44c3239cbe15ad4349db55eb6de1414cd956fc4ecd322ed862a"},
+    {file = "impall-1.5.3-py3-none-any.whl", hash = "sha256:c3c8b1e7b13ba547f9073309acd6388242c7cace49b27f9f05caff04ad02baf0"},
+    {file = "impall-1.5.3.tar.gz", hash = "sha256:58d420ac9070db04a15ea39d75dddf2ab8cd3fd340a1d23bf9a4187184dab9ee"},
 ]
 
 [[package]]
@@ -268,13 +268,13 @@ files = [
 
 [[package]]
 name = "pluggy"
-version = "1.3.0"
+version = "1.4.0"
 description = "plugin and hook calling mechanisms for python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "pluggy-1.3.0-py3-none-any.whl", hash = "sha256:d89c696a773f8bd377d18e5ecda92b7a3793cbe66c87060a6fb58c7b6e1061f7"},
-    {file = "pluggy-1.3.0.tar.gz", hash = "sha256:cf61ae8f126ac6f7c451172cf30e3e43d3ca77615509771b3a984a0730651e12"},
+    {file = "pluggy-1.4.0-py3-none-any.whl", hash = "sha256:7db9f7b503d67d1c5b95f59773ebb58a8c1c288129a88665838012cfb07b8981"},
+    {file = "pluggy-1.4.0.tar.gz", hash = "sha256:8c85c2876142a764e5b7548e7d9a0e0ddb46f5185161049a79b7e974454223be"},
 ]
 
 [package.extras]
