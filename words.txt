@@ -1,3 +1,12 @@
+# This list is taken from a list of the 5000 most common words in the English
+# language which were edited down under 2000. (nmr by default only uses 1628
+# words to form its alphabet.
+#
+# In the case of homophones, only the most common work was used
+# i.e. "be" but not "bee" or "bea"
+#
+# The author also removed words based purely on personal choice or even whim.
+
 the
 of
 and
