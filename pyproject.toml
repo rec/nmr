@@ -24,12 +24,12 @@ mypy = "^1.13.0"
 
 [tool.coverage]
 [tool.coverage.run]
-branch = "True"
-source = "num_name"
+branch = true
+source = ["num_name"]
 
 [tool.coverage.report]
 fail_under = "100"
-skip_covered = "True"
+skip_covered = true
 exclude_lines = ["pragma: no cover", "if False:", "if __name__ == .__main__.:", "raise NotImplementedError"]
 
 [tool.mypy]
