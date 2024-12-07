@@ -4,7 +4,7 @@ from functools import lru_cache
 
 class Type:
     @classmethod
-    @lru_cache()
+    @lru_cache
     def length(cls):
         items = list(cls)
         if items[-1].name == 'RADIX':

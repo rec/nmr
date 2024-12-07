@@ -1,6 +1,7 @@
 from . import count_words, types
 from pathlib import Path
-from typing import Sequence, Union
+from typing import Union
+from collections.abc import Sequence
 import bisect
 
 # The minimum total number of words needed to be able to represent all 64-bit

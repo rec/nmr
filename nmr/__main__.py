@@ -17,7 +17,7 @@ app = Typer(
 
 @app.command(help=HELP)
 def nmr_main(
-    arguments: List[str] = Argument(
+    arguments: list[str] = Argument(
         None,
         help='Numbers to convert to names, or vice-versa'
     ),
