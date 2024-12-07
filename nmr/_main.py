@@ -85,6 +85,6 @@ class Main:
             print(f'{r}:', *self.nmr(r))
 
     def group_args(self):
-        iargs = (types.try_to_int(a) for a in self.arguments)
+        iargs = (types.try_to_int(a) for a in self.arguments or ())
         for num, it in itertools.groupby(iargs, is_int):
             yield from it if num else [list(it)]
