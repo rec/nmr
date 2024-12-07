@@ -1,24 +1,29 @@
-from . import count_words, types
+from . import count_words
 from pathlib import Path
-from typing import Union
+from typing import Union, Generator, Optional
 from collections.abc import Sequence
+from os import PathLike
 import bisect
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
-FILE = Path(__file__).parent.parent / 'words.txt'
+FILE = Path(__file__).parent.parent / "words.txt"
 
 
-def read_words(file):
+def read_words(file: Optional[PathLike[str]]) -> tuple[str, ...]:
     lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
-    return tuple(i for i in lines if i and not i.startswith('#'))
+    return tuple(i for i in lines if i and not i.startswith("#"))
 
 
 class Nmr:
     COUNT = 1628
     WORDS = read_words(FILE)
 
-    def __init__(self, count=None, words=None):
+    def __init__(
+        self,
+        count: Optional[int] = None,
+        words: Optional[Union[list[str], tuple[str, ...]]] = None,
+    ) -> None:
         if not isinstance(words, (list, tuple)):
             if words is count is None:
                 count = self.COUNT
@@ -28,7 +33,7 @@ class Nmr:
 
         if count is not None:
             words = words[:count]
-        assert len(set(words)) == len(words), 'Duplicate words'
+        assert len(set(words)) == len(words), "Duplicate words"
         self.words = words
 
         self.count = count_words.CountWords(self.n).count
@@ -36,13 +41,13 @@ class Nmr:
 
     def int_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
-            raise ValueError('Only accepts non-negative numbers')
+            raise ValueError("Only accepts non-negative numbers")
         return [self.words[i] for i in self._to_digits(num)]
 
     def name_to_int(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
-            raise ValueError('Repeated words not allowed')
+            raise ValueError("Repeated words not allowed")
 
         try:
             indexes = [self.inverse[w] for w in reversed(words)]
@@ -52,13 +57,13 @@ class Nmr:
         return self._from_digits(list(self._redupe(indexes))[::-1])
 
     @property
-    def n(self):
+    def n(self) -> int:
         return len(self.words)
 
-    def _to_digits(self, num):
+    def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
         if (word_count := next(it, None)) is None:
-            raise ValueError(f'Cannot represent {num} in base {self.n}')
+            raise ValueError(f"Cannot represent {num} in base {self.n}")
 
         total = num - self.count(word_count - 1)
         digits = []
@@ -70,7 +75,7 @@ class Nmr:
 
         return list(self._undupe(digits))[::-1]
 
-    def _from_digits(self, digits):
+    def _from_digits(self, digits: Sequence[int]) -> int:
         total = 0
         for i, d in enumerate(digits):
             total *= self.n - (len(digits) - i - 1)
@@ -79,16 +84,16 @@ class Nmr:
         return self.count(len(digits) - 1) + total
 
     @staticmethod
-    def _undupe(indexes):
-        sorted_result = []
+    def _undupe(indexes: Sequence[int]) -> Generator[int, None, None]:
+        sorted_result: list[int] = []
 
         for i in indexes:
             for s in sorted_result:
-                i += (s <= i)
+                i += s <= i
             bisect.insort(sorted_result, i)
             yield i
 
     @staticmethod
-    def _redupe(indexes):
+    def _redupe(indexes: Sequence[int]) -> Generator[int, None, None]:
         for i, num in enumerate(indexes):
             yield num - sum(k < num for k in indexes[:i])
