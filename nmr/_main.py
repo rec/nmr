@@ -1,5 +1,7 @@
+# type: ignore
+
 from . import types
-from . __main__ import nmr_main
+from .__main__ import nmr_main
 from functools import cached_property
 import dtyper
 import itertools
@@ -70,19 +72,19 @@ class Main:
                 raise
 
             self.returncode = 1
-            print('ERROR:', e, file=sys.stderr)
+            print("ERROR:", e, file=sys.stderr)
 
         else:
             prefix = [i] if isinstance(i, int) else list(i)
             if self.label:
-                print(*prefix, ':', *value)
+                print(*prefix, ":", *value)
             else:
                 print(*value)
 
-    def rnd(self):
+    def rnd(self) -> None:
         for i in range(128):
             r = int(10 ** random.uniform(0, 50))
-            print(f'{r}:', *self.nmr.int_to_name(r))
+            print(f"{r}:", *self.nmr.int_to_name(r))
 
     def group_args(self):
         iargs = (types.try_to_int(a) for a in self.arguments or ())
