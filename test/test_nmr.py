@@ -1,4 +1,4 @@
-from nmr import COUNT, nmr
+from nmr import nmr, Nmr
 from nmr.count_words import CountWords
 import pytest
 
@@ -9,9 +9,9 @@ def test_count():
     def count(n, i):
         return CountWords(n).count(i)
 
-    assert count(COUNT, 6) > M > count(COUNT - 1, 6)
-    assert count(COUNT, 6) > 1.0001 * M
-    assert M / 1.003 > count(COUNT - 1, 6)
+    assert count(Nmr.COUNT, 6) > M > count(Nmr.COUNT - 1, 6)
+    assert count(Nmr.COUNT, 6) > 1.0001 * M
+    assert M / 1.003 > count(Nmr.COUNT - 1, 6)
 
 
 _STABILITY_TABLE = (

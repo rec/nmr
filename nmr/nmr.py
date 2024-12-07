@@ -5,18 +5,17 @@ import bisect
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
-COUNT = 1628
 FILE = Path(__file__).parent.parent / 'words.txt'
 
 
-def read_words(file=None):
+def read_words(file):
     lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
     return tuple(i for i in lines if i and not i.startswith('#'))
 
 
 class Nmr:
     COUNT = 1628
-    WORDS = read_words()
+    WORDS = read_words(FILE)
 
     def __init__(self, count=None, words=None):
         if not isinstance(words, (list, tuple)):

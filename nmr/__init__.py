@@ -29,9 +29,7 @@ EXAMPLE
 """
 
 from . nmr import Nmr
-import sys
+
+__all__ = 'nmr', 'Nmr'
 
 nmr = Nmr()
-nmr.__dict__.update(globals())
-
-sys.modules[__name__] = nmr
