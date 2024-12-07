@@ -60,7 +60,7 @@ class Main:
             if self._type_class and isinstance(i, int):
                 value = i
             else:
-                value = self.nmr(i)
+                value = self.nmr.int_to_name(i)
 
             if self._type_class:
                 value = [self._type_class.int_to_str(value)]
@@ -82,7 +82,7 @@ class Main:
     def rnd(self):
         for i in range(128):
             r = int(10 ** random.uniform(0, 50))
-            print(f'{r}:', *self.nmr(r))
+            print(f'{r}:', *self.nmr.int_to_name(r))
 
     def group_args(self):
         iargs = (types.try_to_int(a) for a in self.arguments or ())

@@ -33,19 +33,6 @@ class Nmr:
         self.count = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def __call__(self, s: Union[int, Sequence[str], str]):
-        if isinstance(s, list):
-            return self.name_to_int(s)
-
-        if isinstance(s, int):
-            return self.int_to_name(s)
-
-        st = types.try_to_int(s)
-        if st is not None:
-            return st
-
-        return self.name_to_int(s.split())
-
     def int_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
             raise ValueError('Only accepts non-negative numbers')
