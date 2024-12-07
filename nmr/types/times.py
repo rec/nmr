@@ -1,6 +1,6 @@
 from datetime import datetime
 from enum import IntEnum, auto
-import datacls
+import dataclasses as dc
 
 
 class Interval(IntEnum):
@@ -83,7 +83,7 @@ SECONDS = {
 }
 
 
-@datacls
+@dc.dataclass
 class Time:
     # A location in time
     interval: Interval = datacls.field(default=Interval.SECOND)
