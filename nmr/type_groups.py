@@ -1,30 +1,32 @@
+from __future__ import annotations
+
 from enum import IntEnum, auto
 from functools import lru_cache
+from typing import Type
 
 
 class Type:
     @classmethod
     @lru_cache
-    def length(cls):
-        items = list(cls)
+    def length(cls) -> int:
+        items = list(cls) # type: ignore
         if items[-1].name == 'RADIX':
             items.pop()
         return len(items)
 
     @classmethod
-    def divmod(cls, n: int, strict=False):
+    def divmod(cls, n: int, strict: bool = False) -> tuple[int, Type]:
         d, m = divmod(n, cls.RADIX)
         if m >= cls.length():
             if strict:
                 raise IndexError(f'Out of range {m=}, {cls.length()=}')
             m = m % cls.length()
 
-        print('divmod', cls, n, d, m)
         return d, cls(m + 1)
 
     RADIX = 8
 
-    def type_to_number(self, n):
+    def type_to_number(self, n: int) -> int:
         g = Group[self.__class__.__name__.upper()]
         return g.value - 1 + Group.RADIX * (self.value - 1 + self.RADIX * n)
 
