@@ -5,17 +5,17 @@ import pytest
 def test_huge_unsigned():
     maxint = nmr.count() - 1
     expected = ['the', 'of', 'and', 'to', 'a', 'in', 'for', 'on']
-    assert nmr.int_to_name(maxint)[:8] == expected
+    assert nmr.encode_to_name(maxint)[:8] == expected
 
     expected = [
         'smile', 'armed', 'laura', 'tokyo', 'candy', 'tiger', 'boost', 'moral'
     ]
-    assert nmr.int_to_name(maxint)[-8:] == expected
+    assert nmr.encode_to_name(maxint)[-8:] == expected
     with pytest.raises(ValueError):
-        nmr.int_to_name(maxint + 1)
+        nmr.encode_to_name(maxint + 1)
 
     expected = ['the']
-    assert nmr.int_to_name(0) == expected
+    assert nmr.encode_to_name(0) == expected
 
 
 MAX = int(

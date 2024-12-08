@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from enum import IntEnum, auto
 from functools import lru_cache
-from typing import Type
 
 
 class Type:

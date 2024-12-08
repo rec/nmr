@@ -34,12 +34,12 @@ class Nmr:
         self.count = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def int_to_name(self, num: int) -> Sequence[str]:
+    def encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
             raise ValueError('Only accepts non-negative numbers')
         return [self.words[i] for i in self._to_digits(num)]
 
-    def name_to_int(self, words: Sequence[str]) -> int:
+    def decode_from_name(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
             raise ValueError('Repeated words not allowed')
