@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 
-class Integer(Type):
+class Integer(NameableType):
     @staticmethod
     def type_to_int(s: str) -> Any | None:
         try:

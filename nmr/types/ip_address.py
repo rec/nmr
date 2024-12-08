@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import ipaddress
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 
-class IpAddress(Type):
+class IpAddress(NameableType):
     type = staticmethod(ipaddress.ip_address)
 
     @staticmethod
