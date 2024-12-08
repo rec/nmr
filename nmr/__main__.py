@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from pathlib import Path
-from typing import List, Optional
 
 import typer
 from typer import Argument, Option, Typer
@@ -28,7 +29,7 @@ def nmr_main(
         "-r",
         help="If True, don't catch exceptions, allow the program to terminate",
     ),
-    count: Optional[int] = Option(
+    count: int | None = Option(
         None, "--count", "-c", help="How many words from the word file to use"
     ),
     label: bool = Option(
@@ -37,14 +38,14 @@ def nmr_main(
         "-l",
         help="If true, display the input as a label to the output",
     ),
-    output_type: Optional[str] = Option(
+    output_type: str | None = Option(
         None,
         "--output-type",
         "-t",
         help='Try to convert outputs to one of these formats:'
         f'{" ".join(types.NAMES)}. Abbreviations are possible',
     ),
-    word_file: Optional[Path] = Option(
+    word_file: Path | None = Option(
         None,
         "--word-file",
         "-w",

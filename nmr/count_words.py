@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 import threading
-from typing import Optional
 
 
 class CountWords:
@@ -8,7 +9,7 @@ class CountWords:
         self._perm_count = [(1, 0)]
         self._lock = threading.Lock()
 
-    def count(self, c: Optional[int] = None) -> int:
+    def count(self, c: int | None = None) -> int:
         if c is None:
             c = self.n
 

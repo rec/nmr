@@ -1,7 +1,8 @@
+from __future__ import annotations
+
 import bisect
 from collections.abc import Sequence
 from pathlib import Path
-from typing import Union
 
 from . import count_words, types
 
@@ -21,6 +22,7 @@ class Nmr:
     The exact correspondence depends on the choice and number of words
 
     """
+
     COUNT = 1628
     WORDS = read_words(FILE)
 
