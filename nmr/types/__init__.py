@@ -1,4 +1,4 @@
-from typing import Optional, Tuple, Union
+from __future__ import annotations
 
 from .fraction import Fraction
 from .hex import Hex
@@ -12,12 +12,12 @@ CLASSES = Hex, Fraction, Integer, IpAddress, LatLong, Semver, Uuid
 NAMES = tuple(c.__name__.lower() for c in CLASSES)
 
 
-def try_to_int(s: str) -> Union[int, str]:
+def try_to_int(s: str) -> int | str:
     ci = class_int(s)
     return s if ci is None else ci[1]
 
 
-def class_int(s: str) -> Optional[Tuple]:
+def class_int(s: str) -> tuple | None:
     for c in CLASSES:
         i = c.to_int(s)
         if i is not None:

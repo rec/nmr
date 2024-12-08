@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import fractions
 import math
-from typing import Optional
 
 from ..type_base import Type
 
@@ -31,7 +32,7 @@ class Fraction(Type):
     type = staticmethod(fractions.Fraction)
 
     @staticmethod
-    def to_int(s: str) -> Optional[int]:
+    def to_int(s: str) -> int | None:
         try:
             num, denom = (int(i) for i in s.split("/"))
         except Exception:
@@ -50,7 +51,7 @@ class Fraction(Type):
         return result
 
     @classmethod
-    def int_to_type(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> str | None:
         index_plus_denom, num_neg = divmod(abs(i), 2)
         denom_neg = (i < 0) != num_neg
 

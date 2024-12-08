@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 
 from ..type_base import Type
 
@@ -8,7 +8,7 @@ class LatLong(Type):
     MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
 
     @classmethod
-    def to_int(cls, s: str) -> Optional[int]:
+    def to_int(cls, s: str) -> int | None:
         from lat_lon_parser import parse
 
         try:
@@ -22,7 +22,7 @@ class LatLong(Type):
             return lon + cls.MULT * lat
 
     @classmethod
-    def int_to_type(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> str | None:
         from lat_lon_parser import to_str_deg_min_sec
 
         lat, lon = divmod(i, cls.MULT)
