@@ -1,7 +1,7 @@
 from typing import Any
 
 
-class Type:
+class NameableType:
     type = staticmethod(str)
 
     @classmethod

@@ -3,7 +3,7 @@ from __future__ import annotations
 import fractions
 import math
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 D = {}
 
@@ -23,7 +23,7 @@ def _debug(name, d):
                 print(f"{k}: {D[k]} != {d[k]}")
 
 
-class Fraction(Type):
+class Fraction(NameableType):
     """
     Use a Cantor-style diagonal argument
     numerator, denominator

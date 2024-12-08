@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 
-class Semver(Type):
+class Semver(NameableType):
     BASE = 1024
 
     @classmethod

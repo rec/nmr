@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 
-class LatLong(Type):
+class LatLong(NameableType):
     DIVISIONS = 100000000  # Each degree is divided by ten million
     MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
 

@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import uuid
 
-from ..type_base import Type
+from ..nameable_type import NameableType
 
 
-class Uuid(Type):
+class Uuid(NameableType):
     type = uuid.UUID
 
     @staticmethod
