@@ -28,8 +28,8 @@ EXAMPLE
     #   2 : a
 """
 
-from . nmr import Nmr
+from .nmr import Nmr
 
-__all__ = 'nmr', 'Nmr'
+__all__ = "nmr", "Nmr"
 
 nmr = Nmr()

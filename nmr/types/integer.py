@@ -1,5 +1,6 @@
-from .. type_base import Type
 from typing import Any, Optional
+
+from ..type_base import Type
 
 
 class Integer(Type):

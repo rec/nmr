@@ -1,17 +1,18 @@
-from . import count_words, types
+import bisect
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Union
-from collections.abc import Sequence
-import bisect
+
+from . import count_words, types
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
-FILE = Path(__file__).parent.parent / 'words.txt'
+FILE = Path(__file__).parent.parent / "words.txt"
 
 
 def read_words(file):
     lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
-    return tuple(i for i in lines if i and not i.startswith('#'))
+    return tuple(i for i in lines if i and not i.startswith("#"))
 
 
 class Nmr:
@@ -28,7 +29,7 @@ class Nmr:
 
         if count is not None:
             words = words[:count]
-        assert len(set(words)) == len(words), 'Duplicate words'
+        assert len(set(words)) == len(words), "Duplicate words"
         self.words = words
 
         self.count = count_words.CountWords(self.n).count
@@ -36,13 +37,13 @@ class Nmr:
 
     def encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
-            raise ValueError('Only accepts non-negative numbers')
+            raise ValueError("Only accepts non-negative numbers")
         return [self.words[i] for i in self._to_digits(num)]
 
     def decode_from_name(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
-            raise ValueError('Repeated words not allowed')
+            raise ValueError("Repeated words not allowed")
 
         try:
             indexes = [self.inverse[w] for w in reversed(words)]
@@ -58,7 +59,7 @@ class Nmr:
     def _to_digits(self, num):
         it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
         if (word_count := next(it, None)) is None:
-            raise ValueError(f'Cannot represent {num} in base {self.n}')
+            raise ValueError(f"Cannot represent {num} in base {self.n}")
 
         total = num - self.count(word_count - 1)
         digits = []
@@ -84,7 +85,7 @@ class Nmr:
 
         for i in indexes:
             for s in sorted_result:
-                i += (s <= i)
+                i += s <= i
             bisect.insort(sorted_result, i)
             yield i
 

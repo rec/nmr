@@ -1,5 +1,6 @@
-from .. type_base import Type
 from typing import Optional
+
+from ..type_base import Type
 
 
 class LatLong(Type):
@@ -11,7 +12,7 @@ class LatLong(Type):
         from lat_lon_parser import parse
 
         try:
-            lat, lon = (parse(i) for i in s.split(','))
+            lat, lon = (parse(i) for i in s.split(","))
         except Exception:
             return
 
@@ -32,17 +33,17 @@ class LatLong(Type):
             lat = to_str_deg_min_sec(lat)
             lon = to_str_deg_min_sec(lon)
 
-            if lat.startswith('-'):
-                lat, ns = lat[1:], 'S'
+            if lat.startswith("-"):
+                lat, ns = lat[1:], "S"
             else:
-                ns = 'N'
+                ns = "N"
 
-            if lon.startswith('-'):
-                lat, ew = lat[1:], 'W'
+            if lon.startswith("-"):
+                lat, ew = lat[1:], "W"
             else:
-                ew = 'E'
+                ew = "E"
 
-            lat += ' ' * (' ' in lat) + ns
-            lon += ' ' * (' ' in lon) + ew
+            lat += " " * (" " in lat) + ns
+            lon += " " * (" " in lon) + ew
 
-            return f'{lat}, {lon}'
+            return f"{lat}, {lon}"

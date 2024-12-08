@@ -1,6 +1,7 @@
-from .. type_base import Type
-from typing import Optional
 import uuid
+from typing import Optional
+
+from ..type_base import Type
 
 
 class Uuid(Type):
@@ -8,7 +9,7 @@ class Uuid(Type):
 
     @staticmethod
     def to_int(s: str) -> Optional[int]:
-        if len(s) == 36 and s.count('-') == 4:
+        if len(s) == 36 and s.count("-") == 4:
             try:
                 u = uuid.UUID(s)
             except Exception:

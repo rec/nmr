@@ -1,6 +1,7 @@
-from .. type_base import Type
-from typing import Optional
 import ipaddress
+from typing import Optional
+
+from ..type_base import Type
 
 
 class IpAddress(Type):

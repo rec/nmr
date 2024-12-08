@@ -8,8 +8,8 @@ class Type:
     @classmethod
     @lru_cache
     def length(cls) -> int:
-        items = list(cls) # type: ignore
-        if items[-1].name == 'RADIX':
+        items = list(cls)  # type: ignore
+        if items[-1].name == "RADIX":
             items.pop()
         return len(items)
 
@@ -18,7 +18,7 @@ class Type:
         d, m = divmod(n, cls.RADIX)
         if m >= cls.length():
             if strict:
-                raise IndexError(f'Out of range {m=}, {cls.length()=}')
+                raise IndexError(f"Out of range {m=}, {cls.length()=}")
             m = m % cls.length()
 
         return d, cls(m + 1)

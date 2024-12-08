@@ -1,5 +1,6 @@
-from .. type_base import Type
 from typing import Optional
+
+from ..type_base import Type
 
 
 class Semver(Type):
@@ -7,10 +8,10 @@ class Semver(Type):
 
     @classmethod
     def to_int(cls, s: str) -> Optional[int]:
-        if s.startswith('v'):
+        if s.startswith("v"):
             s2 = s[1:]
             try:
-                p = [int(i) for i in s2.split('.')]
+                p = [int(i) for i in s2.split(".")]
             except Exception:
                 return
 
@@ -27,4 +28,4 @@ class Semver(Type):
                 d2, m2 = divmod(d1, cls.BASE)
                 d3, m3 = divmod(d2, cls.BASE)
                 if not d3:
-                    return f'v{m3}.{m2}.{m1}'
+                    return f"v{m3}.{m2}.{m1}"

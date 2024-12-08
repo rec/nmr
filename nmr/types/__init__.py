@@ -1,11 +1,12 @@
-from . hex import Hex
-from . integer import Integer
-from . fraction import Fraction
-from . ip_address import IpAddress
-from . lat_long import LatLong
-from . sem_ver import Semver
-from . uuid import Uuid
 from typing import Optional, Tuple, Union
+
+from .fraction import Fraction
+from .hex import Hex
+from .integer import Integer
+from .ip_address import IpAddress
+from .lat_long import LatLong
+from .sem_ver import Semver
+from .uuid import Uuid
 
 CLASSES = Hex, Fraction, Integer, IpAddress, LatLong, Semver, Uuid
 NAMES = tuple(c.__name__.lower() for c in CLASSES)
@@ -26,7 +27,7 @@ def class_int(s: str) -> Optional[Tuple]:
 def get_class(prefix: str):
     cl = [c for (n, c) in zip(NAMES, CLASSES) if n.startswith(prefix)]
     if not cl:
-        raise ValueError(f'Unknown {prefix=}')
+        raise ValueError(f"Unknown {prefix=}")
     if len(cl) > 1:
-        raise ValueError(f'Ambiguous {prefix=}, could be {cl}')
+        raise ValueError(f"Ambiguous {prefix=}, could be {cl}")
     return cl[0]

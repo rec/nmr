@@ -1,6 +1,6 @@
+import dataclasses as dc
 from datetime import datetime
 from enum import IntEnum, auto
-import dataclasses as dc
 
 
 class Interval(IntEnum):
@@ -69,17 +69,16 @@ SECONDS = {
     Interval.HOUR: 60 * 60,
     Interval.DAY: 60 * 60 * 24,
     Interval.WEEK: 60 * 60 * 24 * 7,
-
-    Interval.DECA: 10 ** 1,
-    Interval.HECTO: 10 ** 2,
-    Interval.KILO: 10 ** 3,
-    Interval.MEGA: 10 ** 6,
-    Interval.GIGA: 10 ** 9,
-    Interval.TERA: 10 ** 12,
-    Interval.PETA: 10 ** 15,
-    Interval.EXA: 10 ** 18,
-    Interval.ZETTA: 10 ** 21,
-    Interval.YOTTA: 10 ** 24,
+    Interval.DECA: 10**1,
+    Interval.HECTO: 10**2,
+    Interval.KILO: 10**3,
+    Interval.MEGA: 10**6,
+    Interval.GIGA: 10**9,
+    Interval.TERA: 10**12,
+    Interval.PETA: 10**15,
+    Interval.EXA: 10**18,
+    Interval.ZETTA: 10**21,
+    Interval.YOTTA: 10**24,
 }
 
 
@@ -105,7 +104,7 @@ class Time:
         return self.time.year - self.YEAR_ZERO + self.years
 
     def whole_microseconds(self):
-        return 10 ** 6 * self.whole_seconds() + self.time.microseconds
+        return 10**6 * self.whole_seconds() + self.time.microseconds
 
     def whole_yoctoseconds(self):
         yoctoseconds = self.whole_microseconds() * 10 ** (24 - 6)
