@@ -16,12 +16,17 @@ def read_words(file):
 
 
 class Nmr:
+    """Nmr handles encoding integers to names, and decoding names into integers.
+
+    The exact correspondence depends on the choice and number of words
+
+    """
     COUNT = 1628
     WORDS = read_words(FILE)
 
     def __init__(self, count=None, words=None):
         if not isinstance(words, (list, tuple)):
-            if words is count is None:
+            if words is None and count is None:
                 count = self.COUNT
                 words = self.WORDS
             else:
