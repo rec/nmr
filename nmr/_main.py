@@ -81,7 +81,7 @@ class Main:
             else:
                 print(*value)
 
-    def rnd(self):
+    def rnd(self) -> None:
         for i in range(128):
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr.encode_to_name(r))
