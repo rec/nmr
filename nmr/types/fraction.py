@@ -1,7 +1,9 @@
-from .. type_base import Type
-from typing import Optional
+from __future__ import annotations
+
 import fractions
 import math
+
+from ..nameable_type import NameableType
 
 D = {}
 
@@ -9,19 +11,19 @@ D = {}
 def _debug(name, d):
     import json
 
-    print(f'{name}:')
+    print(f"{name}:")
     print(json.dumps(d, indent=2, default=str, sort_keys=True))
 
-    if name == 'to_int':
+    if name == "to_int":
         D.clear()
         D.update(d)
     else:
         for k in sorted(set(d) & set(D)):
-            if k != 'result' and D[k] != d[k]:
-                print(f'{k}: {D[k]} != {d[k]}')
+            if k != "result" and D[k] != d[k]:
+                print(f"{k}: {D[k]} != {d[k]}")
 
 
-class Fraction(Type):
+class Fraction(NameableType):
     """
     Use a Cantor-style diagonal argument
     numerator, denominator
@@ -30,14 +32,14 @@ class Fraction(Type):
     type = staticmethod(fractions.Fraction)
 
     @staticmethod
-    def to_int(s: str) -> Optional[int]:
+    def to_int(s: str) -> int | None:
         try:
-            num, denom = (int(i) for i in s.split('/'))
+            num, denom = (int(i) for i in s.split("/"))
         except Exception:
             return
 
         if not denom:
-            raise ZeroDivisionError('Denominator cannnot be 0')
+            raise ZeroDivisionError("Denominator cannnot be 0")
         num_neg = num < 0
         sign = 1 if num_neg == (denom < 0) else -1
         width = abs(num) + abs(denom) - 1
@@ -45,11 +47,11 @@ class Fraction(Type):
         index_plus_denom = index + abs(denom - 1)
 
         result = sign * (num_neg + 2 * index_plus_denom)
-        _debug('to_int', locals())
+        _debug("to_int", locals())
         return result
 
     @classmethod
-    def int_to_type(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> str | None:
         index_plus_denom, num_neg = divmod(abs(i), 2)
         denom_neg = (i < 0) != num_neg
 
@@ -71,5 +73,5 @@ class Fraction(Type):
         denom = denom_abs * (-1 if denom_neg else 1)
 
         result = cls.type(num, denom, _normalize=False)
-        _debug('int_to_type', locals())
+        _debug("int_to_type", locals())
         return result

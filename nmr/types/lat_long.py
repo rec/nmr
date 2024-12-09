@@ -1,17 +1,18 @@
-from .. type_base import Type
-from typing import Optional
+from __future__ import annotations
+
+from ..nameable_type import NameableType
 
 
-class LatLong(Type):
+class LatLong(NameableType):
     DIVISIONS = 100000000  # Each degree is divided by ten million
     MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
 
     @classmethod
-    def to_int(cls, s: str) -> Optional[int]:
+    def to_int(cls, s: str) -> int | None:
         from lat_lon_parser import parse
 
         try:
-            lat, lon = (parse(i) for i in s.split(','))
+            lat, lon = (parse(i) for i in s.split(","))
         except Exception:
             return
 
@@ -21,7 +22,7 @@ class LatLong(Type):
             return lon + cls.MULT * lat
 
     @classmethod
-    def int_to_type(cls, i: int) -> Optional[str]:
+    def int_to_type(cls, i: int) -> str | None:
         from lat_lon_parser import to_str_deg_min_sec
 
         lat, lon = divmod(i, cls.MULT)
@@ -32,17 +33,17 @@ class LatLong(Type):
             lat = to_str_deg_min_sec(lat)
             lon = to_str_deg_min_sec(lon)
 
-            if lat.startswith('-'):
-                lat, ns = lat[1:], 'S'
+            if lat.startswith("-"):
+                lat, ns = lat[1:], "S"
             else:
-                ns = 'N'
+                ns = "N"
 
-            if lon.startswith('-'):
-                lat, ew = lat[1:], 'W'
+            if lon.startswith("-"):
+                lat, ew = lat[1:], "W"
             else:
-                ew = 'E'
+                ew = "E"
 
-            lat += ' ' * (' ' in lat) + ns
-            lon += ' ' * (' ' in lon) + ew
+            lat += " " * (" " in lat) + ns
+            lon += " " * (" " in lon) + ew
 
-            return f'{lat}, {lon}'
+            return f"{lat}, {lon}"

@@ -1,9 +1,10 @@
-from . import count_words
-from pathlib import Path
-from typing import Union, Generator, Optional
-from collections.abc import Sequence
-from os import PathLike
+from __future__ import annotations
+
 import bisect
+from collections.abc import Sequence
+from pathlib import Path
+
+from . import count_words, types
 
 # The minimum total number of words needed to be able to represent all 64-bit
 # integers with six words or less is 1628
@@ -16,6 +17,12 @@ def read_words(file: Optional[PathLike[str]]) -> tuple[str, ...]:
 
 
 class Nmr:
+    """Nmr handles encoding integers to names, and decoding names into integers.
+
+    The exact correspondence depends on the choice and number of words
+
+    """
+
     COUNT = 1628
     WORDS = read_words(FILE)
 
@@ -25,7 +32,7 @@ class Nmr:
         words: Optional[Union[list[str], tuple[str, ...]]] = None,
     ) -> None:
         if not isinstance(words, (list, tuple)):
-            if words is count is None:
+            if words is None and count is None:
                 count = self.COUNT
                 words = self.WORDS
             else:
@@ -39,12 +46,12 @@ class Nmr:
         self.count = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def int_to_name(self, num: int) -> Sequence[str]:
+    def encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
             raise ValueError("Only accepts non-negative numbers")
         return [self.words[i] for i in self._to_digits(num)]
 
-    def name_to_int(self, words: Sequence[str]) -> int:
+    def decode_from_name(self, words: Sequence[str]) -> int:
         words = list(words)
         if len(set(words)) != len(words):
             raise ValueError("Repeated words not allowed")

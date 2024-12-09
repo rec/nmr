@@ -1,13 +1,15 @@
-from .. type_base import Type
-from typing import Optional
+from __future__ import annotations
+
 import ipaddress
 
+from ..nameable_type import NameableType
 
-class IpAddress(Type):
+
+class IpAddress(NameableType):
     type = staticmethod(ipaddress.ip_address)
 
     @staticmethod
-    def to_int(s: str) -> Optional[int]:
+    def to_int(s: str) -> int | None:
         try:
             return int(ipaddress.ip_address(s))
         except Exception:

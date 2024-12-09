@@ -1,11 +1,11 @@
 from typing import Any
 
 
-class Type:
+class NameableType:
     type = staticmethod(str)
 
     @classmethod
-    def from_int(cls, i: int, name: str = 'str') -> str:
+    def from_int(cls, i: int, name: str = "str") -> str:
         c = str(cls.int_to_type(i))
         if c is not None:
             return c
