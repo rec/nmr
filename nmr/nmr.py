@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import bisect
 from collections.abc import Sequence
+from os import PathLike
 from pathlib import Path
+from typing import Iterator, Sequence
 
 from . import count_words, types
 
@@ -11,7 +13,7 @@ from . import count_words, types
 FILE = Path(__file__).parent.parent / "words.txt"
 
 
-def read_words(file):
+def read_words(file: PathLike[str] | str | None) -> tuple[str, ...]:
     lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
     return tuple(i for i in lines if i and not i.startswith("#"))
 
@@ -26,7 +28,11 @@ class Nmr:
     COUNT = 1628
     WORDS = read_words(FILE)
 
-    def __init__(self, count=None, words=None):
+    def __init__(
+        self,
+        count: int | None = None,
+        words: Sequence[str] | PathLike[str] | None = None,
+    ) -> None:
         if not isinstance(words, (list, tuple)):
             if words is None and count is None:
                 count = self.COUNT
@@ -87,8 +93,8 @@ class Nmr:
         return self.count(len(digits) - 1) + total
 
     @staticmethod
-    def _undupe(indexes):
-        sorted_result = []
+    def _undupe(indexes: Sequence[int]) -> Iterator[int]:
+        sorted_result: list[int] = []
 
         for i in indexes:
             for s in sorted_result:
@@ -97,6 +103,6 @@ class Nmr:
             yield i
 
     @staticmethod
-    def _redupe(indexes):
+    def _redupe(indexes: Sequence[int]) -> Iterator[int]:
         for i, num in enumerate(indexes):
             yield num - sum(k < num for k in indexes[:i])
