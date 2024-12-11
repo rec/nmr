@@ -3,6 +3,8 @@ from __future__ import annotations
 import bisect
 from collections.abc import Sequence
 from pathlib import Path
+from typing import Sequence, Iterator
+from os import PathLike
 
 from . import count_words, types
 
@@ -11,7 +13,7 @@ from . import count_words, types
 FILE = Path(__file__).parent.parent / "words.txt"
 
 
-def read_words(file: Optional[PathLike[str]]) -> tuple[str, ...]:
+def read_words(file: PathLike[str] | str | None) -> tuple[str, ...]:
     lines = (i.strip() for i in Path(file or FILE).read_text().splitlines())
     return tuple(i for i in lines if i and not i.startswith("#"))
 
@@ -28,8 +30,8 @@ class Nmr:
 
     def __init__(
         self,
-        count: Optional[int] = None,
-        words: Optional[Union[list[str], tuple[str, ...]]] = None,
+        count: int | None = None,
+        words: Sequence[str] | PathLike[str] | None = None,
     ) -> None:
         if not isinstance(words, (list, tuple)):
             if words is None and count is None:
@@ -91,7 +93,7 @@ class Nmr:
         return self.count(len(digits) - 1) + total
 
     @staticmethod
-    def _undupe(indexes: Sequence[int]) -> Generator[int, None, None]:
+    def _undupe(indexes: Sequence[int]) -> Iterator[int]:
         sorted_result: list[int] = []
 
         for i in indexes:
@@ -101,6 +103,6 @@ class Nmr:
             yield i
 
     @staticmethod
-    def _redupe(indexes: Sequence[int]) -> Generator[int, None, None]:
+    def _redupe(indexes: Sequence[int]) -> Iterator[int]:
         for i, num in enumerate(indexes):
             yield num - sum(k < num for k in indexes[:i])
