@@ -4,7 +4,7 @@ import threading
 
 
 class CountWords:
-    def __init__(self, n) -> None:
+    def __init__(self, n: int) -> None:
         self.n = n
         self._perm_count = [(1, 0)]
         self._lock = threading.Lock()
