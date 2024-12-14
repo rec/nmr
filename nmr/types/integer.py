@@ -7,8 +7,8 @@ from ..nameable_type import NameableType
 
 class Integer(NameableType):
     @staticmethod
-    def type_to_int(s: str) -> Any | None:
+    def type_to_int(s: str) -> Any:
         try:
             return int(s)
         except ValueError:
-            return
+            return None
