@@ -2,13 +2,14 @@ from __future__ import annotations
 
 import fractions
 import math
+from typing import Any
 
 from ..nameable_type import NameableType
 
-D = {}
+D: dict[str, Any] = {}
 
 
-def _debug(name, d):
+def _debug(name: str, d: dict[str, Any]) -> None:
     import json
 
     print(f"{name}:")
@@ -29,14 +30,14 @@ class Fraction(NameableType):
     numerator, denominator
     """
 
-    type = staticmethod(fractions.Fraction)
+    type: type = fractions.Fraction
 
     @staticmethod
     def to_int(s: str) -> int | None:
         try:
             num, denom = (int(i) for i in s.split("/"))
         except Exception:
-            return
+            return None
 
         if not denom:
             raise ZeroDivisionError("Denominator cannnot be 0")
@@ -51,7 +52,7 @@ class Fraction(NameableType):
         return result
 
     @classmethod
-    def int_to_type(cls, i: int) -> str | None:
+    def int_to_type(cls, i: int) -> Any:
         index_plus_denom, num_neg = divmod(abs(i), 2)
         denom_neg = (i < 0) != num_neg
 
