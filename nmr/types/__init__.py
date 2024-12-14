@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from ..nameable_type import NameableType
 from .fraction import Fraction
 from .hex import Hex
 from .integer import Integer
@@ -17,14 +18,15 @@ def try_to_int(s: str) -> int | str:
     return s if ci is None else ci[1]
 
 
-def class_int(s: str) -> tuple | None:
+def class_int(s: str) -> tuple[type, int] | None:
     for c in CLASSES:
         i = c.to_int(s)
         if i is not None:
             return c, i
+    return None
 
 
-def get_class(prefix: str):
+def get_class(prefix: str) -> type[NameableType]:
     cl = [c for (n, c) in zip(NAMES, CLASSES) if n.startswith(prefix)]
     if not cl:
         raise ValueError(f"Unknown {prefix=}")
