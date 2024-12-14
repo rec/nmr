@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 import bisect
-from collections.abc import Sequence
+from collections.abc import Iterator, Sequence
 from os import PathLike
 from pathlib import Path
-from typing import Iterator, Sequence
 
 from . import count_words, types
 
@@ -33,7 +32,7 @@ class Nmr:
         count: int | None = None,
         words: Sequence[str] | PathLike[str] | None = None,
     ) -> None:
-        if not isinstance(words, (list, tuple)):
+        if not isinstance(words, Sequence):
             if words is None and count is None:
                 count = self.COUNT
                 words = self.WORDS
@@ -66,10 +65,10 @@ class Nmr:
         return self._from_digits(list(self._redupe(indexes))[::-1])
 
     @property
-    def n(self):
+    def n(self) -> int:
         return len(self.words)
 
-    def _to_digits(self, num):
+    def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.n) if self.count(i + 1) > num)
         if (word_count := next(it, None)) is None:
             raise ValueError(f"Cannot represent {num} in base {self.n}")
@@ -84,7 +83,7 @@ class Nmr:
 
         return list(self._undupe(digits))[::-1]
 
-    def _from_digits(self, digits):
+    def _from_digits(self, digits: list[int]) -> int:
         total = 0
         for i, d in enumerate(digits):
             total *= self.n - (len(digits) - i - 1)
