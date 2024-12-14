@@ -4,7 +4,7 @@ from enum import IntEnum, auto
 from functools import lru_cache
 
 
-class Type:
+class Category:
     @classmethod
     @lru_cache
     def length(cls) -> int:
@@ -14,7 +14,7 @@ class Type:
         return len(items)
 
     @classmethod
-    def divmod(cls, n: int, strict: bool = False) -> tuple[int, Type]:
+    def divmod(cls, n: int, strict: bool = False) -> tuple[int, Category]:
         d, m = divmod(n, cls.RADIX)
         if m >= cls.length():
             if strict:
@@ -30,7 +30,7 @@ class Type:
         return g.value - 1 + Group.RADIX * (self.value - 1 + self.RADIX * n)
 
 
-class Group(Type, IntEnum):
+class Group(Category, IntEnum):
     MATH = auto()
     SCIENCE = auto()
     MUSIC = auto()
@@ -44,45 +44,45 @@ class Group(Type, IntEnum):
     RADIX = 16
 
 
-class Math(Type, IntEnum):
+class Math(Category, IntEnum):
     INTEGER = auto()
     HEX = auto()
     FRACTION = auto()
     FLOATING = auto()
 
 
-class Science(Type, IntEnum):
+class Science(Category, IntEnum):
     ELEMENT = auto()
     UNIT = auto()
 
 
-class Music(Type, IntEnum):
+class Music(Category, IntEnum):
     RHYTHM = auto()
     MELODY = auto()
 
 
-class Place(Type, IntEnum):
+class Place(Category, IntEnum):
     LAT_LONG = auto()
 
 
-class Time(Type, IntEnum):
+class Time(Category, IntEnum):
     TIME = auto()
 
 
-class Network(Type, IntEnum):
+class Network(Category, IntEnum):
     IP_ADDRESS = auto()
     SEM_VER = auto()
     UUID = auto()
 
 
-class Game(Type, IntEnum):
+class Game(Category, IntEnum):
     BACKGAMMON = auto()
     CARDS = auto()
     CHESS = auto()
     GO = auto()
 
 
-class Commercial(Type, IntEnum):
+class Commercial(Category, IntEnum):
     ISBN = auto()
     UPC = auto()
 
