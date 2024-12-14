@@ -23,8 +23,11 @@ class NameableType:
         return str(cls.int_to_type(i))
 
     @staticmethod
-    def type_to_int(t: Any) -> int:
-        return int(t)
+    def type_to_int(t: Any) -> int | None:
+        try:
+            return int(t)
+        except Exception:
+            return None
 
     @classmethod
     def to_int(cls, s: str) -> int | None:
