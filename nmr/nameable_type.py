@@ -1,8 +1,10 @@
-from typing import Any
+from __future__ import annotations
+
+from typing import Any, Type
 
 
 class NameableType:
-    type = staticmethod(str)
+    type: type = str
 
     @classmethod
     def from_int(cls, i: int, name: str = "str") -> str:
@@ -25,5 +27,5 @@ class NameableType:
         return int(t)
 
     @classmethod
-    def to_int(cls, s: str) -> int:
+    def to_int(cls, s: str) -> int | None:
         return cls.type_to_int(cls.type(s))
