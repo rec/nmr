@@ -6,7 +6,7 @@ from ..nameable_type import NameableType
 
 
 class IpAddress(NameableType):
-    type = staticmethod(ipaddress.ip_address)
+    type = staticmethod(ipaddress.ip_address)  # type: ignore[assignment]
 
     @staticmethod
     def to_int(s: str) -> int | None:
