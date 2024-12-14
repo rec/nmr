@@ -9,41 +9,46 @@ class LatLong(NameableType):
 
     @classmethod
     def to_int(cls, s: str) -> int | None:
-        from lat_lon_parser import parse
+        from lat_lon_parser import parse  # type: ignore[import-untyped]
+
+        lat: int
+        lon: int
 
         try:
             lat, lon = (parse(i) for i in s.split(","))
         except Exception:
-            return
+            return None
 
         if -90 <= lat <= 90 and -180 <= lon <= 180:
             lat = round(cls.DIVISIONS * (lat + 90))
             lon = round(cls.DIVISIONS * (lon + 180))
             return lon + cls.MULT * lat
+        return None
 
     @classmethod
     def int_to_type(cls, i: int) -> str | None:
         from lat_lon_parser import to_str_deg_min_sec
 
         lat, lon = divmod(i, cls.MULT)
-        lat = lat / cls.DIVISIONS - 90
-        lon = lon / cls.DIVISIONS - 180
+        la = lat / cls.DIVISIONS - 90
+        lo = lon / cls.DIVISIONS - 180
 
-        if -90 <= lat <= 90 and -180 <= lon <= 180:
-            lat = to_str_deg_min_sec(lat)
-            lon = to_str_deg_min_sec(lon)
+        if -90 <= la <= 90 and -180 <= lo <= 180:
+            las = to_str_deg_min_sec(la)
+            los = to_str_deg_min_sec(lo)
 
-            if lat.startswith("-"):
-                lat, ns = lat[1:], "S"
+            if las.startswith("-"):
+                las, ns = las[1:], "S"
             else:
                 ns = "N"
 
-            if lon.startswith("-"):
-                lat, ew = lat[1:], "W"
+            if los.startswith("-"):
+                las, ew = las[1:], "W"
             else:
                 ew = "E"
 
-            lat += " " * (" " in lat) + ns
-            lon += " " * (" " in lon) + ew
+            las += " " * (" " in las) + ns
+            los += " " * (" " in los) + ew
 
-            return f"{lat}, {lon}"
+            return f"{las}, {los}"
+        return None
