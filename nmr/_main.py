@@ -51,6 +51,7 @@ class Main:
     count: int | None
     label: bool
     output_type: str | None
+    random_count: int
     word_file: Path | None
 
     def __call__(self) -> None:
@@ -104,7 +105,7 @@ class Main:
             print(*value)
 
     def rnd(self) -> None:
-        for i in range(128):
+        for i in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr.encode_to_name(r))
 

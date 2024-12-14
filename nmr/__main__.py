@@ -25,7 +25,7 @@ def nmr_main(
     raise_exceptions: bool = Option(
         False,
         "--raise-exceptions",
-        "-r",
+        "-e",
         help="If True, don't catch exceptions, allow the program to terminate",
     ),
     count: Optional[int] = Option(
@@ -43,6 +43,9 @@ def nmr_main(
         "-t",
         help='Try to convert outputs to one of these formats:'
         f'{" ".join(types.NAMES)}. Abbreviations are possible',
+    ),
+    random_count: int = Option(
+        10, "--random-count", "-r", help="How many random numbers to print"
     ),
     word_file: Optional[Path] = Option(
         None,
