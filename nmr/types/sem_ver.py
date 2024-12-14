@@ -13,11 +13,12 @@ class Semver(NameableType):
             try:
                 p = [int(i) for i in s2.split(".")]
             except Exception:
-                return
+                return None
 
             if len(p) == 3 and all(i < cls.BASE for i in p):
                 v = p[2] + cls.BASE * (p[1] + cls.BASE * p[0])
                 return v * cls.BASE
+        return None
 
     @classmethod
     def int_to_type(cls, i: int) -> str | None:
@@ -29,3 +30,4 @@ class Semver(NameableType):
                 d3, m3 = divmod(d2, cls.BASE)
                 if not d3:
                     return f"v{m3}.{m2}.{m1}"
+        return None
