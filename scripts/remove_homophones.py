@@ -1,15 +1,16 @@
 from pathlib import Path
 import sys
 
+ROOT = Path(__file__).parent
+HOMOPHONES = ROOT / "homophones.txt"
+
+sys.path.append(str(ROOT.parent))
+
+from nmr import nmr
+
 
 def run():
-    ROOT = Path(__file__).parent
-    HOMOPHONES = ROOT / "homophones.txt"
-    sys.path.append(str(ROOT.parent))
-
-    from nmr import nmr
-
-    WORDS = nmr.Nmr.WORDS
+    WORDS = nmr.Nmr().words
 
     inverted = {word: i for i, word in enumerate(WORDS)}
     removals = set()
@@ -25,9 +26,9 @@ def run():
                 for d in dupes:
                     print("*", d, file=sys.stderr)
 
-    words = [w for w in WORDS if w not in removals]
-    print(*words, sep="\n")
-    print(len(WORDS), "->", len(words), file=sys.stderr)
+    removed = [w for w in WORDS if w not in removals]
+    print(*removed, sep="\n")
+    print(len(WORDS), "->", len(removed), file=sys.stderr)
 
 
 run()

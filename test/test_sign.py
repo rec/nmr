@@ -6,7 +6,7 @@ from nmr import Nmr
 @pytest.mark.parametrize("n", range(1, 7))
 def test_all_unsigned(n):
     N = Nmr(n)
-    m = N.count(n)
+    m = N._count_words(n)
 
     for i in range(m):
         words = N.encode_to_name(i)

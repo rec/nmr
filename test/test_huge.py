@@ -4,7 +4,7 @@ from nmr import nmr
 
 
 def test_huge_unsigned():
-    maxint = nmr.count() - 1
+    maxint = nmr._count_words() - 1
     expected = ["the", "of", "and", "to", "a", "in", "for", "on"]
     assert nmr.encode_to_name(maxint)[:8] == expected
 
