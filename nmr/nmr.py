@@ -69,8 +69,8 @@ class Nmr:
         index = self.decode_from_name(words)
         return types.index_to_type(index)
 
-    def type_to_name(self, t: Any) -> Sequence[str]:
-        index = types.type_to_index(t)
+    def type_to_name(self, s: str) -> Sequence[str]:
+        index = types.type_to_index(s)
         return self.encode_to_name(index)
 
     @property
