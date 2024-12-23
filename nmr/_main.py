@@ -84,7 +84,7 @@ class Main:
             if self._type_class and isinstance(i, int):
                 value = [i]
             else:
-                value = self.nmr.encode_to_name(i)
+                value = self.nmr._encode_to_name(i)
 
             if self._type_class:
                 value = [str(self._type_class.int_to_type(v)) for v in value]
@@ -106,7 +106,7 @@ class Main:
     def rnd(self) -> None:
         for i in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
-            print(f"{r}:", *self.nmr.encode_to_name(r))
+            print(f"{r}:", *self.nmr._encode_to_name(r))
 
     def group_args(self) -> Iterator[int | str | list[int | str]]:
         iargs = (types.try_to_int(a) for a in self.arguments or ())

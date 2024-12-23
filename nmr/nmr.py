@@ -53,21 +53,15 @@ class Nmr:
         self._count_words = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def encode_to_name(self, num: int) -> Sequence[str]:
+    def _encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
             raise ValueError("Only accepts non-negative numbers")
         return [self.words[i] for i in self._to_digits(num)]
 
     def decode_from_name(self, name: Sequence[str]) -> int:
         name = list(name)
-        if len(set(name)) != len(name):
-            raise ValueError("Repeated words not allowed")
-
-        try:
-            indexes = [self.inverse[w] for w in reversed(name)]
-        except KeyError:
-            raise KeyError(*sorted(set(name) - set(self.inverse))) from None
-
+        _check_dupes(name)
+        indexes = [self.inverse[w] for w in reversed(name)]
         return self._from_digits(list(self._redupe(indexes))[::-1])
 
     def is_name(self, s: Sequence[str]) -> bool:
@@ -79,7 +73,7 @@ class Nmr:
 
     def type_to_name(self, s: str) -> Sequence[str]:
         index = types.type_to_index(s)
-        return self.encode_to_name(index)
+        return self._encode_to_name(index)
 
     @property
     def n(self) -> int:
