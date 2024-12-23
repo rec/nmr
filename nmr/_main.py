@@ -21,7 +21,7 @@ def is_int(s: Any) -> bool:
 
 def stdin_lines() -> Iterator[int | str | list[int | str]]:
     if sys.stdin.isatty():  # Move elsewhere!!!
-       return
+        return
 
     for line in (line for i in sys.stdin if (line := i.strip())):
         parts = [types.try_to_int(s) for s in line.split()]

@@ -25,15 +25,15 @@ def index_to_type(index: int) -> Any:
 
 def try_to_int(s: str) -> int | str:
     ci = class_int(s)
-    return s if ci is None else ci[1]
+    return s if ci[0] is None is None else ci[1]
 
 
-def class_int(s: str) -> tuple[type, int] | None:
+def class_int(s: str) -> tuple[type | None, int]:
     for c in CLASSES:
         i = c.to_int(s)
         if i is not None:
             return c, i
-    return None
+    return None, 0
 
 
 def get_class(prefix: str) -> type[NameableType]:
