@@ -4,6 +4,7 @@ import bisect
 from collections.abc import Iterator, Sequence
 from os import PathLike
 from pathlib import Path
+from typing import Any
 
 from . import count_words, types
 
@@ -63,6 +64,14 @@ class Nmr:
             raise KeyError(*sorted(set(words) - set(self.inverse))) from None
 
         return self._from_digits(list(self._redupe(indexes))[::-1])
+
+    def name_to_type(self, words: Sequence[str]) -> Any:
+        index = self.decode_from_name(words)
+        return types.index_to_type(index)
+
+    def type_to_name(self, t: Any) -> Sequence[str]:
+        index = types.type_to_index(t)
+        return self.encode_to_name(index)
 
     @property
     def n(self) -> int:

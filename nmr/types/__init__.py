@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Any
+
 from ..nameable_type import NameableType
 from .fraction import Fraction
 from .hex import Hex
@@ -11,6 +13,14 @@ from .uuid import Uuid
 
 CLASSES = Hex, Fraction, Integer, IpAddress, LatLong, Semver, Uuid
 NAMES = tuple(c.__name__.lower() for c in CLASSES)
+
+
+def type_to_index(t: Any) -> int:
+    return 0
+
+
+def index_to_type(index: int) -> Any:
+    return None
 
 
 def try_to_int(s: str) -> int | str:

@@ -7,8 +7,19 @@ from typer import Argument, Option, Typer
 from . import types
 
 HELP = """
-`nmbr` is a Python module which uniquely names every number, including
-IP addresses and hex numbers.
+`nmr` is a Python program which uniquely names all canonical things, including
+latlongs, fractions, numbers, IP addresses and hex numbers.
+
+You can either pass data in from the command line, like this:
+
+    nmr "34.5N 15:24E" 1231 -1231 1/5 "Dec 1, 2001"
+    nmr boy spot dog
+
+or you can use it as a Linux-style pipe:
+
+   cat lines.txt | nmr
+
+where each line gets translated independently
 """
 
 app = Typer(
@@ -20,7 +31,7 @@ app = Typer(
 @app.command(help=HELP)
 def nmr_main(
     arguments: list[str] = Argument(
-        None, help="Numbers to convert to names, or vice-versa"
+        None, help="Things to convert to names, or vice-versa"
     ),
     raise_exceptions: bool = Option(
         False,
@@ -41,7 +52,7 @@ def nmr_main(
         None,
         "--output-type",
         "-t",
-        help='Try to convert outputs to one of these formats:'
+        help='Try to convert inputs to one of these output formats:'
         f'{" ".join(types.NAMES)}. Abbreviations are possible',
     ),
     random_count: int = Option(

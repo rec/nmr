@@ -36,6 +36,7 @@ class Group(Category, IntEnum):
     NETWORK = auto()
     GAME = auto()
     COMMERCIAL = auto()
+    COMBINE = auto()
 
     _RADIX = 16
 
@@ -93,9 +94,12 @@ class Commercial(Subcategory, IntEnum):
     UPC = auto()
 
 
+class Combine(Subcategory, IntEnum):
+    PRODUCT = auto()
+
+
 def number_to_remainder_and_type(n: int, strict: bool = False) -> tuple[int, Category]:
     d, group = Group.divmod(n, strict)
     name = group.name  # type: ignore[attr-defined]
-    subtype = globals()[name.capitalize()]
-    result: tuple[int, Category] = subtype.divmod(d, strict)
-    return result
+    subtype: Category = globals()[name.capitalize()]
+    return subtype.divmod(d, strict)

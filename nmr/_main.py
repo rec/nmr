@@ -20,8 +20,8 @@ def is_int(s: Any) -> bool:
 
 
 def stdin_lines() -> Iterator[int | str | list[int | str]]:
-    if sys.stdin.isatty():
-        return
+    if sys.stdin.isatty():  # Move elsewhere!!!
+       return
 
     for line in (line for i in sys.stdin if (line := i.strip())):
         parts = [types.try_to_int(s) for s in line.split()]
@@ -87,14 +87,13 @@ class Main:
                 value = self.nmr.encode_to_name(i)
 
             if self._type_class:
-                value = [self._type_class.int_to_str(v) for v in value]
+                value = [str(self._type_class.int_to_type(v)) for v in value]
 
         except Exception as e:
             if self.raise_exceptions:
                 raise
 
             self.returncode = 1
-            print("!!!!!", e, type(e), e.args)
             print("ERROR:", e, file=sys.stderr)
             return
 

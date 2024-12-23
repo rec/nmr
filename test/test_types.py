@@ -19,12 +19,13 @@ ROUND_TRIPS = (
 @pytest.mark.parametrize("s", ROUND_TRIPS)
 def test_roundtrips(s):
     cls, i = types.class_int(s)
-    assert s == cls.from_int(i)
+    assert s == str(cls.int_to_type(i))
 
 
 def test_fractions():
-    a = [types.Fraction.from_int(i) for i in range(0, 8)]
+    to_type = types.Fraction.int_to_type
+    a = [str(to_type(i)) for i in range(0, 8)]
     assert a == ["0", "0/-1", "2", "-2/-1", "1/2", "-1/-2", "3", "-3/-1"]
 
-    a = [types.Fraction.from_int(i) for i in range(0, 8)]
+    a = [str(to_type(i)) for i in range(0, 8)]
     assert a == ["0", "0/-1", "2", "-2/-1", "1/2", "-1/-2", "3", "-3/-1"]
