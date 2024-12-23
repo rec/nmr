@@ -11,7 +11,7 @@ def test_all_unsigned(n):
     for i in range(m):
         words = N._encode_to_name(i)
         assert len(words) == len(set(words))
-        assert N.decode_from_name(words) == i, str(words)
+        assert N._decode_from_name(words) == i, str(words)
 
     err = "Only accepts non-negative numbers"
     with pytest.raises(ValueError, match=err):

@@ -53,22 +53,11 @@ class Nmr:
         self._count_words = count_words.CountWords(self.n).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
-    def _encode_to_name(self, num: int) -> Sequence[str]:
-        if num < 0:
-            raise ValueError("Only accepts non-negative numbers")
-        return [self.words[i] for i in self._to_digits(num)]
-
-    def decode_from_name(self, name: Sequence[str]) -> int:
-        name = list(name)
-        _check_dupes(name)
-        indexes = [self.inverse[w] for w in reversed(name)]
-        return self._from_digits(list(self._redupe(indexes))[::-1])
-
     def is_name(self, s: Sequence[str]) -> bool:
         return all(i in self.inverse for i in s)
 
     def name_to_type(self, name: Sequence[str]) -> str:
-        index = self.decode_from_name(name)
+        index = self._decode_from_name(name)
         return types.index_to_type(index)
 
     def type_to_name(self, s: str) -> Sequence[str]:
@@ -78,6 +67,17 @@ class Nmr:
     @property
     def n(self) -> int:
         return len(self.words)
+
+    def _encode_to_name(self, num: int) -> Sequence[str]:
+        if num < 0:
+            raise ValueError("Only accepts non-negative numbers")
+        return [self.words[i] for i in self._to_digits(num)]
+
+    def _decode_from_name(self, name: Sequence[str]) -> int:
+        name = list(name)
+        _check_dupes(name)
+        indexes = [self.inverse[w] for w in reversed(name)]
+        return self._from_digits(list(self._redupe(indexes))[::-1])
 
     def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.n) if self._count_words(i + 1) > num)

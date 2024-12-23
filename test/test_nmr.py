@@ -56,4 +56,4 @@ def test_stability(number, words):
     if actual_words != words:
         print(actual_words)
     assert actual_words == words
-    assert nmr.decode_from_name(words) == number
+    assert nmr._decode_from_name(words) == number
