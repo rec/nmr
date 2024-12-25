@@ -61,5 +61,9 @@ def nmr_main(
     Main(**d)()
 
 
-if __name__ == "__main__":
+def main():
     typer.main.get_command(app)()
+
+
+if __name__ == "__main__":
+    main()

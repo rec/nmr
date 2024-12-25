@@ -22,6 +22,9 @@ pytest = "^7.2.0"
 ruff = "^0.8.2"
 mypy = "^1.13.0"
 
+[tool.poetry.scripts]
+nmr = "nmr.__main__:main"
+
 [tool.coverage]
 [tool.coverage.run]
 branch = true
