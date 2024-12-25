@@ -14,31 +14,9 @@ from .__main__ import nmr_main
 from .nameable_type import NameableType
 from .nmr import Nmr
 
+"""
+"""l
 
-def is_int(s: Any) -> bool:
-    return isinstance(s, int)
-
-
-def stdin_lines() -> Iterator[int | str | list[int | str]]:
-    if sys.stdin.isatty():  # Move elsewhere!!!
-        return
-
-    for line in (line for i in sys.stdin if (line := i.strip())):
-        parts = [types.try_to_int(s) for s in line.split()]
-        nums = sum(is_int(i) for i in parts)
-        if nums == 0:
-            yield parts
-        elif nums == len(parts):
-            yield from parts
-        else:
-            msg = f'Line mixes numbers and words: "{line}"'
-            print(msg, file=sys.stderr)
-
-
-def exit(*error: Any) -> NoReturn:
-    if error:
-        print(*error, file=sys.stderr)
-    sys.exit(bool(error))
 
 
 @dtyper.dataclass(nmr_main)
@@ -71,47 +49,40 @@ class Main:
         return None
 
     def run_lines(self) -> bool:
-        items = itertools.chain(self.group_args(), stdin_lines())
+        group_args = (i.strip() for i in " ".join(self.arguments).split(";"))
         has_items = False
-        for i in items:
-            self.run(i)
+        for line in itertools.chain(group_args, stdin_lines()):
             has_items = True
-        return has_items
-
-    def run(self, i: Any) -> None:
-        value: Sequence[Any]
-        try:
-            if self._type_class and isinstance(i, int):
-                value = [i]
+            try:
+                if self.nmr.is_name(line):
+                    result = self.nmr.name_to_type(line)
+                else:
+                    result = self.nmr.type_to_name(line)
+            except Exception as e:
+                if self.raise_exceptions:
+                    raise
+                self.returncode = 1
+                print("ERROR:", e, file=sys.stderr)
+                continue
+            if self.label:
+                print(f"{line}: {result}")
             else:
-                value = self.nmr._encode_to_name(i)
-
-            if self._type_class:
-                value = [str(self._type_class.int_to_type(v)) for v in value]
-
-        except Exception as e:
-            if self.raise_exceptions:
-                raise
-
-            self.returncode = 1
-            print("ERROR:", e, file=sys.stderr)
-            return
-
-        prefix = [i] if isinstance(i, int) else list(i)
-        if self.label:
-            print(*prefix, ":", *value)
-        else:
-            print(*value)
+                print(result)
 
     def rnd(self) -> None:
         for i in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr._encode_to_name(r))
 
-    def group_args(self) -> Iterator[int | str | list[int | str]]:
-        iargs = (types.try_to_int(a) for a in self.arguments or ())
-        for num, it in itertools.groupby(iargs, is_int):
-            if num:
-                yield from it
-            else:
-                yield from [list(it)]
+
+def stdin_lines() -> Iterator[int | str | list[int | str]]:
+    if not sys.stdin.isatty():
+        for line in sys.stdin:
+            if (line := line.strip()) and not line.startswith("#"):
+                yield line
+
+
+def exit(*error: Any) -> NoReturn:
+    if error:
+        print(*error, file=sys.stderr)
+    sys.exit(bool(error))
