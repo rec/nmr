@@ -7,19 +7,31 @@ from typer import Argument, Option, Typer
 from . import types
 
 HELP = """
-`nmr` is a Python program which uniquely names all canonical things, including
-latlongs, fractions, numbers, IP addresses and hex numbers.
+The command line utility `nmr` can be used in three ways:
 
-You can either pass data in from the command line, like this:
+1. From the command line, with arguments
 
-    nmr "34.5N 15:24E" 1231 -1231 1/5 "Dec 1, 2001"
-    nmr boy spot dog
+    $ nmr
+    frog spot on no
 
-or you can use it as a Linux-style pipe:
+    $nmr frog spot on on
+    12 January 2001
 
-   cat lines.txt | nmr
+2. From the command line, without arguments
 
-where each line gets translated independently
+   $ nmr
+   In:  12 January 2001
+   Out: frog spot on
+   In:  17 / 21
+   Out: he the word
+   In: will new an
+   Out: 34.5N 15:24E"
+
+3. As a unix pipe:
+
+    cat first.txt second.txt | nmr > out.txt
+
+Each line is determined to be either a name, or a type, and then converted.
 """
 
 app = Typer(
@@ -32,15 +44,6 @@ app = Typer(
 def nmr_main(
     arguments: list[str] = Argument(
         None, help="Things to convert to names, or vice-versa"
-    ),
-    raise_exceptions: bool = Option(
-        False,
-        "--raise-exceptions",
-        "-e",
-        help="If True, don't catch exceptions, allow the program to terminate",
-    ),
-    count: Optional[int] = Option(
-        None, "--count", "-c", help="How many words from the word file to use"
     ),
     label: bool = Option(
         False,
@@ -55,13 +58,22 @@ def nmr_main(
         help='Try to convert inputs to one of these output formats:'
         f'{" ".join(types.NAMES)}. Abbreviations are possible',
     ),
+    raise_exceptions: bool = Option(
+        False,
+        "--raise-exceptions",
+        "-e",
+        help="If True, don't catch exceptions, allow the program to terminate",
+    ),
     random_count: int = Option(
-        10, "--random-count", "-r", help="How many random numbers to print"
+        0, "--random-count", "-r", help="Print random names"
+    ),
+    word_count: Optional[int] = Option(
+        None, "--word-count", "-c", help="How many words from the word file to use"
     ),
     word_file: Optional[Path] = Option(
         None,
         "--word-file",
-        "-w",
+        "-f",
         help="A file containing unique words with one word per line",
     ),
 ) -> None:

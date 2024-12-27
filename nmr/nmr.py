@@ -56,13 +56,16 @@ class Nmr:
     def is_name(self, s: Sequence[str]) -> bool:
         return all(i in self.inverse for i in s)
 
-    def name_to_type(self, name: str) -> str:
-        index = self._decode_from_name(name.split())
+    def name_to_type(self, name: Sequence[str]) -> str:
+        index = self._decode_from_name(name)
         return types.index_to_type(index)
 
-    def type_to_name(self, s: str) -> str:
-        index = types.type_to_index(s)
+    def type_to_name(self, type: Sequence[str]) -> str:
+        index = types.type_to_index(" ".join(type))
         return " ".join(self._encode_to_name(index))
+
+    def convert(self, s: Sequence[str]) -> str:
+        return self.name_to_type(s) if self.is_name(s) else self.type_to_name(s)
 
     @property
     def n(self) -> int:

@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import itertools
 import random
+import shlex
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Iterator, NoReturn, Sequence
+from typing import Any, Iterable, NoReturn, Sequence
 
 import dtyper
 
@@ -14,33 +15,56 @@ from .__main__ import nmr_main
 from .nameable_type import NameableType
 from .nmr import Nmr
 
-"""
-"""l
-
+"""See __main__.HELP"""
 
 
 @dtyper.dataclass(nmr_main)
 class Main:
     returncode = 0
 
-    # Copied from nme_main
+    # Copied from nmr_main
     arguments: list[str]
-    raise_exceptions: bool
-    count: int | None
     label: bool
     output_type: str | None
+    raise_exceptions: bool
     random_count: int
+    word_count: int | None
     word_file: Path | None
 
     def __call__(self) -> None:
-        if not self.run_lines():
-            self.rnd()
+        if self.is_pipe and self.arguments:
+            raise ValueError("nmr takes no arguments when used as a pipe")
+        if self.random_count and (self.arguments or is_pipe):
+            raise ValueError("nmr takes no arguments when --random-count is set")
+
+        lines: Iteratable[str]
+        if self.arguments:
+            lines = [shlex.join(self.arguments)]
+        elif self.is_pipe:
+            lines = sys.stdin
+        else:
+            def lines() -> Iterator[str]:
+                while True:
+                    try:
+                        yield input("In:  ")
+                    except EOFError:
+                        return
+
+        for line in lines:
+            if words := line.partition("#")[0].strip():
+                if not (self.is_pipe or self.arguments):
+                    print("Out: ", end="")
+                print(self.nmr.convert(words))
 
     @cached_property
     def nmr(self) -> Nmr:
         from nmr import Nmr
 
-        return Nmr(self.count, self.word_file)
+        return Nmr(self.word_count, self.word_file)
+
+    @cached_property
+    def is_pipe(self) -> bool:
+        return not sys.stdin.isatty()
 
     @cached_property
     def _type_class(self) -> type[NameableType] | None:
@@ -74,12 +98,6 @@ class Main:
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr._encode_to_name(r))
 
-
-def stdin_lines() -> Iterator[int | str | list[int | str]]:
-    if not sys.stdin.isatty():
-        for line in sys.stdin:
-            if (line := line.strip()) and not line.startswith("#"):
-                yield line
 
 
 def exit(*error: Any) -> NoReturn:
