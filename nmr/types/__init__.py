@@ -15,6 +15,18 @@ CLASSES = Hex, Fraction, Integer, IpAddress, LatLong, Semver, Uuid
 NAMES = tuple(c.__name__.lower() for c in CLASSES)
 
 
+def type_to_index(s: str) -> int:
+    for cls in CLASSES:
+        try:
+            t = cls.type(s)
+        except Exception:
+            continue
+
+
+
+def index_to_type(index: int) ->:
+
+
 def try_to_int(s: str) -> int | str:
     ci = class_int(s)
     return s if ci[0] is None else ci[1]

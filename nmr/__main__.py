@@ -64,9 +64,7 @@ def nmr_main(
         "-e",
         help="If True, don't catch exceptions, allow the program to terminate",
     ),
-    random_count: int = Option(
-        0, "--random-count", "-r", help="Print random names"
-    ),
+    random_count: int = Option(0, "--random-count", "-r", help="Print random names"),
     word_count: Optional[int] = Option(
         None, "--word-count", "-c", help="How many words from the word file to use"
     ),
@@ -84,7 +82,7 @@ def nmr_main(
     Main(**d)()
 
 
-def main():
+def main() -> None:
     typer.main.get_command(app)()
 
 

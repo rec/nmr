@@ -34,16 +34,17 @@ class Main:
     def __call__(self) -> None:
         if self.is_pipe and self.arguments:
             raise ValueError("nmr takes no arguments when used as a pipe")
-        if self.random_count and (self.arguments or is_pipe):
+        if self.random_count and (self.arguments or self.is_pipe):
             raise ValueError("nmr takes no arguments when --random-count is set")
 
-        lines: Iteratable[str]
+        lines: Iterable[str]
         if self.arguments:
             lines = [shlex.join(self.arguments)]
         elif self.is_pipe:
             lines = sys.stdin
         else:
-            def lines() -> Iterator[str]:
+
+            def lines() -> Iterable[str]:
                 while True:
                     try:
                         yield input("In:  ")
@@ -52,9 +53,17 @@ class Main:
 
         for line in lines:
             if words := line.partition("#")[0].strip():
-                if not (self.is_pipe or self.arguments):
-                    print("Out: ", end="")
-                print(self.nmr.convert(words))
+                try:
+                    self.nmr.convert(words)
+                except Exception as e:
+                    if self.raise_exceptions:
+                        raise
+                    self.returncode = 1
+                    print("ERROR:", e, file=sys.stderr)
+                else:
+                    if not (self.is_pipe or self.arguments):
+                        print("Out: ", end="")
+                    print(result)
 
     @cached_property
     def nmr(self) -> Nmr:
@@ -72,32 +81,10 @@ class Main:
             return types.get_class(self.output_type)
         return None
 
-    def run_lines(self) -> bool:
-        group_args = (i.strip() for i in " ".join(self.arguments).split(";"))
-        has_items = False
-        for line in itertools.chain(group_args, stdin_lines()):
-            has_items = True
-            try:
-                if self.nmr.is_name(line):
-                    result = self.nmr.name_to_type(line)
-                else:
-                    result = self.nmr.type_to_name(line)
-            except Exception as e:
-                if self.raise_exceptions:
-                    raise
-                self.returncode = 1
-                print("ERROR:", e, file=sys.stderr)
-                continue
-            if self.label:
-                print(f"{line}: {result}")
-            else:
-                print(result)
-
-    def rnd(self) -> None:
+    def rnd(self) -> None:  # TODO re-enable
         for i in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr._encode_to_name(r))
-
 
 
 def exit(*error: Any) -> NoReturn:
