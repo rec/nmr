@@ -1,33 +1,35 @@
-from __future__ import annotations
+from semver import Version
 
+from ..categories import Computer
 from ..nameable_type import NameableType
 
+# TODO: use packed_digits when finished
+BASE = 1024
 
-class Semver(NameableType):
-    BASE = 1024
+
+class Semver(NameableType[Version]):
+    category = Computer.SEMVER
 
     @classmethod
-    def to_int(cls, s: str) -> int | None:
+    def index_to_type(cls, i: int) -> Version:
+        d1, m1 = divmod(i, BASE)
+        d2, m2 = divmod(d1, BASE)
+        d3, m3 = divmod(d2, BASE)
+        if d3:
+            raise ValueError("Number too large for semver")
+
+        return Version(m3, m2, m1)
+
+    @classmethod
+    def str_to_type(cls, s: str) -> Version:
         if s.startswith("v"):
-            s2 = s[1:]
-            try:
-                p = [int(i) for i in s2.split(".")]
-            except Exception:
-                return None
+            return Version.parse(s[1:])
+        raise ValueError("semantic versions must start with v")
 
-            if len(p) == 3 and all(i < cls.BASE for i in p):
-                v = p[2] + cls.BASE * (p[1] + cls.BASE * p[0])
-                return v * cls.BASE
-        return None
+    @staticmethod
+    def type_to_index(v: Version) -> int:
+        return v.patch + BASE * (v.minor + BASE * v.major)
 
-    @classmethod
-    def int_to_type(cls, i: int) -> str | None:
-        if i >= 0:
-            d0, m0 = divmod(i, cls.BASE)
-            if not m0:
-                d1, m1 = divmod(d0, cls.BASE)
-                d2, m2 = divmod(d1, cls.BASE)
-                d3, m3 = divmod(d2, cls.BASE)
-                if not d3:
-                    return f"v{m3}.{m2}.{m1}"
-        return None
+    @staticmethod
+    def type_to_str(v: Version) -> str:
+        return f"v{v}"
