@@ -1,24 +1,23 @@
 from __future__ import annotations
 
-import uuid
 from typing import Any
+from uuid import UUID
 
+from ..categories import Computer
 from ..nameable_type import NameableType
 
 
-class Uuid(NameableType):
-    type: type = uuid.UUID
+class Uuid(NameableType[UUID]):
+    category = Computer.UUID
 
     @staticmethod
-    def to_int(s: str) -> int | None:
-        if len(s) == 36 and s.count("-") == 4:
-            try:
-                u = uuid.UUID(s)
-            except Exception:
-                return None
-            return u.int
-        return None
+    def str_to_type(s: str) -> UUID:
+        return UUID(s)
 
     @staticmethod
-    def int_to_type(i: int) -> Any:
-        return uuid.UUID(int=i)
+    def index_to_type(i: int) -> Any:
+        return UUID(int=i)
+
+    @staticmethod
+    def type_to_index(u: UUID) -> int:
+        return u.int

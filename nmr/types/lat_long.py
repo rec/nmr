@@ -1,54 +1,50 @@
 from __future__ import annotations
 
+from lat_lon_parser import parse, to_str_deg_min_sec  # type: ignore[import-untyped]
+
+from ..categories import Location
 from ..nameable_type import NameableType
 
 
-class LatLong(NameableType):
+class _LatLong:
     DIVISIONS = 100000000  # Each degree is divided by ten million
-    MULT = 100000 * DIVISIONS  # Means a gap of two zeros between numbers
+    MULT = 360 * DIVISIONS
 
-    @classmethod
-    def to_int(cls, s: str) -> int | None:
-        from lat_lon_parser import parse  # type: ignore[import-untyped]
-
-        lat: int
-        lon: int
-
-        try:
+    def __init__(self, s: int | str) -> None:
+        if isinstance(s, int):
+            self.lat, self.lon = divmod(s, self.MULT)
+        else:
             lat, lon = (parse(i) for i in s.split(","))
-        except Exception:
-            return None
+            if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                raise ValueError("Bad LatLong")
+            lat = 90 if lat == -90 else lat
+            lon = 180 if lon == -180 else lon
 
-        if -90 <= lat <= 90 and -180 <= lon <= 180:
-            lat = round(cls.DIVISIONS * (lat + 90))
-            lon = round(cls.DIVISIONS * (lon + 180))
-            return lon + cls.MULT * lat
-        return None
+            self.lat = round(self.DIVISIONS * (lat + 90))
+            self.lon = round(self.DIVISIONS * (lon + 180))
 
-    @classmethod
-    def int_to_type(cls, i: int) -> str | None:
-        from lat_lon_parser import to_str_deg_min_sec
+    def __int__(self) -> int:
+        return self.MULT * self.lat + self.lon
 
-        lat, lon = divmod(i, cls.MULT)
-        la = lat / cls.DIVISIONS - 90
-        lo = lon / cls.DIVISIONS - 180
+    def __str__(self) -> str:
+        lat = to_str_deg_min_sec(self.lat / self.DIVISIONS - 90)
+        lon = to_str_deg_min_sec(self.lon / self.DIVISIONS - 180)
 
-        if -90 <= la <= 90 and -180 <= lo <= 180:
-            las = to_str_deg_min_sec(la)
-            los = to_str_deg_min_sec(lo)
+        if lat.startswith("-"):
+            lat, ns = lat[1:], "S"
+        else:
+            ns = "N"
 
-            if las.startswith("-"):
-                las, ns = las[1:], "S"
-            else:
-                ns = "N"
+        if lon.startswith("-"):
+            lat, ew = lat[1:], "W"
+        else:
+            ew = "E"
 
-            if los.startswith("-"):
-                las, ew = las[1:], "W"
-            else:
-                ew = "E"
+        lat += (" " if " " in lat else "") + ns
+        lon += (" " if " " in lon else "") + ew
 
-            las += " " * (" " in las) + ns
-            los += " " * (" " in los) + ew
+        return f"{lat}, {lon}"
 
-            return f"{las}, {los}"
-        return None
+
+class LatLong(NameableType[_LatLong]):
+    category = Location.LAT_LONG

@@ -9,6 +9,8 @@ MICROSECOND_TO_YOCTOSECOND: int = 10 ** (24 - 6)
 
 
 class Interval(IntEnum):
+    INSTANT = auto()
+
     SECOND = auto()
     MINUTE = auto()
     HOUR = auto()
@@ -21,6 +23,7 @@ class Interval(IntEnum):
     MILLENIUM = auto()
     EPOCH = auto()
     EON = auto()
+
     YOTTA = auto()
     ZETTA = auto()
     EXA = auto()
@@ -31,6 +34,7 @@ class Interval(IntEnum):
     KILO = auto()
     HECTO = auto()
     DECA = auto()
+
     DECI = auto()
     CENTI = auto()
     MILLI = auto()
@@ -69,6 +73,7 @@ YEARS = {
 }
 
 SECONDS = {
+    Interval.INSTANT: 0,
     Interval.SECOND: 1,
     Interval.MINUTE: 60,
     Interval.HOUR: 60 * 60,
@@ -98,11 +103,10 @@ class Time:
     years: int = 0
 
     YEAR_ZERO = datetime.fromtimestamp(0).year
-    INTERVAL_SCALE = 100
-
-    assert INTERVAL_SCALE > len(Interval)
+    INTERVAL_SCALE = len(Interval)
 
     def whole_seconds(self) -> int:
+        # TODO: this is only approximate.
         return int(self.time.timestamp()) + (self.years * 3562422) // 10000
 
     def whole_years(self) -> int:

@@ -2,15 +2,13 @@ from __future__ import annotations
 
 import ipaddress
 
+from ..categories import Computer
 from ..nameable_type import NameableType
 
 
-class IpAddress(NameableType):
-    type = staticmethod(ipaddress.ip_address)  # type: ignore[assignment]
+class IPv4Address(NameableType[ipaddress.IPv4Address]):
+    category = Computer.IP_V4_ADDRESS
 
-    @staticmethod
-    def to_int(s: str) -> int | None:
-        try:
-            return int(ipaddress.ip_address(s))
-        except Exception:
-            return None
+
+class IPv6Address(NameableType[ipaddress.IPv6Address]):
+    category = Computer.IP_V6_ADDRESS

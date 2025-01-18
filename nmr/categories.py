@@ -3,56 +3,60 @@ from __future__ import annotations
 import dataclasses as dc
 from enum import IntEnum, auto
 from functools import lru_cache
+from typing import Type, cast
+
+from typing_extensions import Self
+
+DEFAULT_RADIX = 8
 
 
 class Category:
-    @classmethod
-    @lru_cache
-    def length(cls) -> int:
-        items = list(cls)  # type: ignore
-        if items[-1].name == "_RADIX":
-            items.pop()
-        return len(items)
+    name: str
+    value: int
 
     @classmethod
-    def divmod(cls, n: int, strict: bool = False) -> tuple[int, Category]:
-        d, m = divmod(n, cls._RADIX)  # type: ignore[attr-defined]
-        if m >= cls.length():
+    def divmod(cls, n: int, strict: bool = False) -> tuple[Category, int]:
+        d, m = divmod(n, cls.radix())
+        lc = len(cls)  # type: ignore[arg-type]
+        if m >= lc:
             if strict:
-                raise IndexError(f"Out of range {m=}, {cls.length()=}")
-            m = m % cls.length()
+                raise IndexError(f"Out of range {m=}, len(cls)={lc}")
+            m = m % lc
 
         self = cls(m + 1)  # type: ignore[call-arg]
-        return d, self
+        return self, d
+
+    @classmethod
+    def radix(cls) -> int:
+        return _RADIX_TABLE.get(cls, DEFAULT_RADIX)  # type: ignore[arg-type]
+
+    _SUBCLASSES: dict[str, Type[Category]] = {}
+
+    def __init_subclass__(cls) -> None:
+        assert cls.__name__ not in cls._SUBCLASSES
+        cls._SUBCLASSES[cls.__name__] = cls
 
 
 class Group(Category, IntEnum):
     MATH = auto()
     SCIENCE = auto()
-    MUSIC = auto()
-    PLACE = auto()
+    ART = auto()
+    LOCATION = auto()
 
-    TIME = auto()
-    NETWORK = auto()
+    COMPUTER = auto()
     GAME = auto()
     COMMERCIAL = auto()
-
-    _RADIX = 16
+    COMBINE = auto()
 
 
 class Subcategory(Category):
-    value: int
-
-    def type_to_number(self, n: int) -> int:
+    def number_to_index(self, n: int) -> int:
         g = Group[self.__class__.__name__.upper()]
-        return g.value - 1 + Group._RADIX * (self.value - 1 + self._RADIX * n)
-
-    _RADIX = 8
+        return g.value - 1 + Group.radix() * (self.value - 1 + self.radix() * n)
 
 
 class Math(Subcategory, IntEnum):
     INTEGER = auto()
-    HEX = auto()
     FRACTION = auto()
     FLOATING = auto()
 
@@ -60,24 +64,22 @@ class Math(Subcategory, IntEnum):
 class Science(Subcategory, IntEnum):
     ELEMENT = auto()
     UNIT = auto()
+    SMILES = auto()
 
 
-class Music(Subcategory, IntEnum):
-    RHYTHM = auto()
-    MELODY = auto()
+class Art(Subcategory, IntEnum):
+    MUSIC = auto()
 
 
-class Place(Subcategory, IntEnum):
+class Location(Subcategory, IntEnum):
     LAT_LONG = auto()
-
-
-class Time(Subcategory, IntEnum):
     TIME = auto()
 
 
-class Network(Subcategory, IntEnum):
-    IP_ADDRESS = auto()
-    SEM_VER = auto()
+class Computer(Subcategory, IntEnum):
+    IP_V4_ADDRESS = auto()
+    IP_V6_ADDRESS = auto()
+    SEMVER = auto()
     UUID = auto()
 
 
@@ -93,9 +95,14 @@ class Commercial(Subcategory, IntEnum):
     UPC = auto()
 
 
-def number_to_remainder_and_type(n: int, strict: bool = False) -> tuple[int, Category]:
-    d, group = Group.divmod(n, strict)
-    name = group.name  # type: ignore[attr-defined]
-    subtype = globals()[name.capitalize()]
-    result: tuple[int, Category] = subtype.divmod(d, strict)
-    return result
+class Combine(Subcategory, IntEnum):
+    COMBINE = auto()
+
+
+_RADIX_TABLE = {Location: 4, Computer: 32, Commercial: 32, Combine: 1}
+
+
+def make_category(n: int, strict: bool = False) -> tuple[Category, int]:
+    group, d = Group.divmod(n, strict)
+    subclass = Category._SUBCLASSES[group.name.capitalize()]
+    return subclass.divmod(d, strict)

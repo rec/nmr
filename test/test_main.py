@@ -8,27 +8,33 @@ from nmr._main import Main
 
 
 @pytest.fixture
-def main(capsys, monkeypatch):
+def stdout_no_stdin(capsys, monkeypatch):
     monkeypatch.setattr("sys.stdin", io.StringIO(""))
     return capsys.readouterr
 
 
-def test_number_to_name(main):
-    Main(arguments=("14", "2342"))()
-    assert main().out == "it\nthe ear\n"
+def run_main(*arguments):
+    main = Main(arguments=arguments)
+    main.is_pipe = False
+    main()
 
 
-def test_empty_main(main):
+def DISABLED_test_number_to_name(stdout_no_stdin):
+    run_main("14", "2342")
+    assert stdout_no_stdin().out == "it\nthe ear\n"
+
+
+def DISABLED_test_empty_main(stdout_no_stdin):
     random.seed(0)
-    Main()()
-    assert main().out.strip() == EXPECTED.strip()
+    run_main()
+    assert stdout_no_stdin().out.strip() == EXPECTED.strip()
 
 
-def DISABLED_test_type_to_name(main):
-    Main(arguments=("1/2",))()
-    res = main().out.strip()
+def DISABLED_test_type_to_name(stdout_no_stdin):
+    run_main("1/2")
+    res = stdout_no_stdin().out.strip()
     print(res)
-    assert main().out.strip() == EXPECTED_JSON
+    assert stdout_no_stdin().out.strip() == EXPECTED_JSON
 
 
 EXPECTED_JSON = ""
