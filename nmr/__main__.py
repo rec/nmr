@@ -61,7 +61,7 @@ def nmr_main(
     Main(**d)()
 
 
-def main():
+def main() -> None:
     typer.main.get_command(app)()
 
 

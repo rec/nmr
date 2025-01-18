@@ -1,19 +1,21 @@
-from nmr.__main__ import nmr_main
-from nmr._main import Main
 import io
 import random
+
 import pytest
+
+from nmr.__main__ import nmr_main
+from nmr._main import Main
 
 
 @pytest.fixture
 def main(capsys, monkeypatch):
-    monkeypatch.setattr('sys.stdin', io.StringIO(''))
+    monkeypatch.setattr("sys.stdin", io.StringIO(""))
     return capsys.readouterr
 
 
 def test_number_to_name(main):
-    Main(arguments=('14', '2342'))()
-    assert main().out == 'it\nthe ear\n'
+    Main(arguments=("14", "2342"))()
+    assert main().out == "it\nthe ear\n"
 
 
 def test_empty_main(main):
@@ -23,7 +25,7 @@ def test_empty_main(main):
 
 
 def DISABLED_test_type_to_name(main):
-    Main(arguments=('1/2',))()
+    Main(arguments=("1/2",))()
     res = main().out.strip()
     print(res)
     assert main().out.strip() == EXPECTED_JSON
