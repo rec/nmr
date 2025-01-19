@@ -75,22 +75,54 @@ if __name__ == "__main__":
     for i in range(64):
         print(i, *(p.unpack(i) for p in packers))
 
+
 """
 The results aren't very aesthetic, because the recursive definition above means some
 digits increase much faster than others.
 
 WANT something like:
 [0, 0, 0]
-[1, 0, 0]
-[0, 1, 0]
+
 [0, 0, 1]
-[2, 0, 0]
-[0, 2, 0]
+[0, 1, 0]
+[1, 0, 0]
+
 [0, 0, 2]
-[1, 1, 0]
-[1, 0, 1]
 [0, 1, 1]
+[0, 2, 0]
+[1, 0, 1]
+[1, 1, 0]
+[2, 0, 0]
+
+[0, 0, 3]
+[0, 1, 2]
+[0, 2, 1]
+[0, 3, 0]
+[1, 0, 2]
+[1, 1, 1]
+[1, 2, 0]
+[2, 0, 1]
+[2, 1, 0]
 [3, 0, 0]
+
+[0, 0, 4]
+[0, 1, 3]
+[0, 2, 2]
+[0, 3, 1]
+[0, 4, 0]
+[1, 0, 3]
+[1, 1, 2]
+[1, 2, 1]
+[1, 3, 0]
+[2, 0, 2]
+[2, 1  1]
+[2, 2, 0]
+[3, 0, 1]
+[3, 1, 0]
+[4, 0, 0]
+
+[0, 0, 0]
+
 ...
 
 ACTUAL:

@@ -2,9 +2,9 @@ from semver import Version
 
 from ..categories import Computer
 from ..nameable_type import NameableType
+from ..pack_numbers import Packer
 
-# TODO: use packed_digits when finished
-BASE = 1024
+packer = Packer(3)
 
 
 class Semver(NameableType[Version]):
@@ -12,13 +12,7 @@ class Semver(NameableType[Version]):
 
     @classmethod
     def index_to_type(cls, i: int) -> Version:
-        d1, m1 = divmod(i, BASE)
-        d2, m2 = divmod(d1, BASE)
-        d3, m3 = divmod(d2, BASE)
-        if d3:
-            raise ValueError("Number too large for semver")
-
-        return Version(m3, m2, m1)
+        return Version(*packer.unpack(i))
 
     @classmethod
     def str_to_type(cls, s: str) -> Version:
@@ -28,7 +22,7 @@ class Semver(NameableType[Version]):
 
     @staticmethod
     def type_to_index(v: Version) -> int:
-        return v.patch + BASE * (v.minor + BASE * v.major)
+        return packer.pack(v.major, v.minor, v.patch)
 
     @staticmethod
     def type_to_str(v: Version) -> str:
