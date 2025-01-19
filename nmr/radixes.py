@@ -3,10 +3,10 @@ class Radixes:
         self.radixes = radixes
 
     def encode(self, *digits: int) -> int:
-        total, *digits = digits
-        assert len(digits) == len(self.radixes)
+        total, *digit = digits
+        assert len(digit) == len(self.radixes)
 
-        for d, r in zip(digits, self.radixes):
+        for d, r in zip(digit, self.radixes):
             total = r * total + d
         return total
 

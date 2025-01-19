@@ -123,6 +123,14 @@ WANT something like:
 
 [0, 0, 0]
 
+
+C(i, n)
+C(0, 0) = 1
+
+C(i, n) = sum(C(j, n-1) for j in [1, i - 1]?
+
+[5] + i for i in
+
 ...
 
 ACTUAL:
@@ -192,4 +200,8 @@ forward: False  True
 61 [1, 1, 6] [4, 3, 0]
 62 [2, 0, 7] [3, 2, 1]
 63 [0, 1, 8] [2, 1, 2]
+
+
+
+
 """

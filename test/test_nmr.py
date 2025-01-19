@@ -53,7 +53,5 @@ _STABILITY_TABLE = (
 @pytest.mark.parametrize("number, words", _STABILITY_TABLE)
 def test_stability(number, words):
     actual_words = nmr._encode_to_name(number)
-    if actual_words != words:
-        print(actual_words)
     assert actual_words == words
     assert nmr._decode_from_name(words) == number
