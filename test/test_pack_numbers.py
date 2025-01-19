@@ -20,5 +20,5 @@ PARAMS = itertools.product(ROUND_TRIPS, [False, True])
 @pytest.mark.parametrize("numbers, forward", PARAMS)
 def test_round_trip(numbers, forward):
     p = Packer(len(numbers), forward)
-    result = p.unpack(p.pack(numbers))
+    result = p.unpack(p.pack(*numbers))
     assert result == numbers
