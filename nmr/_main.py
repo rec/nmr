@@ -10,9 +10,8 @@ from typing import Any, Iterable, NoReturn, Sequence
 
 import dtyper
 
-from . import types
 from .__main__ import nmr_main
-from .nameable_type import NameableType
+from .nameable_type import NameableType, get_class
 from .nmr import Nmr
 
 """See __main__.HELP"""
@@ -80,7 +79,7 @@ class Main:
     @cached_property
     def _type_class(self) -> type[NameableType[Any]] | None:
         if self.output_type:
-            return types.get_class(self.output_type)
+            return get_class(self.output_type)
         return None
 
     def rnd(self) -> None:  # TODO re-enable

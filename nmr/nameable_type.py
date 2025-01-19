@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import Any, Generic, Type, TypeVar, cast, get_args
 
-from .categories import Category
+from .categories import Subcategory
 
 DataType = TypeVar("DataType")
 
 
 class NameableType(Generic[DataType]):
-    category: Category
+    category: Subcategory
 
     @classmethod
     def index_to_type(cls, i: int) -> DataType:

@@ -23,11 +23,27 @@ def test_roundtrips(s):
 
 
 def test_fractions():
-    to_type = types.Fraction.int_to_type
-    actual = [str(to_type(i)) for i in range(16)]
-    expected = ['0', '0', '2', '-2', '1/2', '-1/2', '3', '-3', '1', '-1', '1/3', '-1/3', '4', '-4', '3/2', '-3/2']
+    to_type = [types.Fraction.index_to_type(i) for i in range(16)]
+    actual = [str(i) for i in to_type]
+    expected = [
+        "0",
+        "0",  # There should be no duplicates
+        "2",  # 1 should appear before 1
+        "-2",
+        "1/2",
+        "-1/2",
+        "3",
+        "-3",
+        "1",
+        "-1",
+        "1/3",
+        "-1/3",
+        "4",
+        "-4",
+        "3/2",
+        "-3/2",
+    ]
     assert actual == expected
-
-    actual = [str(to_type(i)) for i in range(16)]
-    expected = ['0', '0', '2', '-2', '1/2', '-1/2', '3', '-3', '1', '-1', '1/3', '-1/3', '4', '-4', '3/2', '-3/2']
-    assert actual == expected
+    original = [types.Fraction.type_to_index(t) for t in to_type]
+    wrong = [0, 0, 2, 3, 4, 5, 6, 7, 0, 1, 10, 11, 12, 13, 14, 15]
+    assert original == wrong  # FIX ME!

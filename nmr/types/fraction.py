@@ -21,7 +21,7 @@ class Fraction(NameableType[fractions.Fraction]):
     """
 
     @staticmethod
-    def type_to_int(t: fractions.Fraction) -> int:
+    def type_to_index(t: fractions.Fraction) -> int:
         num, denom = t.as_integer_ratio()
         if num >= 0:
             sign = 0
@@ -36,7 +36,7 @@ class Fraction(NameableType[fractions.Fraction]):
         return 2 * index_plus_denom + sign
 
     @staticmethod
-    def int_to_type(i: int) -> fractions.Fraction:
+    def index_to_type(i: int) -> fractions.Fraction:
         index_plus_denom, sign = divmod(i, 2)
 
         # https://math.stackexchange.com/a/1417583/127733

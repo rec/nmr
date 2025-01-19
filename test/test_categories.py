@@ -11,8 +11,7 @@ ROUND_TRIP_CASES = [
     (6, 0, categories.Commercial.ISBN),
 ]
 
-NON_ROUND_TRIP_CASES = [
-]
+NON_ROUND_TRIP_CASES = []
 
 ALL_CASES = (
     list(range(16))

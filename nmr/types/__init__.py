@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, cast
 
-from ..nameable_type import NameableType
 from ..categories import Category, make_category
+from ..nameable_type import NameableType
 from .fraction import Fraction
 from .integer import Integer
 from .ip_address import IPv4Address, IPv6Address
@@ -15,11 +15,13 @@ from .uuid import Uuid
 def str_to_index(s: str) -> int:
     for cls in NameableType.SUBCLASSES.values():
         try:
-            t = cls.str_to_type(s)  # type: ignore[attr-defined]
+            t = cls.str_to_type(s)
         except Exception:
             continue
-        n: int = cls.type_to_index(t)  # type: ignore[attr-defined]
-        return cls.category.number_to_index(n)
+        n = cls.type_to_index(t)
+        r = cls.category.number_to_index(n)
+        assert isinstance(r, int)
+        return r
 
     raise ValueError(f"Cannot understand string '{s}'")
 
