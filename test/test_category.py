@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import pytest
 
-from nmr import categories
+from nmr import category
 
 ROUND_TRIP_CASES = [
-    (0, 0, categories.Math.INTEGER),
-    (1, 0, categories.Science.ELEMENT),
-    (2, 0, categories.Art.MUSIC),
-    (6, 0, categories.Commercial.ISBN),
+    (0, 0, category.Math.INTEGER),
+    (1, 0, category.Science.ELEMENT),
+    (2, 0, category.Art.MUSIC),
+    (6, 0, category.Commercial.ISBN),
 ]
 
 NON_ROUND_TRIP_CASES = []
@@ -21,25 +21,25 @@ ALL_CASES = (
 
 
 def test_simple():
-    assert categories.make_category(8) == (categories.Math.FRACTION, 0)
+    assert category.make_category(8) == (category.Math.FRACTION, 0)
 
 
 @pytest.mark.parametrize("n,d,t", ROUND_TRIP_CASES)
-def test_categories(n, d, t):
+def test_category(n, d, t):
     assert t.number_to_index(d) == n
-    assert categories.make_category(n) == (t, d)
+    assert category.make_category(n) == (t, d)
 
 
 @pytest.mark.parametrize("n,d,t", NON_ROUND_TRIP_CASES)
-def test_categories_non(n, d, t):
+def test_category_non(n, d, t):
     assert (n2 := t.number_to_index(d)) != n
     assert t.number_to_index(n2) == n2
-    assert categories.make_category(n) == (t, d)
+    assert category.make_category(n) == (t, d)
 
 
 @pytest.mark.parametrize("n", ALL_CASES)
-def test_categories_all(n):
-    t, r = categories.make_category(n)
+def test_category_all(n):
+    t, r = category.make_category(n)
     n2 = t.number_to_index(r)
 
-    assert categories.make_category(n2) == (t, r)
+    assert category.make_category(n2) == (t, r)

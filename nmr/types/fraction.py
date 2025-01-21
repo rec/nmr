@@ -4,7 +4,7 @@ import fractions
 import math
 from typing import Any
 
-from ..categories import Math
+from ..category import Math
 from ..pack_numbers import Packer
 from ..type_namer import TypeNamer
 

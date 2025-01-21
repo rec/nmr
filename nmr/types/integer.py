@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..categories import Math
+from ..category import Math
 from ..type_namer import TypeNamer
 
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from lat_lon_parser import parse, to_str_deg_min_sec  # type: ignore[import-untyped]
 
-from ..categories import Location
+from ..category import Location
 from ..type_namer import TypeNamer
 
 

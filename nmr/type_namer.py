@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Generic, TypeVar, cast, get_args
 
-from .categories import Subcategory
+from .category import Subcategory
 
 DataType = TypeVar("DataType")
 

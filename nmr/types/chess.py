@@ -1,6 +1,6 @@
 import chess
 
-from ..categories import Game
+from ..category import Game
 from ..radixes import Radixes
 from ..type_namer import TypeNamer
 

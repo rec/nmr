@@ -1,6 +1,6 @@
 from semver import Version
 
-from ..categories import Computer
+from ..category import Computer
 from ..pack_numbers import Packer
 from ..type_namer import TypeNamer
 

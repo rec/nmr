@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, cast
 
-from ..categories import Category, make_category
+from ..category import Category, make_category
 from ..type_namer import TypeNamer
 from .fraction import Fraction
 from .integer import Integer

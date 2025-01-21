@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ipaddress
 
-from ..categories import Computer
+from ..category import Computer
 from ..type_namer import TypeNamer
 
 
