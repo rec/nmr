@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, cast
 
 from ..categories import Category, make_category
-from ..nameable_type import NameableType
+from ..type_namer import TypeNamer
 from .fraction import Fraction
 from .integer import Integer
 from .ip_address import IPv4Address, IPv6Address
@@ -13,7 +13,7 @@ from .uuid import Uuid
 
 
 def str_to_index(s: str) -> int:
-    for cls in NameableType.SUBCLASSES.values():
+    for cls in TypeNamer.SUBCLASSES.values():
         try:
             t = cls.str_to_type(s)
         except Exception:
@@ -28,10 +28,10 @@ def str_to_index(s: str) -> int:
 
 def index_to_str(index: int) -> str:
     category, n = make_category(index)
-    cls = NameableType.SUBCLASSES[category.name.lower()]
+    cls = TypeNamer.SUBCLASSES[category.name.lower()]
     t = cls.index_to_type(n)
     return cls.type_to_str(t)
 
 
 def names() -> list[str]:
-    return list(NameableType.SUBCLASSES)
+    return list(TypeNamer.SUBCLASSES)

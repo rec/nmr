@@ -5,13 +5,13 @@ import math
 from typing import Any
 
 from ..categories import Math
-from ..nameable_type import NameableType
 from ..pack_numbers import Packer
+from ..type_namer import TypeNamer
 
 packer = Packer(2)
 
 
-class Fraction(NameableType[fractions.Fraction]):
+class Fraction(TypeNamer[fractions.Fraction]):
     category = Math.FRACTION
 
     @staticmethod

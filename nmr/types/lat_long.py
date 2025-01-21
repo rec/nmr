@@ -3,7 +3,7 @@ from __future__ import annotations
 from lat_lon_parser import parse, to_str_deg_min_sec  # type: ignore[import-untyped]
 
 from ..categories import Location
-from ..nameable_type import NameableType
+from ..type_namer import TypeNamer
 
 
 class _LatLong:
@@ -46,5 +46,5 @@ class _LatLong:
         return f"{lat}, {lon}"
 
 
-class LatLong(NameableType[_LatLong]):
+class LatLong(TypeNamer[_LatLong]):
     category = Location.LAT_LONG

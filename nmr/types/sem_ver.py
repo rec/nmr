@@ -1,13 +1,13 @@
 from semver import Version
 
 from ..categories import Computer
-from ..nameable_type import NameableType
 from ..pack_numbers import Packer
+from ..type_namer import TypeNamer
 
 packer = Packer(3)
 
 
-class Semver(NameableType[Version]):
+class Semver(TypeNamer[Version]):
     category = Computer.SEMVER
 
     @staticmethod

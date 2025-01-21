@@ -11,8 +11,8 @@ from typing import Any, Iterable, NoReturn, Sequence
 import dtyper
 
 from .__main__ import nmr_main
-from .nameable_type import NameableType, get_class
 from .nmr import Nmr
+from .type_namer import TypeNamer, get_class
 
 """See __main__.HELP"""
 
@@ -77,7 +77,7 @@ class Main:
         return not sys.stdin.isatty()
 
     @cached_property
-    def _type_class(self) -> type[NameableType[Any]] | None:
+    def _type_class(self) -> type[TypeNamer[Any]] | None:
         if self.output_type:
             return get_class(self.output_type)
         return None

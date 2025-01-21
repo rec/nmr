@@ -3,12 +3,12 @@ from __future__ import annotations
 import ipaddress
 
 from ..categories import Computer
-from ..nameable_type import NameableType
+from ..type_namer import TypeNamer
 
 
-class IPv4Address(NameableType[ipaddress.IPv4Address]):
+class IPv4Address(TypeNamer[ipaddress.IPv4Address]):
     category = Computer.IP_V4_ADDRESS
 
 
-class IPv6Address(NameableType[ipaddress.IPv6Address]):
+class IPv6Address(TypeNamer[ipaddress.IPv6Address]):
     category = Computer.IP_V6_ADDRESS

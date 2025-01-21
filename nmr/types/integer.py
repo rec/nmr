@@ -3,10 +3,10 @@ from __future__ import annotations
 from typing import Any
 
 from ..categories import Math
-from ..nameable_type import NameableType
+from ..type_namer import TypeNamer
 
 
-class Integer(NameableType[int]):
+class Integer(TypeNamer[int]):
     category = Math.INTEGER
 
     @staticmethod

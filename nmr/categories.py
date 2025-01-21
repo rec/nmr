@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses as dc
 from enum import IntEnum, auto
 from functools import lru_cache
-from typing import Type, cast
+from typing import cast
 
 from typing_extensions import Self
 
@@ -30,7 +30,7 @@ class Category:
     def radix(cls) -> int:
         return _RADIX_TABLE.get(cls, DEFAULT_RADIX)  # type: ignore[arg-type]
 
-    _SUBCLASSES: dict[str, Type[Category]] = {}
+    _SUBCLASSES: dict[str, type[Category]] = {}
 
     def __init_subclass__(cls) -> None:
         assert cls.__name__ not in cls._SUBCLASSES

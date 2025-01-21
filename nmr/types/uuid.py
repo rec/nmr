@@ -4,10 +4,10 @@ from typing import Any
 from uuid import UUID
 
 from ..categories import Computer
-from ..nameable_type import NameableType
+from ..type_namer import TypeNamer
 
 
-class Uuid(NameableType[UUID]):
+class Uuid(TypeNamer[UUID]):
     category = Computer.UUID
 
     @staticmethod

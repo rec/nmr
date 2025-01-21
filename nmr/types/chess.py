@@ -1,11 +1,11 @@
 import chess
 
 from ..categories import Game
-from ..nameable_type import NameableType
 from ..radixes import Radixes
+from ..type_namer import TypeNamer
 
 
-class Chess(NameableType[chess.Board]):
+class Chess(TypeNamer[chess.Board]):
     category = Game.CHESS
 
     @staticmethod
