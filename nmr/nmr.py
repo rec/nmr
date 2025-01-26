@@ -87,7 +87,7 @@ class Nmr:
         name = list(name)
         _check_dupes(name)
         indexes = [self.inverse[w] for w in reversed(name)]
-        return self._from_digits(list(self._redupe(indexes))[::-1])
+        return self._from_digits(list(_redupe(indexes))[::-1])
 
     def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.count) if self._count_words(i + 1) > num)
@@ -102,7 +102,7 @@ class Nmr:
             digits.append(index)
         assert not total
 
-        return list(self._undupe(digits))[::-1]
+        return list(_undupe(digits))[::-1]
 
     def _from_digits(self, digits: list[int]) -> int:
         total = 0
@@ -112,24 +112,24 @@ class Nmr:
 
         return self._count_words(len(digits) - 1) + total
 
-    @staticmethod
-    def _undupe(indexes: Sequence[int]) -> Iterator[int]:
-        sorted_result: list[int] = []
-
-        for i in indexes:
-            for s in sorted_result:
-                i += s <= i
-            bisect.insort(sorted_result, i)
-            yield i
-
-    @staticmethod
-    def _redupe(indexes: Sequence[int]) -> Iterator[int]:
-        for i, num in enumerate(indexes):
-            yield num - sum(k < num for k in indexes[:i])
-
 
 def _check_dupes(words: Sequence[str]) -> None:
     if bad := [k for k, v in Counter(words).items() if v > 1]:
         s = "" if len(bad) == 1 else "s"
         msg = ", ".join(sorted(bad))
         raise ValueError(f"Duplicate word{s}: {msg}")
+
+
+def _undupe(indexes: Sequence[int]) -> Iterator[int]:
+    sorted_result: list[int] = []
+
+    for i in indexes:
+        for s in sorted_result:
+            i += s <= i
+        bisect.insort(sorted_result, i)
+        yield i
+
+
+def _redupe(indexes: Sequence[int]) -> Iterator[int]:
+    for i, num in enumerate(indexes):
+        yield num - sum(k < num for k in indexes[:i])
