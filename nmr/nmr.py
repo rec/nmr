@@ -19,11 +19,11 @@ class Nmr:
 
     def __init__(
         self,
-        count: int | None = None,
         words: Sequence[str] | Path | None = None,
+        count: int | None = None,
         ignore_case: bool = True,
     ) -> None:
-        self.words = Words(count, words, ignore_case)
+        self.words = Words(words, count, ignore_case)
 
     def name_to_str(self, name: Sequence[str]) -> str:
         index = self.words.decode_from_name(name)

@@ -5,7 +5,7 @@ from collections import Counter
 from collections.abc import Iterator, Sequence
 from os import PathLike
 from pathlib import Path
-from typing import Any
+from typing import Any, Iterable, cast
 
 from . import count_words
 
@@ -24,10 +24,12 @@ class Words:
 
     def __init__(
         self,
-        count: int | None = None,
         words: Sequence[str] | Path | None = None,
+        count: int | None = None,
         ignore_case: bool = True,
     ) -> None:
+        self.ignore_case = ignore_case
+
         if words is None:
             words = FILE
             if count is None:
@@ -37,10 +39,9 @@ class Words:
             with words.open() as fp:
                 words = tuple(fp)
 
-        it = (s for w in words if (s := w.strip()) and not s.startswith("#"))
-        if ignore_case:
-            it = (s.lower() for s in it)
-        words = tuple(it)
+        it = (w.strip() for w in words)
+        it = (w for w in it if w and not w.startswith("#"))
+        words = tuple(self._maybe_lower(it))
         _check_dupes(words)
 
         if count is None:
@@ -52,7 +53,6 @@ class Words:
 
         self.words = words
         self.count = count
-        self.ignore_case = ignore_case
         self._count_words = count_words.CountWords(self.count)
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
@@ -60,10 +60,13 @@ class Words:
         return self._count_words.count(n)
 
     def decode_from_name(self, name: Sequence[str]) -> int:
-        name = list(name)
-        _check_dupes(name)
-        indexes = [self.inverse[w] for w in reversed(name)]
-        return self._from_digits(list(_redupe(indexes))[::-1])
+        name = list(self._maybe_lower(name))
+        name = name[::-1]
+        inverses = [self.inverse.get(w) for w in name]
+        if bad := ", ".join(n for n, i in zip(name, inverses) if i is None):
+            s = "s" if "," in bad else ""
+            raise ValueError(f"Didn't recognize the following word{s}: {bad}")
+        return self._from_digits(list(_redupe(cast(list[int], inverses)))[::-1])
 
     def encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
@@ -71,7 +74,7 @@ class Words:
         return [self.words[i] for i in self._to_digits(num)]
 
     def is_name(self, s: Sequence[str]) -> bool:
-        return all(i in self.inverse for i in s)
+        return all(i in self.inverse for i in self._maybe_lower(s))
 
     def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.count) if self.count_words(i + 1) > num)
@@ -95,6 +98,9 @@ class Words:
             total += d
 
         return self.count_words(len(digits) - 1) + total
+
+    def _maybe_lower(self, it: Iterable[str]) -> Iterable[str]:
+        yield from (i.lower() for i in it) if self.ignore_case else it
 
 
 def _check_dupes(words: Sequence[str]) -> None:

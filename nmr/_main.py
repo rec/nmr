@@ -70,7 +70,7 @@ class Main:
     def nmr(self) -> Nmr:
         from nmr import Nmr
 
-        return Nmr(self.word_count, self.word_file)
+        return Nmr(self.word_file, self.word_count)
 
     @cached_property
     def is_pipe(self) -> bool:

@@ -5,7 +5,7 @@ from nmr import Nmr
 
 @pytest.mark.parametrize("n", range(1, 7))
 def test_all_unsigned(n):
-    N = Nmr(n)
+    N = Nmr(count=n)
     m = N.words.count_words(n)
 
     for i in range(m):
