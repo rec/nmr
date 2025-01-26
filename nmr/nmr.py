@@ -26,11 +26,13 @@ class Nmr:
 
     words: Sequence[str]
     inverse: dict[str, int]
+    ignore_case: bool
 
     def __init__(
         self,
         count: int | None = None,
         words: Sequence[str] | Path | None = None,
+        ignore_case: bool = True,
     ) -> None:
         if words is None:
             words = FILE
@@ -41,16 +43,23 @@ class Nmr:
             with words.open() as fp:
                 words = tuple(fp)
 
-        words = tuple(s for w in words if (s := w.strip()) and not s.startswith("#"))
+        it = (s for w in words if (s := w.strip()) and not s.startswith("#"))
+        if ignore_case:
+            it = (s.lower() for s in it)
+        words = tuple(it)
         _check_dupes(words)
 
-        if count is not None:
-            if count > len(words):
-                raise ValueError(f"{count=} > {len(words)=}")
+        if count is None:
+            count = len(words)
+        elif count < len(words):
             words = words[:count]
+        elif count > len(words):
+            raise ValueError(f"{count=} > {len(words)=}")
 
         self.words = words
-        self._count_words = count_words.CountWords(self.n).count
+        self.count = count
+        self.ignore_case = ignore_case
+        self._count_words = count_words.CountWords(self.count).count
         self.inverse = {w: i for i, w in enumerate(self.words)}
 
     def is_name(self, s: Sequence[str]) -> bool:
@@ -69,10 +78,6 @@ class Nmr:
             return self.name_to_str(split)
         return " ".join(self.str_to_name(s))
 
-    @property
-    def n(self) -> int:
-        return len(self.words)
-
     def _encode_to_name(self, num: int) -> Sequence[str]:
         if num < 0:
             raise ValueError("Only accepts non-negative numbers")
@@ -85,15 +90,15 @@ class Nmr:
         return self._from_digits(list(self._redupe(indexes))[::-1])
 
     def _to_digits(self, num: int) -> list[int]:
-        it = (i + 1 for i in range(self.n) if self._count_words(i + 1) > num)
+        it = (i + 1 for i in range(self.count) if self._count_words(i + 1) > num)
         if (word_count := next(it, None)) is None:
-            raise ValueError(f"Cannot represent {num} in base {self.n}")
+            raise ValueError(f"Cannot represent {num} in base {self.count}")
 
         total = num - self._count_words(word_count - 1)
         digits = []
 
         for i in range(word_count):
-            total, index = divmod(total, self.n - i)
+            total, index = divmod(total, self.count - i)
             digits.append(index)
         assert not total
 
@@ -102,7 +107,7 @@ class Nmr:
     def _from_digits(self, digits: list[int]) -> int:
         total = 0
         for i, d in enumerate(digits):
-            total *= self.n - (len(digits) - i - 1)
+            total *= self.count - (len(digits) - i - 1)
             total += d
 
         return self._count_words(len(digits) - 1) + total
