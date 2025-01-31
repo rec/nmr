@@ -85,7 +85,7 @@ class Main:
     def rnd(self) -> None:  # TODO re-enable
         for i in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
-            print(f"{r}:", *self.nmr.words.encode_to_name(r))
+            print(f"{r}:", *self.nmr.encode_to_name(r))
 
 
 def exit(*error: Any) -> NoReturn:

@@ -74,7 +74,8 @@ class Words:
         return [self.words[i] for i in self._to_digits(num)]
 
     def is_name(self, s: Sequence[str]) -> bool:
-        return all(i in self.inverse for i in self._maybe_lower(s))
+        s = list(self._maybe_lower(s))
+        return all(i in self.inverse for i in s) and not _dupes(s)
 
     def _to_digits(self, num: int) -> list[int]:
         it = (i + 1 for i in range(self.count) if self.count_words(i + 1) > num)
@@ -104,10 +105,20 @@ class Words:
 
 
 def _check_dupes(words: Sequence[str]) -> None:
-    if bad := [k for k, v in Counter(words).items() if v > 1]:
+    if e := _dupe_error(words):
+        raise ValueError(e)
+
+
+def _dupe_error(words: Sequence[str]) -> str | None:
+    if bad := _dupes(words):
         s = "" if len(bad) == 1 else "s"
         msg = ", ".join(sorted(bad))
-        raise ValueError(f"Duplicate word{s}: {msg}")
+        return f"Duplicate word{s}: {msg}"
+    return None
+
+
+def _dupes(words: Sequence[str]) -> list[str]:
+    return [k for k, v in Counter(words).items() if v > 1]
 
 
 def _redupe(indexes: Sequence[int]) -> Iterator[int]:

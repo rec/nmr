@@ -10,9 +10,9 @@ def test_count():
     def count(n, i):
         return CountWords(n).count(i)
 
-    assert count(nmr.words.count, 6) > M > count(nmr.words.count - 1, 6)
-    assert count(nmr.words.count, 6) > 1.0001 * M
-    assert M / 1.003 > count(nmr.words.count - 1, 6)
+    assert count(nmr.count, 6) > M > count(nmr.count - 1, 6)
+    assert count(nmr.count, 6) > 1.0001 * M
+    assert M / 1.003 > count(nmr.count - 1, 6)
 
 
 _STABILITY_TABLE = (
@@ -52,6 +52,6 @@ _STABILITY_TABLE = (
 
 @pytest.mark.parametrize("number, words", _STABILITY_TABLE)
 def test_stability(number, words):
-    actual_words = nmr.words.encode_to_name(number)
+    actual_words = nmr.encode_to_name(number)
     assert actual_words == words
-    assert nmr.words.decode_from_name(words) == number
+    assert nmr.decode_from_name(words) == number

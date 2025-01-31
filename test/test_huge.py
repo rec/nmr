@@ -4,18 +4,17 @@ from nmr import nmr
 
 
 def test_huge_unsigned():
-    words = nmr.words
-    maxint = words.count_words() - 1
+    maxint = nmr.count_words() - 1
     expected = ["the", "of", "and", "to", "a", "in", "for", "on"]
-    assert words.encode_to_name(maxint)[:8] == expected
+    assert nmr.encode_to_name(maxint)[:8] == expected
 
     expected = ["smile", "armed", "laura", "tokyo", "candy", "tiger", "boost", "moral"]
-    assert words.encode_to_name(maxint)[-8:] == expected
+    assert nmr.encode_to_name(maxint)[-8:] == expected
     with pytest.raises(ValueError):
-        words.encode_to_name(maxint + 1)
+        nmr.encode_to_name(maxint + 1)
 
     expected = ["the"]
-    assert words.encode_to_name(0) == expected
+    assert nmr.encode_to_name(0) == expected
 
 
 MAX = int(
