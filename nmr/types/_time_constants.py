@@ -4,8 +4,6 @@ MICROSECOND_TO_YOCTOSECOND: int = 10 ** (24 - 6)
 
 
 class Interval(IntEnum):
-    INSTANT = auto()
-
     SECOND = auto()
     MINUTE = auto()
     HOUR = auto()
@@ -19,69 +17,69 @@ class Interval(IntEnum):
     EPOCH = auto()
     EON = auto()
 
-    YOTTA = auto()
-    ZETTA = auto()
-    EXA = auto()
-    PETA = auto()
-    TERA = auto()
-    GIGA = auto()
-    MEGA = auto()
-    KILO = auto()
-    HECTO = auto()
-    DECA = auto()
+    YOTTASECOND = auto()
+    ZETTASECOND = auto()
+    EXASECOND = auto()
+    PETASECOND = auto()
+    TERASECOND = auto()
+    GIGASECOND = auto()
+    MEGASECOND = auto()
+    KILOSECOND = auto()
+    HECTOSECOND = auto()
+    DECASECOND = auto()
 
-    DECI = auto()
-    CENTI = auto()
-    MILLI = auto()
-    MICRO = auto()
-    NANO = auto()
-    PICO = auto()
-    FEMTO = auto()
-    ATTO = auto()
-    ZEPTO = auto()
-    YOCTO = auto()
+    DECISECOND = auto()
+    CENTISECOND = auto()
+    MILLISECOND = auto()
+    MICROSECOND = auto()
+    NANOSECOND = auto()
+    PICOSECOND = auto()
+    FEMTOSECOND = auto()
+    ATTOSECOND = auto()
+    ZEPTOSECOND = auto()
+    YOCTOSECOND = auto()
 
 
-MICROSECONDS = {
-    Interval.DECI: 100000,
-    Interval.CENTI: 10000,
-    Interval.MILLI: 1000,
-    Interval.MICRO: 1,
+SCALES = {
+    Interval.YEAR: {
+        Interval.YEAR: 1,
+        Interval.DECADE: 10,
+        Interval.CENTURY: 100,
+        Interval.MILLENIUM: 1000,
+        Interval.EPOCH: 1_000_000,
+        Interval.EON: 1_000_000_000,
+    },
+    Interval.SECOND: {
+        Interval.SECOND: 1,
+        Interval.MINUTE: 60,
+        Interval.HOUR: 60 * 60,
+        Interval.DAY: 60 * 60 * 24,
+        Interval.WEEK: 60 * 60 * 24 * 7,
+        Interval.DECASECOND: 10**1,
+        Interval.HECTOSECOND: 10**2,
+        Interval.KILOSECOND: 10**3,
+        Interval.MEGASECOND: 10**6,
+        Interval.GIGASECOND: 10**9,
+        Interval.TERASECOND: 10**12,
+        Interval.PETASECOND: 10**15,
+        Interval.EXASECOND: 10**18,
+        Interval.ZETTASECOND: 10**21,
+        Interval.YOTTASECOND: 10**24,
+    },
+    Interval.MICROSECOND: {
+        Interval.DECISECOND: 100_000,
+        Interval.CENTISECOND: 10_000,
+        Interval.MILLISECOND: 1_000,
+        Interval.MICROSECOND: 1,
+    },
+    Interval.YOCTOSECOND: {
+        Interval.NANOSECOND: 10 ** (24 - 9),
+        Interval.PICOSECOND: 10 ** (24 - 12),
+        Interval.FEMTOSECOND: 10 ** (24 - 15),
+        Interval.ATTOSECOND: 10 ** (24 - 18),
+        Interval.ZEPTOSECOND: 10 ** (24 - 21),
+        Interval.YOCTOSECOND: 10 ** (24 - 24),
+    },
 }
 
-YOCTOSECONDS = {
-    Interval.NANO: 10 ** (24 - 9),
-    Interval.PICO: 10 ** (24 - 12),
-    Interval.FEMTO: 10 ** (24 - 15),
-    Interval.ATTO: 10 ** (24 - 18),
-    Interval.ZEPTO: 10 ** (24 - 21),
-    Interval.YOCTO: 10 ** (24 - 24),
-}
-
-YEARS = {
-    Interval.YEAR: 1,
-    Interval.DECADE: 10,
-    Interval.CENTURY: 100,
-    Interval.MILLENIUM: 1000,
-    Interval.EPOCH: 1000000,
-    Interval.EON: 1000000000,
-}
-
-SECONDS = {
-    Interval.INSTANT: 0,
-    Interval.SECOND: 1,
-    Interval.MINUTE: 60,
-    Interval.HOUR: 60 * 60,
-    Interval.DAY: 60 * 60 * 24,
-    Interval.WEEK: 60 * 60 * 24 * 7,
-    Interval.DECA: 10**1,
-    Interval.HECTO: 10**2,
-    Interval.KILO: 10**3,
-    Interval.MEGA: 10**6,
-    Interval.GIGA: 10**9,
-    Interval.TERA: 10**12,
-    Interval.PETA: 10**15,
-    Interval.EXA: 10**18,
-    Interval.ZETTA: 10**21,
-    Interval.YOTTA: 10**24,
-}
+assert set(i for s in SCALES.values() for i in s.values()) == set(Interval)
