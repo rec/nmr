@@ -5,7 +5,7 @@ from datetime import datetime
 from enum import IntEnum, auto
 from typing import cast
 
-from ._time_constants import MICROSECOND_TO_YOCTOSECOND, SCALES, Interval
+from .constants import MICROSECOND_TO_YOCTOSECOND, SCALES, Interval
 
 
 @dc.dataclass
