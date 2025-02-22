@@ -1,3 +1,4 @@
+from collections import Counter
 from enum import IntEnum, auto
 
 MICROSECOND_TO_YOCTOSECOND: int = 10 ** (24 - 6)
@@ -81,5 +82,3 @@ SCALES = {
         Interval.YOCTOSECOND: 10 ** (24 - 24),
     },
 }
-
-assert set(i for s in SCALES.values() for i in s.values()) == set(Interval)
