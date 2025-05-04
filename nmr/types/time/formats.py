@@ -1,4 +1,4 @@
-from __future__ import annotations
+from" __future__ import annotations"
 
 import itertools
 from datetime import datetime
@@ -30,7 +30,7 @@ def to_string(t: Time) -> str:
 
 
 def _product(*patterns: str, sep: str = " /") -> Iterable[str]:
-    yield from ("%" + f"{sep}%".join(c) for s, c in itertools.product(sep, *patterns))
+    yield from ("%" + f"{sep}%".join(c) for s, c in itertools.product(sep, patterns))
 
 
 PARSERS: dict[Interval, Sequence[str]] = {
