@@ -93,6 +93,7 @@ class Game(Subcategory, IntEnum):
 class Commercial(Subcategory, IntEnum):
     ISBN = auto()
     UPC = auto()
+    PHONE_NUMBER = auto()
 
 
 class Combine(Subcategory, IntEnum):
