@@ -42,6 +42,9 @@ class Interval(IntEnum):
 
 
 SCALES = {
+    Interval.MONTH: {
+        Interval.MONTH: 1,
+    },
     Interval.YEAR: {
         Interval.YEAR: 1,
         Interval.DECADE: 10,
@@ -82,3 +85,4 @@ SCALES = {
         Interval.YOCTOSECOND: 10 ** (24 - 24),
     },
 }
+INVERSE_SCALES = {j: k for k, v in SCALES.items() for j in v}

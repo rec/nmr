@@ -1,15 +1,20 @@
-from" __future__ import annotations"
+from __future__ import annotations
 
 import itertools
 from datetime import datetime
 from functools import partial
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Iterable, Sequence, TYPE_CHECKING
 
 from .constants import Interval
-from .time import Time
 
 
-def from_string(s: str) -> Time:
+if TYPE_CHECKING:
+    from .time import Time
+
+
+def from_string(s: str) -> "Time":
+    from .time import Time
+
     def parse(p: str) -> datetime | None:
         try:
             return datetime.strptime(s, p)
@@ -25,7 +30,7 @@ def from_string(s: str) -> Time:
     return times[0]
 
 
-def to_string(t: Time) -> str:
+def to_string(t: "Time") -> str:
     return t.time.strftime(PARSERS[t.interval][0])
 
 
