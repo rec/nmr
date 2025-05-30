@@ -57,13 +57,13 @@ class TypeNamer(Generic[DataType]):
 
 
 def get_class(prefix: str) -> type[TypeNamer[Any]]:
-    cl = [
-        c
-        for c in TypeNamer.SUBCLASSES.values()
-        if c.__class__.__name__.lower().startswith(prefix.lower())
-    ]
-    if not cl:
-        raise ValueError(f"Unknown {prefix=}")
+    pre = prefix.lower()
+    sub = {c.__class__.__name__.lower(): c for c in TypeNamer.SUBCLASSES.values()}
+    if c := sub.get(pre):
+        return c
+    cl = [k for k, v in subclasses.items() if k.startswith(pre)]
+    if len(cl) == 1:
+        return cl[0]
     if len(cl) > 1:
         raise ValueError(f"Ambiguous {prefix=}, could be {cl}")
-    return cl[0]
+    raise ValueError(f"Unknown {prefix=}")
