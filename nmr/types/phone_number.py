@@ -26,7 +26,6 @@ LEGAL = set(DIGITS + STARTERS + DIVIDERS)
 
 class PhoneNumber:
     def __init__(self, phone_number: str) -> None:
-
         if phone_number and phone_number[0] not in STARTERS:
             raise ValueError(f"{phone_number=} must start with one of {STARTERS=}")
 

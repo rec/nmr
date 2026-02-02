@@ -21,6 +21,7 @@ nmr = "nmr.__main__:main"
 [tool.doks]
 auto = true
 
+[tool.ruff]
 [dependency-groups]
 dev = [
     "coverage>=6.5.0,<7",

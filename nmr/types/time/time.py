@@ -75,7 +75,6 @@ class Time(TypeNamer["Time"]):
         return 12 * self._whole_years() + self.time.month
 
 
-
 @dc.dataclass
 class Time(TypeNamer["Time"]):
     # A location in time
@@ -90,8 +89,7 @@ class Time(TypeNamer["Time"]):
         raise NotImplementedError  # todo
 
     @staticmethod
-    def str_to_type(cls, s: str) -> "Time":
-        ...
+    def str_to_type(cls, s: str) -> "Time": ...
 
     @staticmethod
     def index_to_type(cls, i: int) -> "Time":
