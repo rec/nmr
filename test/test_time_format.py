@@ -1,7 +1,5 @@
 import pytest
 
-from nmr.types.time import formats
-
 ROUND_TRIPS = ()
 
 

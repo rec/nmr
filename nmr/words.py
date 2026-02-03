@@ -3,9 +3,9 @@ from __future__ import annotations
 import bisect
 from collections import Counter
 from collections.abc import Iterator, Sequence
-from os import PathLike
 from pathlib import Path
-from typing import Any, Iterable, cast
+from typing import cast
+from collections.abc import Iterable
 
 from . import count_words
 
@@ -63,7 +63,9 @@ class Words:
         name = list(self._maybe_lower(name))
         name = name[::-1]
         inverses = [self.inverse.get(w) for w in name]
-        if bad := ", ".join(n for n, i in zip(name, inverses) if i is None):
+        if bad := ", ".join(
+            n for n, i in zip(name, inverses, strict=False) if i is None
+        ):
             s = "s" if "," in bad else ""
             raise ValueError(f"Didn't recognize the following word{s}: {bad}")
         return self._from_digits(list(_redupe(cast(list[int], inverses)))[::-1])

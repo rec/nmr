@@ -1,13 +1,11 @@
 from __future__ import annotations
-from ...type_namer import TypeNamer
 
 import dataclasses as dc
 from datetime import datetime
-from enum import IntEnum, auto
-from typing import cast
 
+from ...type_namer import TypeNamer
 from . import formats
-from .constants import MICROSECOND_TO_YOCTOSECOND, SCALES, Interval, INVERSE_SCALES
+from .constants import INVERSE_SCALES, MICROSECOND_TO_YOCTOSECOND, SCALES, Interval
 
 YEAR_ZERO = datetime.fromtimestamp(0).year
 INTERVAL_SCALE = len(Interval)
@@ -30,7 +28,7 @@ class Time(TypeNamer["Time"]):
     str_to_type = staticmethod(from_string)
 
     @staticmethod
-    def index_to_type(i: int) -> "Time":
+    def index_to_type(i: int) -> Time:
         count, interval = divmod(i, INTERVAL_SCALE)
         _base = INVERSE_SCALES[interval]
         raise NotImplementedError
@@ -89,10 +87,10 @@ class Time(TypeNamer["Time"]):
         raise NotImplementedError  # todo
 
     @staticmethod
-    def str_to_type(cls, s: str) -> "Time": ...
+    def str_to_type(cls, s: str) -> Time: ...
 
     @staticmethod
-    def index_to_type(cls, i: int) -> "Time":
+    def index_to_type(cls, i: int) -> Time:
         count, interval = divmod(i, INTERVAL_SCALE)
         if interval == Interval.SECONDS:
             count = int(self.time.timestamp()) + (self.years * 365_2422) // 10000

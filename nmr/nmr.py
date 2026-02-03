@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-import bisect
-from collections import Counter
-from collections.abc import Iterator, Sequence
-from os import PathLike
-from pathlib import Path
-from typing import Any
+from collections.abc import Sequence
 
 from . import types
 from .words import Words

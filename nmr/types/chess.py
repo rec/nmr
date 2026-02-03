@@ -35,7 +35,7 @@ class Chess(TypeNamer[chess.Board]):
         fields = (
             "/".join(index_to_row(r) for r in board),
             SIDES[side],
-            "".join(c for b, c in zip(castle, CASTLES) if b) or "-",
+            "".join(c for b, c in zip(castle, CASTLES, strict=False) if b) or "-",
             index_to_en_passant(ep),
             str(half_move),
             str(move),

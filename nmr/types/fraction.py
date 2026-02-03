@@ -1,8 +1,6 @@
 from __future__ import annotations
 
 import fractions
-import math
-from typing import Any
 
 from ..category import Math
 from ..pack_numbers import Packer

@@ -53,7 +53,7 @@ class TypeNamer(Generic[DataType]):
         return cast(DataType, data_type(s))
 
     def __init__(self) -> None:
-        assert False, "Cannot construct an instance of TypeNamer"
+        raise NotImplementedError
 
 
 def get_class(prefix: str) -> type[TypeNamer[Any]]:

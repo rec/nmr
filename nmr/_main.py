@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-import itertools
 import random
 import shlex
 import sys
 from functools import cached_property
 from pathlib import Path
-from typing import Any, Iterable, NoReturn, Sequence
+from typing import Any, NoReturn
+from collections.abc import Iterable
 
 import dtyper
 
@@ -83,7 +83,7 @@ class Main:
         return None
 
     def rnd(self) -> None:  # TODO re-enable
-        for i in range(self.random_count):
+        for _ in range(self.random_count):
             r = int(10 ** random.uniform(0, 50))
             print(f"{r}:", *self.nmr.encode_to_name(r))
 

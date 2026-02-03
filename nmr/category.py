@@ -1,11 +1,6 @@
 from __future__ import annotations
 
-import dataclasses as dc
 from enum import IntEnum, auto
-from functools import lru_cache
-from typing import cast
-
-from typing_extensions import Self
 
 DEFAULT_RADIX = 8
 

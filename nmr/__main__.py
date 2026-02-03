@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import typer
 from typer import Argument, Option, Typer
@@ -51,7 +51,7 @@ def nmr_main(
         "-l",
         help="If true, display the input as a label to the output",
     ),
-    output_type: Optional[str] = Option(
+    output_type: str | None = Option(
         None,
         "--output-type",
         "-t",
@@ -65,10 +65,10 @@ def nmr_main(
         help="If True, don't catch exceptions, allow the program to terminate",
     ),
     random_count: int = Option(0, "--random-count", "-r", help="Print random names"),
-    word_count: Optional[int] = Option(
+    word_count: int | None = Option(
         None, "--word-count", "-c", help="How many words from the word file to use"
     ),
-    word_file: Optional[Path] = Option(
+    word_file: Path | None = Option(
         None,
         "--word-file",
         "-f",

@@ -3,7 +3,6 @@ import random
 
 import pytest
 
-from nmr.__main__ import nmr_main
 from nmr._main import Main
 
 

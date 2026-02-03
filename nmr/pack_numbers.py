@@ -1,7 +1,6 @@
-import bisect
 import dataclasses as dc
 import math
-from typing import Sequence
+from collections.abc import Sequence
 
 """
 A module for packing n numbers into a single number

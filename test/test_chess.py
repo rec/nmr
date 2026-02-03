@@ -1,7 +1,7 @@
 import pytest
 from chess import Board
 
-from nmr import nmr, types
+from nmr import nmr
 from nmr.types import chess
 
 INDICES = 0, 1, 2, 17, 225289, 82394423423

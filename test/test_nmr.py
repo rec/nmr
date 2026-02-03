@@ -1,6 +1,6 @@
 import pytest
 
-from nmr import Nmr, nmr
+from nmr import nmr
 from nmr.count_words import CountWords
 
 

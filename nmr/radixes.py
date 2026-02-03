@@ -6,7 +6,7 @@ class Radixes:
         total, *digit = digits
         assert len(digit) == len(self.radixes)
 
-        for d, r in zip(digit, self.radixes):
+        for d, r in zip(digit, self.radixes, strict=False):
             total = r * total + d
         return total
 

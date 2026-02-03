@@ -1,4 +1,3 @@
-from collections import Counter
 from enum import IntEnum, auto
 
 MICROSECOND_TO_YOCTOSECOND: int = 10 ** (24 - 6)
