@@ -3,7 +3,7 @@ revision = 3
 requires-python = ">=3.10"
 
 [options]
-exclude-newer = "2026-10-08T13:10:29.33173Z"
+exclude-newer = "2026-10-08T13:24:43.95451Z"
 exclude-newer-span = "P1W"
 
 [[package]]
@@ -20,18 +20,6 @@ name = "chess"
 version = "1.11.1"
 source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/74/16/53b895bb4fccede8e506de820fa94db03a2dc8bd2ca4bec0aac4a112fb65/chess-1.11.1.tar.gz", hash = "sha256:b7f66a32dc599ab260e2b688e6ac4e868dad840377a54b61357e2dec2a5fed00", size = 156529, upload-time = "2024-10-09T18:28:48.347Z" }
-
-[[package]]
-name = "click"
-version = "8.1.8"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "colorama", marker = "sys_platform == 'win32'" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b9/2e/0090cbf739cee7d23781ad4b89a9894a41538e4fcf4c31dcdd705b78eb8b/click-8.1.8.tar.gz", hash = "sha256:ed53c9d8990d83c2a27deae68e4ee337473f6330c040a31d4225c9574d16096a", size = 226593, upload-time = "2024-12-21T18:38:44.339Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7e/d4/7ebdbd03970677812aac39c869717059dbb71a4cfc033ca6e5221787892c/click-8.1.8-py3-none-any.whl", hash = "sha256:63c132bbbed01578a06712a2d1f497bb62d9c1c0d329b7903a866228027263b2", size = 98188, upload-time = "2024-12-21T18:38:41.666Z" },
-]
 
 [[package]]
 name = "colorama"
@@ -79,18 +67,6 @@ wheels = [
 ]
 
 [[package]]
-name = "dtyper"
-version = "2.5.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typer" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/b3/3c/4202f1c087524dde9240fe95f7cbd1181c21949f2e8f5634dd3ac413200d/dtyper-2.5.1.tar.gz", hash = "sha256:7644462564c99e7eca8a1635c4b5841c118c16443d72237fc0e2c992a111fba0", size = 6227, upload-time = "2024-01-25T10:42:54.989Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/7b/29/1887e294502992a04852c7b6d860c1e586917cf1eb3c14aec1bad6c4eea9/dtyper-2.5.1-py3-none-any.whl", hash = "sha256:50d2257dae1dfca1380f8a1c1495e88e096b9fa55ca829555a9b4e7c78ce8873", size = 8518, upload-time = "2024-01-25T10:42:53.41Z" },
-]
-
-[[package]]
 name = "exceptiongroup"
 version = "1.2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -109,25 +85,13 @@ wheels = [
 ]
 
 [[package]]
-name = "lat-lon-parser"
-version = "1.3.1"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/00/58/879bcefdcec8ea62501270ac4475e75f72b54a32adb3a769c5ba5b10f535/lat_lon_parser-1.3.1.tar.gz", hash = "sha256:62b8191e72150a7bf5d55fe6a8dddf3e20dd4937a995130f74832cd7ede39e91", size = 14299, upload-time = "2024-11-13T19:13:14.879Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/4f/61/a4fda4c2dd7f84814647ce2124edc24dd2c313f4ac0aad786064d5ab9d82/lat_lon_parser-1.3.1-py3-none-any.whl", hash = "sha256:e2abfff8a81de4b4db2c11a02867c5cd8b057a978e7b03c178abdeaa627e8ba8", size = 11269, upload-time = "2024-11-09T00:06:20.579Z" },
-]
-
-[[package]]
 name = "nmr"
 version = "0.11.0"
 source = { editable = "." }
 dependencies = [
     { name = "chess" },
-    { name = "dtyper" },
-    { name = "lat-lon-parser" },
     { name = "pydantic" },
     { name = "semver" },
-    { name = "typer" },
     { name = "tyro" },
 ]
 
@@ -143,11 +107,8 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "chess", specifier = ">=1.9.3,<2" },
-    { name = "dtyper", specifier = ">=2.0.0,<3" },
-    { name = "lat-lon-parser", specifier = ">=1.3.0,<2" },
     { name = "pydantic", specifier = ">=2.10,<3" },
     { name = "semver", specifier = ">=3.0.2,<4" },
-    { name = "typer", specifier = ">=0.7.0,<0.8" },
     { name = "tyro", specifier = ">=1.0,<2" },
 ]
 
@@ -454,18 +415,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/b4/de/4420db493fa8fc0856d5e5c1b159c63a323d2de2317babe36b01568928e8/typeguard-4.6.0.tar.gz", hash = "sha256:e7414f09111317de3e335de92cd397c5c0ca00b1cc1676de12e1d444a79b3f21", size = 82330, upload-time = "2026-07-26T08:40:23.207Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/8f/eb/461d5f167b6f5c7d97696f397c82f82e3480e003fce3f0a1cd1dd26e2eb2/typeguard-4.6.0-py3-none-any.whl", hash = "sha256:79878165bb86f2cf5d41d159a0ff1792a796cf496882d2fe1b1c6c7049b9cdd7", size = 36884, upload-time = "2026-07-26T08:40:21.868Z" },
-]
-
-[[package]]
-name = "typer"
-version = "0.7.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "click" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e1/45/bcbc581f87c8d8f2a56b513eb994d07ea4546322818d95dc6a3caf2c928b/typer-0.7.0.tar.gz", hash = "sha256:ff797846578a9f2a201b53442aedeb543319466870fbe1c701eab66dd7681165", size = 251871, upload-time = "2022-11-05T19:43:54.903Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0d/44/56c3f48d2bb83d76f5c970aef8e2c3ebd6a832f09e3621c5395371fe6999/typer-0.7.0-py3-none-any.whl", hash = "sha256:b5e704f4e48ec263de1c0b3a2387cd405a13767d2f907f44c1a08cbad96f606d", size = 38377, upload-time = "2022-11-05T19:43:53.402Z" },
 ]
 
 [[package]]
