@@ -104,7 +104,7 @@ class Duration(TypeNamer):
         return scaled_string(signed_value(index), SECOND) + "s"
 
 
-CLOCK = r"[0-9]{2}:[0-9]{2}(?::[0-9]{2}(?:\.[0-9]{1,6})?)?"
+CLOCK = r"(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9](?:\.[0-9]{1,6})?)?"
 SECOND = 10**6
 DAY = 86400 * SECOND
 DAYS = date.max.toordinal()

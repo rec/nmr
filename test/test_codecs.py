@@ -56,6 +56,8 @@ def test_codecs_round_trip_at_each_scope(kind: str, value: str, canonical: str) 
         ("clock", "12:00:00.1234567"),
         ("local", "2000-01-01T12:00Z"),
         ("instant", "2000-01-01T12:00"),
+        ("instant", "2000-01-01T12:00+00:60"),
+        ("clock", "12:60"),
         ("phone", "020 1234 5678"),
         ("phone", "+123;ext="),
         ("isbn", "9780306406158"),
