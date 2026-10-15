@@ -41,6 +41,7 @@ const { loadPyodide } = require("pyodide");
     ["text", " exact 001 # é "],
     ["date", "2000-02-29"],
     ["chess", "e4 e5 Nf3"],
+    ["go", "9x9:D4 E4 pass pass"],
     ["semver", "1.2.3-rc.1+build.004"],
   ]) {
     const encoded = JSON.parse(

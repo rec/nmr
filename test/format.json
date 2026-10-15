@@ -79,6 +79,34 @@
       "name": "sons paint"
     },
     {
+      "type": "go",
+      "input": "9x9:D4 E4 pass pass",
+      "value": "9x9:D4 E4 pass pass",
+      "scope": null,
+      "name": "play:game:go:up trade real"
+    },
+    {
+      "type": "go",
+      "input": "9x9:D4 E4 pass pass",
+      "value": "9x9:D4 E4 pass pass",
+      "scope": "",
+      "name": "and added civil drag"
+    },
+    {
+      "type": "go",
+      "input": "",
+      "value": "19x19:",
+      "scope": null,
+      "name": "play:game:go:the"
+    },
+    {
+      "type": "go",
+      "input": "13x13:J10",
+      "value": "13x13:J10",
+      "scope": null,
+      "name": "play:game:go:rest"
+    },
+    {
       "type": "frac",
       "input": "0/0",
       "value": "0/0",

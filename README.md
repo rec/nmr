@@ -93,6 +93,7 @@ expands; save the canonical output instead.
 | `upc` | UPC-A, including the check digit and leading zeroes. |
 | `text` | Exact UTF-8 text, including empty text, non-Latin scripts, punctuation, and whitespace. |
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
+| `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `list`, `record` | Ordered typed values or named typed fields, including nested collections. |
 
 Clock, local time, timestamps, and durations use microseconds. Excess precision is
@@ -105,6 +106,18 @@ game. PGN comments, headers, variations, and stated results are not named. Autom
 endings apply, including fivefold repetition and the 75-move rule; claimable draws
 are not automatic endings. Moves are ordered lexically by UCI, independent of
 library iteration order. Work is limited to 4096 plies per operation.
+
+Go accepts coordinates with columns A through T, skipping I, rows counted from
+the bottom, and `pass`. Black plays first. Use `9x9:D4 E4 pass pass` or
+`13x13:J10`; an omitted size means 19×19. Canonical output always includes the
+size. Captures apply before checking suicide, which is forbidden. Situational
+superko forbids repeating a previous board with the same player to move; passes
+are exempt, and two consecutive passes end the named play sequence. These move
+legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/pdf/conciserules.pdf).
+Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
+part of this format. Empty and unfinished sequences are supported, with a
+4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the name
+`play:game:go:up trade real` with the default vocabulary.
 
 Named text is an encoding, not compression. A phone fits in four payload words in
 the example above; a general email address can take thirteen or more. Prefixes

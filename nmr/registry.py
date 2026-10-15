@@ -5,6 +5,7 @@ from .types.chess import Chess
 from .types.collections import List, Record
 from .types.floating import Float
 from .types.fraction import Frac
+from .types.go import Go
 from .types.identifiers import Isbn, Upc
 from .types.integer import Int
 from .types.ip_address import IPv4, IPv6
@@ -48,7 +49,7 @@ ROOT = Category(
         3: Category(
             name="play",
             children={
-                0: Category(name="game", children={0: Chess}),
+                0: Category(name="game", children={0: Chess, 1: Go}),
             },
         ),
         4: Category(name="meta", children={0: List, 1: Record}),

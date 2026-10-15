@@ -168,7 +168,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `virtual:contact` | 0: `phone`. |
 | `virtual:id` | 0: `isbn`, 1: `upc`. |
 | `play` | 0: `game` (category). |
-| `play:game` | 0: `chess`. |
+| `play:game` | 0: `chess`, 1: `go`. |
 | `meta` | 0: `list`, 1: `record`. |
 
 All unlisted slots are empty. Science, art, music, and additional games retain
@@ -331,6 +331,7 @@ Allocate leaves through the chosen permanent expansion mechanism.
 | Exact text | Names, postal addresses, email addresses, URLs, account/reference identifiers, and short notes. Preserve whitespace, case, punctuation, and leading zeroes. | UTF-8 bytes with sparse canonical indices; browsing replaces invalid sequences with `?` without increasing the leaf index. Empty text is supported. |
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
+| Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
 | Collections | Typed ordered lists and records with sorted string keys; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
 The browser's exact-text choice explicitly covers names, addresses, email, URLs,
@@ -416,6 +417,34 @@ The chess leaf names a game, not a FEN position. Move ordering is lexical UCI.
 Automatic game endings include fivefold repetition and the 75-move rule; claimable
 draws do not force termination. Both encoding and decoding enforce a 4096-ply work
 limit. PGN headers, comments, variations, and results are not part of the object.
+
+### Go
+
+The requested Go extension occupies previously empty `play:game` slot 1. No
+existing allocation or canonical name changes. The value is a move sequence
+starting with Black on an empty board. Input optionally begins `19x19:`, `9x9:`,
+or `13x13:`; the default is 19×19, and canonical output always includes the size.
+Coordinates use columns `ABCDEFGHJKLMNOPQRST`, with row 1 at the bottom, plus
+`pass`. Input coordinates and passes are case-insensitive.
+
+Freeze board-size tags as 19×19 = 0, 9×9 = 1, and 13×13 = 2. The leaf index is
+`tag + 3 * sequence_rank`; this three-size domain is permanent. Moves are ordered
+by row then column (`A1`, `B1`, ..., `A2`, ...), with pass last. Sequence ranking
+uses the chess stop-or-legal-child recurrence above. Captures remove whole
+connected opposing groups without liberties before checking the played group.
+Suicide is illegal. Situational superko rejects a stone move that recreates an
+earlier board and next-player combination, including the initial empty board.
+Passes are exempt from repetition checks, recorded in history, and two consecutive
+passes terminate the named sequence. These move legality rules follow the
+[AGA concise rules](https://www.usgo-archive.org/files/pdf/conciserules.pdf).
+
+Canonical decoding rejects positive residuals after termination; browsing returns
+the sequence ending there. Both directions enforce a 4096-ply work limit. This
+format records play only: no scoring, result, komi, handicap setup, SGF metadata,
+or post-scoring resumption. A small pure-Python rules engine keeps the same codec
+available in the browser without adding dependencies. Tests cover connected
+captures, suicide, immediate ko, a full triple-ko repetition, passes, terminal
+aliases, all sizes, prefix equivalence, custom vocabularies, and frozen fixtures.
 
 ## Custom word lists and privacy
 
@@ -653,10 +682,12 @@ human answer to use the delivered library, CLI, or static browser build.
    checks. Improved UTF-8 text efficiency and very-large-integer handling.
 5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
    documentation, and replacements for obsolete maintenance paths.
+6. Added the requested Go extension in an unused leaf slot, preserving existing
+   canonical names and sharing the implementation across Python and WebAssembly.
 
 ### Verification and limits
 
-The final local suite has 130 tests with 92% branch-aware coverage. It passes on
+The final local suite has 156 tests with 93% branch-aware coverage. It passes on
 CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated
