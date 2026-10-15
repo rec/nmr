@@ -1,57 +1,36 @@
 import pytest
 
-from nmr import nmr
-from nmr.count_words import CountWords
+from nmr.nmr import Nmr
 
 
-def test_count():
-    M = 2**64 - 1
-
-    def count(n, i):
-        return CountWords(n).count(i)
-
-    assert count(nmr.count, 6) > M > count(nmr.count - 1, 6)
-    assert count(nmr.count, 6) > 1.0001 * M
-    assert M / 1.003 > count(nmr.count - 1, 6)
-
-
-_STABILITY_TABLE = (
-    (0, ["the"]),
-    (1, ["of"]),
-    (999, ["hans"]),
-    (134123978423341234, ["this", "valid", "menu", "gamma", "phase", "ban"]),
-    (
-        341279384172341314120987134123443434734134913248132481234812341823413,
-        [
-            "i",
-            "proud",
-            "door",
-            "fight",
-            "ink",
-            "later",
-            "fixed",
-            "tree",
-            "truck",
-            "bruce",
-            "taxi",
-            "play",
-            "log",
-            "all",
-            "res",
-            "also",
-            "cube",
-            "doing",
-            "reid",
-            "cool",
-            "iron",
-            "night",
-        ],
-    ),
+@pytest.mark.parametrize(
+    "kind,value", [("int", "-42"), ("frac", "2/4"), ("frac", "0/0"), ("float", "-0.0")]
 )
+def test_prefix_scopes_decode_the_same_value(kind: str, value: str) -> None:
+    engine = Nmr()
+    path = engine.find_type(kind)[0]
+    for scope in [None, "", "universal", "universal:math", path]:
+        result = engine.encode(value, kind, scope)
+        assert engine.decode(result.name).value == value
+        assert engine.decode(result.name, browse=True).name == result.name
 
 
-@pytest.mark.parametrize("number, words", _STABILITY_TABLE)
-def test_stability(number, words):
-    actual_words = nmr.encode_to_name(number)
-    assert actual_words == words
-    assert nmr.decode_from_name(words) == number
+def test_canonical_decode_never_silently_browses() -> None:
+    engine = Nmr()
+    name = "universal:" + " ".join(engine.encode_to_name(3))
+    with pytest.raises(ValueError, match="unassigned"):
+        engine.decode(name)
+    result = engine.decode(name, browse=True)
+    assert not result.canonical
+    assert engine.decode(result.name).value == result.value
+
+
+def test_scope_must_contain_the_type() -> None:
+    with pytest.raises(ValueError, match="contain"):
+        Nmr().encode("1", "int", "play")
+
+
+def test_vocabulary_identity_is_checked() -> None:
+    engine = Nmr()
+    with pytest.raises(ValueError, match="identifier"):
+        engine.decode(engine.encode("1", "int").name, vocabulary="wrong")

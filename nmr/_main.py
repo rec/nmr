@@ -1,94 +1,98 @@
-from __future__ import annotations
+"""Command configuration and stream processing; conversion stays in the core."""
 
-import random
-import shlex
+import json
 import sys
-from functools import cached_property
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Any, NoReturn
-from collections.abc import Iterable
+from typing import Annotated, Literal, TextIO
 
-import dtyper
+import tyro
+from pydantic import BaseModel, Field
 
-from .__main__ import nmr_main
 from .nmr import Nmr
-from .type_namer import TypeNamer, get_class
-
-"""See __main__.HELP"""
 
 
-@dtyper.dataclass(nmr_main)
-class Main:
-    returncode = 0
+class Main(BaseModel):
+    operation: Literal["encode", "decode", "browse"] = "decode"
+    """Canonical decode is the default; browsing must be explicitly selected."""
+    value: str | None = None
+    """One input value. Omit to read one value per line from stdin or interactively."""
+    type_name: Annotated[str | None, tyro.conf.arg(name="type")] = None
+    """Type path or unique leaf name, required for encoding."""
+    scope: str | None = None
+    """Encoding prefix scope. Default: full leaf path. Empty string: no prefix."""
+    word_file: Path | None = None
+    word_count: int | None = Field(default=None, ge=1)
+    case_sensitive: bool = False
+    expect_vocabulary: str | None = None
+    json_output: bool = False
+    list_types: bool = False
+    vocabulary_info: bool = False
+    export_words: Path | None = None
 
-    # Copied from nmr_main
-    arguments: list[str]
-    label: bool
-    output_type: str | None
-    raise_exceptions: bool
-    random_count: int
-    word_count: int | None
-    word_file: Path | None
-
-    def __call__(self) -> None:
-        if self.is_pipe and self.arguments:
-            raise ValueError("nmr takes no arguments when used as a pipe")
-        if self.random_count and (self.arguments or self.is_pipe):
-            raise ValueError("nmr takes no arguments when --random-count is set")
-
-        lines: Iterable[str]
-        if self.arguments:
-            lines = [shlex.join(self.arguments)]
-        elif self.is_pipe:
-            lines = sys.stdin
-        else:
-
-            def _lines() -> Iterable[str]:
-                while True:
-                    try:
-                        yield input("In:  ")
-                    except EOFError:
-                        return
-
-            lines = _lines()
-
-        for line in lines:
-            if words := line.partition("#")[0].strip():
-                try:
-                    result = self.nmr.convert(words)
-                except Exception as e:
-                    if self.raise_exceptions:
-                        raise
-                    self.returncode = 1
-                    print("ERROR:", e, file=sys.stderr)
+    def run(self, source: TextIO, output: TextIO, errors: TextIO) -> int:
+        engine = Nmr(self.word_file, self.word_count, not self.case_sensitive)
+        if self.list_types:
+            for path, description in engine.types().items():
+                print(f"{path}\t{description}", file=output)
+            return 0
+        if self.vocabulary_info:
+            print(
+                json.dumps(
+                    {
+                        "identifier": engine.identifier,
+                        "words": engine.count,
+                        "maximum_payload_words": engine.count,
+                    }
+                ),
+                file=output,
+            )
+            return 0
+        if self.export_words is not None:
+            self.export_words.write_text(engine.export())
+            return 0
+        if self.operation == "encode" and self.type_name is None:
+            raise ValueError("Encoding requires --type")
+        status = 0
+        interactive = self.value is None and source.isatty()
+        while True:
+            if self.value is not None:
+                value = self.value
+            else:
+                if interactive:
+                    print("In: ", end="", file=errors, flush=True)
+                if not (line := source.readline()):
+                    break
+                value = line.removesuffix("\n").removesuffix("\r")
+            try:
+                if self.operation == "encode":
+                    result = engine.encode(value, self.type_name or "", self.scope)
                 else:
-                    if not (self.is_pipe or self.arguments):
-                        print("Out: ", end="")
-                    print(result)
-
-    @cached_property
-    def nmr(self) -> Nmr:
-        from nmr import Nmr
-
-        return Nmr(self.word_file, self.word_count)
-
-    @cached_property
-    def is_pipe(self) -> bool:
-        return not sys.stdin.isatty()
-
-    @cached_property
-    def _type_class(self) -> type[TypeNamer[Any]] | None:
-        if self.output_type:
-            return get_class(self.output_type)
-        return None
-
-    def rnd(self) -> None:  # TODO re-enable
-        for _ in range(self.random_count):
-            r = int(10 ** random.uniform(0, 50))
-            print(f"{r}:", *self.nmr.encode_to_name(r))
+                    result = engine.decode(
+                        value, self.operation == "browse", self.expect_vocabulary
+                    )
+            except ValueError as error:
+                print(f"ERROR: {error}", file=errors)
+                status = 1
+            else:
+                if self.json_output:
+                    print(result.model_dump_json(), file=output)
+                else:
+                    print(
+                        result.name if self.operation == "encode" else result.value,
+                        file=output,
+                    )
+                    if self.operation == "browse":
+                        print(f"Canonical name: {result.name}", file=errors)
+            if self.value is not None:
+                break
+        return status
 
 
-def exit(*error: Any) -> NoReturn:
-    if error:
-        print(*error, file=sys.stderr)
-    sys.exit(bool(error))
+def main(args: Sequence[str] | None = None) -> int:
+    options = tyro.cli(Main, args=args)
+    try:
+        return options.run(sys.stdin, sys.stdout, sys.stderr)
+    except (ValueError, OSError) as error:
+        print(f"ERROR: {error}", file=sys.stderr)
+        return 1

@@ -1,45 +1,33 @@
-from __future__ import annotations
-
 import pytest
 
-from nmr import category
-
-ROUND_TRIP_CASES = [
-    (0, 0, category.Math.INTEGER),
-    (1, 0, category.Science.ELEMENT),
-    (2, 0, category.Art.MUSIC),
-    (6, 0, category.Commercial.ISBN),
-]
-
-NON_ROUND_TRIP_CASES = []
-
-ALL_CASES = (
-    list(range(16))
-    + list(range(n := 109223, n + 32))
-    + list(range(n := 3458702354876246, n + 32))
-)
+from nmr.category import Category, route
+from nmr.registry import ROOT
+from nmr.types.integer import Int
 
 
-def test_simple():
-    assert category.make_category(8) == (category.Math.FRACTION, 0)
+def test_last_slot_never_accepts_a_leaf() -> None:
+    with pytest.raises(ValueError, match="last slot"):
+        Category(name="bad", children={4: Int})
 
 
-@pytest.mark.parametrize("n,d,t", ROUND_TRIP_CASES)
-def test_category(n, d, t):
-    assert t.number_to_index(d) == n
-    assert category.make_category(n) == (t, d)
+def test_growth_preserves_old_allocations() -> None:
+    old = Category(name="root", children={0: Int})
+    new = Category(
+        name="root", children={0: Int, 4: Category(name="extra", children={0: Int})}
+    )
+    for i in range(100):
+        assert old.resolve(route([0], i)) == new.resolve(route([0], i)) == (Int, i)
+        assert new.resolve(route([4, 0], i)) == (Int, i)
 
 
-@pytest.mark.parametrize("n,d,t", NON_ROUND_TRIP_CASES)
-def test_category_non(n, d, t):
-    assert (n2 := t.number_to_index(d)) != n
-    assert t.number_to_index(n2) == n2
-    assert category.make_category(n) == (t, d)
-
-
-@pytest.mark.parametrize("n", ALL_CASES)
-def test_category_all(n):
-    t, r = category.make_category(n)
-    n2 = t.number_to_index(r)
-
-    assert category.make_category(n2) == (t, r)
+def test_root_order_and_reserved_slot() -> None:
+    assert [i.name for i in ROOT.children.values() if isinstance(i, Category)] == [
+        "universal",
+        "physical",
+        "virtual",
+        "play",
+        "meta",
+    ]
+    with pytest.raises(ValueError, match="unassigned"):
+        ROOT.resolve(route([0, 3], 0))
+    assert ROOT.resolve(route([0, 3], 0), browse=True)[0] is Int

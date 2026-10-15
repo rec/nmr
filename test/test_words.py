@@ -4,50 +4,37 @@ import pytest
 
 from nmr.words import Words
 
-WORD_LISTS = (
-    ("one", "two", "three"),
-    ("one", "two", "Three"),
-    ("one", "Two", "three", "Three"),
+
+def test_all_small_permutations_are_bijective() -> None:
+    words = ["a", "b", "c", "d", "e"]
+    engine = Words(words)
+    indices = set()
+    for n in range(1, len(words) + 1):
+        for p in itertools.permutations(words, n):
+            index = engine.decode_from_name(p)
+            assert engine.encode_to_name(index) == list(p)
+            indices.add(index)
+    assert indices == set(range(engine.count_words()))
+
+
+@pytest.mark.parametrize(
+    "words", [[], ["a", "A"], ["two words"], ["a:b"], ["e\u0301", "é"]]
 )
+def test_invalid_vocabularies_are_rejected(words: list[str]) -> None:
+    with pytest.raises(ValueError):
+        Words(words)
 
-PARAMS = itertools.product(WORD_LISTS, (False, True))
+
+@pytest.mark.parametrize("name", [[], ["one", "one"], ["missing"]])
+def test_invalid_names_are_rejected(name: list[str]) -> None:
+    with pytest.raises(ValueError):
+        Words(["one", "two"]).decode_from_name(name)
 
 
-@pytest.mark.parametrize("words, ignore_case", PARAMS)
-def test_case(words, ignore_case):
-    try:
-        try:
-            w = Words(words, ignore_case=ignore_case)
-        except ValueError as e:
-            if words == ("one", "Two", "three", "Three") and ignore_case:
-                assert e.args == ("Duplicate word: three",)
-                return
-            else:
-                raise
-
-        expected = 4
-        name = w.encode_to_name(expected)
-        actual = w.decode_from_name(name)
-        assert actual == expected
-
-        original = "one", "Three"
-        expected = ("one", "three") if ignore_case else original
-        n = w.decode_from_name(original)
-        if len(words) == 4:
-            assert name == ["Two", "one"]
-        else:
-            assert name == ["one", "two"]
-        try:
-            actual = w.encode_to_name(n)
-        except ValueError as e:
-            if words == ("one", "two", "three") and not ignore_case:
-                assert e.args == ("Didn't recognize the following word: Three",)
-                return
-            else:
-                raise
-
-        assert actual == list(expected)
-
-    except ValueError as e:
-        if words == ("one", "two", "three") and not ignore_case:
-            assert e.args == ("Didn't recognize the following word: Three",)
+def test_vocabulary_identity_covers_order_case_policy_and_unicode() -> None:
+    first = Words(["e\u0301", "A"])
+    second = Words(["é", "a"])
+    assert first.identifier == second.identifier
+    assert first.identifier != Words(["a", "é"]).identifier
+    assert first.identifier != Words(["é", "a"], ignore_case=False).identifier
+    assert Words(first.export().splitlines()).identifier == first.identifier

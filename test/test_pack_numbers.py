@@ -1,24 +1,18 @@
-import itertools
-
 import pytest
 
-from nmr.pack_numbers import Packer
-
-ROUND_TRIPS = (
-    [0],
-    [10],
-    [0, 0],
-    [4, 7],
-    [0, 0, 0],
-    [2, 7, 3],
-    [0, 0, 0, 0],
-    [0, 2, 0, 1],
-)
-PARAMS = itertools.product(ROUND_TRIPS, [False, True])
+from nmr.pack_numbers import Packer, pair, unpair
 
 
-@pytest.mark.parametrize("numbers, forward", PARAMS)
-def test_round_trip(numbers, forward):
-    p = Packer(len(numbers), forward)
-    result = p.unpack(p.pack(*numbers))
-    assert result == numbers
+@pytest.mark.parametrize("count", [1, 2, 3, 8])
+@pytest.mark.parametrize("forward", [False, True])
+def test_arbitrary_precision_packing(count: int, forward: bool) -> None:
+    numbers = [10**100 + i for i in range(count)]
+    packer = Packer(count=count, forward=forward)
+    assert packer.unpack(packer.pack(*numbers)) == numbers
+
+
+def test_pair_boundaries() -> None:
+    for d in [0, 1, 10, 10**30, 10**300]:
+        boundary = d * (d + 1) // 2
+        for n in range(max(0, boundary - 1), boundary + 2):
+            assert pair(*unpair(n)) == n

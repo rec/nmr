@@ -1,27 +1,20 @@
-from __future__ import annotations
+"""Rank and unrank nonempty word permutations, without repeated words."""
 
 import bisect
-from collections import Counter
-from collections.abc import Iterator, Sequence
+import hashlib
+import json
+import unicodedata
+from collections.abc import Sequence
+from functools import cached_property
 from pathlib import Path
-from typing import cast
-from collections.abc import Iterable
 
-from . import count_words
+from .count_words import CountWords
 
-# The minimum total number of words needed to be able to represent all 64-bit
-# integers with six words or less is 1628
-FILE = Path(__file__).parent.parent / "words.txt"
+FILE = Path(__file__).with_name("words.txt")
 COUNT_FOR_FILE = 1628
 
 
 class Words:
-    """A list of words to use in naming."""
-
-    words: Sequence[str]
-    inverse: dict[str, int]
-    ignore_case: bool
-
     def __init__(
         self,
         words: Sequence[str] | Path | None = None,
@@ -29,110 +22,94 @@ class Words:
         ignore_case: bool = True,
     ) -> None:
         self.ignore_case = ignore_case
-
         if words is None:
             words = FILE
             if count is None:
                 count = COUNT_FOR_FILE
-
         if isinstance(words, Path):
-            with words.open() as fp:
-                words = tuple(fp)
+            words = words.read_text().splitlines()
+        tokens = [
+            self.normalize(i.strip())
+            for i in words
+            if i.strip() and not i.lstrip().startswith("#")
+        ]
+        if not tokens or any(":" in i or any(c.isspace() for c in i) for i in tokens):
+            raise ValueError(
+                "A vocabulary needs nonempty words without whitespace or colons"
+            )
+        if len(tokens) != len(set(tokens)):
+            raise ValueError("Duplicate words after vocabulary normalization")
+        if count is not None:
+            if not 1 <= count <= len(tokens):
+                raise ValueError("Word count must be between 1 and the vocabulary size")
+            tokens = tokens[:count]
+        self.words = tuple(tokens)
+        self.count = len(tokens)
+        self.inverse = {w: i for i, w in enumerate(tokens)}
+        self._counts = CountWords(self.count)
 
-        it = (w.strip() for w in words)
-        it = (w for w in it if w and not w.startswith("#"))
-        words = tuple(self._maybe_lower(it))
-        _check_dupes(words)
+    def normalize(self, word: str) -> str:
+        word = unicodedata.normalize("NFC", word)
+        return (
+            unicodedata.normalize("NFC", word.casefold()) if self.ignore_case else word
+        )
 
-        if count is None:
-            count = len(words)
-        elif count < len(words):
-            words = words[:count]
-        elif count > len(words):
-            raise ValueError(f"{count=} > {len(words)=}")
+    @cached_property
+    def identifier(self) -> str:
+        contents = json.dumps(
+            ["nmr-vocabulary-1", self.ignore_case, self.words],
+            ensure_ascii=False,
+            separators=(",", ":"),
+        )
+        return hashlib.sha256(contents.encode()).hexdigest()
 
-        self.words = words
-        self.count = count
-        self._count_words = count_words.CountWords(self.count)
-        self.inverse = {w: i for i, w in enumerate(self.words)}
+    def export(self) -> str:
+        return "\n".join(self.words) + "\n"
 
     def count_words(self, n: int | None = None) -> int:
-        return self._count_words.count(n)
+        if n is not None and not 0 <= n <= self.count:
+            raise ValueError("Word length outside vocabulary capacity")
+        return self._counts.count(n)
 
-    def decode_from_name(self, name: Sequence[str]) -> int:
-        name = list(self._maybe_lower(name))
-        name = name[::-1]
-        inverses = [self.inverse.get(w) for w in name]
-        if bad := ", ".join(
-            n for n, i in zip(name, inverses, strict=False) if i is None
-        ):
-            s = "s" if "," in bad else ""
-            raise ValueError(f"Didn't recognize the following word{s}: {bad}")
-        return self._from_digits(list(_redupe(cast(list[int], inverses)))[::-1])
-
-    def encode_to_name(self, num: int) -> Sequence[str]:
+    def encode_to_name(self, num: int) -> list[str]:
         if num < 0:
             raise ValueError("Only accepts non-negative numbers")
-        return [self.words[i] for i in self._to_digits(num)]
+        length = next(
+            (i for i in range(1, self.count + 1) if self.count_words(i) > num), None
+        )
+        if length is None:
+            raise ValueError("Vocabulary capacity exceeded; choose a larger word list")
+        total = num - self.count_words(length - 1)
+        digits: list[int] = []
+        used: list[int] = []
+        for i in range(length):
+            total, digit = divmod(total, self.count - i)
+            for index in used:
+                digit += index <= digit
+            bisect.insort(used, digit)
+            digits.append(digit)
+        return [self.words[i] for i in reversed(digits)]
 
-    def is_name(self, s: Sequence[str]) -> bool:
-        s = list(self._maybe_lower(s))
-        return all(i in self.inverse for i in s) and not _dupes(s)
-
-    def _to_digits(self, num: int) -> list[int]:
-        it = (i + 1 for i in range(self.count) if self.count_words(i + 1) > num)
-        if (word_count := next(it, None)) is None:
-            raise ValueError(f"Cannot represent {num} in base {self.count}")
-
-        total = num - self.count_words(word_count - 1)
-        digits = []
-
-        for i in range(word_count):
-            total, index = divmod(total, self.count - i)
-            digits.append(index)
-        assert not total
-
-        return list(_undupe(digits))[::-1]
-
-    def _from_digits(self, digits: list[int]) -> int:
+    def decode_from_name(self, name: Sequence[str]) -> int:
+        words = [self.normalize(i) for i in name]
+        if not words:
+            raise ValueError("A name needs at least one word")
+        if len(words) != len(set(words)):
+            raise ValueError("A name cannot repeat words")
+        unknown = [i for i in words if i not in self.inverse]
+        if unknown:
+            raise ValueError("Unrecognized words: " + ", ".join(unknown))
+        indexes = [self.inverse[i] for i in reversed(words)]
+        digits = [n - sum(i < n for i in indexes[:j]) for j, n in enumerate(indexes)]
         total = 0
-        for i, d in enumerate(digits):
-            total *= self.count - (len(digits) - i - 1)
-            total += d
+        for i, digit in enumerate(reversed(digits)):
+            total = total * (self.count - len(digits) + i + 1) + digit
+        return self.count_words(len(words) - 1) + total
 
-        return self.count_words(len(digits) - 1) + total
-
-    def _maybe_lower(self, it: Iterable[str]) -> Iterable[str]:
-        yield from (i.lower() for i in it) if self.ignore_case else it
-
-
-def _check_dupes(words: Sequence[str]) -> None:
-    if e := _dupe_error(words):
-        raise ValueError(e)
-
-
-def _dupe_error(words: Sequence[str]) -> str | None:
-    if bad := _dupes(words):
-        s = "" if len(bad) == 1 else "s"
-        msg = ", ".join(sorted(bad))
-        return f"Duplicate word{s}: {msg}"
-    return None
-
-
-def _dupes(words: Sequence[str]) -> list[str]:
-    return [k for k, v in Counter(words).items() if v > 1]
-
-
-def _redupe(indexes: Sequence[int]) -> Iterator[int]:
-    for i, num in enumerate(indexes):
-        yield num - sum(k < num for k in indexes[:i])
-
-
-def _undupe(indexes: Sequence[int]) -> Iterator[int]:
-    sorted_result: list[int] = []
-
-    for i in indexes:
-        for s in sorted_result:
-            i += s <= i
-        bisect.insort(sorted_result, i)
-        yield i
+    def is_name(self, words: Sequence[str]) -> bool:
+        tokens = [self.normalize(i) for i in words]
+        return (
+            bool(tokens)
+            and len(tokens) == len(set(tokens))
+            and all(i in self.inverse for i in tokens)
+        )

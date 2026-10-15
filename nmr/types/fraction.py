@@ -1,40 +1,40 @@
-from __future__ import annotations
-
 import fractions
+import math
+from typing import ClassVar
 
-from ..category import Math
-from ..pack_numbers import Packer
+from pydantic import BaseModel, ConfigDict
+
+from ..pack_numbers import pair, unpair
 from ..type_namer import TypeNamer
+from .integer import signed_index, signed_value
 
-packer = Packer(2)
 
+class Frac(BaseModel, TypeNamer, frozen=True):
+    numerator: int
+    denominator: int
+    label: ClassVar[str] = "frac"
+    description: ClassVar[str] = "Exact numerator/denominator pair, including 0/0"
 
-class Fraction(TypeNamer[fractions.Fraction]):
-    category = Math.FRACTION
+    def float(self) -> float:
+        if self.denominator == 0:
+            if self.numerator == 0:
+                return math.nan
+            return math.inf if self.numerator > 0 else -math.inf
+        return float(self.fraction())
+
+    def fraction(self) -> fractions.Fraction:
+        return fractions.Fraction(self.numerator, self.denominator)
 
     @staticmethod
-    def type_to_index(t: fractions.Fraction) -> int:
-        if not t:
-            return 0
-        num, denom = t.as_integer_ratio()
-        assert num and denom
-        if num > 0:
-            num = num * 2 - 1
-        else:
-            num = -num * 2
-        return 1 + packer.pack(num - 1, denom - 1)
+    def str_to_index(value: str) -> int:
+        parts = value.split("/")
+        if len(parts) != 2:
+            raise ValueError("Expected numerator/denominator")
+        return pair(*(signed_index(int(i)) for i in parts))
 
     @staticmethod
-    def index_to_type(i: int) -> fractions.Fraction:
-        if not i:
-            return fractions.Fraction(0)
+    def index_to_str(index: int, browse: bool = False) -> str:
+        numerator, denominator = (signed_value(i) for i in unpair(index))
+        return f"{numerator}/{denominator}"
 
-        num, denom = packer.unpack(i - 1)
-        num += 1
-        denom += 1
-        if num % 2:
-            num = (num + 1) // 2
-        else:
-            num = -num // 2
-
-        return fractions.Fraction(num, denom)
+    model_config = ConfigDict(strict=True)

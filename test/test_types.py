@@ -1,60 +1,50 @@
+import fractions
+import math
+
 import pytest
 
-from nmr import nmr, types
+from nmr.types.floating import Float
+from nmr.types.fraction import Frac
+from nmr.types.integer import Int
 
-ROUND_TRIPS = (
-    "12341324",
-    "-3",
-    "12",
-    "127.0.0.1",
-    "v1.1.92",
-    """52° 22' 3.36" N, 4° 54' 14.76" E""",
-    "123e4567-e89b-12d3-a456-426614174000",
-    "1/2",
-    "-1752/491",
-    "2001:0:130f::9c0:876a:130b",
+
+@pytest.mark.parametrize("value", ["0/0", "1/2", "2/4", "0/3", "-1/-2", "1/0", "-1/0"])
+def test_fraction_pairs_preserve_identity(value: str) -> None:
+    assert Frac.index_to_str(Frac.str_to_index(value)) == value
+
+
+def test_fraction_conversions_delegate_without_changing_identity() -> None:
+    value = Frac(numerator=2, denominator=4)
+    assert value.fraction() == fractions.Fraction(1, 2)
+    assert value.float() == 0.5
+    assert value != Frac(numerator=1, denominator=2)
+    assert value.numerator == 2 and value.denominator == 4
+    assert math.isnan(Frac(numerator=0, denominator=0).float())
+    assert Frac(numerator=1, denominator=0).float() == math.inf
+    assert Frac(numerator=-1, denominator=0).float() == -math.inf
+    with pytest.raises(ZeroDivisionError):
+        Frac(numerator=0, denominator=0).fraction()
+    with pytest.raises(TypeError):
+        float(value)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "0.0",
+        "-0.0",
+        "1.5",
+        "inf",
+        "-inf",
+        "bits:7ff8000000000042",
+        "bits:fff8000000000001",
+    ],
 )
+def test_float_preserves_all_bits(value: str) -> None:
+    index = Float.str_to_index(value)
+    assert Float.str_to_index(Float.index_to_str(index)) == index
 
 
-@pytest.mark.parametrize("s", ROUND_TRIPS)
-def test_index_roundtrips(s):
-    i = types.str_to_index(s)
-    assert s == types.index_to_str(i)
-
-
-@pytest.mark.parametrize("s", ROUND_TRIPS)
-def test_name_roundtrips(s):
-    name = nmr.str_to_name(s)
-    result = nmr.name_to_str(name)
-    assert s == result
-
-
-def test_fractions():
-    to_type = [types.Fraction.index_to_type(i) for i in range(32)]
-    actual = [str(i) for i in to_type]
-    expected1 = (
-        ["0"]
-        + ["1", "-1"]
-        + ["1/2", "2", "-1/2"]
-        + ["1/3", "-2", "1", "-1/3"]
-        + ["1/4", "3", "-1", "2/3", "-1/4"]
-        + ["1/5", "-3", "3/2", "-2/3", "1/2", "-1/5"]
-        + ["1/6", "4", "-3/2", "1", "-1/2", "2/5", "-1/6", "1/7"]
-        + ["-4", "2", "-1"]
-    )
-    assert actual == expected1
-    actual = [types.Fraction.type_to_index(t) for t in to_type]
-    expected2 = (
-        [0]
-        + [1, 2]
-        + [3, 4, 5]
-        + [6, 7, 1, 9]
-        + [10, 11, 2, 13, 14]
-        + [15, 16, 17, 18, 3, 20]
-        + [21, 22, 23, 1, 5, 26, 27, 28]
-        + [29, 4, 2]
-    )
-    assert actual == expected2
-
-    actual = [str(types.Fraction.index_to_type(i)) for i in expected2]
-    assert actual == expected1
+def test_signed_integers() -> None:
+    for i in range(-100, 100):
+        assert Int.index_to_str(Int.str_to_index(str(i))) == str(i)

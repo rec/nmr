@@ -1,104 +1,97 @@
+"""Five-way routing. Slot four is always empty or a category."""
+
 from __future__ import annotations
 
-from enum import IntEnum, auto
+from collections.abc import Iterator
 
-DEFAULT_RADIX = 8
+from pydantic import BaseModel, ConfigDict, model_validator
+
+from .type_namer import TypeNamer
+
+RADIX = 5
 
 
-class Category:
+class Category(BaseModel, frozen=True):
     name: str
-    value: int
+    children: dict[int, Category | type[TypeNamer]]
 
-    @classmethod
-    def divmod(cls, n: int, strict: bool = False) -> tuple[Category, int]:
-        d, m = divmod(n, cls.radix())
-        lc = len(cls)  # type: ignore[arg-type]
-        if m >= lc:
-            if strict:
-                raise IndexError(f"Out of range {m=}, len(cls)={lc}")
-            m = m % lc
+    @model_validator(mode="after")
+    def validate_children(self) -> Category:
+        if any(i < 0 or i >= RADIX for i in self.children):
+            raise ValueError("Category slots must be between 0 and 4")
+        if 4 in self.children and not isinstance(self.children[4], Category):
+            raise ValueError("The last slot can never be a leaf")
+        labels = [label(i) for i in self.children.values()]
+        if len(labels) != len(set(labels)):
+            raise ValueError("Sibling names must be unique")
+        return self
 
-        self = cls(m + 1)  # type: ignore[call-arg]
-        return self, d
+    def leaves(
+        self, prefix: str = ""
+    ) -> Iterator[tuple[str, list[int], type[TypeNamer]]]:
+        for slot, child in sorted(self.children.items()):
+            path = f"{prefix}{label(child)}"
+            if isinstance(child, Category):
+                for name, slots, codec in child.leaves(path + ":"):
+                    yield name, [slot, *slots], codec
+            else:
+                yield path, [slot], child
 
-    @classmethod
-    def radix(cls) -> int:
-        return _RADIX_TABLE.get(cls, DEFAULT_RADIX)  # type: ignore[arg-type]
+    def lookup(self, path: str) -> tuple[Category | type[TypeNamer], list[int]]:
+        node: Category | type[TypeNamer] = self
+        slots: list[int] = []
+        if not path:
+            return node, slots
+        for part in path.split(":"):
+            if not isinstance(node, Category):
+                raise ValueError(f"Extra components after a leaf: {path}")
+            matches = [(s, c) for s, c in node.children.items() if label(c) == part]
+            if not matches:
+                raise ValueError(f"Unknown category or type: {path}")
+            slot, node = matches[0]
+            slots.append(slot)
+        return node, slots
 
-    _SUBCLASSES: dict[str, type[Category]] = {}
+    def resolve(self, index: int, browse: bool = False) -> tuple[type[TypeNamer], int]:
+        if index < 0:
+            raise ValueError("Expected a nonnegative index")
+        node: Category | type[TypeNamer] = self
+        while isinstance(node, Category):
+            index, slot = divmod(index, RADIX)
+            if slot not in node.children:
+                if not browse:
+                    raise ValueError("Name selects an unassigned category slot")
+                available = [
+                    s
+                    for s, c in sorted(node.children.items())
+                    if not isinstance(c, Category) or list(c.leaves())
+                ]
+                if not available:
+                    raise ValueError("No implemented types in this category")
+                slot = available[slot % len(available)]
+            child = node.children[slot]
+            if browse and isinstance(child, Category) and not list(child.leaves()):
+                available = [
+                    c
+                    for c in node.children.values()
+                    if not isinstance(c, Category) or list(c.leaves())
+                ]
+                if not available:
+                    raise ValueError("No implemented types in this category")
+                child = available[slot % len(available)]
+            node = child
+        return node, index
 
-    def __init_subclass__(cls) -> None:
-        assert cls.__name__ not in cls._SUBCLASSES
-        cls._SUBCLASSES[cls.__name__] = cls
-
-
-class Group(Category, IntEnum):
-    MATH = auto()
-    SCIENCE = auto()
-    ART = auto()
-    LOCATION = auto()
-
-    COMPUTER = auto()
-    GAME = auto()
-    COMMERCIAL = auto()
-    COMBINE = auto()
-
-
-class Subcategory(Category):
-    def number_to_index(self, n: int) -> int:
-        g = Group[self.__class__.__name__.upper()]
-        return g.value - 1 + Group.radix() * (self.value - 1 + self.radix() * n)
-
-
-class Math(Subcategory, IntEnum):
-    INTEGER = auto()
-    FRACTION = auto()
-    FLOATING = auto()
-
-
-class Science(Subcategory, IntEnum):
-    ELEMENT = auto()
-    UNIT = auto()
-    SMILES = auto()
-
-
-class Art(Subcategory, IntEnum):
-    MUSIC = auto()
-
-
-class Location(Subcategory, IntEnum):
-    LAT_LONG = auto()
-    TIME = auto()
-
-
-class Computer(Subcategory, IntEnum):
-    IP_V4_ADDRESS = auto()
-    IP_V6_ADDRESS = auto()
-    SEMVER = auto()
-    UUID = auto()
-
-
-class Game(Subcategory, IntEnum):
-    BACKGAMMON = auto()
-    CARDS = auto()
-    CHESS = auto()
-    GO = auto()
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class Commercial(Subcategory, IntEnum):
-    ISBN = auto()
-    UPC = auto()
-    PHONE_NUMBER = auto()
+def label(node: Category | type[TypeNamer]) -> str:
+    return node.name if isinstance(node, Category) else node.label
 
 
-class Combine(Subcategory, IntEnum):
-    COMBINE = auto()
-
-
-_RADIX_TABLE = {Location: 4, Computer: 32, Commercial: 32, Combine: 1}
-
-
-def make_category(n: int, strict: bool = False) -> tuple[Category, int]:
-    group, d = Group.divmod(n, strict)
-    subclass = Category._SUBCLASSES[group.name.capitalize()]
-    return subclass.divmod(d, strict)
+def route(slots: list[int], index: int) -> int:
+    if index < 0:
+        raise ValueError("Expected a nonnegative index")
+    for slot in reversed(slots):
+        index = slot + RADIX * index
+    return index
