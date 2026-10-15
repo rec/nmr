@@ -8,13 +8,13 @@ from pydantic import BaseModel
 from nmr.nmr import Nmr
 
 
-class Settings(BaseModel):
+class Settings(BaseModel, frozen=True):
     words: list[str] | None = None
     count: int | None = None
     case_sensitive: bool = False
 
 
-class Request(BaseModel):
+class Request(BaseModel, frozen=True):
     operation: Literal["encode", "decode", "browse"]
     value: str
     type_name: str = ""

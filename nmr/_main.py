@@ -12,7 +12,7 @@ from pydantic import BaseModel, Field
 from .nmr import Nmr
 
 
-class Main(BaseModel):
+class Main(BaseModel, frozen=True):
     operation: Literal["encode", "decode", "browse", "build-web"] = "decode"
     """Canonical decode is the default; browsing must be explicitly selected."""
     value: str | None = None

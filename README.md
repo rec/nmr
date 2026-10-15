@@ -21,13 +21,16 @@ This checkout contains the new 1.0 format; it has not been published to PyPI.
 ```sh
 git clone git@github.com:rec/nmr.git
 cd nmr
-uv sync --locked
-uv run nmr --operation encode --type date --value 2000-02-29
-uv run nmr --value 'physical:time:date:nor lung'
+uv sync --frozen
+uv run --frozen nmr --operation encode --type date --value 2000-02-29
+uv run --frozen nmr --value 'physical:time:date:nor lung'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
 Use `nmr --help` for the complete options and `nmr --list-types` for type paths.
+Frozen development commands use the checked-in package versions independently of
+machine-local resolution settings. Regenerate the lock deliberately when changing
+dependencies.
 
 ## Encode, decode, and browse
 
@@ -217,13 +220,13 @@ A fuller prefix removes more of those routing components from the word payload.
 `test/format.json` freezes shared Python and WebAssembly examples.
 
 ```sh
-uv sync --locked
-uv run pytest
-uv run ruff check --select B,E,F,I nmr test scripts
-uv run ruff format --check nmr test scripts
-uv run ty check nmr
-uv run coverage run -m pytest
-uv run coverage report
+uv sync --frozen
+uv run --frozen pytest
+uv run --frozen ruff check --select B,E,F,I nmr test scripts
+uv run --frozen ruff format --check nmr test scripts
+uv run --frozen ty check nmr
+uv run --frozen coverage run -m pytest
+uv run --frozen coverage report
 uv build
 ```
 

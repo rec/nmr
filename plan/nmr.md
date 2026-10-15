@@ -661,6 +661,9 @@ CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated
 local editor and reflog files; browser bundles include project/dependency licenses.
+The first remote install exposed host-specific cooldown settings in the lockfile.
+Those settings were removed without changing package versions, and reproduction
+commands now use frozen installs. A clean environment was checked independently.
 
 The unit suite covers small-vocabulary permutations exhaustively, exact pairing
 boundaries, prefix equivalence, canonical rejection, browsing, invalid data,

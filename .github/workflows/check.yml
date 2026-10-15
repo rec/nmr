@@ -17,14 +17,14 @@ jobs:
         with:
           version: "0.13.1"
           python-version: ${{ matrix.python }}
-      - run: uv sync --locked
-      - run: uv run ruff check --select B,E,F,I nmr test scripts
-      - run: uv run ruff format --check nmr test scripts
-      - run: uv run ty check nmr
-      - run: uv run coverage run -m pytest -q
-      - run: uv run coverage report
+      - run: uv sync --frozen
+      - run: uv run --frozen ruff check --select B,E,F,I nmr test scripts
+      - run: uv run --frozen ruff format --check nmr test scripts
+      - run: uv run --frozen ty check nmr
+      - run: uv run --frozen coverage run -m pytest -q
+      - run: uv run --frozen coverage report
       - run: uv build
-      - run: uv run nmr --operation build-web
+      - run: uv run --frozen nmr --operation build-web
       - name: Verify installed wheel outside the checkout
         run: |
           uv venv /tmp/nmr-installed
@@ -39,8 +39,8 @@ jobs:
         with:
           version: "0.13.1"
           python-version: "3.13"
-      - run: uv sync --locked
-      - run: uv run nmr --operation build-web
+      - run: uv sync --frozen
+      - run: uv run --frozen nmr --operation build-web
       - run: npm install --prefix /tmp/nmr-js --no-audit --no-fund pyodide@0.29.3
       - run: NODE_PATH=/tmp/nmr-js/node_modules node test/runtime_smoke.cjs
   browser-ui:
@@ -52,13 +52,13 @@ jobs:
         with:
           version: "0.13.1"
           python-version: "3.13"
-      - run: uv sync --locked
-      - run: uv run nmr --operation build-web
+      - run: uv sync --frozen
+      - run: uv run --frozen nmr --operation build-web
       - run: npm install --prefix /tmp/nmr-js --no-audit --no-fund playwright@1.64.1
       - run: /tmp/nmr-js/node_modules/.bin/playwright install --with-deps chromium
       - name: Browser interactions and local-only conversions
         run: |
-          uv run python -m http.server 8765 --bind 127.0.0.1 --directory dist/web >/tmp/nmr-http.log 2>&1 &
+          uv run --frozen python -m http.server 8765 --bind 127.0.0.1 --directory dist/web >/tmp/nmr-http.log 2>&1 &
           server_pid=$!
           trap 'kill "$server_pid"' EXIT
           curl --retry-connrefused --retry 10 --retry-delay 1 -fsS http://127.0.0.1:8765/ >/dev/null
