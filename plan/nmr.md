@@ -21,8 +21,11 @@ Additional work beyond the prompt: None.
 * Once established, canonical names must remain backward compatible forever.
   There is no later incompatible format reset. Adding types must remain possible
   without changing the meaning of any existing canonical name.
-* Every type-allocation block has six child slots and two continuation slots,
-  with permanently assigned roles. The branching radix is always eight.
+* The root categories, in order, are `universal`, `physical`, `virtual`, `play`,
+  and `meta`. Every category node has five slots, with fixed radix five.
+* The last slot, index 4, may be empty or contain a category, never a leaf.
+  Slots 0 through 3 may be empty, leaves, or categories. This rule applies at
+  every depth; expansion uses ordinary categories.
 * Canonical decoding is the default. Browsing is a separate, explicit operation
   that can map unassigned or out-of-range indices into supported choices.
 * The namable numeric classes are `Int`, `Frac`, and `Float`.
@@ -130,34 +133,51 @@ weaken this guarantee. No future version switch is an escape from it.
 
 ### Permanent, extensible type allocation
 
-Use the same fixed structure for every type-allocation block: six child slots
-and two continuation slots, giving radix eight everywhere in the category tree.
-Replace the separate radix override table with this explicit structure. This rule
-governs type routing, not the internal enumeration of objects within a leaf codec.
+Use fixed branching of five at every category node, including the root. Replace
+the separate radix override table with this uniform rule. It governs type routing,
+not the internal enumeration of objects within a leaf codec.
 
-Number the child slots 0 through 5 and the continuation slots 6 and 7. A child
-names a category with its own allocation tree or a specifically defined leaf type.
-Each continuation leads to another block with the same six-plus-two layout,
-extending the current category's available children. Continuations are encoding
-machinery, not additional user-visible categories or prefix components.
+The root allocation is settled:
 
-Roles are permanent: a child slot never becomes a continuation, and a continuation
-slot never temporarily holds a child. Once published, occupied child allocations
-and continuation paths never move. New children fill previously unassigned child
-slots, allocating further continuation blocks as needed. Never resize a block or
-derive its radix from the current number of implemented children.
+| Slot | Category | Scope |
+| --- | --- | --- |
+| 0 | `universal` | Math and science. |
+| 1 | `physical` | Time and geographic location, including latitude/longitude. |
+| 2 | `virtual` | Computing, communication, contacts, and identifiers. |
+| 3 | `play` | Art, music, and games. |
+| 4 | `meta` | Collections, composites, and structural types. |
 
-At continuation depth `d`, there can be `2^d` blocks and `6 * 2^d` child slots at
-that depth. Selecting one of those children takes `d + 1` radix-eight steps within
-the category. Thus available blocks double with depth, while each routing step
-adds three bits of overhead. For a slot `s` and remaining payload integer `n`,
-the routing operation is `s + 8*n`; decoding uses division with remainder by eight.
-The word-permutation ranking remains unchanged.
+`universal` is the category name; “canonical” refers to encoding and decoding,
+not a category. Place the existing mathematical and scientific types under
+`universal`; time and coordinates under `physical`; computer, contact, and
+commercial identifier types under `virtual`; art and games under `play`; and
+the former combination concept under `meta`. Exact subcategory names, slot
+assignments, and structural leaf definitions remain to be settled. These homes
+do not add every unfinished type to the implementation scope.
 
-This supplies indefinite expansion without changing existing canonical names.
-Measure actual name lengths and prefix savings using the fixed layout. Finite
-vocabulary capacity still bounds which particular objects can be expressed with
-a particular list.
+At every category node, slots 0 through 3 may be empty, a specifically defined
+leaf type, or a category. Slot 4 may be empty or a category, but must never be a
+leaf. The root satisfies this rule because `meta` is a category. Every category
+child uses the same five-slot structure and last-slot restriction recursively.
+
+To extend a full node, descend through slot 4. If that slot is empty, create a
+category there and place the new type in an available slot 0 through 3 beneath it.
+In a finite tree, repeatedly following slot 4 eventually reaches an empty slot,
+so space for extension always exists. Other slots can also contain categories,
+allowing broader organization rather than forcing all growth down the last path.
+This guarantees structural room, not a semantically appropriate home for every
+type: choose category meanings with their descendants in mind.
+
+Published slots and category paths never move. A published leaf never becomes a
+category, and an occupied category never becomes a leaf. Never resize a node or
+derive its radix from the current number of implemented children. Every branch
+is an ordinary named category and contributes to the visible prefix path.
+
+For a slot `s` and remaining payload integer `n`, routing is `s + 5*n`; decoding
+uses division with remainder by five. Each additional category edge adds a radix
+step. The word-permutation ranking remains unchanged. Measure actual name lengths
+and prefix savings using this layout. Finite vocabulary capacity still bounds
+which particular objects can be expressed with a particular list.
 
 Unassigned slots are invalid in canonical decoding. Browsing may redirect them
 to supported children. When an unassigned slot is later populated, its browsing
@@ -169,27 +189,24 @@ redirect an already canonical input.
 Use a colon-separated path followed by a word payload:
 
 * No prefix: words encode the global integer.
-* `game:`: words encode the integer inside the game group.
-* `game:chess:`: words encode the integer inside the chess subtype.
+* `play:`: words encode the integer inside the play category.
+* An illustrative `play:game:chess:` path: words encode the integer inside the
+  chess leaf, if `game` and `chess` are the selected subcategory and leaf names.
 
-The current implementation illustrates the principle. Let `g` and `s` be its
-zero-based group and subtype numbers, `R_G` the group radix, `R_g` the group's
-subtype radix, and `n` the type-relative integer.
-The existing global integer is:
+For that illustrative path, let `g` be the game slot within `play`, `c` the chess
+slot within `game`, and `n` the type-relative integer. The global integer is:
 
-`I = g + R_G * (s + R_g * n)`
+`I = 3 + 5 * (g + 5 * (c + 5*n))`
 
-The corresponding payload integers are `I`, `s + R_g * n`, and `n`. Decoding a
-prefix restores the omitted fixed components. For the current chess category,
-these are `21 + 64*n`, `2 + 8*n`, and `n`. This makes the three forms equivalent
-without changing the word-ranking algorithm. These are explanatory examples of
-the old table, not allocations to preserve in the new format. The chosen extensible
-allocation must provide the equivalent operation: include or remove enclosing
-routing components while keeping the same type-relative integer.
+The payload integers for no prefix, `play:`, `play:game:`, and
+`play:game:chess:` are respectively `I`, `g + 5*(c + 5*n)`, `c + 5*n`, and `n`.
+The values of `g` and `c` are not assigned by this example. Decoding a prefix
+restores the omitted fixed routing components. This preserves the type-relative
+integer and makes the forms equivalent without changing the word-ranking algorithm.
 
 Keep prefixes outside the vocabulary. A custom list changes the payload words,
-not the spelling or meaning of `game:chess:`. A prefix restricts decoding to its
-scope; it must never be treated as a hint that the decoder can ignore. Remove a
+not the spelling or meaning of the category path. A prefix restricts decoding to
+its scope; it must never be treated as a hint that the decoder can ignore. Remove a
 prefix only by decoding and re-encoding, never by deleting its text.
 
 Use exact, documented prefix names, normalized consistently across clients. Do
@@ -262,7 +279,7 @@ structured types, rank valid objects directly where practical. Do not promise
 completeness through searching until something happens to be valid.
 
 For a group or global browsing scope, every advertised input must reach a supported
-codec. Document how holes, continuation blocks, and groups without implemented
+codec. Document how empty slots and categories without implemented
 children are redirected within the prefix scope. Publish complete leaf ranges
 first and broader ranges where that construction is established. Unlike canonical
 allocations, these browsing redirects do not reserve permanent aliases.
@@ -375,8 +392,8 @@ and distinguish claimable draws from automatic endings. Measure work for extreme
 indices before publishing a word-length guarantee; enforce limits before decoding,
 not after silently truncating the game.
 
-Decide whether `game:chess:` names a position or a game before establishing the
-permanent format. There are no external FEN names to preserve. If both objects are
+Decide whether the chess leaf under `play` names a position or a game before
+establishing the permanent format. There are no external FEN names to preserve. If both objects are
 needed, give them distinct allocations and meanings. If positions remain the
 main object, browsing legal positions needs a separate explicit design; the
 existing FEN field packing cannot provide the requested legality guarantee.
@@ -481,8 +498,9 @@ leaf-prefixed names generated by the implementation.
 
 Resolve the remaining blocking questions below: initial child placement, chess
 identity, security expectations, browser delivery, `Float` representation, type
-scope, and browsing ranges. The six-child/two-continuation layout, canonical
-decoding as the default, and permanent compatibility are settled requirements.
+scope, and browsing ranges. The five root categories, fixed radix five, last-slot
+restriction, canonical decoding default, and permanent compatibility are settled
+requirements.
 Write the prefix grammar, canonicalization
 rules, stable allocations, and per-type bounds before changing encoders. Replace
 pre-release fixtures deliberately, then freeze fixtures for the established format.
@@ -506,11 +524,12 @@ Add scope-relative rank/unrank using the chosen permanent allocation. Test each
 type at leaf, group, and global scope, including verified equivalence triples,
 word-count boundaries, and reserved slots. Verify canonical rejection and explicit
 browsing separately, including agreement on canonical inputs. Simulate adding
-children through both continuation slots and multiple depths: every previously
-canonical name must retain its meaning at every prefix scope. Verify the six-child,
-two-continuation roles in every block, and that continuation steps do not add
-visible prefix components. Former browsing
-inputs may change discovery results without invalidating those saved names.
+children at multiple depths, including creating a category in an empty last slot
+and extending through existing last-slot categories. Every previously canonical
+name must retain its meaning at every prefix scope. Verify radix five and reject
+leaf allocations in slot 4 at every depth. Verify that new category edges appear
+in the corresponding prefix paths. Former browsing inputs may change discovery
+results without invalidating those saved names.
 
 Exit criterion: all advertised scope ranges satisfy their published guarantees,
 and invalid syntax never masquerades as a browsing input.
@@ -587,10 +606,11 @@ existing users, the branching layout, permanent compatibility, canonical default
 and fraction identity
 are recorded as decisions above rather than asked again.
 
-1. **Initial child placement:** Which categories and types should receive the six
-   direct child slots at each category, and which should begin in continuation
-   blocks? Placement affects name lengths and becomes permanent when published;
-   the six-child/two-continuation layout itself is settled.
+1. **Initial child placement:** How should subcategories and leaf types be arranged
+   beneath the five agreed root categories? Which category meanings should occupy
+   last slots so that later descendants fit naturally? Root names and slots,
+   branching of five, and the ban on last-slot leaves are settled; placements
+   below the root affect name lengths and become permanent when published.
 2. **Meaning of security:** Is obscurity through a privately shared vocabulary
    sufficient, or must this release protect details against someone actively
    trying to recover them? If confidentiality is required, what threats and
@@ -601,8 +621,8 @@ are recorded as decisions above rather than asked again.
 4. **Ease of access:** Is a mobile-friendly, locally executing browser tool a
    first-release requirement? Is reusing Python through a browser runtime
    acceptable, subject to measured download and startup costs?
-5. **Meaning of chess:** Should `game:chess:` identify a move sequence, a position,
-   or a completed game? Must unfinished games and the initial position count?
+5. **Meaning of chess:** Should the chess leaf under `play` identify a move sequence,
+   a position, or a completed game? Must unfinished games and the initial position count?
    Are both positions and games required as separate namable types?
 6. **Browsing coverage:** Which leaf, group, and global scopes must have complete
    browsing ranges at release? Is modulo over explicitly ordered supported
@@ -614,9 +634,9 @@ are recorded as decisions above rather than asked again.
    details, and what minimum “short enough” browsing range should chess and
    the other types guarantee? What browser load and decoding times are acceptable
    on an ordinary phone?
-9. **Prefix UX:** Should full leaf prefixes be the default, as proposed? Are
-   existing group names such as `commercial` and `location` suitable for users,
-   and should custom lists always retain the same English prefix names?
+9. **Prefix UX:** Should full leaf prefixes be the default, as proposed? Which
+   subcategory names below the agreed root are clearest for users, and should
+   custom lists always retain the same English prefix names?
 10. **Dates and time:** Are Gregorian years 1 through 9999 and microseconds enough?
     Do we need partial dates such as month/day birthdays, named timezones, leap
     seconds, or calendar durations in this release? How should ambiguous numeric
