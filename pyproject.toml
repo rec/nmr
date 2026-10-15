@@ -23,9 +23,9 @@ auto = true
 [tool.ruff]
 [dependency-groups]
 dev = [
-    "coverage>=6.5.0,<7",
-    "pytest>=7.2.0,<8",
-    "ruff>=0.8.2,<0.9",
+    "coverage>=7,<8",
+    "pytest>=9,<10",
+    "ruff>=0.14,<1",
     "pyupgrade>=3.21.2",
     "ty>=0.0.14",
 ]
