@@ -1,4 +1,7 @@
 import io
+from pathlib import Path
+
+from pytest import MonkeyPatch
 
 from nmr._main import Main
 
@@ -17,3 +20,66 @@ def test_canonical_decode_is_default() -> None:
     output, errors = io.StringIO(), io.StringIO()
     assert Main(value="universal:to").run(io.StringIO(), output, errors) == 1
     assert output.getvalue() == ""
+
+
+def test_vocabulary_export_and_info(tmp_path: Path) -> None:
+    import json
+
+    from nmr.words import Words
+
+    output, errors = io.StringIO(), io.StringIO()
+    assert Main(vocabulary_info=True).run(io.StringIO(), output, errors) == 0
+    info = json.loads(output.getvalue())
+    assert info["words"] == 1628
+    target = tmp_path / "words.txt"
+    assert Main(export_words=target).run(io.StringIO(), output, errors) == 0
+    assert Words(target).identifier == info["identifier"]
+
+
+def test_json_pipeline_exposes_canonical_value_and_type() -> None:
+    import json
+
+    output, errors = io.StringIO(), io.StringIO()
+    status = Main(
+        operation="encode", type_name="date", value="2000-02-29", json_output=True
+    ).run(io.StringIO(), output, errors)
+    assert status == 0
+    result = json.loads(output.getvalue())
+    assert result["value"] == "2000-02-29"
+    assert result["type"] == "physical:time:date"
+    assert result["canonical"] is True
+
+
+def test_browsing_prints_canonical_name_to_stderr() -> None:
+    output, errors = io.StringIO(), io.StringIO()
+    assert (
+        Main(operation="browse", value="universal:to").run(
+            io.StringIO(), output, errors
+        )
+        == 0
+    )
+    assert output.getvalue().strip() == "0"
+    assert "Canonical name: universal:the" in errors.getvalue()
+
+
+def test_encoding_requires_an_explicit_type() -> None:
+    import pytest
+
+    with pytest.raises(ValueError, match="requires --type"):
+        Main(operation="encode", value="1").run(
+            io.StringIO(), io.StringIO(), io.StringIO()
+        )
+
+
+def test_command_entrypoint_parses_the_pydantic_model(monkeypatch: MonkeyPatch) -> None:
+    import sys
+
+    from nmr._main import main
+
+    output, errors = io.StringIO(), io.StringIO()
+    monkeypatch.setattr(sys, "stdout", output)
+    monkeypatch.setattr(sys, "stderr", errors)
+    assert main(["--operation", "encode", "--type", "frac", "--value", "0/0"]) == 0
+    assert output.getvalue().startswith("universal:math:frac:")
+    assert main(["--value", "missing:the"]) == 1
+    assert "Unknown category" in errors.getvalue()

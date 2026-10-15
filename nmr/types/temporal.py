@@ -71,7 +71,9 @@ class Instant(TypeNamer):
     @staticmethod
     def str_to_index(value: str) -> int:
         if not re.fullmatch(
-            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T" + CLOCK + r"(?:Z|[+-][0-9]{2}:[0-9]{2})",
+            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T"
+            + CLOCK
+            + r"(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
             value,
         ):
             raise ValueError("Timestamp needs an explicit Z or ±HH:MM offset")

@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ..pack_numbers import pair, unpair
 from ..type_namer import TypeNamer
-from .integer import signed_index, signed_value
+from .integer import parse_integer, signed_index, signed_value
 
 
 class Frac(BaseModel, TypeNamer, frozen=True):
@@ -30,7 +30,7 @@ class Frac(BaseModel, TypeNamer, frozen=True):
         parts = value.split("/")
         if len(parts) != 2:
             raise ValueError("Expected numerator/denominator")
-        return pair(*(signed_index(int(i)) for i in parts))
+        return pair(*(signed_index(parse_integer(i)) for i in parts))
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:

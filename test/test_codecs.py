@@ -95,3 +95,27 @@ def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> No
     result = engine.decode(name, browse=True)
     assert not result.canonical
     assert engine.decode(result.name).value == result.value
+
+
+def test_text_browsing_produces_canonical_utf8_without_increasing_index() -> None:
+    from nmr.types.text import Text
+
+    for index in range(2048):
+        value = Text.index_to_str(index, browse=True)
+        canonical = Text.str_to_index(value)
+        assert canonical <= index
+        assert Text.index_to_str(canonical) == value
+    with pytest.raises(UnicodeDecodeError):
+        Text.index_to_str(256)  # A single invalid UTF-8 byte, 0xff.
+
+
+def test_semver_browsing_normalizes_invalid_metadata() -> None:
+    from nmr.pack_numbers import pair
+    from nmr.types.sem_ver import Semver, metadata_index
+
+    index = pair(0, pair(metadata_index("01.."), metadata_index("..")))
+    with pytest.raises(ValueError):
+        Semver.index_to_str(index)
+    value = Semver.index_to_str(index, browse=True)
+    assert value == "0.0.0-1.0.0+0.0.0"
+    assert Semver.index_to_str(Semver.str_to_index(value)) == value

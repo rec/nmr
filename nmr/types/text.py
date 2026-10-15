@@ -1,4 +1,4 @@
-"""Dense enumeration of Unicode scalar strings; spelling is the value."""
+"""UTF-8 text with sparse canonical indices; spelling is the value."""
 
 from ..type_namer import TypeNamer
 
@@ -9,19 +9,22 @@ class Text(TypeNamer):
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        digits = []
-        for character in value:
-            number = ord(character)
-            if 0xD800 <= number < 0xE000:
-                raise ValueError("Text cannot contain Unicode surrogate code points")
-            digits.append(number if number < 0xD800 else number - 0x800)
-        return rank_digits(digits, SCALARS)
+        return rank_digits(list(value.encode()), 256)
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
-        return "".join(
-            chr(i if i < 0xD800 else i + 0x800) for i in unrank_digits(index, SCALARS)
-        )
+        data = bytes(unrank_digits(index, 256))
+        if not browse:
+            return data.decode()
+        parts = []
+        while data:
+            try:
+                parts.append(data.decode())
+                break
+            except UnicodeDecodeError as error:
+                parts.extend([data[: error.start].decode(), "?"])
+                data = data[error.end :]
+        return "".join(parts)
 
 
 def rank_digits(digits: list[int], base: int) -> int:
@@ -39,6 +42,3 @@ def unrank_digits(index: int, base: int) -> list[int]:
         index, digit = divmod(index - 1, base)
         digits.append(digit)
     return digits[::-1]
-
-
-SCALARS = 0x110000 - 0x800

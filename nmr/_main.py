@@ -13,7 +13,7 @@ from .nmr import Nmr
 
 
 class Main(BaseModel):
-    operation: Literal["encode", "decode", "browse"] = "decode"
+    operation: Literal["encode", "decode", "browse", "build-web"] = "decode"
     """Canonical decode is the default; browsing must be explicitly selected."""
     value: str | None = None
     """One input value. Omit to read one value per line from stdin or interactively."""
@@ -29,8 +29,15 @@ class Main(BaseModel):
     list_types: bool = False
     vocabulary_info: bool = False
     export_words: Path | None = None
+    destination: Path = Path("dist/web")
+    """Directory for --operation build-web; serve its static files over HTTP."""
 
     def run(self, source: TextIO, output: TextIO, errors: TextIO) -> int:
+        if self.operation == "build-web":
+            from .browser_build import build_browser
+
+            print(build_browser(self.destination), file=output)
+            return 0
         engine = Nmr(self.word_file, self.word_count, not self.case_sensitive)
         if self.list_types:
             for path, description in engine.types().items():

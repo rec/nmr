@@ -1,3 +1,5 @@
+import re
+from decimal import Decimal
 from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
@@ -12,17 +14,24 @@ class Int(BaseModel, TypeNamer, frozen=True):
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        return signed_index(int(value))
+        return signed_index(parse_integer(value))
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
-        return str(signed_value(index))
+        return format(Decimal(signed_value(index)), "f")
 
     model_config = ConfigDict(strict=True)
 
 
 def signed_index(n: int) -> int:
     return 2 * n - 1 if n > 0 else -2 * n
+
+
+def parse_integer(value: str) -> int:
+    value = value.strip()
+    if not re.fullmatch(r"[+-]?[0-9]+", value):
+        raise ValueError("Expected a signed decimal integer")
+    return int(Decimal(value))
 
 
 def signed_value(n: int) -> int:

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="no-referrer">
+  <meta name="description" content="Give exact details reversible word names. Encode, decode, and explore locally on your device.">
+  <title>nmr — a name for the details</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="./" aria-label="nmr home">nmr<span> / </span>word names</a><span id="engine-status" role="status">Loading local engine…</span></header>
+  <main>
+    <section class="intro"><p class="eyebrow">EXACT DETAILS. ORDINARY WORDS.</p><h1>A name for<br>the details.</h1><p>Turn a birthday, a number, a location, or a whole chess game into words. Share the name. Get the same detail back.</p></section>
+    <section class="workspace" aria-label="Naming tool">
+      <div class="modes" role="group" aria-label="Operation">
+        <button type="button" data-mode="decode" aria-pressed="true">Decode</button>
+        <button type="button" data-mode="encode" aria-pressed="false">Encode</button>
+        <button type="button" data-mode="browse" aria-pressed="false">Browse</button>
+      </div>
+      <p id="mode-description">Recover an exact detail from its canonical name.</p>
+      <form id="convert-form">
+        <div id="encode-options" hidden>
+          <label for="type">Kind of detail</label><select id="type"></select>
+          <p id="type-description" class="hint"></p>
+          <label for="scope">Prefix</label><select id="scope"></select>
+        </div>
+        <label id="input-label" for="value">Word name</label>
+        <textarea id="value" rows="4" spellcheck="false" autocomplete="off" placeholder="Paste a name, including its prefix"></textarea>
+        <label for="expected-id">Expected vocabulary identifier <span class="hint">(optional)</span></label>
+        <input id="expected-id" type="text" autocomplete="off" spellcheck="false" placeholder="Compare the identifier your friend shared">
+        <div class="submit-row"><button id="convert" class="primary" disabled>Decode name</button><button id="example" type="button">Try an example</button></div>
+      </form>
+      <p id="message" role="status" aria-live="polite"></p>
+      <section id="result" hidden aria-label="Conversion result" aria-live="polite">
+        <p class="eyebrow" id="result-type"></p><label for="result-value">Decoded detail</label><textarea id="result-value" rows="3" readonly></textarea>
+        <label for="result-name">Canonical name to save or share</label><textarea id="result-name" rows="3" readonly></textarea>
+        <p id="result-note" class="hint"></p><div class="submit-row"><button id="copy-name" type="button">Copy name</button><button id="copy-value" type="button">Copy detail</button></div>
+      </section>
+    </section>
+    <section class="vocabulary">
+      <div><p class="eyebrow">THE SHARED INGREDIENT</p><h2>Your words, in order.</h2><p>Friends need the same ordered vocabulary to decode a name. The default list is ready to use.</p></div>
+      <div><p id="vocabulary-count">Preparing vocabulary…</p><label for="vocabulary-id">Vocabulary identifier</label><input id="vocabulary-id" readonly aria-label="Vocabulary identifier"><p class="hint">Compare this identifier when exchanging custom lists.</p>
+        <details><summary>Use your own vocabulary</summary><label for="word-file">Import a UTF-8 word list</label><input id="word-file" type="file" accept=".txt,text/plain"><label for="word-list">Or paste one word per line</label><textarea id="word-list" rows="5" spellcheck="false"></textarea><label for="word-count">Words to use <span class="hint">(blank uses the list default)</span></label><input id="word-count" type="number" min="1"><label class="check"><input id="case-sensitive" type="checkbox">Case-sensitive words</label><div class="submit-row"><button id="apply-words" type="button">Apply vocabulary</button><button id="default-words" type="button">Use default</button></div></details>
+        <button id="export-words" type="button" disabled>Export ordered word list</button>
+      </div>
+    </section>
+    <section class="notes"><div><h2>Canonical by default.</h2><p>Decode accepts exact canonical names. Browse deliberately explores other names and supplies a canonical name to keep. Exploratory results can change as new types are added.</p></div><div><h2>Local, with clear limits.</h2><p>Conversion runs on your device. Runtime downloads require an internet connection, but values and lists are never uploaded. A private vocabulary obscures a detail; it is not encryption. Verify important details with your friend.</p></div></section>
+  </main>
+  <footer>nmr · ordinary words, precisely reversible · no accounts, analytics, or saved inputs</footer>
+</body>
+</html>
