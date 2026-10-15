@@ -49,3 +49,27 @@ def test_noncanonical_empty_list_is_only_browsable() -> None:
 def test_collection_rejects_ambiguous_items(value: str) -> None:
     with pytest.raises(ValueError):
         List.str_to_index(value)
+
+
+def test_duplicate_json_fields_are_rejected_instead_of_lost() -> None:
+    with pytest.raises(ValueError, match="Duplicate"):
+        Record.str_to_index(
+            '{"a":{"type":"int","value":"1"},"a":{"type":"int","value":"2"}}'
+        )
+    with pytest.raises(ValueError, match="Duplicate"):
+        List.str_to_index('[{"type":"int","type":"text","value":"1"}]')
+
+
+def test_collection_work_limits_are_explicit() -> None:
+    with pytest.raises(ValueError, match="256"):
+        List.str_to_index(json.dumps([{"type": "int", "value": "0"}] * 257))
+    value: object = []
+    for _ in range(8):
+        value = [{"type": "list", "value": value}]
+    with pytest.raises(ValueError, match="eight"):
+        List.str_to_index(json.dumps(value))
+
+
+def test_excessive_json_nesting_is_a_value_error() -> None:
+    with pytest.raises(ValueError):
+        List.str_to_index("[" * 1100 + "0" + "]" * 1100)

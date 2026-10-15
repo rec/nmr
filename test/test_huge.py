@@ -13,10 +13,16 @@ def test_vocabulary_capacity_boundary() -> None:
         engine.encode_to_name(maximum + 1)
 
 
-def test_named_integer_can_exceed_python_decimal_string_limit() -> None:
+@pytest.mark.parametrize(
+    "kind,value",
+    [("int", "1" + "0" * 4400), ("duration", "1" + "0" * 4400 + "s")],
+    ids=["integer", "duration"],
+)
+def test_numeric_names_can_exceed_python_decimal_string_limit(
+    kind: str, value: str
+) -> None:
     from nmr.nmr import Nmr
 
-    value = "1" + "0" * 4400
     engine = Nmr()
-    result = engine.encode(value, "int")
+    result = engine.encode(value, kind)
     assert engine.decode(result.name).value == value

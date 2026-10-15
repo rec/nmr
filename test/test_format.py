@@ -1,0 +1,47 @@
+"""Published format fixtures must survive every compatible extension."""
+
+import json
+from pathlib import Path
+from typing import ClassVar
+
+import pytest
+
+from nmr.category import Category
+from nmr.nmr import Nmr
+from nmr.registry import ROOT
+from nmr.types.integer import Int
+
+
+class Added(Int):
+    label: ClassVar[str] = "added"
+
+
+def test_published_format_fixtures() -> None:
+    fixture = json.loads(Path(__file__).with_name("format.json").read_text())
+    engine = Nmr()
+    assert engine.identifier == fixture["vocabulary"]
+    for case in fixture["cases"]:
+        result = engine.encode(case["input"], case["type"], case["scope"])
+        assert result.name == case["name"]
+        assert result.value == case["value"]
+        assert engine.decode(case["name"]).value == case["value"]
+
+
+def test_new_last_slot_categories_preserve_every_established_fixture() -> None:
+    meta = ROOT.children[4]
+    assert isinstance(meta, Category)
+    extra = Category(name="extra", children={0: Added})
+    expanded_meta = Category(name="meta", children={**meta.children, 4: extra})
+    expanded = Category(name="", children={**ROOT.children, 4: expanded_meta})
+    engine = Nmr(root=expanded)
+    fixture = json.loads(Path(__file__).with_name("format.json").read_text())
+    for case in fixture["cases"]:
+        assert engine.decode(case["name"]).value == case["value"]
+        assert (
+            engine.encode(case["input"], case["type"], case["scope"]).name
+            == case["name"]
+        )
+    new_name = engine.encode("42", "added", scope="").name
+    assert engine.decode(new_name).value == "42"
+    with pytest.raises(ValueError, match="unassigned"):
+        Nmr().decode(new_name)

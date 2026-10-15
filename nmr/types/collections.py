@@ -24,7 +24,7 @@ class List(TypeNamer):
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        return encode_collection(json.loads(value), False, 0)
+        return encode_collection(parse_collection(value), False, 0)
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
@@ -43,7 +43,7 @@ class Record(TypeNamer):
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        return encode_collection(json.loads(value), True, 0)
+        return encode_collection(parse_collection(value), True, 0)
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
@@ -57,6 +57,8 @@ class Record(TypeNamer):
 def encode_collection(value: object, record: bool, depth: int) -> int:
     if depth >= MAX_DEPTH:
         raise ValueError("Collections allow at most eight nesting levels")
+    if isinstance(value, (dict, list)) and len(value) > MAX_ITEMS:
+        raise ValueError("Collections allow at most 256 items")
     if record:
         if not isinstance(value, dict) or any(not isinstance(i, str) for i in value):
             raise ValueError("A record must be a JSON object with string keys")
@@ -68,9 +70,14 @@ def encode_collection(value: object, record: bool, depth: int) -> int:
         if not isinstance(value, list):
             raise ValueError("A list must be a JSON array")
         values = [encode_item(i, depth + 1) for i in value]
-    if len(values) > MAX_ITEMS:
-        raise ValueError("Collections allow at most 256 items")
     return ((2 * pack_balanced(values) + 1) << len(values)) - 1
+
+
+def parse_collection(value: str) -> object:
+    try:
+        return json.loads(value, object_pairs_hook=unique_fields)
+    except RecursionError as error:
+        raise ValueError("Collection JSON nesting exceeds the parser limit") from error
 
 
 def decode_collection(index: int, record: bool, browse: bool, depth: int) -> object:
@@ -89,7 +96,7 @@ def decode_collection(index: int, record: bool, browse: bool, depth: int) -> obj
         previous: str | None = None
         for value in values:
             key_index, item_index = unpair(value)
-            key = Text.index_to_str(key_index)
+            key = Text.index_to_str(key_index, browse)
             if not browse and previous is not None and key <= previous:
                 raise ValueError("Noncanonical record field ordering")
             previous = key
@@ -135,6 +142,13 @@ def pack_balanced(values: list[int]) -> int:
         return values[0]
     middle = len(values) // 2
     return pair(pack_balanced(values[:middle]), pack_balanced(values[middle:]))
+
+
+def unique_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    fields = dict(pairs)
+    if len(fields) != len(pairs):
+        raise ValueError("Duplicate JSON fields would lose information")
+    return fields
 
 
 def unpack_balanced(index: int, length: int) -> list[int]:

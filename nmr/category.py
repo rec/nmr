@@ -73,7 +73,7 @@ class Category(BaseModel, frozen=True):
             if browse and isinstance(child, Category) and not list(child.leaves()):
                 available = [
                     c
-                    for c in node.children.values()
+                    for _, c in sorted(node.children.items())
                     if not isinstance(c, Category) or list(c.leaves())
                 ]
                 if not available:

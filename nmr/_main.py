@@ -56,7 +56,7 @@ class Main(BaseModel):
             )
             return 0
         if self.export_words is not None:
-            self.export_words.write_text(engine.export())
+            self.export_words.write_bytes(engine.export().encode())
             return 0
         if self.operation == "encode" and self.type_name is None:
             raise ValueError("Encoding requires --type")

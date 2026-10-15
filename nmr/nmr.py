@@ -58,6 +58,8 @@ class Nmr(Words):
         if vocabulary is not None and vocabulary != self.identifier:
             raise ValueError("Vocabulary identifier does not match the selected list")
         prefix, separator, payload = name.strip().rpartition(":")
+        if separator and not prefix:
+            raise ValueError("A prefix cannot be empty")
         if not separator:
             payload = prefix or payload
             prefix = ""

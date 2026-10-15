@@ -1,34 +1,33 @@
+"""Print a candidate vocabulary without homophones; never modify the shipped list."""
+
 from pathlib import Path
-import sys
 
-ROOT = Path(__file__).parent
-HOMOPHONES = ROOT / "homophones.txt"
+import tyro
+from pydantic import BaseModel
 
-sys.path.append(str(ROOT.parent))
-
-from nmr import nmr
+from nmr.words import FILE, Words
 
 
-def run():
-    WORDS = nmr.Nmr().words
+class Main(BaseModel, frozen=True):
+    word_file: Path = FILE
+    homophones: Path = Path(__file__).with_name("homophones.txt")
 
-    inverted = {word: i for i, word in enumerate(WORDS)}
+    def run(self) -> None:
+        words = list(Words(self.word_file).words)
+        groups = [
+            i.strip().split(", ") for i in self.homophones.read_text().splitlines()
+        ]
+        print("\n".join(without_homophones(words, groups)))
+
+
+def without_homophones(words: list[str], groups: list[list[str]]) -> list[str]:
+    positions = {w: i for i, w in enumerate(words)}
     removals = set()
-
-    with HOMOPHONES.open() as fp:
-        for line in fp:
-            parts = [i.lower() for i in line.strip().split(", ")]
-            dupes = [i for i in parts if i in inverted]
-            if len(dupes) > 1:
-                _, m = min((inverted[d], d) for d in dupes)
-                dupes.remove(m)
-                removals.update(dupes)
-                for d in dupes:
-                    print("*", d, file=sys.stderr)
-
-    removed = [w for w in WORDS if w not in removals]
-    print(*removed, sep="\n")
-    print(len(WORDS), "->", len(removed), file=sys.stderr)
+    for group in groups:
+        matches = sorted((positions[i], i) for i in group if i in positions)
+        removals.update(w for _, w in matches[1:])
+    return [i for i in words if i not in removals]
 
 
-run()
+if __name__ == "__main__":
+    tyro.cli(Main).run()

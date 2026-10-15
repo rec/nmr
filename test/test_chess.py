@@ -35,3 +35,8 @@ def test_pgn_mainline_and_special_moves() -> None:
     assert Chess.str_to_index("1. e4 e5 2. Nf3 *") == Chess.str_to_index("e4 e5 Nf3")
     sequence = "e4 a5 e5 d5 exd6 cxd6 Nf3 Nf6 Be2 e6 O-O"
     assert Chess.index_to_str(Chess.str_to_index(sequence)).split()[-1] == "e1g1"
+
+
+def test_promotion_preserves_the_selected_piece() -> None:
+    game = "a4 h5 a5 h4 a6 h3 axb7 hxg2 bxa8=Q"
+    assert Chess.index_to_str(Chess.str_to_index(game)).split()[-1] == "b7a8q"

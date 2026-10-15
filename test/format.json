@@ -1,0 +1,187 @@
+{
+  "vocabulary": "8018fee950b51a77dd05943d584034ff03bf4a446ff8670b19d23a64e6b28239",
+  "cases": [
+    {
+      "type": "int",
+      "input": "42",
+      "value": "42",
+      "scope": null,
+      "name": "universal:math:int:year"
+    },
+    {
+      "type": "int",
+      "input": "42",
+      "value": "42",
+      "scope": "",
+      "name": "in dish"
+    },
+    {
+      "type": "frac",
+      "input": "2/4",
+      "value": "2/4",
+      "scope": null,
+      "name": "universal:math:frac:now"
+    },
+    {
+      "type": "date",
+      "input": "2000-02-29",
+      "value": "2000-02-29",
+      "scope": null,
+      "name": "physical:time:date:nor lung"
+    },
+    {
+      "type": "phone",
+      "input": "+442079460958",
+      "value": "+442079460958",
+      "scope": null,
+      "name": "virtual:contact:phone:then eden happy ian"
+    },
+    {
+      "type": "latlong",
+      "input": "48.8566,2.3522",
+      "value": "48.8566,2.3522",
+      "scope": null,
+      "name": "physical:latlong:to plot ruth wise tend echo"
+    },
+    {
+      "type": "text",
+      "input": "alice@example.com",
+      "value": "alice@example.com",
+      "scope": null,
+      "name": "virtual:text:then hint pine this ice line shut spy these wow guru on mug"
+    },
+    {
+      "type": "chess",
+      "input": "e4 e5 Nf3",
+      "value": "e2e4 e7e5 g1f3",
+      "scope": null,
+      "name": "play:game:chess:in get"
+    },
+    {
+      "type": "chess",
+      "input": "e4 e5 Nf3",
+      "value": "e2e4 e7e5 g1f3",
+      "scope": "play:game",
+      "name": "play:game:will gas"
+    },
+    {
+      "type": "chess",
+      "input": "e4 e5 Nf3",
+      "value": "e2e4 e7e5 g1f3",
+      "scope": "play",
+      "name": "play:both pride"
+    },
+    {
+      "type": "chess",
+      "input": "e4 e5 Nf3",
+      "value": "e2e4 e7e5 g1f3",
+      "scope": "",
+      "name": "sons paint"
+    },
+    {
+      "type": "frac",
+      "input": "0/0",
+      "value": "0/0",
+      "scope": null,
+      "name": "universal:math:frac:the"
+    },
+    {
+      "type": "float",
+      "input": "-0.0",
+      "value": "-0.0",
+      "scope": null,
+      "name": "universal:math:float:sing crop doubt lynn hey run"
+    },
+    {
+      "type": "float",
+      "input": "bits:7ff8000000000042",
+      "value": "bits:7ff8000000000042",
+      "scope": null,
+      "name": "universal:math:float:sue fix turn lane sin rug"
+    },
+    {
+      "type": "clock",
+      "input": "23:59:59.999999",
+      "value": "23:59:59.999999",
+      "scope": null,
+      "name": "physical:time:clock:from add even user"
+    },
+    {
+      "type": "local",
+      "input": "2000-02-29T12:30",
+      "value": "2000-02-29T12:30:00",
+      "scope": null,
+      "name": "physical:time:local:a tile wish roof exam she"
+    },
+    {
+      "type": "instant",
+      "input": "2000-01-01T00:30:00+01:00",
+      "value": "1999-12-31T23:30:00Z",
+      "scope": null,
+      "name": "physical:time:instant:a jeep mill ebony hash live"
+    },
+    {
+      "type": "duration",
+      "input": "-0.000001s",
+      "value": "-0.000001s",
+      "scope": null,
+      "name": "physical:duration:and"
+    },
+    {
+      "type": "ipv4",
+      "input": "127.0.0.1",
+      "value": "127.0.0.1",
+      "scope": null,
+      "name": "virtual:computer:ipv4:lion jet night"
+    },
+    {
+      "type": "ipv6",
+      "input": "2001:db8::1",
+      "value": "2001:db8::1",
+      "scope": null,
+      "name": "virtual:computer:ipv6:act world leon lady main wood soft nice upper serve kay mid"
+    },
+    {
+      "type": "uuid",
+      "input": "123e4567-e89b-12d3-a456-426614174000",
+      "value": "123e4567-e89b-12d3-a456-426614174000",
+      "scope": null,
+      "name": "virtual:computer:uuid:mail worth silk link track of oops tight pig find hold beat"
+    },
+    {
+      "type": "semver",
+      "input": "1.2.3-rc.1+build.004",
+      "value": "1.2.3-rc.1+build.004",
+      "scope": null,
+      "name": "virtual:computer:semver:air info rand start sort dump lamb catch fed since apple okay emma month track hide chain armed swiss wife"
+    },
+    {
+      "type": "isbn",
+      "input": "9780306406157",
+      "value": "9780306406157",
+      "scope": null,
+      "name": "virtual:id:isbn:wood main owen"
+    },
+    {
+      "type": "upc",
+      "input": "036000291452",
+      "value": "036000291452",
+      "scope": null,
+      "name": "virtual:id:upc:motor baby box"
+    },
+    {
+      "type": "list",
+      "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
+      "value": "[{\"type\":\"universal:math:int\",\"value\":\"1\"}]",
+      "scope": null,
+      "name": "meta:list:zoom"
+    },
+    {
+      "type": "record",
+      "input": "{\"a\":{\"type\":\"int\",\"value\":\"1\"}}",
+      "value": "{\"a\":{\"type\":\"universal:math:int\",\"value\":\"1\"}}",
+      "scope": null,
+      "name": "meta:record:web lime"
+    }
+  ]
+}

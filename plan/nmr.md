@@ -7,10 +7,11 @@ word names, share those names, and let friends recover the original details easi
 Keep the more playful ambition: a short name can also discover an interesting,
 valid object, including a legal chess game.
 
-This is a plan, not an authorization to implement every proposed design. The
-recommendations below define a bounded first release; unresolved decisions are
-collected at the end. Implementation should follow those decisions rather than
-silently choose incompatible meanings.
+The user subsequently authorized autonomous implementation of this whole plan,
+including architectural changes and replacement of all pre-release mappings.
+The implementation slices are complete in the repository. The final section
+records the defaults chosen for the original open questions. Hosting and package
+publication have not been performed; live browser approval remains unavailable.
 
 Additional work beyond the prompt: None.
 
@@ -51,9 +52,10 @@ contact synchronization, or a general plugin marketplace in this release. Music,
 chemistry, and additional board games remain outside the release unless chosen
 to replace another scoped feature.
 
-## What the repository already provides
+## Initial repository assessment
 
-This assessment is from reading the code and tests, not running them.
+This is the historical assessment that informed the repair work. These paths and
+defects describe the starting point, not the current implementation.
 
 `Words` ranks and unranks sequences without repeated words using a configurable,
 ordered vocabulary. `TypeNamer` maps values to nonnegative integers, and
@@ -85,8 +87,9 @@ modules are unfinished. Declaring a category does not mean its codec exists.
 | Words | Empty input, repetition, token syntax, and normalization are not a consistent public contract. | One documented grammar enforced across library, CLI, and browser. |
 | Packaging/docs | Word file is located outside the package; README/API examples are stale; time tests contain no cases. | Verify installed wheels and source distributions, bundle the vocabulary reliably, and publish executable examples. |
 
-The working tree currently has an unrelated `CARDS` to `CARD` edit in
-`nmr/category.py`; preserve it. `TAGS` and `reflog.txt` are also outside this plan.
+The old category implementation was replaced under the subsequent architectural
+authorization. Unimplemented card games remain outside the first-release scope.
+Unrelated `TAGS` and `reflog.txt` files were left untouched.
 
 ## Define the format before adding codecs
 
@@ -152,8 +155,24 @@ not a category. Place the existing mathematical and scientific types under
 `universal`; time and coordinates under `physical`; computer, contact, and
 commercial identifier types under `virtual`; art and games under `play`; and
 the former combination concept under `meta`. Exact subcategory names, slot
-assignments, and structural leaf definitions remain to be settled. These homes
-do not add every unfinished type to the implementation scope.
+assignments and structural leaves are now explicit in `nmr/registry.py`:
+
+| Category path | Occupied child slots |
+| --- | --- |
+| `universal` | 0: `math` (category). |
+| `universal:math` | 0: `int`, 1: `frac`, 2: `float`. |
+| `physical` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
+| `physical:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
+| `virtual` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `text`. |
+| `virtual:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
+| `virtual:contact` | 0: `phone`. |
+| `virtual:id` | 0: `isbn`, 1: `upc`. |
+| `play` | 0: `game` (category). |
+| `play:game` | 0: `chess`. |
+| `meta` | 0: `list`, 1: `record`. |
+
+All unlisted slots are empty. Science, art, music, and additional games retain
+their agreed conceptual homes but do not acquire placeholder leaf allocations.
 
 At every category node, slots 0 through 3 may be empty, a specifically defined
 leaf type, or a category. Slot 4 may be empty or a category, but must never be a
@@ -300,24 +319,24 @@ Allocate leaves through the chosen permanent expansion mechanism.
 | --- | --- | --- |
 | `Int` | Signed arbitrary-size integers, limited by vocabulary capacity. | Every payload index. |
 | `Frac` | Ordered pairs of arbitrary signed integers, including zero denominators; preserve the pair exactly. | Every payload index through exact signed-integer encoding and pairing. |
-| `Float` | Name floating-point objects using an existing numerical representation; settle precision, signed zero, infinities, and NaN identity before defining the permanent mapping. | Depends on the chosen representation and nonfinite identity policy. |
+| `Float` | Exact Python binary64 bits, including signed zero, infinity, NaN signs and payloads. `bits:HEX` supplies an exact pattern. | Full 64-bit domain; higher indices wrap only when browsing. |
 | Dates | Gregorian calendar dates, including birthdays; recommend years 1 through 9999 initially. | Dense day enumeration; browsing redirects beyond the finite range. |
 | Times and timestamps | Separate time of day, local date-time, and offset-aware timestamp meanings. Recommend microsecond resolution and explicit offsets initially. | Enumerate valid components, with precisely bounded domains. |
 | Durations | Signed elapsed time with exact supported resolution. Calendar months/years are not fixed durations. | Every payload index in the defined representation. |
 | Phone numbers | International numbers with explicit country calling code and optional extension; preserve significant digits. No implicit regional parsing. | Structural validity only; no claim that a number is assigned or reachable. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
-| IP addresses | IPv4 and IPv6; canonical standard spelling. Decide scoped IPv6 separately. | Full address domains, including non-routable addresses. |
+| IP addresses | IPv4 and IPv6; canonical standard spelling. Scoped IPv6 uses exact text. | Full address domains, including non-routable addresses. |
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |
-| Semantic versions | Major, minor, patch, prerelease, and build metadata. | Canonical round trips; a total valid enumeration only if achievable within the release. |
-| Exact text | Names, postal addresses, email addresses, URLs, account/reference identifiers, and short notes. Preserve whitespace, case, punctuation, and leading zeroes. | A reversible enumeration of supported Unicode scalar strings, including empty text; capacity remains finite. |
-| Chess | A legal move sequence from the standard initial position, subject to the decision below. | Every payload index within the advertised practical bound. |
+| Semantic versions | Major, minor, patch, prerelease, and build metadata. | Browsing repairs empty metadata identifiers and numeric prerelease leading zeroes; canonical decoding rejects invalid indices. Capacity still applies to the repaired output. |
+| Exact text | Names, postal addresses, email addresses, URLs, account/reference identifiers, and short notes. Preserve whitespace, case, punctuation, and leading zeroes. | UTF-8 bytes with sparse canonical indices; browsing replaces invalid sequences with `?` without increasing the leaf index. Empty text is supported. |
+| ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
+| Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
+| Collections | Typed ordered lists and records with sorted string keys; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
-The browser should offer recognizable input choices such as “email”, “address”,
-and “reference number” backed by exact text, explaining that these share the text
-type and do not validate ownership, delivery, or account existence. Avoid making
-regex acceptance look like semantic validation. Structured email, URL, ISBN, or
-bank codecs should be added only if their measured benefit justifies inclusion
-before release.
+The browser's exact-text choice explicitly covers names, addresses, email, URLs,
+and identifiers without implying semantic validation. ISBN and UPC have compact
+checked codecs. Bank identifiers and messenger handles use exact text; there are
+no ownership, delivery, assignment, or account-existence checks.
 
 Text coverage is important, but arbitrary long text will not become a few words.
 Measure realistic output lengths for every proposed use case. If common details
@@ -329,9 +348,10 @@ bundles without a demonstrated need and an explicit decision.
 
 Use these exact names for the namable numeric classes. Reuse existing numerical
 classes for numerical operations; do not implement a new arithmetic system.
-The exact stored representation and conversion API for `Float` remain to be
-settled. Do not silently substitute the earlier proposed decimal codec or add a
-fourth numeric type without a decision.
+`Float` stores binary64 bits and returns the standard Python float through
+`.float()`. NaN spelling is `bits:HEX` to preserve payload and sign. There is no
+separate decimal codec in this release; exact decimal spelling can use text, or
+an exact decimal value can be represented as a numerator/denominator pair.
 
 `Frac` stores a numerator and denominator as signed integers. Its identity is the
 ordered pair: `1/2`, `2/4`, and `50/100` are different fractions; so are `0/2` and
@@ -349,8 +369,8 @@ Expose two explicit numerical conversions:
 * `.float() -> float`: for a nonzero denominator, delegate numerical conversion
   to existing Python numerical facilities. For denominator zero, return positive
   infinity for a positive numerator, negative infinity for a negative numerator,
-  and NaN for `0/0`. Do not mutate the stored pair. Finite-value overflow policy
-  must be specified separately from these zero-denominator cases.
+  and NaN for `0/0`. Do not mutate the stored pair. Finite-value overflow follows
+  the standard rational conversion and raises `OverflowError`.
 * `.fraction() -> fractions.Fraction`: construct the standard-library rational
   from the pair. It may reduce factors or normalize denominator signs in the
   returned value; the original `Frac` remains unchanged. A zero denominator cannot
@@ -369,7 +389,7 @@ The existing code names FEN positions, not games. A valid FEN structure does not
 prove that a position is reachable from the standard starting position. A game
 also includes its move sequence; several games can lead to the same position.
 
-Recommended first-release object: a finite sequence of legal moves from the
+The implemented first-release object is a finite sequence of legal moves from the
 standard initial position, including an unfinished game. Accept a simple move
 sequence or PGN main line; explain that comments, variations, and headers are not
 part of the named object unless separately included in the agreed scope.
@@ -392,11 +412,10 @@ and distinguish claimable draws from automatic endings. Measure work for extreme
 indices before publishing a word-length guarantee; enforce limits before decoding,
 not after silently truncating the game.
 
-Decide whether the chess leaf under `play` names a position or a game before
-establishing the permanent format. There are no external FEN names to preserve. If both objects are
-needed, give them distinct allocations and meanings. If positions remain the
-main object, browsing legal positions needs a separate explicit design; the
-existing FEN field packing cannot provide the requested legality guarantee.
+The chess leaf names a game, not a FEN position. Move ordering is lexical UCI.
+Automatic game endings include fivefold repetition and the 75-move rule; claimable
+draws do not force termination. Both encoding and decoding enforce a 4096-ply work
+limit. PGN headers, comments, variations, and results are not part of the object.
 
 ## Custom word lists and privacy
 
@@ -496,12 +515,11 @@ leaf-prefixed names generated by the implementation.
 
 ### 1. Agree and record the release contract
 
-Resolve the remaining blocking questions below: initial child placement, chess
-identity, security expectations, browser delivery, `Float` representation, type
-scope, and browsing ranges. The five root categories, fixed radix five, last-slot
-restriction, canonical decoding default, and permanent compatibility are settled
-requirements.
-Write the prefix grammar, canonicalization
+The implementation choices are recorded in the final section: child placement,
+chess identity, security expectations, browser delivery, `Float` representation,
+type scope, and browsing limits. The five root categories, fixed radix five,
+last-slot restriction, canonical decoding default, and permanent compatibility
+are settled requirements. Record the prefix grammar, canonicalization
 rules, stable allocations, and per-type bounds before changing encoders. Replace
 pre-release fixtures deliberately, then freeze fixtures for the established format.
 
@@ -591,92 +609,74 @@ browser during conversion.
   required separate commit, and push each commit. Publish only after the release
   scope and any distribution/hosting decisions are approved.
 
-No Python tests are needed for this planning-only change. Subsequent implementation
-verification should follow project instructions; running services or full runtime
-flows requires the corresponding authorization.
+The later implementation authorization covers the runtime and packaging checks
+described above. Live browser UI access was rejected by the approval gate, so
+WebAssembly checks run without a browser and the UI checks are provided in CI.
 
-## Questions for the undertaking
+## Resolved implementation decisions and delivery status
 
-These are the foreseeable decisions for this first release. The recommendations
-above let implementation stay small, but the following answers can change the
-format, security promise, or public behavior. Resolve initial placement, security,
-chess, delivery, and `Float` questions before substantial implementation; settle
-the remainder before their associated phase. Already answered questions about
-existing users, the branching layout, permanent compatibility, canonical defaults,
-and fraction identity
-are recorded as decisions above rather than asked again.
+The later instruction requested an uninterrupted implementation with defaults
+chosen autonomously. These replace the original question list; none requires a
+human answer to use the delivered library, CLI, or static browser build.
 
-1. **Initial child placement:** How should subcategories and leaf types be arranged
-   beneath the five agreed root categories? Which category meanings should occupy
-   last slots so that later descendants fit naturally? Root names and slots,
-   branching of five, and the ban on last-slot leaves are settled; placements
-   below the root affect name lengths and become permanent when published.
-2. **Meaning of security:** Is obscurity through a privately shared vocabulary
-   sufficient, or must this release protect details against someone actively
-   trying to recover them? If confidentiality is required, what threats and
-   password/key-sharing experience must it support?
-3. **Main use cases:** Which details do you most want people to share first?
-   Are birthdays, phones, coordinates, exact-text contact/reference details, and
-   computer identifiers the right coverage, and what must be added or removed?
-4. **Ease of access:** Is a mobile-friendly, locally executing browser tool a
-   first-release requirement? Is reusing Python through a browser runtime
-   acceptable, subject to measured download and startup costs?
-5. **Meaning of chess:** Should the chess leaf under `play` identify a move sequence,
-   a position, or a completed game? Must unfinished games and the initial position count?
-   Are both positions and games required as separate namable types?
-6. **Browsing coverage:** Which leaf, group, and global scopes must have complete
-   browsing ranges at release? Is modulo over explicitly ordered supported
-   choices the desired rule for redirecting unfilled boxes, including empty groups?
-7. **Repetition:** Should repeated words remain invalid in both modes, or did the
-   repeated `they` in the example intentionally request a browsing input form
-   outside the permutation grammar?
-8. **Acceptance thresholds:** What maximum word counts feel useful for the main
-   details, and what minimum “short enough” browsing range should chess and
-   the other types guarantee? What browser load and decoding times are acceptable
-   on an ordinary phone?
-9. **Prefix UX:** Should full leaf prefixes be the default, as proposed? Which
-   subcategory names below the agreed root are clearest for users, and should
-   custom lists always retain the same English prefix names?
-10. **Dates and time:** Are Gregorian years 1 through 9999 and microseconds enough?
-    Do we need partial dates such as month/day birthdays, named timezones, leap
-    seconds, or calendar durations in this release? How should ambiguous numeric
-    dates and offset-free date-times be presented?
-11. **`Float` representation and conversions:** Should `Float` name Python binary
-    floats, a decimal representation, or another existing type? Must positive and
-    negative zero, NaN signs, and distinct NaN payloads have distinct names? If a
-    finite `Frac` exceeds floating-point range, should `.float()` propagate an
-    overflow error or return signed infinity? The explicit zero-denominator
-    behavior of `Frac.float()` is already settled.
-12. **Phone scope:** Are explicit international numbers plus extensions sufficient,
-    or are local numbers, short codes, `*`/`#` service strings, and vanity numbers
-    required? If local numbers are supported, how will users supply the region?
-13. **Coordinate identity:** What precision is useful, and should pole longitudes
-    and the two antimeridian spellings be equivalent? Should excess input precision
-    be rejected or rounded only after explicit user confirmation?
-14. **Text and contact details:** Is exact text an acceptable first-release backing
-    for email, URLs, postal addresses, and reference numbers? Must the decoded name
-    retain those semantic labels? Are multiline text and non-Latin scripts needed?
-15. **Additional compact identifiers:** Are ISBN, product codes, bank identifiers,
-    scoped IPv6 addresses, or a bundle of several contact details mandatory for
-    the first release rather than adequately served by exact text or separate names?
-16. **Vocabulary rules:** Should custom lists be case-insensitive? Which Unicode
-    normalization, punctuation, and comment rules should apply? Should we revise
-    awkward or offensive words in the default list before permanently freezing it?
-17. **Vocabulary exchange:** Is importing an ordered text file sufficient for
-    friends, or is a built-in list authoring/shuffling tool essential? May exported
-    share text include a vocabulary identifier, and should the browser remember
-    lists only through an explicit opt-in?
-18. **Mistakes in shared names:** Is showing the decoded value and canonical name
-    sufficient, or is a checksum required despite extra length? If required, how
-    should checked messages coexist with complete browsing of ordinary names?
-19. **Chess details:** Are standard chess and PGN main-line moves enough? Must PGN
-    metadata, variations, custom starting positions, resignation, agreed draws,
-    or claimed draws be preserved? Which automatic termination rules define the
-    enumerated games?
-20. **CLI continuity:** Which existing CLI options and public Python entry points
-    are actually used and must remain? May nonfunctional options be replaced by
-    the single agreed interface rather than retained as compatibility wrappers?
-21. **Release identity and delivery:** Which Python versions and browsers must be
-    supported, what version denotes this first usable release, where should the
-    browser tool live, and which package publication and hosting actions are
-    authorized when implementation is ready?
+| Original decision area | Implemented choice |
+| --- | --- |
+| Tree and placement | Five-way tree and explicit allocations above; no legacy decoder. Golden fixtures freeze the new format. |
+| Security | Private vocabularies provide obscurity. Actual encryption, key management, and password storage claims are excluded. |
+| Main use cases | The implemented type matrix plus exact text for other personal details. |
+| Browser delivery | Static local conversion through pinned Pyodide 0.29.3 in a worker, with the same bundled Python core. |
+| Chess identity | Standard-start legal move sequences; unfinished and empty games count. FEN naming is replaced. |
+| Browsing | Explicitly selected; deterministic redirects through supported children, finite-domain modulo, codec-specific repairs. Canonical decoding remains the default. |
+| Repetition | Repeated words are invalid in both modes. |
+| Practical lengths | Generated examples show birthday: 2 words, international phone: 4, coordinate: 6, email: 13, three-ply chess: 2. No universal shortness claim. |
+| Prefixes | Full leaf paths by default. CLI/API can select an ancestor scope or no prefix. Paths are independent of vocabulary. |
+| Temporal scope | Gregorian years 1–9999, exact microseconds, explicit offsets for instants, UTC canonical output. No partial dates, named timezones, leap seconds, or calendar-month durations. |
+| Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
+| Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
+| Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
+| Text | Exact UTF-8, including whitespace and non-Latin scripts. Contact labels do not become separate semantic types. |
+| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Other identifiers use text. Typed list and record codecs provide composition. |
+| Vocabulary policy | NFC plus case folding by default; optional case sensitivity and active word count. Word order, normalization, and count participate in identity. Existing default order retained. |
+| Vocabulary exchange | File import, paste, normalized export, and full SHA-256 identity. No automatic persistence or shuffling. |
+| Typo handling | Strict canonical rejection and explicit result verification. No checksum overhead or silent correction. |
+| Chess metadata and rules | Main line only, lexical UCI ordering, automatic endings enforced, maximum 4096 plies. |
+| CLI continuity | Replaced the broken old interface with Tyro/Pydantic configuration. Encode, decode, browse, streams, JSON, vocabulary tools, and static build are supported. |
+| Release delivery | Metadata prepared for 1.0.0; source and wheel builds and local static output. No external package publication or hosted deployment. |
+
+### Completed slices
+
+1. Added Tyro/Pydantic in a dedicated dependency commit and established the baseline.
+2. Replaced the naming core, category allocation, numeric models, word validation,
+   and CLI; removed the broken old codec implementations.
+3. Added everyday codecs, legal chess enumeration, and typed lists/records.
+4. Added the static browser build, worker bridge, vocabulary UI, and WebAssembly
+   checks. Improved UTF-8 text efficiency and very-large-integer handling.
+5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
+   documentation, and replacements for obsolete maintenance paths.
+
+### Verification and limits
+
+The final local suite has 130 tests with 92% branch-aware coverage. It passes on
+CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
+checked outside the checkout, including all format fixtures, vocabulary loading,
+CLI decoding, and static browser builds. The source archive excludes unrelated
+local editor and reflog files; browser bundles include project/dependency licenses.
+
+The unit suite covers small-vocabulary permutations exhaustively, exact pairing
+boundaries, prefix equivalence, canonical rejection, browsing, invalid data,
+nonfinite values, collection identity, legal games, and CLI stream behavior.
+`test/format.json` supplies published fixtures to both Python and WebAssembly
+checks. Ruff, formatting, type checks, pyupgrade, and the coverage gate accompany
+implementation tests. Automatic CI runs Python 3.10, 3.13, and 3.15 and an
+independent non-UI WebAssembly job. Browser UI checks are a separate manual job;
+they were not dispatched as a workaround for the local approval rejection.
+
+The Node WebAssembly bridge was exercised locally with the actual static bundle.
+Live browser interaction and visual QA could not run because browser approval
+rejected local-preview access. The browser smoke test remains executable where
+access is available and is wired into CI. Browser startup measured through the
+non-UI runtime was approximately 1.8 seconds with cached runtime packages; this is
+not a cold mobile-browser benchmark. No claim of human usability testing is made.
+
+External distribution remains a deployment task: the repository contains a
+buildable installation-free decoder, but no public URL or PyPI release was created.

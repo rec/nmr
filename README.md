@@ -1,127 +1,238 @@
-🔢 `nmr`: name all canonical things 🔢
+# nmr
 
-Give each canonical thing a unique English name using non-repeating words from a
-short list of common, short English words... or use a word list of your choice.
+Give exact details reversible names made from ordinary words. Name a birthday,
+phone number, coordinate, fraction, identifier, or legal chess game, then let a
+friend recover it with the same vocabulary.
 
-The word list is here: https://github.com/rec/nmr/blob/main/words.txt
+A name contains a readable type prefix and a payload without repeated words:
 
-
-Canonical things include but are not limited to:
-
-* numbers
-* fractions
-* times, dates, time intervals
-* lat/long positions on the earth
-* IP addresses
-* UUIDs
-
-Other unimplemented possibilities:
-
-* Phone numbers
-* Periodic table
-* Chemical compounds(?) (probably not worth the huge effort)
-* Pieces of music! (my original motivating example)
-
-
-Shorter or simpler things should generally be represented by shorter names.
-
-Extending this to your own domain is easy and you can either add it to this
-codebase or write your own code and easily plug in in.
-
-Installs both a module named `nmr` and an executable called `nmr.py`
-
-# EXAMPLE
-
-``` python
-import nmr
-
-assert nmr(0) == ['the']
-assert nmr(2718281828) == ['the', 'race', 'tie', 'hook']
-
-for i in range(-2, 3):
-    print(i, ':', *nmr(i))
-
-# Prints
-#   -2 : to
-#   -1 : of
-#   0 : the
-#   1 : and
-#   2 : a
+```text
+physical:time:date:nor lung
 ```
 
-# HOW IT WORKS
+That name means `2000-02-29`. Canonical decoding is the default. Browsing is an
+explicit operation for discovering objects from other word combinations.
 
-All of this involves the same trick over and over again - counting using positional notation:
-https://en.wikipedia.org/wiki/Positional_notation
+## Install and try
 
-By default `nmr` has 1628 different words, which you can think of as 1628 different
-digits.
+Requires Python 3.10 or newer and [uv](https://docs.astral.sh/uv/).
+This checkout contains the new 1.0 format; it has not been published to PyPI.
 
-There's a wrinkle that makes things harder: the author decided that repeating
-words was unaesthetic, so counting is a little trickier, but you don't have to
-understand how it's done.
+```sh
+git clone git@github.com:rec/nmr.git
+cd nmr
+uv sync --locked
+uv run nmr --operation encode --type date --value 2000-02-29
+uv run nmr --value 'physical:time:date:nor lung'
+```
 
-With repeating words eliminated, 1628 is the minimum total number of words
-needed to be able to represent all 64-bit integers with at most six words.
+To install the CLI outside the checkout, run `uv tool install .`.
+Use `nmr --help` for the complete options and `nmr --list-types` for type paths.
 
+## Encode, decode, and browse
 
-Conversion runs as follows.
+```sh
+# Preserve the actual fraction pair, including zero denominators.
+nmr --operation encode --type frac --value '2/4'
+# universal:math:frac:now
+nmr --value 'universal:math:frac:now'
+# 2/4
 
-First you take your type, whatever it is, and figure out a way to represent it as a
-number in positional notation, where perhaps the digits have different values.
+# The scope controls how much type information stays in the word payload.
+nmr --operation encode --type chess --value 'e4 e5 Nf3'
+# play:game:chess:in get
+nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
+# play:both pride
+nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
+# sons paint
 
-Suppose you're wanting to represent the time of the day, down to milliseconds.
+# Explore a noncanonical name. The stable name is printed to stderr.
+nmr --operation browse --value 'universal:to'
+# 0
+# Canonical name: universal:the
 
-You represent it as a four digit number: hours, minutes, seconds, milliseconds
+# One value per line; errors go to stderr and produce exit status 1.
+printf '2000-02-29\n2024-12-31\n' | nmr --operation encode --type date
 
-Next, you take the positional number, and evaluate it into a "type-relative number",
-a number that makes sense only within this type.
+# JSON includes type, canonical value, name, vocabulary ID, and canonical status.
+nmr --operation encode --type phone --value '+442079460958' --json-output
+```
 
-For example, to represent the time 15:11:55.823, we'd evaluate the number
-`((((15 * 60) + 11) * 60 + 55) * 1000 + 823)` to get the type relative number,
-but this number might mean something completely different for say, lat-long.
+Without `--value`, the CLI reads stdin, or prompts when used in a terminal.
+`--value` preserves its entire argument, including whitespace, `#`, and newlines.
+Use exact text for names, addresses, email, URLs, messenger handles, and arbitrary
+reference numbers. There is no implicit type guessing or country inference.
 
-Now, each type also gets its own fixed "type identifier number" and that gets combined
-with the type-relative number to give a new number, the `nmr` number which is unique
-over all types.
+Canonical decoding rejects unassigned type slots, invalid values, and
+noncanonical encodings. It never silently switches to browsing. Browsing may
+redirect those indices, returns a real supported object, and supplies its
+canonical name. Exploratory inputs can discover different objects as the tree
+expands; save the canonical output instead.
 
-Then that `nmr` number is encoded into a non-repeating sequence of words from the
-word list, which is the `nmr` name.
+## Supported details
 
-----
+| Type or path | Input and identity |
+| --- | --- |
+| `int` | Signed decimal integer, including very large integers within vocabulary capacity. |
+| `frac` | Signed numerator/denominator pair; `1/2`, `2/4`, `0/2`, `0/0`, and `1/0` are distinct objects. |
+| `float` | Python binary64 float. Signed zero is preserved; `bits:7ff8000000000042` specifies an exact NaN payload. |
+| `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
+| `clock` | `HH:MM[:SS[.ffffff]]`, no timezone, hours 00 through 23. |
+| `local` | Date and clock separated by `T`, without an offset. |
+| `instant` | Timestamp with `Z` or an explicit `±HH:MM` offset; canonical output is UTC. |
+| `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
+| `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
+| `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
+| `ipv4`, `ipv6` | Full address domains; interface-scoped IPv6 requires text. |
+| `uuid` | All 128 bits, without imposing version restrictions. |
+| `semver` | Complete semantic version, including prerelease and build metadata; optional input `v`. |
+| `isbn` | ISBN-10 or ISBN-13 with check digits; ISBN-13 begins 978 or 979. |
+| `upc` | UPC-A, including the check digit and leading zeroes. |
+| `text` | Exact UTF-8 text, including empty text, non-Latin scripts, punctuation, and whitespace. |
+| `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
+| `list`, `record` | Ordered typed values or named typed fields, including nested collections. |
 
-In the reverse direction, a `nmr` name is given, and it's converted back into an `nmr`
-number, then split into the type identifier number and type-relative number.
+Clock, local time, timestamps, and durations use microseconds. Excess precision is
+rejected, not rounded. Coordinates identify the two antimeridian spellings and
+ignore longitude at either pole. Phone and retail-code validity is structural;
+no assignment, ownership, or reachability checks are made.
 
-The type identifier number is used to look up which type is being decoded, and then
-the type-relative number is decoded into the positional number, and finally
-back into the original type.
+Chess names preserve the move sequence, including unfinished games and the empty
+game. PGN comments, headers, variations, and stated results are not named. Automatic
+endings apply, including fivefold repetition and the 75-move rule; claimable draws
+are not automatic endings. Moves are ordered lexically by UCI, independent of
+library iteration order. Work is limited to 4096 plies per operation.
 
-----
+Named text is an encoding, not compression. A phone fits in four payload words in
+the example above; a general email address can take thirteen or more. Prefixes
+remove type-routing overhead but cannot eliminate the information in the value.
 
-You are guaranteed that for each original canonical thing, T, there is a unique
-canonical name, and that decoding that name will always reproduce exactly the
-same thing.
+## Your own vocabulary
 
-It's mathematically
-an [injection](https://en.wikipedia.org/wiki/Bijection,_injection_and_surjection).
+Use a UTF-8 file with one word per line. Order matters. Empty lines and lines
+beginning with `#` are ignored. Tokens cannot contain whitespace or `:`.
+NFC normalization and Unicode case folding are the defaults; `--case-sensitive`
+retains case. Duplicate normalized words are rejected. The same policy and
+selected word count must be used by both people.
 
-On the other hand, if you start with a random name and try to decode, a data type
-isn't required to give any guarantees at all.
+```sh
+nmr --word-file private.txt --vocabulary-info
+nmr --word-file private.txt --operation encode --type phone --value '+442079460958'
+nmr --word-file private.txt --value 'virtual:contact:phone:YOUR WORDS HERE'
+nmr --word-file private.txt --export-words normalized-private.txt
+```
 
-You aren't even guaranteed that the decoding will return anything - some names just
-won't correspond even to a known type. If a name can be decoded to a known type,
-that type decoder might still not be able to come up with a type. Or, if it comes
-up with a type, that type might have a different canonical name.
+`--word-count N` selects the first N validated words. The default vocabulary uses
+1,628 words. `--vocabulary-info` gives its SHA-256 identifier; a recipient can
+require it with `--expect-vocabulary IDENTIFIER`. The identifier includes word
+order and case policy. Export the normalized ordered list and share it through an
+already trusted channel. The browser supports both file import and pasted lists.
 
-This is all good because it makes it really easy to whip up an encoder/decoder, but for
-the basic encoders included with the program, we can offer a better guarantee: that we
-can always decode any any type-relative number and return an instance of the type, even
-if we weren't given a canonical name.
+A private vocabulary provides obscurity, not reliable encryption. Repeated values
+produce repeated names; prefixes reveal types; a wrong vocabulary can produce a
+plausible result. The vocabulary identifier detects a mismatch when supplied,
+but does not authenticate the sender or the message. Verify important details.
 
-Separately, we add a "type wrapping" feature to the main program so that unknown type
-identifier numbers just wrap repeated over known type identifiers - again, this will
-never be a canonical name.
+Names never repeat a word, so a vocabulary has finite capacity:
+`sum(W! / (W-k)!, k=1..W)`. Overflow produces an error; a larger vocabulary may be
+needed. Many mistyped names are rejected, but another valid canonical name cannot
+be distinguished from an intentional one without additional information.
 
-With those features, it means you can type random names into the program, and see what
-sort of thing you get.
+## Browser tool
+
+Build a mobile-friendly static tool from the installed core:
+
+```sh
+nmr --operation build-web --destination dist/web
+python -m http.server 8765 --bind 127.0.0.1 --directory dist/web
+```
+
+Open `http://127.0.0.1:8765` locally, or host those files on an ordinary static
+HTTPS server for friends. Direct `file:` loading does not support the worker and
+asset loading used here. No conversion server or account is needed.
+
+The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
+requires a connection and a WebAssembly-capable modern browser. The project,
+chess library, and semantic-version library are bundled from the same installation
+that builds the site. Conversion runs in a worker; values and custom lists are
+never sent over the network or saved in browser storage. Export a list explicitly
+to retain it. Closing or reloading the page loses the in-memory list and inputs.
+
+The WebAssembly bridge is tested in Node. Live browser interaction and visual
+verification were blocked by the local browser approval gate during development;
+`test/browser_smoke.cjs` and a manual CI job provide interaction checks to run where
+browser access is available. No hosted deployment or PyPI publication was performed.
+
+## Python library
+
+```python
+from nmr.nmr import Nmr
+from nmr.types.fraction import Frac
+
+engine = Nmr()
+encoded = engine.encode("2/4", "frac")
+assert encoded.name == "universal:math:frac:now"
+assert engine.decode(encoded.name).value == "2/4"
+
+explored = engine.decode("universal:to", browse=True)
+assert engine.decode(explored.name).value == explored.value
+
+fraction = Frac(numerator=2, denominator=4)
+assert fraction.float() == 0.5
+assert fraction.fraction().numerator == 1
+```
+
+`Frac` has no arithmetic or implicit numerical conversion. Its identity is the
+stored pair. `.float()` returns infinities or NaN for zero denominators, and
+otherwise delegates to the standard rational conversion; finite overflow raises
+`OverflowError`. `.fraction()` returns `fractions.Fraction` and raises
+`ZeroDivisionError` for zero denominators. Neither method changes the pair.
+`Int` lives in `nmr.types.integer`; `Float` in `nmr.types.floating` stores exact
+binary64 bits and exposes `.float()`.
+
+Collections use explicit typed values rather than vocabulary-dependent names:
+
+```json
+{"birthday":{"type":"date","value":"2000-02-29"},"phone":{"type":"phone","value":"+442079460958"}}
+```
+
+Encode that JSON with type `record`. Type names normalize to full paths; scalar
+values must be strings. A `list` is an array of the same typed items. Nested list
+or record values use JSON arrays or objects, not JSON encoded inside strings.
+Records canonicalize key order, lists preserve order. Limits are 256 items per
+collection and eight collection levels; arbitrary browsing can encounter these
+work limits and is not promised to succeed for every collection index.
+
+## Format and development
+
+The five root slots are `universal`, `physical`, `virtual`, `play`, and `meta`.
+Every category has radix five. Slots 0–3 may hold leaves or categories; slot 4
+can only be empty or a category. Published allocations never move, and leaves
+never turn into categories. Future types occupy empty slots or new categories;
+all established canonical names keep their meaning.
+
+The exact allocations are in `nmr/registry.py`. Prefixes are ordinary paths
+through that tree. At each edge, `parent_index = slot + 5 * child_index`.
+A fuller prefix removes more of those routing components from the word payload.
+`test/format.json` freezes shared Python and WebAssembly examples.
+
+```sh
+uv sync --locked
+uv run pytest
+uv run ruff check --select B,E,F,I nmr test scripts
+uv run ruff format --check nmr test scripts
+uv run ty check nmr
+uv run coverage run -m pytest
+uv run coverage report
+uv build
+```
+
+For WebAssembly checks, install `pyodide@0.29.3` in a temporary npm directory,
+make it available through `NODE_PATH`, build `dist/web`, and run
+`node test/runtime_smoke.cjs`. Browser interaction checks also need Playwright and
+Chrome, or `NMR_BROWSER_CHANNEL=chromium` with Playwright's Chromium installed.
+The workflow in `.github/workflows/check.yml` runs WebAssembly checks automatically
+and offers browser interactions as a manual workflow-dispatch job.
+
+See [the implementation plan](plan/nmr.md) for the contract, design rationale,
+and resolved first-release decisions.

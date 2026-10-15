@@ -34,3 +34,11 @@ def test_vocabulary_identity_is_checked() -> None:
     engine = Nmr()
     with pytest.raises(ValueError, match="identifier"):
         engine.decode(engine.encode("1", "int").name, vocabulary="wrong")
+
+
+@pytest.mark.parametrize(
+    "name", [":the", "universal::the", "universal:", "universal:math:int:extra:the"]
+)
+def test_malformed_prefixes_are_not_accepted_as_canonical(name: str) -> None:
+    with pytest.raises(ValueError):
+        Nmr().decode(name)

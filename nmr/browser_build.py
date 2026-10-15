@@ -24,15 +24,11 @@ def build_browser(destination: Path) -> Path:
                     source.suffix == ".py" or source == package / "words.txt"
                 ):
                     archive.write(source, Path(name) / source.relative_to(root))
-            if name != "nmr":
-                distribution = metadata.distribution(name)
-                for entry in distribution.files or []:
-                    if (
-                        "license" in entry.name.lower()
-                        or "copying" in entry.name.lower()
-                    ):
-                        archive.write(
-                            str(distribution.locate_file(entry)),
-                            Path("licenses") / name / entry.name,
-                        )
+            distribution = metadata.distribution(name)
+            for entry in distribution.files or []:
+                if "license" in entry.name.lower() or "copying" in entry.name.lower():
+                    archive.write(
+                        str(distribution.locate_file(entry)),
+                        Path("licenses") / name / entry.name,
+                    )
     return destination / "index.html"

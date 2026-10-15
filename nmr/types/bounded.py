@@ -32,5 +32,7 @@ def scaled_string(value: int, scale: int) -> str:
     digits = len(str(scale)) - 1
     fraction = f"{part:0{digits}d}".rstrip("0")
     return (
-        ("-" if value < 0 else "") + str(whole) + ("." + fraction if fraction else "")
+        ("-" if value < 0 else "")
+        + format(Decimal(whole), "f")
+        + ("." + fraction if fraction else "")
     )

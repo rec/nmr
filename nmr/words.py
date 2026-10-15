@@ -27,7 +27,7 @@ class Words:
             if count is None:
                 count = COUNT_FOR_FILE
         if isinstance(words, Path):
-            words = words.read_text().splitlines()
+            words = words.read_bytes().decode().splitlines()
         tokens = [
             self.normalize(i.strip())
             for i in words

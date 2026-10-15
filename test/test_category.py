@@ -2,6 +2,7 @@ import pytest
 
 from nmr.category import Category, route
 from nmr.registry import ROOT
+from nmr.types.floating import Float
 from nmr.types.integer import Int
 
 
@@ -31,3 +32,10 @@ def test_root_order_and_reserved_slot() -> None:
     with pytest.raises(ValueError, match="unassigned"):
         ROOT.resolve(route([0, 3], 0))
     assert ROOT.resolve(route([0, 3], 0), browse=True)[0] is Int
+
+
+def test_browsing_empty_categories_uses_slot_order() -> None:
+    empty = Category(name="empty", children={})
+    first = Category(name="root", children={0: Int, 1: empty, 2: Float})
+    second = Category(name="root", children={2: Float, 1: empty, 0: Int})
+    assert first.resolve(1, browse=True) == second.resolve(1, browse=True) == (Float, 0)
