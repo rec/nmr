@@ -46,3 +46,17 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["nmr"]
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "nmr/**",
+    "scripts/**",
+    "test/**",
+    "plan/nmr.md",
+    "README.md",
+    "LICENSE",
+    "pyproject.toml",
+    "uv.lock",
+    ".python-version",
+    ".github/workflows/check.yml",
+]
