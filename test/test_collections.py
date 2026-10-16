@@ -12,7 +12,7 @@ def test_nested_contact_record_preserves_typed_details() -> None:
         "details": {
             "type": "list",
             "value": [
-                {"type": "text", "value": " 001 # é "},
+                {"type": "phone", "value": "+442079460958;ext=001"},
                 {"type": "frac", "value": "2/4"},
             ],
         },
@@ -21,7 +21,7 @@ def test_nested_contact_record_preserves_typed_details() -> None:
     encoded = engine.encode(json.dumps(value), "record")
     decoded = json.loads(engine.decode(encoded.name).value)
     assert decoded["birthday"] == {"type": "physical:time:date", "value": "2000-01-01"}
-    assert decoded["details"]["value"][0]["value"] == " 001 # é "
+    assert decoded["details"]["value"][0]["value"] == "+442079460958;ext=001"
     assert decoded["details"]["value"][1]["value"] == "2/4"
     assert engine.encode(json.dumps(decoded), "record").name == encoded.name
 
@@ -57,7 +57,24 @@ def test_duplicate_json_fields_are_rejected_instead_of_lost() -> None:
             '{"a":{"type":"int","value":"1"},"a":{"type":"int","value":"2"}}'
         )
     with pytest.raises(ValueError, match="Duplicate"):
-        List.str_to_index('[{"type":"int","type":"text","value":"1"}]')
+        List.str_to_index('[{"type":"int","type":"frac","value":"1"}]')
+
+
+def test_record_field_names_preserve_unicode_and_whitespace() -> None:
+    value = {" 001 # é 東京 :\x00 ": {"type": "int", "value": "0"}}
+    decoded = json.loads(Record.index_to_str(Record.str_to_index(json.dumps(value))))
+    assert list(decoded) == list(value)
+    assert decoded[next(iter(value))]["value"] == "0"
+
+
+def test_record_browsing_repairs_invalid_utf8_field_names() -> None:
+    # One field with key index 256 (the invalid UTF-8 byte ff), integer zero.
+    index = 131585
+    with pytest.raises(UnicodeDecodeError):
+        Record.index_to_str(index)
+    value = Record.index_to_str(index, browse=True)
+    assert json.loads(value) == {"?": {"type": "universal:math:int", "value": "0"}}
+    assert Record.index_to_str(Record.str_to_index(value)) == value
 
 
 def test_collection_work_limits_are_explicit() -> None:

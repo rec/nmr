@@ -19,6 +19,7 @@ const { loadPyodide } = require("pyodide");
   const fixture = JSON.parse(fs.readFileSync("test/format.json", "utf8"));
   assert.equal(info.count, 1628);
   assert.equal(info.identifier, fixture.vocabulary);
+  assert.equal("virtual:text" in info.types, false);
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(
@@ -38,7 +39,6 @@ const { loadPyodide } = require("pyodide");
   }
   for (const [type, value] of [
     ["frac", "2/4"],
-    ["text", " exact 001 # é "],
     ["date", "2000-02-29"],
     ["chess", "e4 e5 Nf3"],
     ["go", "9x9:D4 E4 pass pass"],

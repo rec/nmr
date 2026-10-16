@@ -6,9 +6,8 @@ from typing import cast
 from pydantic import BaseModel, ConfigDict
 
 from ..category import route
-from ..pack_numbers import pair, unpair
+from ..pack_numbers import pair, rank_digits, unpair, unrank_digits
 from ..type_namer import TypeNamer
-from .text import Text
 
 
 class Item(BaseModel, frozen=True):
@@ -63,7 +62,7 @@ def encode_collection(value: object, record: bool, depth: int) -> int:
         if not isinstance(value, dict) or any(not isinstance(i, str) for i in value):
             raise ValueError("A record must be a JSON object with string keys")
         values = [
-            pair(Text.str_to_index(k), encode_item(v, depth + 1))
+            pair(rank_digits(list(k.encode()), 256), encode_item(v, depth + 1))
             for k, v in sorted(cast(dict[str, object], value).items())
         ]
     else:
@@ -96,13 +95,28 @@ def decode_collection(index: int, record: bool, browse: bool, depth: int) -> obj
         previous: str | None = None
         for value in values:
             key_index, item_index = unpair(value)
-            key = Text.index_to_str(key_index, browse)
+            key = decode_key(key_index, browse)
             if not browse and previous is not None and key <= previous:
                 raise ValueError("Noncanonical record field ordering")
             previous = key
             result[key] = decode_item(item_index, browse, depth + 1)
         return dict(sorted(result.items()))
     return [decode_item(i, browse, depth + 1) for i in values]
+
+
+def decode_key(index: int, browse: bool) -> str:
+    data = bytes(unrank_digits(index, 256))
+    if not browse:
+        return data.decode()
+    parts = []
+    while data:
+        try:
+            parts.append(data.decode())
+            break
+        except UnicodeDecodeError as error:
+            parts.extend([data[: error.start].decode(), "?"])
+            data = data[error.end :]
+    return "".join(parts)
 
 
 def encode_item(item: object, depth: int) -> int:

@@ -26,8 +26,6 @@ CASES = [
     ("isbn", "978-0-306-40615-7", "9780306406157"),
     ("isbn", "0-306-40615-2", "0306406152"),
     ("upc", "036000291452", "036000291452"),
-    ("text", " leading 00\nélan 東京 # : \x00", " leading 00\nélan 東京 # : \x00"),
-    ("text", "", ""),
     ("chess", "e4 e5 Nf3", "e2e4 e7e5 g1f3"),
 ]
 
@@ -99,16 +97,15 @@ def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> No
     assert engine.decode(result.name).value == result.value
 
 
-def test_text_browsing_produces_canonical_utf8_without_increasing_index() -> None:
-    from nmr.types.text import Text
-
-    for index in range(2048):
-        value = Text.index_to_str(index, browse=True)
-        canonical = Text.str_to_index(value)
-        assert canonical <= index
-        assert Text.index_to_str(canonical) == value
-    with pytest.raises(UnicodeDecodeError):
-        Text.index_to_str(256)  # A single invalid UTF-8 byte, 0xff.
+def test_text_is_not_a_supported_type_or_category_slot() -> None:
+    engine = Nmr()
+    assert "virtual:text" not in engine.types()
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.encode("hello", "text")
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.decode("virtual:text:the")
+    with pytest.raises(ValueError, match="unassigned"):
+        engine.decode("virtual:" + " ".join(engine.encode_to_name(3)))
 
 
 def test_semver_browsing_normalizes_invalid_metadata() -> None:

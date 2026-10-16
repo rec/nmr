@@ -49,3 +49,20 @@ def unpair(n: int) -> tuple[int, int]:
     diagonal = (isqrt(8 * n + 1) - 1) // 2
     y = n - diagonal * (diagonal + 1) // 2
     return diagonal - y, y
+
+
+def rank_digits(digits: list[int], base: int) -> int:
+    total = 0
+    for digit in digits:
+        total = base * total + digit + 1
+    return total
+
+
+def unrank_digits(index: int, base: int) -> list[int]:
+    if index < 0:
+        raise ValueError("Expected a nonnegative index")
+    digits = []
+    while index:
+        index, digit = divmod(index - 1, base)
+        digits.append(digit)
+    return digits[::-1]

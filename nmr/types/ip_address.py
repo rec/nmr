@@ -24,7 +24,7 @@ class IPv6(TypeNamer):
     @staticmethod
     def str_to_index(value: str) -> int:
         if "%" in value:
-            raise ValueError("Scoped IPv6 addresses require exact text")
+            raise ValueError("Scoped IPv6 addresses are not supported")
         return int(ipaddress.IPv6Address(value))
 
     @staticmethod

@@ -1,7 +1,7 @@
 import re
 
+from ..pack_numbers import rank_digits, unrank_digits
 from ..type_namer import TypeNamer
-from .text import rank_digits, unrank_digits
 
 
 class Phone(TypeNamer):

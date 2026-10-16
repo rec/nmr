@@ -5,16 +5,16 @@ from nmr.registry import ROOT
 from nmr.types.floating import Float
 from nmr.types.fraction import Frac
 from nmr.types.integer import Int
-from nmr.types.text import Text
+from nmr.types.uuid import Uuid
 
 
 def test_last_slot_never_accepts_a_leaf() -> None:
     with pytest.raises(ValueError, match="last slot"):
-        Category("bad", Int, Float, Frac, Text, Int)
+        Category("bad", Int, Float, Frac, Uuid, Int)
 
 
 def test_growth_preserves_old_allocations() -> None:
-    old = Category("root", Int, Float, Frac, Text)
+    old = Category("root", Int, Float, Frac, Uuid)
     new = Category("root", *old.children, Category("extra", Int))
     for i in range(100):
         assert old.resolve(route([0], i)) == new.resolve(route([0], i)) == (Int, i)

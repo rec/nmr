@@ -13,7 +13,6 @@ from .types.lat_long import LatLong
 from .types.phone_number import Phone
 from .types.sem_ver import Semver
 from .types.temporal import Clock, Date, Duration, Instant, Local
-from .types.text import Text
 from .types.uuid import Uuid
 
 ROOT = Category(
@@ -30,7 +29,6 @@ ROOT = Category(
         Category("computer", IPv4, IPv6, Uuid, Semver),
         Category("contact", Phone),
         Category("id", Isbn, Upc),
-        Text,
     ),
     Category("play", Category("game", Chess, Go)),
     Category("meta", List, Record),

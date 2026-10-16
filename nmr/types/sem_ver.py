@@ -1,8 +1,7 @@
 from semver import Version
 
-from ..pack_numbers import Packer, pair, unpair
+from ..pack_numbers import Packer, pair, rank_digits, unpair, unrank_digits
 from ..type_namer import TypeNamer
-from .text import rank_digits, unrank_digits
 
 
 class Semver(TypeNamer):

@@ -39,8 +39,7 @@ The release should provide:
 * A dependable Python library and command-line tool.
 * A small, mobile-friendly browser encoder/decoder that friends can use without
   installing Python, registering, or uploading their private details.
-* Useful codecs for common personal details, with an exact text escape hatch for
-  details that do not justify their own codec.
+* Useful codecs for the supported personal details, numbers, and games.
 * Optional hierarchical prefixes that reveal the type and reduce the integer
   encoded by the word payload, using the same permanent numeration in every scope.
 * Straightforward custom-word-list creation, loading, and sharing.
@@ -118,8 +117,8 @@ invalid objects, and noncanonical indices; never silently fall back to browsing.
 
 Distinguish value preservation from spelling preservation. For example, equivalent
 IPv6 spellings may have one canonical output; a phone identifier must retain
-meaningful leading zeroes; exact text must retain its original contents. Display
-normalization before encoding whenever the input spelling will change. Do not
+meaningful leading zeroes. Display normalization before encoding whenever the
+input spelling will change. Do not
 round, truncate, infer a country, or discard timezone information silently.
 
 An object's identity is defined by its type, not universally by numerical equality.
@@ -163,7 +162,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `universal:math` | 0: `int`, 1: `frac`, 2: `float`. |
 | `physical` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
 | `physical:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
-| `virtual` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `text`. |
+| `virtual` | 0: `computer`, 1: `contact`, 2: `id` (categories). |
 | `virtual:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
 | `virtual:contact` | 0: `phone`. |
 | `virtual:id` | 0: `isbn`, 1: `upc`. |
@@ -317,9 +316,8 @@ that the decoded object is the intended one.
 ## First-release type coverage
 
 “All common types” needs a finite release definition. The following is the proposed
-coverage. The exact-text codec supplies faithful coverage for personal details
-outside these specialized codecs, without inventing jurisdiction-specific rules.
-Allocate leaves through the chosen permanent expansion mechanism.
+coverage. Generic strings are outside this scope. Allocate leaves through the
+chosen permanent expansion mechanism.
 
 | Type | First-release scope and canonicalization | Browsing completeness target |
 | --- | --- | --- |
@@ -331,21 +329,17 @@ Allocate leaves through the chosen permanent expansion mechanism.
 | Durations | Signed elapsed time with exact supported resolution. Calendar months/years are not fixed durations. | Every payload index in the defined representation. |
 | Phone numbers | International numbers with explicit country calling code and optional extension; preserve significant digits. No implicit regional parsing. | Structural validity only; no claim that a number is assigned or reachable. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
-| IP addresses | IPv4 and IPv6; canonical standard spelling. Scoped IPv6 uses exact text. | Full address domains, including non-routable addresses. |
+| IP addresses | IPv4 and IPv6; canonical standard spelling. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |
 | Semantic versions | Major, minor, patch, prerelease, and build metadata. | Browsing repairs empty metadata identifiers and numeric prerelease leading zeroes; canonical decoding rejects invalid indices. Capacity still applies to the repaired output. |
-| Exact text | Names, postal addresses, email addresses, URLs, account/reference identifiers, and short notes. Preserve whitespace, case, punctuation, and leading zeroes. | UTF-8 bytes with sparse canonical indices; browsing replaces invalid sequences with `?` without increasing the leaf index. Empty text is supported. |
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
 | Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
 | Collections | Typed ordered lists and records with sorted string keys; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
-The browser's exact-text choice explicitly covers names, addresses, email, URLs,
-and identifiers without implying semantic validation. ISBN and UPC have compact
-checked codecs. Bank identifiers and messenger handles use exact text; there are
-no ownership, delivery, assignment, or account-existence checks.
+ISBN and UPC have compact checked codecs. There are no ownership, delivery,
+assignment, or account-existence checks.
 
-Text coverage is important, but arbitrary long text will not become a few words.
 Measure realistic output lengths for every proposed use case. If common details
 produce impractically long names, revise the release scope or representation
 before describing the product as easy to share. Do not add compression or contact
@@ -357,8 +351,8 @@ Use these exact names for the namable numeric classes. Reuse existing numerical
 classes for numerical operations; do not implement a new arithmetic system.
 `Float` stores binary64 bits and returns the standard Python float through
 `.float()`. NaN spelling is `bits:HEX` to preserve payload and sign. There is no
-separate decimal codec in this release; exact decimal spelling can use text, or
-an exact decimal value can be represented as a numerator/denominator pair.
+separate decimal codec in this release; an exact decimal value can be represented
+as a numerator/denominator pair.
 
 `Frac` stores a numerator and denominator as signed integers. Its identity is the
 ordered pair: `1/2`, `2/4`, and `50/100` are different fractions; so are `0/2` and
@@ -658,19 +652,18 @@ human answer to use the delivered library, CLI, or static browser build.
 | --- | --- |
 | Tree and placement | Five-way tree and explicit allocations above; no legacy decoder. Golden fixtures freeze the new format. |
 | Security | Private vocabularies provide obscurity. Actual encryption, key management, and password storage claims are excluded. |
-| Main use cases | The implemented type matrix plus exact text for other personal details. |
+| Main use cases | The implemented type matrix; generic string encoding is excluded. |
 | Browser delivery | Static local conversion through pinned Pyodide 0.29.3 in a worker, with the same bundled Python core. |
 | Chess identity | Standard-start legal move sequences; unfinished and empty games count. FEN naming is replaced. |
 | Browsing | Explicitly selected; deterministic redirects through supported children, finite-domain modulo, codec-specific repairs. Canonical decoding remains the default. |
 | Repetition | Repeated words are invalid in both modes. |
-| Practical lengths | Generated examples show birthday: 2 words, international phone: 4, coordinate: 6, email: 13, three-ply chess: 2. No universal shortness claim. |
+| Practical lengths | Generated examples show birthday: 2 words, international phone: 4, coordinate: 6, three-ply chess: 2. No universal shortness claim. |
 | Prefixes | Full leaf paths by default. CLI/API can select an ancestor scope or no prefix. Paths are independent of vocabulary. |
 | Temporal scope | Gregorian years 1–9999, exact microseconds, explicit offsets for instants, UTC canonical output. No partial dates, named timezones, leap seconds, or calendar-month durations. |
 | Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
 | Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
 | Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
-| Text | Exact UTF-8, including whitespace and non-Latin scripts. Contact labels do not become separate semantic types. |
-| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Other identifiers use text. Typed list and record codecs provide composition. |
+| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Typed list and record codecs provide composition; record field names retain their internal UTF-8 encoding. |
 | Vocabulary policy | NFC plus case folding by default; optional case sensitivity and active word count. Word order, normalization, and count participate in identity. Existing default order retained. |
 | Vocabulary exchange | File import, paste, normalized export, and full SHA-256 identity. No automatic persistence or shuffling. |
 | Typo handling | Strict canonical rejection and explicit result verification. No checksum overhead or silent correction. |
@@ -685,11 +678,14 @@ human answer to use the delivered library, CLI, or static browser build.
    and CLI; removed the broken old codec implementations.
 3. Added everyday codecs, legal chess enumeration, and typed lists/records.
 4. Added the static browser build, worker bridge, vocabulary UI, and WebAssembly
-   checks. Improved UTF-8 text efficiency and very-large-integer handling.
+   checks. Improved very-large-integer handling.
 5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
    documentation, and replacements for obsolete maintenance paths.
 6. Added the requested Go extension in an unused leaf slot, preserving existing
    canonical names and sharing the implementation across Python and WebAssembly.
+7. Removed the public Text type and its browser choice. Its former slot is
+   unassigned; other types retain their names. Record field names keep their
+   internal UTF-8 encoding, and shared digit ranking remains for compact codecs.
 
 ### Verification and limits
 

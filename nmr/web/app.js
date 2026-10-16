@@ -45,7 +45,7 @@ function selectMode(selected) {
   $("encode-options").hidden = mode !== "encode";
   $("mode-description").textContent = {
     encode:
-      "Choose a type. Exact text preserves names, addresses, email, URLs, and reference numbers.",
+      "Choose the type of detail or game you want to name.",
     decode: "Recover an exact detail from its canonical name.",
     browse:
       "Explore a name. Save the returned canonical name to preserve the result.",

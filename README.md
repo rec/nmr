@@ -63,8 +63,7 @@ nmr --operation encode --type phone --value '+442079460958' --json-output
 
 Without `--value`, the CLI reads stdin, or prompts when used in a terminal.
 `--value` preserves its entire argument, including whitespace, `#`, and newlines.
-Use exact text for names, addresses, email, URLs, messenger handles, and arbitrary
-reference numbers. There is no implicit type guessing or country inference.
+There is no implicit type guessing or country inference.
 
 Canonical decoding rejects unassigned type slots, invalid values, and
 noncanonical encodings. It never silently switches to browsing. Browsing may
@@ -86,12 +85,11 @@ expands; save the canonical output instead.
 | `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
 | `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
-| `ipv4`, `ipv6` | Full address domains; interface-scoped IPv6 requires text. |
+| `ipv4`, `ipv6` | Full address domains; interface-scoped IPv6 is unsupported. |
 | `uuid` | All 128 bits, without imposing version restrictions. |
 | `semver` | Complete semantic version, including prerelease and build metadata; optional input `v`. |
 | `isbn` | ISBN-10 or ISBN-13 with check digits; ISBN-13 begins 978 or 979. |
 | `upc` | UPC-A, including the check digit and leading zeroes. |
-| `text` | Exact UTF-8 text, including empty text, non-Latin scripts, punctuation, and whitespace. |
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `list`, `record` | Ordered typed values or named typed fields, including nested collections. |
@@ -119,9 +117,8 @@ part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the name
 `play:game:go:up trade real` with the default vocabulary.
 
-Named text is an encoding, not compression. A phone fits in four payload words in
-the example above; a general email address can take thirteen or more. Prefixes
-remove type-routing overhead but cannot eliminate the information in the value.
+Prefixes remove type-routing overhead but cannot eliminate the information in
+the value. A phone fits in four payload words in the example above.
 
 ## Your own vocabulary
 
