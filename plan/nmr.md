@@ -174,6 +174,12 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 All unlisted slots are empty. Science, art, music, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
 
+Represent the hierarchy with `Category(name, *children)`, storing children as
+`tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an
+integer-keyed dictionary. Every category has one to five children; entries cannot
+be `None`, and unused slots follow the final child. This representation preserves
+all existing slot allocations and canonical names.
+
 At every category node, slots 0 through 3 may be empty, a specifically defined
 leaf type, or a category. Slot 4 may be empty or a category, but must never be a
 leaf. The root satisfies this rule because `meta` is a category. Every category
@@ -687,7 +693,7 @@ human answer to use the delivered library, CLI, or static browser build.
 
 ### Verification and limits
 
-The final local suite has 156 tests with 93% branch-aware coverage. It passes on
+The final local suite has 158 tests with 93% branch-aware coverage. It passes on
 CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated

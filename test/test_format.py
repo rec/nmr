@@ -27,12 +27,12 @@ def test_published_format_fixtures() -> None:
         assert engine.decode(case["name"]).value == case["value"]
 
 
-def test_new_last_slot_categories_preserve_every_established_fixture() -> None:
+def test_new_categories_preserve_every_established_fixture() -> None:
     meta = ROOT.children[4]
     assert isinstance(meta, Category)
-    extra = Category(name="extra", children={0: Added})
-    expanded_meta = Category(name="meta", children={**meta.children, 4: extra})
-    expanded = Category(name="", children={**ROOT.children, 4: expanded_meta})
+    extra = Category("extra", Added)
+    expanded_meta = Category("meta", *meta.children, extra)
+    expanded = Category("", *ROOT.children[:4], expanded_meta)
     engine = Nmr(root=expanded)
     fixture = json.loads(Path(__file__).with_name("format.json").read_text())
     for case in fixture["cases"]:

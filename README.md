@@ -227,7 +227,11 @@ can only be empty or a category. Published allocations never move, and leaves
 never turn into categories. Future types occupy empty slots or new categories;
 all established canonical names keep their meaning.
 
-The exact allocations are in `nmr/registry.py`. Prefixes are ordinary paths
+The exact allocations are in `nmr/registry.py`, using positional constructors
+such as `Category("game", Chess, Go)`. Children are stored in an immutable tuple
+of categories or codec classes. Tuple positions define the slots; unused slots
+follow the last child. Categories require one to five children, with no `None`
+entries or empty placeholder categories. Prefixes are ordinary paths
 through that tree. At each edge, `parent_index = slot + 5 * child_index`.
 A fuller prefix removes more of those routing components from the word payload.
 `test/format.json` freezes shared Python and WebAssembly examples.
