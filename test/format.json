@@ -6,7 +6,7 @@
       "input": "42",
       "value": "42",
       "scope": null,
-      "name": "universal:math:int:year"
+      "name": "pure:math:int:year"
     },
     {
       "type": "int",
@@ -20,28 +20,28 @@
       "input": "2/4",
       "value": "2/4",
       "scope": null,
-      "name": "universal:math:frac:now"
+      "name": "pure:math:frac:now"
     },
     {
       "type": "date",
       "input": "2000-02-29",
       "value": "2000-02-29",
       "scope": null,
-      "name": "physical:time:date:nor lung"
+      "name": "real:time:date:nor lung"
     },
     {
       "type": "phone",
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "name": "virtual:contact:phone:then eden happy ian"
+      "name": "data:contact:phone:then eden happy ian"
     },
     {
       "type": "latlong",
       "input": "48.8566,2.3522",
       "value": "48.8566,2.3522",
       "scope": null,
-      "name": "physical:latlong:to plot ruth wise tend echo"
+      "name": "real:latlong:to plot ruth wise tend echo"
     },
     {
       "type": "chess",
@@ -104,103 +104,103 @@
       "input": "0/0",
       "value": "0/0",
       "scope": null,
-      "name": "universal:math:frac:the"
+      "name": "pure:math:frac:the"
     },
     {
       "type": "float",
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "name": "universal:math:float:sing crop doubt lynn hey run"
+      "name": "pure:math:float:sing crop doubt lynn hey run"
     },
     {
       "type": "float",
       "input": "bits:7ff8000000000042",
       "value": "bits:7ff8000000000042",
       "scope": null,
-      "name": "universal:math:float:sue fix turn lane sin rug"
+      "name": "pure:math:float:sue fix turn lane sin rug"
     },
     {
       "type": "clock",
       "input": "23:59:59.999999",
       "value": "23:59:59.999999",
       "scope": null,
-      "name": "physical:time:clock:from add even user"
+      "name": "real:time:clock:from add even user"
     },
     {
       "type": "local",
       "input": "2000-02-29T12:30",
       "value": "2000-02-29T12:30:00",
       "scope": null,
-      "name": "physical:time:local:a tile wish roof exam she"
+      "name": "real:time:local:a tile wish roof exam she"
     },
     {
       "type": "instant",
       "input": "2000-01-01T00:30:00+01:00",
       "value": "1999-12-31T23:30:00Z",
       "scope": null,
-      "name": "physical:time:instant:a jeep mill ebony hash live"
+      "name": "real:time:instant:a jeep mill ebony hash live"
     },
     {
       "type": "duration",
       "input": "-0.000001s",
       "value": "-0.000001s",
       "scope": null,
-      "name": "physical:duration:and"
+      "name": "real:duration:and"
     },
     {
       "type": "ipv4",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "name": "virtual:computer:ipv4:lion jet night"
+      "name": "data:computer:ipv4:lion jet night"
     },
     {
       "type": "ipv6",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "name": "virtual:computer:ipv6:act world leon lady main wood soft nice upper serve kay mid"
+      "name": "data:computer:ipv6:act world leon lady main wood soft nice upper serve kay mid"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "name": "virtual:computer:uuid:mail worth silk link track of oops tight pig find hold beat"
+      "name": "data:computer:uuid:mail worth silk link track of oops tight pig find hold beat"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "name": "virtual:computer:semver:air info rand start sort dump lamb catch fed since apple okay emma month track hide chain armed swiss wife"
+      "name": "data:computer:semver:air info rand start sort dump lamb catch fed since apple okay emma month track hide chain armed swiss wife"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "name": "virtual:id:isbn:wood main owen"
+      "name": "data:id:isbn:wood main owen"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "name": "virtual:id:upc:motor baby box"
+      "name": "data:id:upc:motor baby box"
     },
     {
       "type": "list",
       "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
-      "value": "[{\"type\":\"universal:math:int\",\"value\":\"1\"}]",
+      "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"}]",
       "scope": null,
       "name": "meta:list:zoom"
     },
     {
       "type": "record",
       "input": "{\"a\":{\"type\":\"int\",\"value\":\"1\"}}",
-      "value": "{\"a\":{\"type\":\"universal:math:int\",\"value\":\"1\"}}",
+      "value": "{\"a\":{\"type\":\"pure:math:int\",\"value\":\"1\"}}",
       "scope": null,
       "name": "meta:record:web lime"
     }

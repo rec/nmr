@@ -99,13 +99,13 @@ def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> No
 
 def test_text_is_not_a_supported_type_or_category_slot() -> None:
     engine = Nmr()
-    assert "virtual:text" not in engine.types()
+    assert "data:text" not in engine.types()
     with pytest.raises(ValueError, match="Unknown"):
         engine.encode("hello", "text")
     with pytest.raises(ValueError, match="Unknown"):
-        engine.decode("virtual:text:the")
+        engine.decode("data:text:the")
     with pytest.raises(ValueError, match="unassigned"):
-        engine.decode("virtual:" + " ".join(engine.encode_to_name(3)))
+        engine.decode("data:" + " ".join(engine.encode_to_name(3)))
 
 
 def test_semver_browsing_normalizes_invalid_metadata() -> None:

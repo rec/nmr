@@ -19,7 +19,7 @@ const { loadPyodide } = require("pyodide");
   const fixture = JSON.parse(fs.readFileSync("test/format.json", "utf8"));
   assert.equal(info.count, 1628);
   assert.equal(info.identifier, fixture.vocabulary);
-  assert.equal("virtual:text" in info.types, false);
+  assert.equal("data:text" in info.types, false);
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(
@@ -70,10 +70,10 @@ const { loadPyodide } = require("pyodide");
     "-2",
   );
   assert.throws(() =>
-    convert(JSON.stringify({ operation: "decode", value: "universal:green" })),
+    convert(JSON.stringify({ operation: "decode", value: "pure:green" })),
   );
   const browsed = JSON.parse(
-    convert(JSON.stringify({ operation: "browse", value: "universal:green" })),
+    convert(JSON.stringify({ operation: "browse", value: "pure:green" })),
   );
   assert.equal(browsed.canonical, false);
   assert.equal(

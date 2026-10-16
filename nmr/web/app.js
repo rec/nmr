@@ -101,7 +101,7 @@ async function configure(settings) {
       option.textContent = path + " / " + description;
       $("type").append(option);
     }
-    $("type").value = previous in info.types ? previous : "universal:math:int";
+    $("type").value = previous in info.types ? previous : "pure:math:int";
     updateType();
     $("vocabulary-id").value = info.identifier;
     $("vocabulary-count").textContent =
@@ -232,11 +232,11 @@ for (const part of ["name", "value"]) {
 $("example").addEventListener("click", async () => {
   if (busy || !vocabulary) return;
   if (mode === "encode") {
-    $("type").value = "physical:time:date";
+    $("type").value = "real:time:date";
     updateType();
     $("value").value = "2000-02-29";
   } else if (mode === "browse")
-    $("value").value = "universal:" + vocabulary.words[3 % vocabulary.count];
+    $("value").value = "pure:" + vocabulary.words[3 % vocabulary.count];
   else {
     try {
       const result = await request("convert", {

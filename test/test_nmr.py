@@ -9,7 +9,7 @@ from nmr.nmr import Nmr
 def test_prefix_scopes_decode_the_same_value(kind: str, value: str) -> None:
     engine = Nmr()
     path = engine.find_type(kind)[0]
-    for scope in [None, "", "universal", "universal:math", path]:
+    for scope in [None, "", "pure", "pure:math", path]:
         result = engine.encode(value, kind, scope)
         assert engine.decode(result.name).value == value
         assert engine.decode(result.name, browse=True).name == result.name
@@ -17,7 +17,7 @@ def test_prefix_scopes_decode_the_same_value(kind: str, value: str) -> None:
 
 def test_canonical_decode_never_silently_browses() -> None:
     engine = Nmr()
-    name = "universal:" + " ".join(engine.encode_to_name(3))
+    name = "pure:" + " ".join(engine.encode_to_name(3))
     with pytest.raises(ValueError, match="unassigned"):
         engine.decode(name)
     result = engine.decode(name, browse=True)
@@ -37,7 +37,7 @@ def test_vocabulary_identity_is_checked() -> None:
 
 
 @pytest.mark.parametrize(
-    "name", [":the", "universal::the", "universal:", "universal:math:int:extra:the"]
+    "name", [":the", "pure::the", "pure:", "pure:math:int:extra:the"]
 )
 def test_malformed_prefixes_are_not_accepted_as_canonical(name: str) -> None:
     with pytest.raises(ValueError):

@@ -7,7 +7,7 @@ friend recover it with the same vocabulary.
 A name contains a readable type prefix and a payload without repeated words:
 
 ```text
-physical:time:date:nor lung
+real:time:date:nor lung
 ```
 
 That name means `2000-02-29`. Canonical decoding is the default. Browsing is an
@@ -23,7 +23,7 @@ git clone git@github.com:rec/nmr.git
 cd nmr
 uv sync --frozen
 uv run --frozen nmr --operation encode --type date --value 2000-02-29
-uv run --frozen nmr --value 'physical:time:date:nor lung'
+uv run --frozen nmr --value 'real:time:date:nor lung'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
@@ -37,8 +37,8 @@ dependencies.
 ```sh
 # Preserve the actual fraction pair, including zero denominators.
 nmr --operation encode --type frac --value '2/4'
-# universal:math:frac:now
-nmr --value 'universal:math:frac:now'
+# pure:math:frac:now
+nmr --value 'pure:math:frac:now'
 # 2/4
 
 # The scope controls how much type information stays in the word payload.
@@ -50,9 +50,9 @@ nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
 # sons paint
 
 # Explore a noncanonical name. The stable name is printed to stderr.
-nmr --operation browse --value 'universal:to'
+nmr --operation browse --value 'pure:to'
 # 0
-# Canonical name: universal:the
+# Canonical name: pure:the
 
 # One value per line; errors go to stderr and produce exit status 1.
 printf '2000-02-29\n2024-12-31\n' | nmr --operation encode --type date
@@ -131,7 +131,7 @@ selected word count must be used by both people.
 ```sh
 nmr --word-file private.txt --vocabulary-info
 nmr --word-file private.txt --operation encode --type phone --value '+442079460958'
-nmr --word-file private.txt --value 'virtual:contact:phone:YOUR WORDS HERE'
+nmr --word-file private.txt --value 'data:contact:phone:YOUR WORDS HERE'
 nmr --word-file private.txt --export-words normalized-private.txt
 ```
 
@@ -184,10 +184,10 @@ from nmr.types.fraction import Frac
 
 engine = Nmr()
 encoded = engine.encode("2/4", "frac")
-assert encoded.name == "universal:math:frac:now"
+assert encoded.name == "pure:math:frac:now"
 assert engine.decode(encoded.name).value == "2/4"
 
-explored = engine.decode("universal:to", browse=True)
+explored = engine.decode("pure:to", browse=True)
 assert engine.decode(explored.name).value == explored.value
 
 fraction = Frac(numerator=2, denominator=4)
@@ -218,7 +218,7 @@ work limits and is not promised to succeed for every collection index.
 
 ## Format and development
 
-The five root slots are `universal`, `physical`, `virtual`, `play`, and `meta`.
+The five root slots are `pure`, `real`, `data`, `play`, and `meta`.
 Every category has radix five. Slots 0–3 may hold leaves or categories; slot 4
 can only be empty or a category. Published allocations never move, and leaves
 never turn into categories. Future types occupy empty slots or new categories;

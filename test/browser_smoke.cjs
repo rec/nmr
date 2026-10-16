@@ -32,7 +32,7 @@ const { chromium } = require("playwright");
     await page.locator("#result").waitFor({ state: "visible" });
     assert.equal(await page.locator("#result-value").inputValue(), "2/4");
     await page.locator('[data-mode="encode"]').click();
-    await page.locator("#type").selectOption("virtual:contact:phone");
+    await page.locator("#type").selectOption("data:contact:phone");
     const secret = "+442079460958;ext=001";
     await page.locator("#value").fill(secret);
     await page.locator("#convert").click();
@@ -53,7 +53,7 @@ const { chromium } = require("playwright");
       document.getElementById("vocabulary-count").textContent.startsWith("7 "),
     );
     await page.locator('[data-mode="encode"]').click();
-    await page.locator("#type").selectOption("universal:math:int");
+    await page.locator("#type").selectOption("pure:math:int");
     await page.locator("#value").fill("-2");
     await page.locator("#convert").click();
     await page.locator("#result").waitFor({ state: "visible" });
@@ -63,7 +63,7 @@ const { chromium } = require("playwright");
     await page.locator("#convert").click();
     await page.locator("#result").waitFor({ state: "visible" });
     assert.equal(await page.locator("#result-value").inputValue(), "-2");
-    await page.locator("#value").fill("universal:green");
+    await page.locator("#value").fill("pure:green");
     await page.locator("#convert").click();
     await page.waitForFunction(() =>
       document.getElementById("message").classList.contains("error"),

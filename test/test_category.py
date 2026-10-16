@@ -23,9 +23,9 @@ def test_growth_preserves_old_allocations() -> None:
 
 def test_root_order_and_reserved_slot() -> None:
     assert [i.name for i in ROOT.children if isinstance(i, Category)] == [
-        "universal",
-        "physical",
-        "virtual",
+        "pure",
+        "real",
+        "data",
         "play",
         "meta",
     ]

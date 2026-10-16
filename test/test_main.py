@@ -18,7 +18,7 @@ def test_streams_preserve_hashes_and_report_each_error() -> None:
 
 def test_canonical_decode_is_default() -> None:
     output, errors = io.StringIO(), io.StringIO()
-    assert Main(value="universal:to").run(io.StringIO(), output, errors) == 1
+    assert Main(value="pure:to").run(io.StringIO(), output, errors) == 1
     assert output.getvalue() == ""
 
 
@@ -46,20 +46,18 @@ def test_json_pipeline_exposes_canonical_value_and_type() -> None:
     assert status == 0
     result = json.loads(output.getvalue())
     assert result["value"] == "2000-02-29"
-    assert result["type"] == "physical:time:date"
+    assert result["type"] == "real:time:date"
     assert result["canonical"] is True
 
 
 def test_browsing_prints_canonical_name_to_stderr() -> None:
     output, errors = io.StringIO(), io.StringIO()
     assert (
-        Main(operation="browse", value="universal:to").run(
-            io.StringIO(), output, errors
-        )
+        Main(operation="browse", value="pure:to").run(io.StringIO(), output, errors)
         == 0
     )
     assert output.getvalue().strip() == "0"
-    assert "Canonical name: universal:the" in errors.getvalue()
+    assert "Canonical name: pure:the" in errors.getvalue()
 
 
 def test_encoding_requires_an_explicit_type() -> None:
@@ -80,6 +78,6 @@ def test_command_entrypoint_parses_the_pydantic_model(monkeypatch: MonkeyPatch) 
     monkeypatch.setattr(sys, "stdout", output)
     monkeypatch.setattr(sys, "stderr", errors)
     assert main(["--operation", "encode", "--type", "frac", "--value", "0/0"]) == 0
-    assert output.getvalue().startswith("universal:math:frac:")
+    assert output.getvalue().startswith("pure:math:frac:")
     assert main(["--value", "missing:the"]) == 1
     assert "Unknown category" in errors.getvalue()

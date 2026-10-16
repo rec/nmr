@@ -17,15 +17,15 @@ from .types.uuid import Uuid
 
 ROOT = Category(
     "",
-    Category("universal", Category("math", Int, Frac, Float)),
+    Category("pure", Category("math", Int, Frac, Float)),
     Category(
-        "physical",
+        "real",
         Category("time", Date, Clock, Local, Instant),
         LatLong,
         Duration,
     ),
     Category(
-        "virtual",
+        "data",
         Category("computer", IPv4, IPv6, Uuid, Semver),
         Category("contact", Phone),
         Category("id", Isbn, Upc),

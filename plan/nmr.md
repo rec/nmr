@@ -22,7 +22,7 @@ Additional work beyond the prompt: None.
 * Once established, canonical names must remain backward compatible forever.
   There is no later incompatible format reset. Adding types must remain possible
   without changing the meaning of any existing canonical name.
-* The root categories, in order, are `universal`, `physical`, `virtual`, `play`,
+* The root categories, in order, are `pure`, `real`, `data`, `play`,
   and `meta`. Every category node has five slots, with fixed radix five.
 * The last slot, index 4, may be empty or contain a category, never a leaf.
   Slots 0 through 3 may be empty, leaves, or categories. This rule applies at
@@ -143,29 +143,29 @@ The root allocation is settled:
 
 | Slot | Category | Scope |
 | --- | --- | --- |
-| 0 | `universal` | Math and science. |
-| 1 | `physical` | Time and geographic location, including latitude/longitude. |
-| 2 | `virtual` | Computing, communication, contacts, and identifiers. |
+| 0 | `pure` | Math and science. |
+| 1 | `real` | Time and geographic location, including latitude/longitude. |
+| 2 | `data` | Computing, communication, contacts, and identifiers. |
 | 3 | `play` | Art, music, and games. |
 | 4 | `meta` | Collections, composites, and structural types. |
 
-`universal` is the category name; “canonical” refers to encoding and decoding,
+`pure` is the category name; “canonical” refers to encoding and decoding,
 not a category. Place the existing mathematical and scientific types under
-`universal`; time and coordinates under `physical`; computer, contact, and
-commercial identifier types under `virtual`; art and games under `play`; and
+`pure`; time and coordinates under `real`; computer, contact, and
+commercial identifier types under `data`; art and games under `play`; and
 the former combination concept under `meta`. Exact subcategory names, slot
 assignments and structural leaves are now explicit in `nmr/registry.py`:
 
 | Category path | Occupied child slots |
 | --- | --- |
-| `universal` | 0: `math` (category). |
-| `universal:math` | 0: `int`, 1: `frac`, 2: `float`. |
-| `physical` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
-| `physical:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
-| `virtual` | 0: `computer`, 1: `contact`, 2: `id` (categories). |
-| `virtual:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
-| `virtual:contact` | 0: `phone`. |
-| `virtual:id` | 0: `isbn`, 1: `upc`. |
+| `pure` | 0: `math` (category). |
+| `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
+| `real` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
+| `real:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
+| `data` | 0: `computer`, 1: `contact`, 2: `id` (categories). |
+| `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
+| `data:contact` | 0: `phone`. |
+| `data:id` | 0: `isbn`, 1: `upc`. |
 | `play` | 0: `game` (category). |
 | `play:game` | 0: `chess`, 1: `go`. |
 | `meta` | 0: `list`, 1: `record`. |

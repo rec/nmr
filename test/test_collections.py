@@ -20,7 +20,7 @@ def test_nested_contact_record_preserves_typed_details() -> None:
     engine = Nmr()
     encoded = engine.encode(json.dumps(value), "record")
     decoded = json.loads(engine.decode(encoded.name).value)
-    assert decoded["birthday"] == {"type": "physical:time:date", "value": "2000-01-01"}
+    assert decoded["birthday"] == {"type": "real:time:date", "value": "2000-01-01"}
     assert decoded["details"]["value"][0]["value"] == "+442079460958;ext=001"
     assert decoded["details"]["value"][1]["value"] == "2/4"
     assert engine.encode(json.dumps(decoded), "record").name == encoded.name
@@ -73,7 +73,7 @@ def test_record_browsing_repairs_invalid_utf8_field_names() -> None:
     with pytest.raises(UnicodeDecodeError):
         Record.index_to_str(index)
     value = Record.index_to_str(index, browse=True)
-    assert json.loads(value) == {"?": {"type": "universal:math:int", "value": "0"}}
+    assert json.loads(value) == {"?": {"type": "pure:math:int", "value": "0"}}
     assert Record.index_to_str(Record.str_to_index(value)) == value
 
 

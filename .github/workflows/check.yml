@@ -30,7 +30,7 @@ jobs:
           uv venv /tmp/nmr-installed
           uv pip install --python /tmp/nmr-installed/bin/python dist/*.whl
           cd /tmp
-          /tmp/nmr-installed/bin/nmr --operation decode --value 'universal:math:frac:now'
+          /tmp/nmr-installed/bin/nmr --operation decode --value 'pure:math:frac:now'
   browser-runtime:
     runs-on: ubuntu-latest
     steps:
