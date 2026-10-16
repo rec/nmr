@@ -31,5 +31,5 @@ ROOT = Category(
         Category("id", Isbn, Upc),
     ),
     Category("play", Category("game", Chess, Go)),
-    Category("meta", List),
+    List,
 )

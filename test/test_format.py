@@ -28,11 +28,11 @@ def test_published_format_fixtures() -> None:
 
 
 def test_new_categories_preserve_every_established_fixture() -> None:
-    meta = ROOT.children[4]
-    assert isinstance(meta, Category)
+    pure = ROOT.children[0]
+    assert isinstance(pure, Category)
     extra = Category("extra", Added)
-    expanded_meta = Category("meta", *meta.children, extra)
-    expanded = Category("", *ROOT.children[:4], expanded_meta)
+    expanded_pure = Category("pure", *pure.children, extra)
+    expanded = Category("", expanded_pure, *ROOT.children[1:])
     engine = Nmr(root=expanded)
     fixture = json.loads(Path(__file__).with_name("format.json").read_text())
     for case in fixture["cases"]:

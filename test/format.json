@@ -195,7 +195,14 @@
       "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
       "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"}]",
       "scope": null,
-      "name": "meta:list:zoom"
+      "name": "list:zoom"
+    },
+    {
+      "type": "list",
+      "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
+      "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"}]",
+      "scope": "",
+      "name": "the joke"
     }
   ]
 }

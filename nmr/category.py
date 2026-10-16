@@ -1,4 +1,4 @@
-"""Five-way routing. Slot four is always empty or a category."""
+"""Five-way routing. Only the unnamed root may have a leaf in slot four."""
 
 from __future__ import annotations
 
@@ -22,8 +22,14 @@ class Category(BaseModel, frozen=True):
     def validate_children(self) -> Category:
         if not 1 <= len(self.children) <= RADIX:
             raise ValueError(f"Child count {len(self.children)} is out of range 1..5")
-        if len(self.children) == RADIX and not isinstance(self.children[-1], Category):
+        if (
+            self.name
+            and len(self.children) == RADIX
+            and not isinstance(self.children[-1], Category)
+        ):
             raise ValueError("The last slot can never be a leaf")
+        if any(isinstance(i, Category) and not i.name for i in self.children):
+            raise ValueError("The unnamed root cannot be nested inside a category")
         labels = [label(i) for i in self.children]
         if len(labels) != len(set(labels)):
             raise ValueError("Sibling names must be unique")

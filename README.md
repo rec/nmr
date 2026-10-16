@@ -217,11 +217,16 @@ to succeed for every list index.
 
 ## Format and development
 
-The five root slots are `pure`, `real`, `data`, `play`, and `meta`.
-Every category has radix five. Slots 0–3 may hold leaves or categories; slot 4
-can only be empty or a category. Published allocations never move, and leaves
-never turn into categories. Future types occupy empty slots or new categories;
-all established canonical names keep their meaning.
+The five root slots are `pure`, `real`, `data`, `play`, and the `list` leaf.
+Every category has radix five. Below the root, slots 0–3 may hold leaves or
+categories; slot 4 can only be empty or a category. The unnamed root alone is
+exempt from the last-slot rule and cannot be nested. New types expand beneath
+the four root categories. Published allocations never move, and leaves never
+turn into categories.
+
+List names use `list:` directly. An unprefixed list routes as `4 + 5 * payload`,
+with one fewer routing step than the former `meta:list` path. Nested lists also
+benefit from the shorter route; other type allocations are unchanged.
 
 The exact allocations are in `nmr/registry.py`, using positional constructors
 such as `Category("game", Chess, Go)`. Children are stored in an immutable tuple

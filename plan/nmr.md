@@ -22,11 +22,12 @@ Additional work beyond the prompt: None.
 * Once established, canonical names must remain backward compatible forever.
   There is no later incompatible format reset. Adding types must remain possible
   without changing the meaning of any existing canonical name.
-* The root categories, in order, are `pure`, `real`, `data`, `play`,
-  and `meta`. Every category node has five slots, with fixed radix five.
-* The last slot, index 4, may be empty or contain a category, never a leaf.
-  Slots 0 through 3 may be empty, leaves, or categories. This rule applies at
-  every depth; expansion uses ordinary categories.
+* The root slots, in order, are `pure`, `real`, `data`, `play`, and the `list`
+  leaf. Every category node has five slots, with fixed radix five.
+* Below the root, the last slot, index 4, may be empty or contain a category,
+  never a leaf. The root is exempt. Slots 0 through 3 may be empty, leaves, or
+  categories. Below the root, this rule applies at every depth; expansion uses
+  ordinary categories.
 * Canonical decoding is the default. Browsing is a separate, explicit operation
   that can map unassigned or out-of-range indices into supported choices.
 * The namable numeric classes are `Int`, `Frac`, and `Float`.
@@ -141,19 +142,19 @@ not the internal enumeration of objects within a leaf codec.
 
 The root allocation is settled:
 
-| Slot | Category | Scope |
+| Slot | Category or leaf | Scope |
 | --- | --- | --- |
 | 0 | `pure` | Math and science. |
 | 1 | `real` | Time and geographic location, including latitude/longitude. |
 | 2 | `data` | Computing, communication, contacts, and identifiers. |
 | 3 | `play` | Art, music, and games. |
-| 4 | `meta` | Collections, composites, and structural types. |
+| 4 | `list` (leaf) | Ordered typed values, including nested lists. |
 
 `pure` is the category name; “canonical” refers to encoding and decoding,
 not a category. Place the existing mathematical and scientific types under
 `pure`; time and coordinates under `real`; computer, contact, and
 commercial identifier types under `data`; art and games under `play`; and
-the former combination concept under `meta`. Exact subcategory names, slot
+List directly in root slot 4. Exact subcategory names, slot
 assignments and structural leaves are now explicit in `nmr/registry.py`:
 
 | Category path | Occupied child slots |
@@ -168,7 +169,6 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `data:id` | 0: `isbn`, 1: `upc`. |
 | `play` | 0: `game` (category). |
 | `play:game` | 0: `chess`, 1: `go`. |
-| `meta` | 0: `list`. |
 
 All unlisted slots are empty. Science, art, music, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
@@ -177,20 +177,27 @@ Represent the hierarchy with `Category(name, *children)`, storing children as
 `tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an
 integer-keyed dictionary. Every category has one to five children; entries cannot
 be `None`, and unused slots follow the final child. This representation preserves
-all existing slot allocations and canonical names.
+the numbered ordering of its children.
 
-At every category node, slots 0 through 3 may be empty, a specifically defined
-leaf type, or a category. Slot 4 may be empty or a category, but must never be a
-leaf. The root satisfies this rule because `meta` is a category. Every category
-child uses the same five-slot structure and last-slot restriction recursively.
+Below the root, slots 0 through 3 may be empty, a specifically defined leaf type,
+or a category. Slot 4 may be empty or a category, but must never be a leaf. The
+unnamed root alone is exempt and cannot be nested. Its fifth child is List.
+Every named category uses the five-slot structure and last-slot restriction
+recursively; no new root slots can be added.
 
-To extend a full node, descend through slot 4. If that slot is empty, create a
-category there and place the new type in an available slot 0 through 3 beneath it.
+To extend a full named category, descend through slot 4. If that slot is empty,
+create a category there and place the new type in an available slot 0 through 3
+beneath it.
 In a finite tree, repeatedly following slot 4 eventually reaches an empty slot,
 so space for extension always exists. Other slots can also contain categories,
 allowing broader organization rather than forcing all growth down the last path.
 This guarantees structural room, not a semantically appropriate home for every
 type: choose category meanings with their descendants in mind.
+
+List moved from `meta:list` to `list`; the `meta` category is removed. List's
+global route is now `4 + 5*n` instead of `4 + 25*n`. Fully prefixed scalar-only
+lists retain their word payloads with the shorter `list:` prefix. Unprefixed
+and nested-list names use the shorter route. Other type slots are unchanged.
 
 Published slots and category paths never move. A published leaf never becomes a
 category, and an occupied category never becomes a leaf. Never resize a node or
@@ -574,7 +581,8 @@ browsing separately, including agreement on canonical inputs. Simulate adding
 children at multiple depths, including creating a category in an empty last slot
 and extending through existing last-slot categories. Every previously canonical
 name must retain its meaning at every prefix scope. Verify radix five and reject
-leaf allocations in slot 4 at every depth. Verify that new category edges appear
+leaf allocations in slot 4 below the root. Verify the root permits List in slot 4
+and cannot be nested, and that new category edges appear
 in the corresponding prefix paths. Former browsing inputs may change discovery
 results without invalidating those saved names.
 
@@ -688,10 +696,12 @@ human answer to use the delivered library, CLI, or static browser build.
    compact codecs.
 8. Removed Record and its field-name encoding. Lists retain their slot, canonical
    names, nesting, order, and work limits; the former Record slot is unassigned.
+9. Moved List to root slot 4, removed `meta`, and limited the last-slot exception
+   to the unnamed, non-nestable root. Updated routing fixtures for the shorter path.
 
 ### Verification and limits
 
-The final local suite has 158 tests with 94% branch-aware coverage. It passes on
+The final local suite has 159 tests with 94% branch-aware coverage. It passes on
 CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated

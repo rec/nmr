@@ -19,6 +19,7 @@ def test_nested_lists_preserve_typed_details() -> None:
     ]
     engine = Nmr()
     encoded = engine.encode(json.dumps(value), "list")
+    assert encoded.type == "list"
     decoded = json.loads(engine.decode(encoded.name).value)
     assert decoded[0] == {"type": "real:time:date", "value": "2000-01-01"}
     assert decoded[1]["value"][0]["value"] == "+442079460958;ext=001"
@@ -61,8 +62,8 @@ def test_record_is_not_a_supported_type_or_category_slot() -> None:
         engine.encode("{}", "record")
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("meta:record:the")
-    with pytest.raises(ValueError, match="unassigned"):
-        engine.decode("meta:" + " ".join(engine.encode_to_name(1)))
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.decode("meta:the")
     with pytest.raises(ValueError, match="Unknown"):
         List.str_to_index('[{"type":"record","value":{}}]')
 
