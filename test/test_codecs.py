@@ -109,10 +109,10 @@ def test_text_is_not_a_supported_type_or_category_slot() -> None:
 
 
 def test_semver_browsing_normalizes_invalid_metadata() -> None:
-    from nmr.pack_numbers import pair
+    from nmr.pack_numbers import Packer
     from nmr.types.sem_ver import Semver, metadata_index
 
-    index = pair(0, pair(metadata_index("01.."), metadata_index("..")))
+    index = Packer(count=5).pack(0, 0, 0, metadata_index("01.."), metadata_index(".."))
     with pytest.raises(ValueError):
         Semver.index_to_str(index)
     value = Semver.index_to_str(index, browse=True)

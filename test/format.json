@@ -174,7 +174,7 @@
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "name": "data:computer:semver:air info rand start sort dump lamb catch fed since apple okay emma month track hide chain armed swiss wife"
+      "name": "data:computer:semver:with meant third hans joint prior yarn bolt table orgy gate treat list jump key sit way end fog pub chat onto spin tom act"
     },
     {
       "type": "isbn",
@@ -203,6 +203,13 @@
       "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"}]",
       "scope": "",
       "name": "the joke"
+    },
+    {
+      "type": "list",
+      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
+      "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"},{\"type\":\"pure:math:int\",\"value\":\"0\"},{\"type\":\"pure:math:int\",\"value\":\"0\"}]",
+      "scope": null,
+      "name": "list:of your par"
     }
   ]
 }

@@ -5,7 +5,7 @@ import json
 from pydantic import BaseModel, ConfigDict
 
 from ..category import route
-from ..pack_numbers import pair, unpair
+from ..pack_numbers import Packer
 from ..type_namer import TypeNamer
 
 
@@ -41,7 +41,8 @@ def encode_collection(value: object, depth: int) -> int:
     if len(value) > MAX_ITEMS:
         raise ValueError("Collections allow at most 256 items")
     values = [encode_item(i, depth + 1) for i in value]
-    return ((2 * pack_balanced(values) + 1) << len(values)) - 1
+    packed = Packer(count=len(values)).pack(*values) if values else 0
+    return ((2 * packed + 1) << len(values)) - 1
 
 
 def parse_collection(value: str) -> object:
@@ -61,7 +62,7 @@ def decode_collection(index: int, browse: bool, depth: int) -> list[dict[str, ob
     packed = (number >> length) // 2
     if length == 0 and packed and not browse:
         raise ValueError("Noncanonical empty collection")
-    values = unpack_balanced(packed, length)
+    values = Packer(count=length).unpack(packed) if length else []
     return [decode_item(i, browse, depth + 1) for i in values]
 
 
@@ -95,30 +96,11 @@ def decode_item(index: int, browse: bool, depth: int) -> dict[str, object]:
     return {"type": path, "value": value}
 
 
-def pack_balanced(values: list[int]) -> int:
-    if not values:
-        return 0
-    if len(values) == 1:
-        return values[0]
-    middle = len(values) // 2
-    return pair(pack_balanced(values[:middle]), pack_balanced(values[middle:]))
-
-
 def unique_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
     fields = dict(pairs)
     if len(fields) != len(pairs):
         raise ValueError("Duplicate JSON fields would lose information")
     return fields
-
-
-def unpack_balanced(index: int, length: int) -> list[int]:
-    if length == 0:
-        return []
-    if length == 1:
-        return [index]
-    first, second = unpair(index)
-    middle = length // 2
-    return unpack_balanced(first, middle) + unpack_balanced(second, length - middle)
 
 
 MAX_ITEMS = 256

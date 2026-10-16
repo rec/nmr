@@ -698,10 +698,20 @@ human answer to use the delivered library, CLI, or static browser build.
    names, nesting, order, and work limits; the former Record slot is unassigned.
 9. Moved List to root slot 4, removed `meta`, and limited the last-slot exception
    to the unnamed, non-nestable root. Updated routing fixtures for the shorter path.
+10. Replaced repeated pairing with direct sum-layer tuple enumeration. For total
+    `S` and arity `n`, the rank is `comb(S+n-1, n) + rank(tail)` with the one-part
+    rank equal to its value. Unranking uses exact binomial comparisons and integer
+    binary search, ending with the existing exact two-part inverse. Removed the
+    forward/backward nested-pairing option and the separate balanced list tree.
+    SemVer packs all five integer components directly; lists pack all item indices
+    directly while retaining the length header and empty-list representation.
+    Two-part ranks and fraction names remain unchanged. SemVer and longer-list
+    fixtures deliberately adopt the new mapping; no legacy decoder is retained.
+    Balance is by component sum, not by bit length, so individual names can grow.
 
 ### Verification and limits
 
-The final local suite has 159 tests with 94% branch-aware coverage. It passes on
+The final local suite has 167 tests with 94% branch-aware coverage. It passes on
 CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated

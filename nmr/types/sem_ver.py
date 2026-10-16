@@ -1,6 +1,6 @@
 from semver import Version
 
-from ..pack_numbers import Packer, pair, rank_digits, unpair, unrank_digits
+from ..pack_numbers import Packer, rank_digits, unrank_digits
 from ..type_namer import TypeNamer
 
 
@@ -11,15 +11,13 @@ class Semver(TypeNamer):
     @staticmethod
     def str_to_index(value: str) -> int:
         version = Version.parse(value.removeprefix("v"))
-        main = MAIN.pack(version.major, version.minor, version.patch)
         pre = metadata_index(version.prerelease or "")
         build = metadata_index(version.build or "")
-        return pair(main, pair(pre, build))
+        return PACKER.pack(version.major, version.minor, version.patch, pre, build)
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
-        main, extra = unpair(index)
-        pre, build = unpair(extra)
+        major, minor, patch, pre, build = PACKER.unpack(index)
         prerelease, metadata = metadata_string(pre), metadata_string(build)
         if browse:
             prerelease = (
@@ -33,7 +31,6 @@ class Semver(TypeNamer):
             metadata = (
                 ".".join(i or "0" for i in metadata.split(".")) if metadata else ""
             )
-        major, minor, patch = MAIN.unpack(main)
         value = f"{major}.{minor}.{patch}"
         if prerelease:
             value += "-" + prerelease
@@ -52,4 +49,4 @@ def metadata_string(index: int) -> str:
 
 
 ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-."
-MAIN = Packer(count=3)
+PACKER = Packer(count=5)

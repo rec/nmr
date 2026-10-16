@@ -1,40 +1,47 @@
-"""Exact bijections between nonnegative integer tuples and integers."""
+"""Exact sum-layer enumeration of fixed-length nonnegative integer tuples."""
 
-from math import isqrt
+from itertools import pairwise
+from math import comb, isqrt
 
 from pydantic import BaseModel, Field
 
 
 class Packer(BaseModel, frozen=True):
     count: int = Field(ge=1)
-    forward: bool = True
 
     def pack(self, *numbers: int) -> int:
         if len(numbers) != self.count or any(i < 0 for i in numbers):
             raise ValueError(f"Expected {self.count} nonnegative integers")
-        values = list(numbers)
-        if self.forward:
-            total = values.pop()
-            for i in reversed(values):
-                total = pair(i, total)
-        else:
-            total = values.pop(0)
-            for i in values:
-                total = pair(total, i)
+        total = 0
+        tail = 0
+        for size, value in enumerate(reversed(numbers), 1):
+            tail += value
+            total += comb(tail + size - 1, size)
         return total
 
     def unpack(self, n: int) -> list[int]:
         if n < 0:
             raise ValueError("Expected a nonnegative integer")
-        values = []
-        for _ in range(self.count - 1):
-            if self.forward:
-                first, n = unpair(n)
-                values.append(first)
-            else:
-                n, last = unpair(n)
-                values.append(last)
-        return values + [n] if self.forward else [n] + values[::-1]
+        if self.count == 1:
+            return [n]
+        sums = []
+        # comb(b, k) >= (b/k)**k gives an integer-only initial upper bound.
+        upper = self.count * (1 << ((n.bit_length() + self.count - 1) // self.count))
+        for size in range(self.count, 2, -1):
+            lower = size - 1
+            while upper - lower > 1:
+                middle = (lower + upper) // 2
+                if comb(middle, size) <= n:
+                    lower = middle
+                else:
+                    upper = middle
+            sums.append(lower - size + 1)
+            n -= comb(lower, size)
+            # The next binomial's upper argument must be smaller than this one.
+            upper = lower
+        first, last = unpair(n)
+        sums.extend([first + last, last, 0])
+        return [i - j for i, j in pairwise(sums)]
 
 
 def pair(x: int, y: int) -> int:

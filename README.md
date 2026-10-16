@@ -215,6 +215,16 @@ strings. Lists preserve order. Limits are 256 items per list and eight nesting
 levels; arbitrary browsing can encounter these work limits and is not promised
 to succeed for every list index.
 
+Integer tuples are ranked directly by total sum. For `n` nonnegative integers
+with total `S`, preceding sum layers contain `comb(S + n - 1, n)` tuples; the
+remaining offset is the rank of the tail tuple. For example, `(2, 1, 3)` has
+rank 69. Inversion uses integer binomial comparisons and binary search. One-part
+tuples are unchanged, and two-part tuples retain the Cantor pairing order.
+List items share one tuple rank, and semantic versions pack major, minor, patch,
+prerelease, and build indices as five components without nested pairing. The list
+length is stored separately. This balances by sum, not by component bit length;
+it does not guarantee a shorter name for every object.
+
 ## Format and development
 
 The five root slots are `pure`, `real`, `data`, `play`, and the `list` leaf.
