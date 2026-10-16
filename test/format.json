@@ -196,13 +196,6 @@
       "value": "[{\"type\":\"pure:math:int\",\"value\":\"1\"}]",
       "scope": null,
       "name": "meta:list:zoom"
-    },
-    {
-      "type": "record",
-      "input": "{\"a\":{\"type\":\"int\",\"value\":\"1\"}}",
-      "value": "{\"a\":{\"type\":\"pure:math:int\",\"value\":\"1\"}}",
-      "scope": null,
-      "name": "meta:record:web lime"
     }
   ]
 }

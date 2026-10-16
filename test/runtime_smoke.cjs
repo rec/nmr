@@ -20,6 +20,7 @@ const { loadPyodide } = require("pyodide");
   assert.equal(info.count, 1628);
   assert.equal(info.identifier, fixture.vocabulary);
   assert.equal("data:text" in info.types, false);
+  assert.equal("meta:record" in info.types, false);
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(

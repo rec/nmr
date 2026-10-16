@@ -2,7 +2,7 @@
 
 from .category import Category
 from .types.chess import Chess
-from .types.collections import List, Record
+from .types.collections import List
 from .types.floating import Float
 from .types.fraction import Frac
 from .types.go import Go
@@ -31,5 +31,5 @@ ROOT = Category(
         Category("id", Isbn, Upc),
     ),
     Category("play", Category("game", Chess, Go)),
-    Category("meta", List, Record),
+    Category("meta", List),
 )

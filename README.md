@@ -92,7 +92,7 @@ expands; save the canonical output instead.
 | `upc` | UPC-A, including the check digit and leading zeroes. |
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
-| `list`, `record` | Ordered typed values or named typed fields, including nested collections. |
+| `list` | Ordered typed values, including nested lists. |
 
 Clock, local time, timestamps, and durations use microseconds. Excess precision is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
@@ -203,18 +203,17 @@ otherwise delegates to the standard rational conversion; finite overflow raises
 `Int` lives in `nmr.types.integer`; `Float` in `nmr.types.floating` stores exact
 binary64 bits and exposes `.float()`.
 
-Collections use explicit typed values rather than vocabulary-dependent names:
+Lists use explicit typed values rather than vocabulary-dependent names:
 
 ```json
-{"birthday":{"type":"date","value":"2000-02-29"},"phone":{"type":"phone","value":"+442079460958"}}
+[{"type":"date","value":"2000-02-29"},{"type":"phone","value":"+442079460958"}]
 ```
 
-Encode that JSON with type `record`. Type names normalize to full paths; scalar
-values must be strings. A `list` is an array of the same typed items. Nested list
-or record values use JSON arrays or objects, not JSON encoded inside strings.
-Records canonicalize key order, lists preserve order. Limits are 256 items per
-collection and eight collection levels; arbitrary browsing can encounter these
-work limits and is not promised to succeed for every collection index.
+Encode that JSON with type `list`. Type names normalize to full paths; scalar
+values must be strings. Nested lists use JSON arrays, not JSON encoded inside
+strings. Lists preserve order. Limits are 256 items per list and eight nesting
+levels; arbitrary browsing can encounter these work limits and is not promised
+to succeed for every list index.
 
 ## Format and development
 

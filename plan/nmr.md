@@ -168,7 +168,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `data:id` | 0: `isbn`, 1: `upc`. |
 | `play` | 0: `game` (category). |
 | `play:game` | 0: `chess`, 1: `go`. |
-| `meta` | 0: `list`, 1: `record`. |
+| `meta` | 0: `list`. |
 
 All unlisted slots are empty. Science, art, music, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
@@ -335,7 +335,7 @@ chosen permanent expansion mechanism.
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
 | Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
-| Collections | Typed ordered lists and records with sorted string keys; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
+| Lists | Typed ordered lists; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
@@ -663,7 +663,7 @@ human answer to use the delivered library, CLI, or static browser build.
 | Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
 | Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
 | Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
-| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Typed list and record codecs provide composition; record field names retain their internal UTF-8 encoding. |
+| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Typed lists provide composition. |
 | Vocabulary policy | NFC plus case folding by default; optional case sensitivity and active word count. Word order, normalization, and count participate in identity. Existing default order retained. |
 | Vocabulary exchange | File import, paste, normalized export, and full SHA-256 identity. No automatic persistence or shuffling. |
 | Typo handling | Strict canonical rejection and explicit result verification. No checksum overhead or silent correction. |
@@ -676,7 +676,7 @@ human answer to use the delivered library, CLI, or static browser build.
 1. Added Tyro/Pydantic in a dedicated dependency commit and established the baseline.
 2. Replaced the naming core, category allocation, numeric models, word validation,
    and CLI; removed the broken old codec implementations.
-3. Added everyday codecs, legal chess enumeration, and typed lists/records.
+3. Added everyday codecs, legal chess enumeration, and typed lists.
 4. Added the static browser build, worker bridge, vocabulary UI, and WebAssembly
    checks. Improved very-large-integer handling.
 5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
@@ -684,12 +684,14 @@ human answer to use the delivered library, CLI, or static browser build.
 6. Added the requested Go extension in an unused leaf slot, preserving existing
    canonical names and sharing the implementation across Python and WebAssembly.
 7. Removed the public Text type and its browser choice. Its former slot is
-   unassigned; other types retain their names. Record field names keep their
-   internal UTF-8 encoding, and shared digit ranking remains for compact codecs.
+   unassigned; other types retain their names. Shared digit ranking remains for
+   compact codecs.
+8. Removed Record and its field-name encoding. Lists retain their slot, canonical
+   names, nesting, order, and work limits; the former Record slot is unassigned.
 
 ### Verification and limits
 
-The final local suite has 158 tests with 93% branch-aware coverage. It passes on
+The final local suite has 158 tests with 94% branch-aware coverage. It passes on
 CPython 3.10, 3.13, and 3.15. Clean wheel and source-distribution installs were
 checked outside the checkout, including all format fixtures, vocabulary loading,
 CLI decoding, and static browser builds. The source archive excludes unrelated
