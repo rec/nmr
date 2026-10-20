@@ -31,9 +31,11 @@ Additional work beyond the prompt: None.
 ## Musical identity
 
 Use the following proposed first-profile rules. The user-established requirements
-are combined melody and rhythm, successive pitch differences, a first note
-normalized to C, and divisions by two and three. Semitone resolution, beat
-semantics, and silence handling below are explicit design defaults.
+are combined melody and rhythm, successive pitch differences, presentation
+centered around C or a configurable root note, and divisions by two and three.
+Semitone resolution, beat semantics, and silence handling below are explicit
+design defaults. Centered presentation replaces the earlier first-note-C rule;
+the first relative pitch remains zero internally.
 
 * A tune is a nonempty, finite, monophonic sequence of attacked notes. Chords and
   overlapping notes are outside this profile.
@@ -43,10 +45,11 @@ semantics, and silence handling below are explicit design defaults.
   direction and octave distances; do not reduce intervals modulo twelve.
   Microtonal grids would require a separately allocated profile, not a local
   setting that changes the meaning of existing names.
-* The first pitch is implicitly zero. Canonical presentation starts on C;
-  playback defaults to C4. Changing the playback octave or transposing every
-  input pitch equally does not change the name.
-* There is no inferred scale or tonic. Starting on C does not make the tune
+* The first relative pitch is implicitly zero. Presentation centers the sequence
+  around a configurable root, default C4, using the rule below. Changing the
+  presentation root or transposing every input pitch equally does not change
+  the name. The first sounding note need not be C.
+* There is no inferred scale or tonic. Centering on C does not make the tune
   C major. Chromatic intervals remain available.
 * Each note has an exact positive duration in beats. Each later note also has
   an exact nonnegative gap after the preceding note ends.
@@ -56,9 +59,10 @@ semantics, and silence handling below are explicit design defaults.
   a different rhythm; changing playback BPM alone does not. Do not silently
   normalize the first duration to one. Full proportional-rhythm equivalence
   would be a different identity decision.
-* Leading and trailing silence are outside the named phrase. Remove them during
-  input normalization and show that normalization before encoding. Reject an
-  empty or all-rest input.
+* Leading and trailing silence are outside the named phrase. Remove them from
+  keyboard or imported performance input before producing interval notation,
+  and show that normalization before encoding. Interval text itself must start
+  with `@`, never a rest or offset. Reject an empty or all-rest input.
 * Merge adjacent rests into one intervening gap. Tied notes form one sustained
   note. Two attacks at the same pitch remain two notes, even with no gap.
 * A rest does not reset the pitch reference: the next interval is measured from
@@ -99,14 +103,16 @@ encoded beat reference.
 
 Provide a compact interval-and-duration notation. For example:
 
-    0@1 +2@1/2 +2@1/2 r@1/3 -1@2/3 0@1
+    @1 2@1/2 2@1/2 r@1/3 -1@2/3 @1
 
-This means an initial C lasting one beat, two successive upward semitone-pair
+This means an initial note lasting one beat, two successive upward semitone-pair
 steps lasting half a beat each, a one-third-beat rest, a downward semitone step
 lasting two thirds, and a repeated attack at that pitch lasting one beat.
 
-Each note token is `step@duration`. The first step must be zero. Subsequent
-positive steps print with `+`; zero prints as `0`. Rest tokens use `r@duration`.
+The first token is `@duration`: a phrase must start with `@`, with no initial
+offset, even an explicit zero. Later note tokens are `step@duration`, with no
+`+` on positive steps. A later zero step may be written `0@duration` or
+`@duration`; canonical output always omits the zero. Rest tokens use `r@duration`.
 Durations print as reduced fractions, or integers when their denominator is one.
 Canonical output has one space between tokens, with no edge rests or adjacent
 rest tokens. Same-pitch attacks are never merged automatically.
@@ -115,6 +121,40 @@ The UI may accept absolute pitches through a keyboard or note editor, then
 convert them to successive differences and discard the initial absolute pitch.
 Show the normalized phrase and allow playback before encoding. The core numeric
 notation does not need note names to represent the melody.
+
+## Presentation centering
+
+Center the cumulative sounding pitches, not the written intervals. Recover
+relative pitches from the interval sequence as follows:
+
+    p1 = 0
+    pi = p(i-1) + step_i
+    S = sum(pi)
+    mean = S / m
+
+Use the arithmetic mean over the `m` attacked notes, counting repeated notes
+separately. Rests do not contribute, and note durations do not weight the mean.
+Round to the nearest semitone, with exact half-semitone ties away from zero.
+For example, `0.4` rounds to `0`, `0.6` to `1`, `-0.6` to `-1`, and `+/-0.5`
+to `+/-1`. Compute the rounded center `k` using exact integer arithmetic:
+
+    k = sign(S) * floor((2*abs(S) + m) / (2*m))
+
+With configured root pitch `R`, present each note at:
+
+    presented_pitch_i = R + pi - k
+
+For the example phrase, the intervals are `0, 2, 2, -1, 0`, while the cumulative
+pitches are `0, 2, 4, 3, 3`. Their mean is `12/5 = 2.4`, so `k = 2`. The
+presented offsets from the configured root are `-2, 0, 2, 1, 1`. With C4 as the
+root, these sound as Bb3, C4, D4, Db4, Db4, using one possible enharmonic spelling.
+Averaging the intervals instead would yield `0.6`; that is not the centering rule.
+
+Use the same placement for playback and absolute-pitch displays. The exact
+arithmetic mean can remain within half a semitone of the configured root because
+the placement shifts by whole semitones. Changing the root transposes the entire
+presentation; it must not change the interval text, ranking, or canonical name.
+Centering is a presentation transform, not a step in the integer enumeration.
 
 ## A dense duration enumeration
 
@@ -208,13 +248,13 @@ Small fixtures to verify independently during implementation:
 
 | Tune index | Canonical phrase |
 | --- | --- |
-| 0 | `0@1` |
-| 1 | `0@1 0@1` |
-| 2 | `0@1/2` |
-| 3 | `0@1 0@1 0@1` |
-| 4 | `0@1/3` |
-| 9 | `0@1 +1@1` |
-| 13 | `0@1 r@1 0@1` |
+| 0 | `@1` |
+| 1 | `@1 @1` |
+| 2 | `@1/2` |
+| 3 | `@1 @1 @1` |
+| 4 | `@1/3` |
+| 9 | `@1 1@1` |
+| 13 | `@1 r@1 @1` |
 
 The length header spends roughly one bit per additional note. It favors short
 phrases without giving one positive count a finite allotment of tuple ranks.
@@ -259,19 +299,26 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
 
 1. Freeze and document the musical identity and enumeration defaults above.
    Update the older plans to identify music as the original goal and remove the
-   stale suggestion that first-note transposition remains undecided.
+   stale suggestion that transposition equivalence remains undecided. Document
+   centered presentation separately from the initial relative-pitch reference.
 2. Implement and test exact duration/gap rank and unrank. Start with the table
    above, reduced-fraction equivalence, and rejection of denominators containing
    other primes. Prove group counts and check layer boundaries.
-3. Implement phrase normalization and the flat tuple codec. Test transposition,
+3. Implement phrase normalization and the flat tuple codec. Test the initial `@`
+   rule, unsigned positive steps, optional later zero steps, transposition,
    octave leaps, rests, ties, repeated attacks, count headers, and arbitrary-index
-   round trips. Empty tunes and all-rest input must fail clearly.
+   round trips. Empty tunes and all-rest input must fail clearly. Verify that
+   optional later zeros normalize to omission without changing a tune's rank.
 4. Allocate the leaf and add canonical fixtures for the existing vocabulary,
    custom vocabularies, full and ancestor prefixes, and unprefixed names. Keep
    every pre-existing type fixture unchanged.
 5. Build the editor and playback through the shared browser bridge. Test decoded
    note onsets, ends, and pitches against the exact core events. Sounding right
    by ear is useful review, not a substitute for event-sequence verification.
+   Test cumulative-pitch centering, positive and negative rounding including
+   exact ties, duration/rest independence, and configurable roots. The example
+   must center at two semitones, not at the mean interval of one semitone.
+   Changing the presentation root must leave every name unchanged.
 6. Measure names for personally meaningful four-, eight-, and sixteen-note
    phrases, with repeated notes, octave leaps, rests, dotted rhythms, and mixed
    binary/ternary subdivisions. Include all-zero tuple cases, many-note counts,
