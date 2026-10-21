@@ -164,10 +164,19 @@ assign several integers to the same duration, defeating invertibility.
 Instead enumerate only reduced durations, in finite complexity layers. Set
 `h = floor(log2(u))`, computed using integer bit length, and define:
 
-    weight = h + a + b
+    weight = 4*h + a + 3*b*b
+
+The numerator bit-length costs four per step, delaying long durations. Binary
+subdivision costs one per step. Ternary subdivision costs three times the square
+of its exponent, so thirds arrive modestly later and ninths much later. These
+weights define the enumeration, not playback settings; freeze them before names
+are published. This favors short binary durations, including very short ones,
+so assess the musical balance through playback during implementation.
 
 Visit weights in ascending order. Within a weight, visit `h` in ascending order,
-then `b` in ascending order; `a = weight - h - b` is determined. For each group,
+then `b` in ascending order; `a = weight - 4*h - 3*b*b` is determined. Visit only
+nonnegative exponents: `h <= floor(weight/4)` and
+`b <= floor(sqrt((weight - 4*h)/3))`, using integer arithmetic. For each group,
 visit permitted numerators `u` in ascending order in:
 
     2^h <= u < 2^(h+1)
@@ -179,19 +188,24 @@ Assign consecutive duration indices `D(d)`, starting at zero. The beginning is:
 | --- | --- |
 | 0 | 1 |
 | 1 | 1/2 |
-| 2 | 1/3 |
-| 3 | 2 |
-| 4 | 3 |
-| 5 | 1/4 |
+| 2 | 1/4 |
+| 3 | 1/8 |
+| 4 | 1/3 |
+| 5 | 1/16 |
 | 6 | 1/6 |
-| 7 | 1/9 |
-| 8 | 3/2 |
-| 9 | 2/3 |
+| 7 | 2 |
+| 8 | 3 |
+| 9 | 1/32 |
+| 10 | 1/12 |
+| 11 | 3/2 |
+
+Compared with the unweighted `h + a + b` ordering, two beats move from index 3
+to 7, four beats from 10 to 22, thirds from 2 to 4, and ninths from 7 to 46.
 
 Every allowed positive duration appears exactly once: reduced numerator and
 denominator exponents are unique, and they determine exactly one group. Every
-group is finite, and every weight has entries. Thus all nonnegative duration
-indices have inverses without aliases or holes.
+group is finite, and every weight has entries (`1/2^weight` is always present).
+Thus all nonnegative duration indices have inverses without aliases or holes.
 
 Rank and unrank by counting groups, not by visiting every numerator. For a group
 with inclusive numerator bounds `L` and `U`, let:
@@ -205,10 +219,13 @@ numerator. Cache or derive exact layer/group prefix counts for larger weights.
 
 This ordering also avoids an important computational trap: directly packing
 unbounded denominator exponents can make a short integer demand a denominator
-with an astronomically large number of digits. Here, weight `w` has at least
-`2^w-1` preceding entries from integer durations alone. Consequently `a`, `b`,
-and the numerator bit-length scale with the duration index's bit-length, not
-with its numeric value. Construct fractions only after checking work estimates.
+with an astronomically large number of digits. Here, for `w >= 1`, weight `w`
+has at least `2^ceil(w/4)-1` preceding entries from integer durations alone.
+For duration index `r`, this gives `w <= 4*floor(log2(r+1))`; index zero has
+weight zero. Also `a <= w`, `b <= floor(sqrt(w/3))`, and `h <= floor(w/4)`.
+Consequently denominator exponents and numerator bit-length remain bounded by
+the duration index's bit-length, not its numeric value. Construct fractions only
+after checking work estimates.
 
 For gaps, reserve `G(0) = 0`; for positive gaps use `G(g) = 1 + D(g)`. This is
 another dense bijection.
@@ -252,9 +269,13 @@ Small fixtures to verify independently during implementation:
 | 1 | `@1 @1` |
 | 2 | `@1/2` |
 | 3 | `@1 @1 @1` |
-| 4 | `@1/3` |
+| 4 | `@1/4` |
+| 8 | `@1/3` |
 | 9 | `@1 1@1` |
 | 13 | `@1 r@1 @1` |
+| 14 | `@2` |
+| 44 | `@4` |
+| 92 | `@1/9` |
 
 The length header spends roughly one bit per additional note. It favors short
 phrases without giving one positive count a finite allotment of tuple ranks.
