@@ -75,24 +75,27 @@ There is no requirement that a generated tune be pleasant or recognizable.
 
 Interpret this as rhythmic subdivision of a beat. Every duration or positive
 gap must be a rational number whose reduced denominator has no prime factors
-other than two and three:
+other than two and three, and at most one factor of three:
 
     d = u / (2^a * 3^b)
-    u >= 1; a, b >= 0
+    u >= 1; a >= 0; b in {0, 1}
 
 The fraction must be reduced: if `a > 0`, `u` is odd; if `b > 0`, `u` is not
 divisible by three. There is no restriction that the numerator itself contain
 only factors two and three.
 
-Examples include `1`, `1/2`, `1/3`, `1/6`, `1/8`, `1/9`, `2/3`, `3/2`, and
-`7/4`. This covers nested binary/ternary subdivisions and durations formed by
-adding or tying those subdivisions. A five-beat note is allowed; one fifth of a
-beat is not. A quarter note split into three equal parts is allowed.
+Examples include `1`, `1/2`, `1/3`, `1/6`, `1/8`, `1/12`, `2/3`, `3/2`, and
+`7/4`. This covers arbitrary binary subdivisions, triplets, and binary
+subdivisions of triplets, but excludes nested triplets such as `1/9` and `1/18`.
+Adding or tying allowed durations always produces another allowed duration.
+A five-beat note is allowed; one fifth of a beat is not. A quarter note split
+into three equal parts is allowed.
 
-Reduce fractions before validation. Thus `2/6` means `1/3`, while `1/5` is
-rejected. Accept exact supported decimal fractions if useful, but never round an
-approximate decimal to a triplet. Use `fractions.Fraction` internally; duration
-equivalence differs deliberately from nmr's pair-preserving Frac type.
+Reduce fractions before validation. Thus `2/6` and `3/9` mean `1/3`, while `1/5`
+and `1/9` are rejected. Accept exact supported decimal fractions if useful, but
+never round an approximate decimal to a triplet. Use `fractions.Fraction`
+internally; duration equivalence differs deliberately from nmr's pair-preserving
+Frac type.
 
 Keep exact beat durations rather than dividing every duration by the first one:
 scaling a five-beat first note to one could turn a later one-beat note into the
@@ -164,19 +167,18 @@ assign several integers to the same duration, defeating invertibility.
 Instead enumerate only reduced durations, in finite complexity layers. Set
 `h = floor(log2(u))`, computed using integer bit length, and define:
 
-    weight = 4*h + a + 3*b*b
+    weight = 4*h + a + 3*b
 
 The numerator bit-length costs four per step, delaying long durations. Binary
-subdivision costs one per step. Ternary subdivision costs three times the square
-of its exponent, so thirds arrive modestly later and ninths much later. These
+subdivision costs one per step. The optional factor of three costs three,
+so thirds arrive modestly later; further factors of three are excluded. These
 weights define the enumeration, not playback settings; freeze them before names
 are published. This favors short binary durations, including very short ones,
 so assess the musical balance through playback during implementation.
 
 Visit weights in ascending order. Within a weight, visit `h` in ascending order,
-then `b` in ascending order; `a = weight - 4*h - 3*b*b` is determined. Visit only
-nonnegative exponents: `h <= floor(weight/4)` and
-`b <= floor(sqrt((weight - 4*h)/3))`, using integer arithmetic. For each group,
+then `b` in ascending order over `{0, 1}`; `a = weight - 4*h - 3*b` is determined.
+Visit `h <= floor(weight/4)` and omit groups with `a < 0`. For each group,
 visit permitted numerators `u` in ascending order in:
 
     2^h <= u < 2^(h+1)
@@ -200,7 +202,7 @@ Assign consecutive duration indices `D(d)`, starting at zero. The beginning is:
 | 11 | 3/2 |
 
 Compared with the unweighted `h + a + b` ordering, two beats move from index 3
-to 7, four beats from 10 to 22, thirds from 2 to 4, and ninths from 7 to 46.
+to 7, four beats from 10 to 22, and thirds from 2 to 4. Ninths are excluded.
 
 Every allowed positive duration appears exactly once: reduced numerator and
 denominator exponents are unique, and they determine exactly one group. Every
@@ -222,7 +224,7 @@ unbounded denominator exponents can make a short integer demand a denominator
 with an astronomically large number of digits. Here, for `w >= 1`, weight `w`
 has at least `2^ceil(w/4)-1` preceding entries from integer durations alone.
 For duration index `r`, this gives `w <= 4*floor(log2(r+1))`; index zero has
-weight zero. Also `a <= w`, `b <= floor(sqrt(w/3))`, and `h <= floor(w/4)`.
+weight zero. Also `a <= w`, `b <= 1`, and `h <= floor(w/4)`.
 Consequently denominator exponents and numerator bit-length remain bounded by
 the duration index's bit-length, not its numeric value. Construct fractions only
 after checking work estimates.
@@ -275,7 +277,6 @@ Small fixtures to verify independently during implementation:
 | 13 | `@1 r@1 @1` |
 | 14 | `@2` |
 | 44 | `@4` |
-| 92 | `@1/9` |
 
 The length header spends roughly one bit per additional note. It favors short
 phrases without giving one positive count a finite allotment of tuple ranks.
@@ -324,7 +325,9 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
    centered presentation separately from the initial relative-pitch reference.
 2. Implement and test exact duration/gap rank and unrank. Start with the table
    above, reduced-fraction equivalence, and rejection of denominators containing
-   other primes. Prove group counts and check layer boundaries.
+   other primes or more than one factor of three after reduction. Include
+   accepted `3/9` and rejected `1/9` and `1/18`. Prove group counts and check
+   layer boundaries.
 3. Implement phrase normalization and the flat tuple codec. Test the initial `@`
    rule, unsigned positive steps, optional later zero steps, transposition,
    octave leaps, rests, ties, repeated attacks, count headers, and arbitrary-index
