@@ -3,14 +3,14 @@
 from __future__ import annotations
 
 import re
+from bisect import bisect_right
 from fractions import Fraction
-from functools import lru_cache
 from typing import ClassVar
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-from ..pack_numbers import Packer
 from ..type_namer import TypeNamer
+from . import tune_count
 from .integer import signed_index, signed_value
 
 
@@ -101,19 +101,37 @@ class Tune(BaseModel, TypeNamer, frozen=True):
         return " ".join(tokens)
 
     def index(self) -> int:
-        values = [duration_index(self.notes[0].duration)]
+        cost = len(self.notes) * tune_count.ATTACK_COST
+        cost += sum(duration_cost(i.duration) for i in self.notes)
+        cost += sum(
+            abs(i.step) * tune_count.STEP_COST + gap_cost(i.gap) for i in self.notes[1:]
+        )
+        if cost > MAX_COST:
+            raise ValueError("Tune work limit: total complexity exceeds 4096")
+        tables = tune_count.tune_counts(MAX_COST)
+        remaining = cost - tune_count.ATTACK_COST
+        rank, remaining = rank_duration(
+            self.notes[0].duration, remaining, tables["suffix"]
+        )
         for note in self.notes[1:]:
-            values.extend(
-                [
-                    signed_index(note.step),
-                    1 + duration_index(note.gap) if note.gap else 0,
-                    duration_index(note.duration),
-                ]
+            remaining -= tune_count.ATTACK_COST
+            # Pitch order is 0,+1,-1,+2,-2,... within the remaining budget.
+            for i in range(signed_index(note.step)):
+                weight = abs(signed_value(i)) * tune_count.STEP_COST
+                rank += tables["after_step"][remaining - weight]
+            remaining -= abs(note.step) * tune_count.STEP_COST
+            if note.gap:
+                rank += tables["after_gap"][remaining]
+                addition, remaining = rank_duration(
+                    note.gap, remaining - tune_count.REST_COST, tables["after_gap"]
+                )
+                rank += addition
+            addition, remaining = rank_duration(
+                note.duration, remaining, tables["suffix"]
             )
-        if any(i.bit_length() > MAX_INDEX_BITS for i in values):
-            raise ValueError("Tune work limit: tuple components exceed 4096 bits")
-        packed = Packer(count=len(values)).pack(*values)
-        index = ((2 * packed + 1) << (len(self.notes) - 1)) - 1
+            rank += addition
+        assert remaining == 0
+        index = tables["starts"][cost] + rank
         check_index(index)
         return index
 
@@ -136,22 +154,44 @@ class Tune(BaseModel, TypeNamer, frozen=True):
     @classmethod
     def from_index(cls, index: int) -> Tune:
         check_index(index)
-        number = index + 1
-        extra = (number & -number).bit_length() - 1
-        if extra >= MAX_NOTES:
-            raise ValueError("Tune work limit: at most 256 attacked notes")
-        values = Packer(count=3 * extra + 1).unpack((number >> extra) // 2)
-        notes = [Note(duration=duration_value(values[0]))]
-        for i in range(1, len(values), 3):
-            notes.append(
-                Note(
-                    step=signed_value(values[i]),
-                    gap=duration_value(values[i + 1] - 1)
-                    if values[i + 1]
-                    else Fraction(0),
-                    duration=duration_value(values[i + 2]),
+        tables = tune_count.tune_counts(MAX_COST)
+        if index >= tables["starts"][-1]:
+            raise ValueError("Tune work limit: total complexity exceeds 4096")
+        cost = bisect_right(tables["starts"], index) - 1
+        rank = index - tables["starts"][cost]
+        duration, rank, remaining = unrank_duration(
+            rank, cost - tune_count.ATTACK_COST, tables["suffix"]
+        )
+        notes = [Note(duration=duration)]
+        while remaining:
+            if len(notes) >= MAX_NOTES:
+                raise ValueError("Tune work limit: at most 256 attacked notes")
+            remaining -= tune_count.ATTACK_COST
+            for step_index in range(2 * (remaining // tune_count.STEP_COST) + 1):
+                step = signed_value(step_index)
+                weight = abs(step) * tune_count.STEP_COST
+                count = (
+                    tables["after_step"][remaining - weight]
+                    if weight <= remaining
+                    else 0
                 )
+                if rank < count:
+                    remaining -= weight
+                    break
+                rank -= count
+            else:
+                raise AssertionError("Pitch completion count is inconsistent")
+            count = tables["after_gap"][remaining]
+            gap = Fraction(0)
+            if rank >= count:
+                gap, rank, remaining = unrank_duration(
+                    rank - count, remaining - tune_count.REST_COST, tables["after_gap"]
+                )
+            duration, rank, remaining = unrank_duration(
+                rank, remaining, tables["suffix"]
             )
+            notes.append(Note(step=step, gap=gap, duration=duration))
+        assert rank == 0
         return cls(notes=notes)
 
     def events(self, root: int = 60) -> list[dict[str, int | str]]:
@@ -219,6 +259,51 @@ def check_index(index: int) -> None:
         raise ValueError("Tune work limit: index exceeds 4096 bits")
 
 
+def duration_cost(value: Fraction) -> int:
+    _, a, b, h = duration_parts(value)
+    return (
+        tune_count.NUMERATOR_COST * h
+        + tune_count.BINARY_COST * a
+        + tune_count.THIRD_COST * b
+    )
+
+
+def gap_cost(value: Fraction) -> int:
+    return tune_count.REST_COST + duration_cost(value) if value else 0
+
+
+def rank_duration(
+    value: Fraction, budget: int, completions: list[int]
+) -> tuple[int, int]:
+    tables = tune_count.tune_counts(MAX_COST)
+    weight = duration_cost(value)
+    rank = sum(tables["duration"][i] * completions[budget - i] for i in range(weight))
+    ordinal = duration_index(value) - tables["duration_starts"][weight]
+    remaining = budget - weight
+    return rank + ordinal * completions[remaining], remaining
+
+
+def unrank_duration(
+    rank: int, budget: int, completions: list[int]
+) -> tuple[Fraction, int, int]:
+    tables = tune_count.tune_counts(MAX_COST)
+    for weight in range(budget + 1):
+        suffixes = completions[budget - weight]
+        count = tables["duration"][weight] * suffixes
+        if rank >= count:
+            rank -= count
+            continue
+        ordinal, rank = divmod(rank, suffixes)
+        if weight > MAX_WEIGHT:
+            raise ValueError("Tune work limit: duration weight exceeds 512")
+        return (
+            duration_value(tables["duration_starts"][weight] + ordinal),
+            rank,
+            budget - weight,
+        )
+    raise AssertionError("Duration completion count is inconsistent")
+
+
 def duration_parts(value: Fraction) -> tuple[int, int, int, int]:
     if value <= 0:
         raise ValueError("Durations must be positive")
@@ -233,7 +318,12 @@ def duration_parts(value: Fraction) -> tuple[int, int, int, int]:
         )
     u = value.numerator
     h = u.bit_length() - 1
-    if 4 * h + a + 3 * b > MAX_WEIGHT:
+    if (
+        tune_count.NUMERATOR_COST * h
+        + tune_count.BINARY_COST * a
+        + tune_count.THIRD_COST * b
+        > MAX_WEIGHT
+    ):
         raise ValueError("Tune work limit: duration weight exceeds 512")
     return u, a, b, h
 
@@ -249,30 +339,17 @@ def group_count(lower: int, upper: int, a: int, b: int) -> int:
     return count
 
 
-@lru_cache(maxsize=1)
-def duration_layers() -> list[int]:
-    starts = [0]
-    for weight in range(MAX_WEIGHT + 1):
-        starts.append(
-            starts[-1]
-            + sum(
-                group_count(1 << h, (1 << (h + 1)) - 1, weight - 4 * h - 3 * b, b)
-                for h in range(weight // 4 + 1)
-                for b in (0, 1)
-                if weight >= 4 * h + 3 * b
-            )
-        )
-    return starts
-
-
 def duration_index(value: Fraction) -> int:
     u, a, b, h = duration_parts(value)
-    weight = 4 * h + a + 3 * b
-    index = duration_layers()[weight]
+    weight = duration_cost(value)
+    index = tune_count.tune_counts(MAX_COST)["duration_starts"][weight]
     for i in range(h + 1):
         for j in (0, 1):
-            exponent = weight - 4 * i - 3 * j
-            if exponent < 0:
+            exponent, remainder = divmod(
+                weight - tune_count.NUMERATOR_COST * i - tune_count.THIRD_COST * j,
+                tune_count.BINARY_COST,
+            )
+            if exponent < 0 or remainder:
                 continue
             if (i, j) == (h, b):
                 return index + group_count(1 << h, u - 1, a, b)
@@ -283,10 +360,13 @@ def duration_index(value: Fraction) -> int:
 def duration_value(index: int) -> Fraction:
     if index < 0:
         raise ValueError("Expected a nonnegative duration index")
-    layers = duration_layers()
+    layers = tune_count.tune_counts(MAX_COST)["duration_starts"]
     if index >= layers[MAX_WEIGHT + 1]:
         raise ValueError("Tune work limit: duration weight exceeds 512")
-    lower, upper = 0, min(MAX_WEIGHT + 1, 4 * (index + 1).bit_length() + 1)
+    lower, upper = (
+        0,
+        min(MAX_WEIGHT + 1, tune_count.NUMERATOR_COST * (index + 1).bit_length() + 1),
+    )
     while upper - lower > 1:
         middle = (lower + upper) // 2
         if layers[middle] <= index:
@@ -295,10 +375,13 @@ def duration_value(index: int) -> Fraction:
             upper = middle
     weight = lower
     index -= layers[weight]
-    for h in range(weight // 4 + 1):
+    for h in range(weight // tune_count.NUMERATOR_COST + 1):
         for b in (0, 1):
-            a = weight - 4 * h - 3 * b
-            if a < 0:
+            a, remainder = divmod(
+                weight - tune_count.NUMERATOR_COST * h - tune_count.THIRD_COST * b,
+                tune_count.BINARY_COST,
+            )
+            if a < 0 or remainder:
                 continue
             start, end = 1 << h, (1 << (h + 1)) - 1
             count = group_count(start, end, a, b)
@@ -320,3 +403,4 @@ MAX_NOTES = 256
 MAX_WEIGHT = 512
 MAX_INDEX_BITS = 4096
 MAX_TEXT = 20000
+MAX_COST = 4096

@@ -122,8 +122,8 @@ Tunes use the `play:music:tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# play:music:tune:have cycle tokyo
-nmr --value 'play:music:tune:have cycle tokyo'
+# play:music:tune:diff fact lock
+nmr --value 'play:music:tune:diff fact lock'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -150,12 +150,19 @@ Browsing uses the discovered item's canonical name. This plays an interpretation
 of the item without replacing its value or name. Work and playback limits still
 apply, so some items cannot be previewed practically.
 
+Tunes are ordered by total complexity: one per attack, absolute semitone steps,
+duration weight `4h+a+3b`, and one plus duration weight for positive gaps. More
+simple notes compete with fewer complicated ones. Exact rational generating
+functions count all layers and completions; there is no separate length header.
+The six weights are centralized in `nmr/types/tune_count.py` for design changes
+before release. They are not runtime switches: changing them changes names.
+
 Current codec work limits are 256 attacked notes, 20,000 text characters,
-duration weight 512, and tune indices of 4,096 bits. A refusal reports a work
-limit and never substitutes another tune. Browser previews allow 20–400 BPM,
+duration weight 512, total complexity 4,096, and tune indices of 4,096 bits.
+A refusal reports a work limit and never substitutes another tune. Browser previews allow 20–400 BPM,
 MIDI pitches 0–127, at most 120 seconds, and notes at least 0.01 seconds long.
 A tune can be named even when its preview is unavailable. Measured 4-, 8-, and
-16-note motifs with the default vocabulary take 3, 8, and 16 payload words in
+16-note motifs with the default vocabulary take 3, 8, and 15 payload words in
 the examples in `plan/tunes.md`; these are measurements, not general bounds.
 
 Prefixes remove type-routing overhead but cannot eliminate the information in

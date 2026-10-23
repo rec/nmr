@@ -76,7 +76,7 @@ def test_bridge_previews_items_without_changing_their_values() -> None:
 
 def test_projection_preserves_work_and_playback_refusals() -> None:
     engine = Nmr()
-    name = engine.encode(str(2**300), "int").name
+    name = engine.encode(str(2**4096), "int").name
     with pytest.raises(ValueError, match="work limit"):
         engine.to_tune(name)
     request = {"operation": "encode", "type_name": "tune", "value": "@1000"}

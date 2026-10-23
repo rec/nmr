@@ -232,39 +232,65 @@ Consequently denominator exponents and numerator bit-length remain bounded by
 the duration index's bit-length, not its numeric value. Construct fractions only
 after checking work estimates.
 
-For gaps, reserve `G(0) = 0`; for positive gaps use `G(g) = 1 + D(g)`. This is
-another dense bijection.
-
 ## Encode melody and rhythm together
 
-For a tune with `m >= 1` notes, form one flat vector of nonnegative integers:
+Enumerate complete tunes by total musical complexity. Each attack costs one;
+each pitch step costs its absolute semitone distance; durations retain weight
+`4*h+a+3*b`; a positive gap costs one plus its duration weight. No gap costs zero.
 
-    [D(d1), Z(step2), G(gap2), D(d2), ..., Z(step_m), G(gap_m), D(dm)]
+    C = m + sum(duration_weight(di))
+          + sum(abs(step_i) + gap_weight(gi), i >= 2)
 
-Here `Z` is the existing signed-integer enumeration:
+There is no separate length header or tuple rank. A greater number of simple
+notes competes with fewer complicated notes in the same cost budget. Eight
+repeated one-beat notes cost eight; one 128-beat note costs twenty-nine.
 
-    0 -> 0; +1 -> 1; -1 -> 2; +2 -> 3; -2 -> 4; ...
+Visit costs in ascending order. Within a cost, visit the first duration in its
+existing duration-index order. For each later note, visit pitch steps in order
+`0,+1,-1,+2,-2,...`, then the gap (zero first, then positive duration-index
+order), then its duration in duration-index order, then the next note. Only
+choices with a completion at the remaining cost occupy a block. End the phrase
+when no cost remains. The first note never has a pitch step or gap.
 
-The first pitch requires no component. There are `3*m - 2` components. Use the
-existing sum-layer `Packer` once across the entire vector to obtain `Q`.
-Do not repeatedly pair note objects, or pack pitch and rhythm through separate
-opaque subtrees. Melody and rhythm jointly determine the name.
+Every cost layer is finite, every tune has a finite positive cost, and each
+canonical tune occurs in one block exactly once. Consecutive indices over those
+blocks therefore give a bijection with nonnegative integers.
 
-Encode the positive note count with this reversible length header:
+## Rational counting and inversion
 
-    N = 2^(m-1) * (2*Q + 1) - 1
+Use rational generating functions for all counting tables, including duration
+counts and cumulative layer counts. Let `D(z)` count durations by their weight.
+For the default weights it is:
 
-To invert a tune index `N`:
+    D(z) = (1-z^5)(1+z^3+z^4) / ((1-z)(1-2z^4)(1+z^4))
 
-1. Factor out the powers of two from `N+1`. If there are `k`, then `m = k+1`.
-2. Recover `Q = ((N+1) / 2^k - 1) / 2` using exact integers.
-3. Unpack `Q` with arity `3*m-2`.
-4. Invert the duration, signed-step, and gap indices and reconstruct the notes.
+More generally, with `x=z^BINARY_COST`, `t=z^NUMERATOR_COST`, and
+`s=z^THIRD_COST`, it is `(1-xt)(1+t+s)/((1-x)(1-2t)(1+t))`.
+The numerator filters count reduced fractions, including the numerator one.
+For the default attack, step, and rest costs of one, define:
 
-Every `N >= 0` determines one positive note count and one tuple rank. Every tuple
-component has a total inverse, so every index produces exactly one canonical
-tune. Conversely, a canonical tune determines that same vector, count, and rank.
-No invalid length combinations, empty-tune aliases, or duration repairs remain.
+    P(z) = (1+z)/(1-z)        # signed pitch steps by absolute distance
+    G(z) = 1+z*D(z)           # zero or positive gap
+    H(z) = 1/(1-z*D(z)*P(z)*G(z))
+    T(z) = z*D(z)*H(z)       # nonempty tunes
+
+The completion series are `H` after a duration, `D*H` after a gap, and `G*D*H`
+after a step. Strictly preceding layer counts are coefficients of `z*T/(1-z)`;
+preceding duration layers use `z*D/(1-z)`. All are rational. Expand each `N/Q`
+with `Q[0]=1` using the fixed linear recurrence:
+
+    coefficient[c] = N[c] - sum(Q[j]*coefficient[c-j], j >= 1)
+
+Cache these exact big-integer tables. Find the tune's cost by binary search in
+the cumulative table, then subtract completion-count blocks for each component.
+Within a duration weight, select its reduced numerator by the existing exact
+group counts and binary search. Ranking sums the same preceding blocks.
+Neither direction visits previously enumerated tunes.
+
+All six positive integer weights live together in `nmr/types/tune_count.py`.
+They are design constants, not runtime settings. Changing them or the within-cost
+order changes names. Do not keep an old/new enumeration toggle or infer which
+scheme a name used. Freeze the selected constants before release.
 
 Small fixtures to verify independently during implementation:
 
@@ -274,17 +300,15 @@ Small fixtures to verify independently during implementation:
 | 1 | `@1 @1` |
 | 2 | `@1/2` |
 | 3 | `@1 @1 @1` |
-| 4 | `@1/4` |
-| 8 | `@1/3` |
-| 9 | `@1 1@1` |
-| 13 | `@1 r@1 @1` |
-| 14 | `@2` |
-| 44 | `@4` |
-
-The length header spends roughly one bit per additional note. It favors short
-phrases without giving one positive count a finite allotment of tuple ranks.
-Measure its practical cost before freezing this mapping. Optimize arithmetic
-freely, but changing enumeration order after publication changes names.
+| 4 | `@1 @1/2` |
+| 5 | `@1 r@1 @1` |
+| 6 | `@1 1@1` |
+| 7 | `@1 -1@1` |
+| 8 | `@1/2 @1` |
+| 9 | `@1/4` |
+| 35 | `@1/3` |
+| 127 | `@2` |
+| 20896 | `@4` |
 
 ## Integration, usability, and limits
 
@@ -331,14 +355,16 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
    other primes or more than one factor of three after reduction. Include
    accepted `3/9` and rejected `1/9` and `1/18`. Prove group counts and check
    layer boundaries.
-3. Implement phrase normalization and the flat tuple codec. Test the initial `@`
+3. Implement phrase normalization and the whole-tune complexity codec. Test the
+   initial `@`
    rule, unsigned positive steps, optional later zero steps, transposition,
-   octave leaps, rests, ties, repeated attacks, count headers, and arbitrary-index
-   round trips. Empty tunes and all-rest input must fail clearly. Verify that
+   octave leaps, rests, ties, repeated attacks, complexity layers, and arbitrary
+   index round trips. Empty tunes and all-rest input must fail clearly. Verify that
    optional later zeros normalize to omission without changing a tune's rank.
 4. Allocate the leaf and add canonical fixtures for the existing vocabulary,
    custom vocabularies, full and ancestor prefixes, and unprefixed names. Keep
-   every pre-existing type fixture unchanged.
+   all non-tune type fixtures unchanged; update tune fixtures when tuning the
+   pre-release enumeration.
 5. Build the editor and playback through the shared browser bridge. Test decoded
    note onsets, ends, and pitches against the exact core events. Sounding right
    by ear is useful review, not a substitute for event-sequence verification.
@@ -348,7 +374,7 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
    Changing the presentation root must leave every name unchanged.
 6. Measure names for personally meaningful four-, eight-, and sixteen-note
    phrases, with repeated notes, octave leaps, rests, dotted rhythms, and mixed
-   binary/ternary subdivisions. Include all-zero tuple cases, many-note counts,
+   binary/ternary subdivisions. Include repeated simple notes, many-note counts,
    large duration weights, capacity boundaries, and explicit resource refusals.
 7. Run the repository checks, shared Python/WebAssembly fixtures, and browser UI
    tests where access is available. Commit the final mapping and fixtures before
@@ -362,8 +388,8 @@ an attractive example length.
 ## Implemented limits, measurements, and verification
 
 The codec refuses work beyond 256 attacked notes, 20,000 input characters,
-duration weight 512, or a 4,096-bit tune index. These are operational bounds,
-not changes to the mathematical domain. Browser playback additionally requires
+duration weight 512, total complexity 4,096, or a 4,096-bit tune index. These are
+operational bounds, not changes to the mathematical domain. Browser playback additionally requires
 20–400 BPM, centered MIDI pitches in 0–127, total length at most 120 seconds,
 and individual notes at least 0.01 seconds long. A playback refusal leaves the
 normalized phrase available for naming.
@@ -382,13 +408,15 @@ The first four, eight, and sixteen notes produce these full-prefix payloads:
 
 | Notes | Payload words | Payload |
 | --- | --- | --- |
-| 4 | 3 | `opera bali pump` |
-| 8 | 8 | `by peak iron kerry heel bound such level` |
-| 16 | 16 | `the glen menu are tube post use zinc ratio hide soft mug joan bank boom per` |
+| 4 | 3 | `fall proof tune` |
+| 8 | 8 | `data maui disc new usual log keno kit` |
+| 16 | 15 | `game logic solid birth aqua jean lip site villa best leg throw spot dark ski` |
 
 Python tests check independent duration enumeration through weight 24, large
-duration indices, initial tune fixtures, arbitrary-index inverses, all-zero
-tuples, centering, ties, capacity, and resource refusals. Shared format fixtures
+duration indices, initial tune fixtures, arbitrary-index inverses, repeated simple
+notes, centering, ties, capacity, and resource refusals. Independent exhaustive
+enumeration through cost six checks every index and every within-layer choice
+against the rational recurrence. Shared format fixtures
 cover all prefix scopes and preserve earlier type names. The WebAssembly smoke
 check exercises those fixtures, custom words, exact events, and playback limits.
 The browser smoke test includes note editing, play/stop, centering, decode, ties,

@@ -95,12 +95,12 @@ def test_normalization_preserves_attacks_and_merges_rests() -> None:
         (1, "@1 @1"),
         (2, "@1/2"),
         (3, "@1 @1 @1"),
-        (4, "@1/4"),
-        (8, "@1/3"),
-        (9, "@1 1@1"),
-        (13, "@1 r@1 @1"),
-        (14, "@2"),
-        (44, "@4"),
+        (4, "@1 @1/2"),
+        (5, "@1 r@1 @1"),
+        (6, "@1 1@1"),
+        (7, "@1 -1@1"),
+        (8, "@1/2 @1"),
+        (9, "@1/4"),
     ],
 )
 def test_tune_index_fixtures(index: int, text: str) -> None:
@@ -181,7 +181,7 @@ def test_playback_preserves_events_and_refuses_unrenderable_tunes() -> None:
 
 
 def test_work_limits_do_not_repair_the_tune() -> None:
-    for index in [-1, 2**4096, 2**257 - 1]:
+    for index in [-1, 2**4096]:
         with pytest.raises(ValueError):
             Tune.from_index(index)
     for value in [Fraction(1, 2**513), Fraction(2**129)]:
