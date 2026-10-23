@@ -14,7 +14,12 @@ def build_browser(destination: Path) -> Path:
             copyfile(source, destination / source.name)
     archive_path = destination / "python.zip"
     with ZipFile(archive_path, "w", compression=ZIP_DEFLATED) as archive:
-        for name in ["nmr", "chess", "semver"]:
+        for name, distribution_name in [
+            ("nmr", "nmr"),
+            ("chess", "chess"),
+            ("semver", "semver"),
+            ("phonenumbers", "phonenumberslite"),
+        ]:
             spec = util.find_spec(name)
             if spec is None or spec.origin is None:
                 raise ValueError(f"Missing browser dependency: {name}")
@@ -24,7 +29,7 @@ def build_browser(destination: Path) -> Path:
                     source.suffix == ".py" or source == package / "words.txt"
                 ):
                     archive.write(source, Path(name) / source.relative_to(root))
-            distribution = metadata.distribution(name)
+            distribution = metadata.distribution(distribution_name)
             for entry in distribution.files or []:
                 if "license" in entry.name.lower() or "copying" in entry.name.lower():
                     archive.write(

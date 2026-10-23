@@ -339,7 +339,7 @@ chosen permanent expansion mechanism.
 | Dates | Gregorian calendar dates, including birthdays; recommend years 1 through 9999 initially. | Dense day enumeration; browsing redirects beyond the finite range. |
 | Times and timestamps | Separate time of day, local date-time, and offset-aware timestamp meanings. Recommend microsecond resolution and explicit offsets initially. | Enumerate valid components, with precisely bounded domains. |
 | Durations | Signed elapsed time with exact supported resolution. Calendar months/years are not fixed durations. | Every payload index in the defined representation. |
-| Phone numbers | International numbers with explicit country calling code and optional extension; preserve significant digits. No implicit regional parsing. | Structural validity only; no claim that a number is assigned or reachable. |
+| Phone numbers | International numbers with explicit country calling code and optional extension. Normalize formatted input with `phonenumberslite` to E.164 digits and `;ext=digits`; retain significant zeroes. Already canonical digits remain literal and metadata-independent. No implicit regional parsing. | No assignment or reachability check; decoded identities do not depend on numbering-plan metadata. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
 | IP addresses | IPv4 and IPv6; canonical standard spelling. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |

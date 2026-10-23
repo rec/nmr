@@ -34,7 +34,7 @@ const { chromium } = require("playwright");
     await page.locator('[data-mode="encode"]').click();
     await page.locator("#type").selectOption("data:contact:phone");
     const secret = "+442079460958;ext=001";
-    await page.locator("#value").fill(secret);
+    await page.locator("#value").fill("+44 (0)20 7946 0958 ext. 001");
     await page.locator("#convert").click();
     await page.locator("#result").waitFor({ state: "visible" });
     const name = await page.locator("#result-name").inputValue();

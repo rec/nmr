@@ -100,6 +100,16 @@ rejected, not rounded. Coordinates identify the two antimeridian spellings and
 ignore longitude at either pole. Phone and retail-code validity is structural;
 no assignment, ownership, or reachability checks are made.
 
+Formatted phone input is normalized with `phonenumberslite`, using international
+E.164 digits plus our `;ext=digits` suffix. For example,
+`+44 (0)20 7946 0958 ext. 004` becomes `+442079460958;ext=004`. The library
+handles national trunk prefixes, significant leading zeroes, Unicode digits,
+and vanity letters. Review the normalized result before sharing its name.
+An explicit `+` country code is still required; nmr does not guess a region.
+Already canonical `+digits` values are literal identifiers, including unassigned
+or short values, so established names do not depend on changing library metadata.
+This is input normalization, not a check that a number is assigned or reachable.
+
 Chess names preserve the move sequence, including unfinished games and the empty
 game. PGN comments, headers, variations, and stated results are not named. Automatic
 endings apply, including fivefold repetition and the 75-move rule; claimable draws

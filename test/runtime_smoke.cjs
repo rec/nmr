@@ -47,6 +47,7 @@ const { loadPyodide } = require("pyodide");
     ["date", "2000-02-29"],
     ["chess", "e4 e5 Nf3"],
     ["go", "9x9:D4 E4 pass pass"],
+    ["phone", "+44 (0)20 7946 0958 ext. 004"],
     ["tune", "@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1"],
     ["semver", "1.2.3-rc.1+build.004"],
   ]) {
@@ -57,6 +58,7 @@ const { loadPyodide } = require("pyodide");
       convert(JSON.stringify({ operation: "decode", value: encoded.name })),
     );
     assert.equal(decoded.value, encoded.value);
+    if (type === "phone") assert.equal(encoded.value, "+442079460958;ext=004");
     console.log(`${type}: ${encoded.name}`);
   }
   configure(
