@@ -11,6 +11,7 @@
     <title>nmr: a name for the details</title>
     <link rel="stylesheet" href="style.css" />
     <script src="app.js" defer></script>
+    <script src="tune.js" defer></script>
   </head>
   <body>
     <header>
@@ -23,7 +24,7 @@
         <p class="eyebrow">EXACT DETAILS. ORDINARY WORDS.</p>
         <h1>A name for<br />the details.</h1>
         <p>
-          Turn a birthday, a number, a location, or a whole chess game into
+          Turn a short tune, a birthday, a location, or a whole chess game into
           words. Share the name. Get the same detail back.
         </p>
       </section>
@@ -74,6 +75,41 @@
             ><button id="example" type="button">Try an example</button>
           </div>
         </form>
+        <section id="tune-panel" hidden aria-label="Tune editor and playback">
+          <h2>Hear the name.</h2>
+          <p class="hint">Steps are semitones from the previous note. Use @1 for
+            the first note, 2@1/2 for an upward step, and r@1/3 for a rest.
+            Triplets are supported; ninths are excluded.</p>
+          <div class="tune-settings">
+            <label>Center (MIDI; 60 = C4)<input id="tune-root" type="number" min="0" max="127" value="60"></label>
+            <label>Tempo (BPM)<input id="tune-bpm" type="number" min="20" max="400" value="120"></label>
+          </div>
+          <div class="submit-row">
+            <button id="tune-preview" type="button">Preview / normalize</button>
+            <button id="tune-play" type="button">Play</button>
+            <button id="tune-stop" type="button">Stop</button>
+          </div>
+          <p id="tune-status" role="status" class="hint"></p>
+          <output id="tune-phrase"></output>
+          <p id="tune-pitches" class="hint"></p>
+          <div id="tune-editor" hidden>
+            <p class="hint">Blank gap means no rest. Changing these rows takes effect
+              when you choose Use notes. Tie joins a note to its predecessor.</p>
+            <div id="tune-notes"></div>
+            <datalist id="tune-rhythms">
+              <option value="1"></option><option value="1/2"></option>
+              <option value="1/4"></option><option value="1/8"></option>
+              <option value="1/3"></option><option value="1/6"></option>
+              <option value="2/3"></option><option value="3/2"></option>
+            </datalist>
+            <div class="submit-row">
+              <button id="tune-add" type="button">Add note</button>
+              <button id="tune-remove" type="button">Remove last note</button>
+              <button id="tune-use" type="button">Use notes</button>
+              <button id="tune-example" type="button">Load example tune</button>
+            </div>
+          </div>
+        </section>
         <p id="message" role="status" aria-live="polite"></p>
         <section
           id="result"

@@ -1,8 +1,8 @@
 # nmr
 
 Give exact details reversible names made from ordinary words. Name a birthday,
-phone number, coordinate, fraction, identifier, or legal chess game, then let a
-friend recover it with the same vocabulary.
+short tune, phone number, coordinate, fraction, identifier, or legal chess game,
+then let a friend recover it with the same vocabulary.
 
 A name contains a readable type prefix and a payload without repeated words:
 
@@ -92,6 +92,7 @@ expands; save the canonical output instead.
 | `upc` | UPC-A, including the check digit and leading zeroes. |
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
+| `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
 | `list` | Ordered typed values, including nested lists. |
 
 Clock, local time, timestamps, and durations use microseconds. Excess precision is
@@ -116,6 +117,37 @@ Scoring, results, komi, handicap setups, SGF, and resumption after scoring are n
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the name
 `play:game:go:up trade real` with the default vocabulary.
+
+Tunes use the `play:music:tune` prefix. For example:
+
+```sh
+nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
+# play:music:tune:have cycle tokyo
+nmr --value 'play:music:tune:have cycle tokyo'
+# @1 2@1/2 r@1/3 -1@2/3
+```
+
+The first note starts with `@duration`. Later steps are signed semitone differences
+from the previous sounding note; omit a zero step. `r@duration` adds a rest.
+Durations are exact beats, with reduced denominators containing powers of two and
+at most one factor of three. Thus `1/6` is allowed, `1/9` is not, and `3/9` becomes
+`1/3`. Transposition, playback tempo, and the center note do not change a name;
+octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
+trailing rests disappear, and a phrase must start with a sounding note.
+
+In the browser, choose **Encode**, then `play:music:tune`. Load the example or
+enter interval text, preview it, and edit note durations, pitch steps, and rests
+in the rows. **Use notes** applies row edits. **Tie** joins contiguous same-pitch
+notes; repeated attacks otherwise stay distinct. Decoded tunes also offer
+playback. The default center is MIDI 60 (C4); another center transposes the sound.
+
+Current codec work limits are 256 attacked notes, 20,000 text characters,
+duration weight 512, and tune indices of 4,096 bits. A refusal reports a work
+limit and never substitutes another tune. Browser previews allow 20–400 BPM,
+MIDI pitches 0–127, at most 120 seconds, and notes at least 0.01 seconds long.
+A tune can be named even when its preview is unavailable. Measured 4-, 8-, and
+16-note motifs with the default vocabulary take 3, 8, and 16 payload words in
+the examples in `plan/tunes.md`; these are measurements, not general bounds.
 
 Prefixes remove type-routing overhead but cannot eliminate the information in
 the value. A phone fits in four payload words in the example above.

@@ -24,13 +24,16 @@ finite segment. Out-of-capacity tunes get an explicit error, not a shortened or
 approximate substitute. Other prefix scopes and vocabularies have their own
 names for the same tune, as elsewhere in nmr.
 
-This is a documentation plan, not an instruction to implement it immediately.
+The slices below are implemented in `nmr/types/tune.py`, the shared browser
+bridge, and the browser note editor. The enumeration and format fixtures define
+the first tune profile. Browser interaction verification remains blocked in the
+current environment; see the verification notes below.
 
 Additional work beyond the prompt: None.
 
 ## Musical identity
 
-Use the following proposed first-profile rules. The user-established requirements
+Use the following fixed first-profile rules. The user-established requirements
 are combined melody and rhythm, successive pitch differences, presentation
 centered around C or a configurable root note, and divisions by two and three.
 Semitone resolution, beat semantics, and silence handling below are explicit
@@ -285,7 +288,7 @@ freely, but changing enumeration order after publication changes names.
 
 ## Integration, usability, and limits
 
-Propose `play:music:tune`: add the `music` category at unused `play` slot 1 and
+Use `play:music:tune`: add the `music` category at unused `play` slot 1 and
 the `tune` leaf at its slot 0. Existing game paths remain unchanged. The full
 prefix removes type-routing cost; shorter scopes use the existing five-way tree.
 There is no separate public rhythm-only type in this work.
@@ -355,3 +358,40 @@ Acceptance requires a demonstrated rank/unrank bijection, practical examples of
 name lengths, and input/playback that preserves both melody and rhythm. Do not
 claim a six-word bound or replace the exact rhythm with an approximation to meet
 an attractive example length.
+
+## Implemented limits, measurements, and verification
+
+The codec refuses work beyond 256 attacked notes, 20,000 input characters,
+duration weight 512, or a 4,096-bit tune index. These are operational bounds,
+not changes to the mathematical domain. Browser playback additionally requires
+20–400 BPM, centered MIDI pitches in 0–127, total length at most 120 seconds,
+and individual notes at least 0.01 seconds long. A playback refusal leaves the
+normalized phrase available for naming.
+
+The editor exposes successive semitone steps, durations, and gaps before notes,
+with half/third rhythmic presets. It applies ties explicitly. Absolute-pitch
+input is available in `Tune.from_pitches`, which drops initial pitch and leading
+silence; there is no performance-file importer or keyboard recorder in this
+release. The center and tempo are presentation settings only. Exact bridge
+events use strings so JavaScript cannot round large integer pitches or fractions.
+
+Measured test motifs use the pitch pattern
+`0,0,7,7,9,9,7,5,5,4,4,2,2,0,7,7`, the duration pattern
+`1,1/2,1/2,3/2,1/3,2/3,1,2` repeated, and a third-beat gap before note five.
+The first four, eight, and sixteen notes produce these full-prefix payloads:
+
+| Notes | Payload words | Payload |
+| --- | --- | --- |
+| 4 | 3 | `opera bali pump` |
+| 8 | 8 | `by peak iron kerry heel bound such level` |
+| 16 | 16 | `the glen menu are tube post use zinc ratio hide soft mug joan bank boom per` |
+
+Python tests check independent duration enumeration through weight 24, large
+duration indices, initial tune fixtures, arbitrary-index inverses, all-zero
+tuples, centering, ties, capacity, and resource refusals. Shared format fixtures
+cover all prefix scopes and preserve earlier type names. The WebAssembly smoke
+check exercises those fixtures, custom words, exact events, and playback limits.
+The browser smoke test includes note editing, play/stop, centering, decode, ties,
+and invalid rhythms, but could not run here: headless Chrome failed to launch
+and the saved browser access policy denied localhost. Audible and visual browser
+verification is outstanding. No musical identity questions remain open.

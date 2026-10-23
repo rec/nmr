@@ -22,6 +22,21 @@ def test_canonical_decode_is_default() -> None:
     assert output.getvalue() == ""
 
 
+def test_tune_cli_encodes_and_decodes_the_exact_phrase() -> None:
+    output, errors = io.StringIO(), io.StringIO()
+    assert (
+        Main(operation="encode", type_name="tune", value="@1 2@1/2 r@1/3 -1@2/3").run(
+            io.StringIO(), output, errors
+        )
+        == 0
+    )
+    name = output.getvalue().strip()
+    decoded = io.StringIO()
+    assert Main(value=name).run(io.StringIO(), decoded, errors) == 0
+    assert decoded.getvalue().strip() == "@1 2@1/2 r@1/3 -1@2/3"
+    assert errors.getvalue() == ""
+
+
 def test_vocabulary_export_and_info(tmp_path: Path) -> None:
     import json
 

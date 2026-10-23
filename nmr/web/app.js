@@ -62,6 +62,7 @@ function selectMode(selected) {
     browse: "Explore name",
   }[mode];
   $("result").hidden = true;
+  updateTuneVisibility();
   message("");
 }
 function updateType() {
@@ -84,6 +85,7 @@ function updateType() {
   none.value = "";
   none.textContent = "No prefix";
   $("scope").append(none);
+  updateTuneVisibility();
 }
 async function configure(settings) {
   busy = true;
@@ -111,6 +113,7 @@ async function configure(settings) {
       " nonrepeating words";
     $("engine-status").textContent = "Ready · runs on your device";
     $("result").hidden = true;
+    updateTuneVisibility();
     $("export-words").disabled = false;
     message(
       "Vocabulary ready. Its order and case policy are part of the encoding.",
@@ -131,6 +134,7 @@ async function convert(event) {
   busy = true;
   $("convert").disabled = true;
   $("result").hidden = true;
+  updateTuneVisibility();
   message("Working locally…");
   try {
     const expected = $("expected-id").value.trim();
@@ -158,6 +162,8 @@ async function convert(event) {
         ? "Canonical name."
         : "Browsing discovery: the input is not canonical and may explore differently in a future tree.");
     $("result").hidden = false;
+    if (result.type === "play:music:tune") await showTune(result.value);
+    else updateTuneVisibility();
     message(
       mode === "encode"
         ? "Name created. Check the decoded detail before sharing."

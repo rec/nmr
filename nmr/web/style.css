@@ -294,3 +294,25 @@ footer {
 select {
   min-width: 0;
 }
+#tune-panel {
+  border-top: 1px solid var(--line);
+  margin-top: 24px;
+  padding-top: 12px;
+}
+.tune-settings, .tune-note {
+  display: flex;
+  align-items: end;
+  gap: 8px;
+}
+.tune-settings label, .tune-note label {
+  flex: 1;
+  min-width: 0;
+}
+.tune-note input {
+  padding: 8px 5px;
+}
+#tune-phrase {
+  display: block;
+  overflow-wrap: anywhere;
+  font: 13px/1.6 ui-monospace, monospace;
+}

@@ -167,11 +167,16 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
 | `data:contact` | 0: `phone`. |
 | `data:id` | 0: `isbn`, 1: `upc`. |
-| `play` | 0: `game` (category). |
+| `play` | 0: `game`, 1: `music` (categories). |
 | `play:game` | 0: `chess`, 1: `go`. |
+| `play:music` | 0: `tune`. |
 
-All unlisted slots are empty. Science, art, music, and additional games retain
+All unlisted slots are empty. Science, art, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
+
+Naming short tunes is nmr's original motivating purpose. `plan/tunes.md` defines
+the implemented combined melody/rhythm profile, transposition equivalence, and
+centered playback presentation.
 
 Represent the hierarchy with `Category(name, *children)`, storing children as
 `tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an

@@ -15,6 +15,7 @@ const { loadPyodide } = require("pyodide");
   runtime.runPython(fs.readFileSync("dist/web/bridge.py", "utf8"));
   const configure = runtime.globals.get("configure");
   const convert = runtime.globals.get("convert");
+  const preview = runtime.globals.get("preview");
   const info = JSON.parse(configure("{}"));
   const fixture = JSON.parse(fs.readFileSync("test/format.json", "utf8"));
   assert.equal(info.count, 1628);
@@ -45,6 +46,7 @@ const { loadPyodide } = require("pyodide");
     ["date", "2000-02-29"],
     ["chess", "e4 e5 Nf3"],
     ["go", "9x9:D4 E4 pass pass"],
+    ["tune", "@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1"],
     ["semver", "1.2.3-rc.1+build.004"],
   ]) {
     const encoded = JSON.parse(
@@ -86,6 +88,21 @@ const { loadPyodide } = require("pyodide");
     browsed.value,
   );
   configure.destroy();
+  const music = JSON.parse(preview(JSON.stringify({
+    value: "@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1",
+  })));
+  assert.deepEqual(music.events.map((event) => event.pitch), ["58", "60", "62", "61", "61"]);
+  assert.deepEqual(music.events.map((event) => event.onset), ["0", "1", "3/2", "7/3", "3"]);
+  assert.equal(music.playback[3].onset, 7 / 6);
+  assert.equal(JSON.parse(preview(JSON.stringify({value: "@1 @1", tie: 1}))).value, "@2");
+  assert.throws(() => preview(JSON.stringify({ value: "@1/9" })));
+  assert.match(JSON.parse(preview(JSON.stringify({value: "@1 200@1"}))).playback_error, /MIDI/);
+  const widePitch = JSON.parse(preview(JSON.stringify({value: "@1 18014398509481986@1"})));
+  assert.deepEqual(widePitch.events.map((event) => event.pitch), ["-9007199254740933", "9007199254741053"]);
+  const tuneCustom = JSON.parse(convert(JSON.stringify({operation: "encode", type_name: "tune", value: "@1"})));
+  assert.equal(tuneCustom.name, "play:music:tune:é");
+  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: tuneCustom.name}))).value, "@1");
+  preview.destroy();
   convert.destroy();
   console.log(
     `WebAssembly bridge, all sample codecs, custom words, and browsing passed in ${Date.now() - started}ms`,

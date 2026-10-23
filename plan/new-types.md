@@ -110,10 +110,11 @@ first composition, or a personal musical signature.
 **Object:** a short ordered sequence of pitches, durations, and rests. It names
 the musical phrase, not a recording, performer, instrument sound, or title.
 
-The central identity choice is whether transposing the phrase produces a new
-object. Absolute pitches and relative intervals are both meaningful, but they
-must have explicit semantics. Decide how tempo, octave, and rhythmic scaling
-affect identity before choosing an enumeration.
+This is nmr's original motivating purpose, now implemented as `play:music:tune`.
+The fixed identity uses successive semitone intervals and exact beat durations;
+transposition and playback tempo do not change the name. Octave distances and
+rhythmic scaling do. Presentation centers cumulative pitches around C4 or a
+configured root. See `plan/tunes.md` for the enumeration and rhythm domain.
 
 **Assessment:** high appeal under `play`, with length and usability uncertainty.
 Start by measuring a few short motifs, not by promising names for entire songs.
