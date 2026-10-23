@@ -30,6 +30,12 @@ class Preview(BaseModel, frozen=True):
     tie: int | None = None
 
 
+class ItemPreview(Request, frozen=True):
+    absolute: bool = False
+    root: int = 60
+    bpm: int = 120
+
+
 _engine = Nmr()
 
 
@@ -63,18 +69,33 @@ def preview(request_json: str) -> str:
     tune = Tune.from_text(request.value)
     if request.tie is not None:
         tune = tune.tie(request.tie)
+    return render_tune(tune, request.root, request.bpm)
+
+
+def preview_item(request_json: str) -> str:
+    request = ItemPreview.model_validate_json(request_json)
+    if request.vocabulary is not None and request.vocabulary != _engine.identifier:
+        raise ValueError("Vocabulary identifier does not match the selected list")
+    name = (
+        _engine.encode(request.value, request.type_name, request.scope).name
+        if request.operation == "encode"
+        else request.value
+    )
+    tune = _engine.to_tune(name, request.absolute, request.operation == "browse")
+    return render_tune(tune, request.root, request.bpm)
+
+
+def render_tune(tune: Tune, root: int, bpm: int) -> str:
     result: dict[str, object] = {
         "value": tune.text(),
         "notes": [
             {"step": str(i.step), "duration": str(i.duration), "gap": str(i.gap)}
             for i in tune.notes
         ],
-        "events": [
-            {k: str(v) for k, v in i.items()} for i in tune.events(request.root)
-        ],
+        "events": [{k: str(v) for k, v in i.items()} for i in tune.events(root)],
     }
     try:
-        result["playback"] = tune.playback(request.root, request.bpm)
+        result["playback"] = tune.playback(root, bpm)
     except ValueError as error:
         result["playback_error"] = str(error)
     return json.dumps(result)

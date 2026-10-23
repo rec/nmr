@@ -10,10 +10,12 @@ function stopTune() {
 function updateTuneVisibility() {
   ++previewGeneration;
   const editing = mode === "encode" && $("type").value === "play:music:tune";
-  const decoded = mode !== "encode" && !$("result").hidden &&
-    $("result-type").textContent === "play:music:tune";
-  $("tune-panel").hidden = !(editing || decoded);
+  $("tune-panel").hidden = !vocabulary;
   $("tune-editor").hidden = !editing;
+  $("tune-syntax").hidden = !editing;
+  $("tune-phrase").textContent = "";
+  $("tune-pitches").textContent = "";
+  $("tune-status").textContent = "";
   stopTune();
 }
 function tuneSource() {
@@ -63,16 +65,40 @@ async function showTune(value, tie = null) {
     bpm: Number($("tune-bpm").value),
   });
   if (generation !== previewGeneration) return null;
+  renderTune(result);
+  $("tune-notes").replaceChildren(...result.notes.map(noteRow));
+  $("value").value = result.value;
+  return result;
+}
+function renderTune(result) {
   updateTuneVisibility();
   $("tune-phrase").textContent = result.value;
   $("tune-pitches").textContent = "Centered MIDI pitches: " + result.events.map((event) => event.pitch).join(", ");
-  $("tune-notes").replaceChildren(...result.notes.map(noteRow));
-  if (mode === "encode") $("value").value = result.value;
   $("tune-status").textContent = result.playback_error ||
     "Ready to play. Center and tempo change the sound, not the name.";
+}
+async function showItemTune() {
+  const generation = ++previewGeneration;
+  stopTune();
+  const result = await request("preview_item", {
+    operation: mode,
+    value: $("value").value,
+    type_name: $("type").value,
+    scope: $("scope").value,
+    vocabulary: $("expected-id").value.trim() || null,
+    absolute: $("tune-mapping").value === "absolute",
+    root: Number($("tune-root").value),
+    bpm: Number($("tune-bpm").value),
+  });
+  if (generation !== previewGeneration) return null;
+  renderTune(result);
   return result;
 }
-$("tune-preview").addEventListener("click", () => showTune(tuneSource()).catch(tuneError));
+$("tune-preview").addEventListener("click", () => {
+  const editing = mode === "encode" && $("type").value === "play:music:tune" &&
+    $("tune-mapping").value === "relative" && $("scope").value === "play:music:tune";
+  (editing ? showTune(tuneSource()) : showItemTune()).catch(tuneError);
+});
 $("tune-use").addEventListener("click", () => showTune(editorText()).catch(tuneError));
 $("tune-stop").addEventListener("click", () => {
   ++previewGeneration;
@@ -89,7 +115,7 @@ $("tune-remove").addEventListener("click", () => {
 });
 $("tune-example").addEventListener("click", () =>
   showTune("@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1").catch(tuneError));
-for (const id of ["tune-root", "tune-bpm", "value", "tune-notes"]) {
+for (const id of ["tune-root", "tune-bpm", "tune-mapping", "scope", "expected-id", "value", "tune-notes"]) {
   $(id).addEventListener("input", () => { ++previewGeneration; stopTune(); });
 }
 $("tune-play").addEventListener("click", async () => {
@@ -97,7 +123,7 @@ $("tune-play").addEventListener("click", async () => {
     // Resume from the user gesture, before waiting for the worker.
     audio ||= new AudioContext();
     await audio.resume();
-    const result = await showTune(tuneSource());
+    const result = await showItemTune();
     if (!result || result.playback_error) return;
     const start = audio.currentTime + 0.05;
     for (const event of result.playback) {

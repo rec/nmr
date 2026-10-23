@@ -141,6 +141,15 @@ in the rows. **Use notes** applies row edits. **Tie** joins contiguous same-pitc
 notes; repeated attacks otherwise stay distinct. Decoded tunes also offer
 playback. The default center is MIDI 60 (C4); another center transposes the sound.
 
+Every type has **Play** and **Preview tune** controls, including names entered
+for decoding or browsing. **Prefix relative** is the default: interpret the
+canonical name's word-payload index as a tune index. Selecting **Absolute** first
+includes the path from the root. Relative tunes can change when you change a
+name's prefix scope; absolute tunes stay the same. With no prefix, both agree.
+Browsing uses the discovered item's canonical name. This plays an interpretation
+of the item without replacing its value or name. Work and playback limits still
+apply, so some items cannot be previewed practically.
+
 Current codec work limits are 256 attacked notes, 20,000 text characters,
 duration weight 512, and tune indices of 4,096 bits. A refusal reports a work
 limit and never substitutes another tune. Browser previews allow 20–400 BPM,

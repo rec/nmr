@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from .category import Category, route
 from .registry import ROOT
 from .type_namer import TypeNamer
+from .types.tune import Tune
 from .words import Words
 
 
@@ -90,3 +91,13 @@ class Nmr(Words):
         if len(matches) != 1:
             raise ValueError(f"Unknown or ambiguous type: {type_name}")
         return matches[0]
+
+    def to_tune(self, name: str, absolute: bool = False, browse: bool = False) -> Tune:
+        """Interpret a canonical name's payload or full root index as a tune."""
+        result = self.decode(name, browse)
+        prefix, _, payload = result.name.rpartition(":")
+        index = self.decode_from_name(payload.split())
+        if absolute:
+            _, slots = self.root.lookup(prefix)
+            index = route(slots, index)
+        return Tune.from_index(index)

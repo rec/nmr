@@ -162,8 +162,7 @@ async function convert(event) {
         ? "Canonical name."
         : "Browsing discovery: the input is not canonical and may explore differently in a future tree.");
     $("result").hidden = false;
-    if (result.type === "play:music:tune") await showTune(result.value);
-    else updateTuneVisibility();
+    updateTuneVisibility();
     message(
       mode === "encode"
         ? "Name created. Check the decoded detail before sharing."

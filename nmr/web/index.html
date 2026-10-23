@@ -77,7 +77,14 @@
         </form>
         <section id="tune-panel" hidden aria-label="Tune editor and playback">
           <h2>Hear the name.</h2>
-          <p class="hint">Steps are semitones from the previous note. Use @1 for
+          <label for="tune-mapping">Interpret as a tune</label>
+          <select id="tune-mapping">
+            <option value="relative">Prefix relative (default)</option>
+            <option value="absolute">Absolute</option>
+          </select>
+          <p class="hint">Prefix relative plays the word payload within its prefix.
+            Absolute includes the whole type path. With no prefix, both agree.</p>
+          <p id="tune-syntax" class="hint">Steps are semitones from the previous note. Use @1 for
             the first note, 2@1/2 for an upward step, and r@1/3 for a rest.
             Triplets are supported; ninths are excluded.</p>
           <div class="tune-settings">
@@ -85,7 +92,7 @@
             <label>Tempo (BPM)<input id="tune-bpm" type="number" min="20" max="400" value="120"></label>
           </div>
           <div class="submit-row">
-            <button id="tune-preview" type="button">Preview / normalize</button>
+            <button id="tune-preview" type="button">Preview tune</button>
             <button id="tune-play" type="button">Play</button>
             <button id="tune-stop" type="button">Stop</button>
           </div>
