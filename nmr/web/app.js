@@ -71,14 +71,14 @@ function updateType() {
   $("scope").replaceChildren();
   const full = document.createElement("option");
   full.value = path;
-  full.textContent = "Full type prefix (recommended)";
+  full.textContent = "Type prefix (recommended)";
   $("scope").append(full);
   const parts = path.split(":");
   for (let i = parts.length - 1; i > 0; i--) {
     const scope = parts.slice(0, i).join(":");
     const option = document.createElement("option");
     option.value = scope;
-    option.textContent = scope + ":";
+    option.textContent = scope.split(":").pop() + ":";
     $("scope").append(option);
   }
   const none = document.createElement("option");
@@ -100,7 +100,7 @@ async function configure(settings) {
     for (const [path, description] of Object.entries(info.types)) {
       const option = document.createElement("option");
       option.value = path;
-      option.textContent = path + " / " + description;
+      option.textContent = path.split(":").pop() + " / " + description;
       $("type").append(option);
     }
     $("type").value = previous in info.types ? previous : "pure:math:int";

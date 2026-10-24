@@ -222,20 +222,24 @@ redirect an already canonical input.
 
 ### Hierarchical prefixes
 
-Use a colon-separated path followed by a word payload:
+Use a unique category or type name followed by a colon and a word payload.
+All category and type labels must be globally unique, including across levels;
+a registry unit test enforces this. Parent categories may be supplied on input,
+including an optional leading colon, but output always prints only the final
+category or type name. Thus `:play:game:chess:in get` prints as `chess:in get`.
 
 * No prefix: words encode the global integer.
 * `play:`: words encode the integer inside the play category.
-* An illustrative `play:game:chess:` path: words encode the integer inside the
-  chess leaf, if `game` and `chess` are the selected subcategory and leaf names.
+* `game:`: words encode the integer inside the game category.
+* `chess:`: words encode the integer inside the chess leaf.
 
 For that illustrative path, let `g` be the game slot within `play`, `c` the chess
 slot within `game`, and `n` the type-relative integer. The global integer is:
 
 `I = 3 + 5 * (g + 5 * (c + 5*n))`
 
-The payload integers for no prefix, `play:`, `play:game:`, and
-`play:game:chess:` are respectively `I`, `g + 5*(c + 5*n)`, `c + 5*n`, and `n`.
+The payload integers for no prefix, `play:`, `game:`, and
+`chess:` are respectively `I`, `g + 5*(c + 5*n)`, `c + 5*n`, and `n`.
 The values of `g` and `c` are not assigned by this example. Decoding a prefix
 restores the omitted fixed routing components. This preserves the type-relative
 integer and makes the forms equivalent without changing the word-ranking algorithm.

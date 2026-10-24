@@ -44,9 +44,9 @@ class Nmr(Words):
             raise ValueError("Prefix scope does not contain the selected type")
         name = " ".join(self.encode_to_name(route(slots[len(prefix_slots) :], index)))
         if prefix:
-            name = prefix + ":" + name
+            name = prefix.rsplit(":", 1)[-1] + ":" + name
         return Result(
-            type=path,
+            type=codec.label,
             value=canonical_value,
             name=name,
             vocabulary=self.identifier,
@@ -77,7 +77,7 @@ class Nmr(Words):
         result = self.encode(value, path, prefix)
         normalized = " ".join(self.normalize(i) for i in payload.split())
         if prefix:
-            normalized = prefix + ":" + normalized
+            normalized = prefix.rsplit(":", 1)[-1] + ":" + normalized
         canonical = result.name == normalized
         if not browse and not canonical:
             raise ValueError("Noncanonical name; use browse explicitly to explore it")
@@ -85,12 +85,11 @@ class Nmr(Words):
 
     def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeNamer]]:
         name = type_name.casefold().strip(":")
-        matches = [
-            (p, s, c) for p, s, c in self.root.leaves() if p == name or c.label == name
-        ]
-        if len(matches) != 1:
+        node, slots = self.root.lookup(name)
+        if isinstance(node, Category):
             raise ValueError(f"Unknown or ambiguous type: {type_name}")
-        return matches[0]
+        path = next(p for p, s, _ in self.root.leaves() if s == slots)
+        return path, slots, node
 
     def to_tune(self, name: str, absolute: bool = False, browse: bool = False) -> Tune:
         """Interpret a canonical name's payload or full root index as a tune."""

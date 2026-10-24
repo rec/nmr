@@ -9,6 +9,19 @@ from nmr.types.integer import Int
 from nmr.types.uuid import Uuid
 
 
+def test_all_category_and_type_names_are_globally_unique() -> None:
+    names = [label(i).casefold() for _, _, i in ROOT.nodes()]
+    duplicates = sorted({i for i in names if names.count(i) > 1})
+    assert not duplicates, f"Category/type names occur more than once: {duplicates}"
+
+
+@pytest.mark.parametrize(
+    "path", ["chess", "game:chess", "play:game:chess", ":play:game:chess"]
+)
+def test_lookup_accepts_omitted_parent_categories(path: str) -> None:
+    assert ROOT.lookup(path) == ROOT.lookup("play:game:chess")
+
+
 def test_named_categories_reject_last_slot_leaves() -> None:
     with pytest.raises(ValueError, match="last slot"):
         Category("bad", Int, Float, Frac, Uuid, Int)

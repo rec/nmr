@@ -7,7 +7,7 @@ then let a friend recover it with the same vocabulary.
 A name contains a readable type prefix and a payload without repeated words:
 
 ```text
-real:time:date:nor lung
+date:nor lung
 ```
 
 That name means `2000-02-29`. Canonical decoding is the default. Browsing is an
@@ -23,11 +23,11 @@ git clone git@github.com:rec/nmr.git
 cd nmr
 uv sync --frozen
 uv run --frozen nmr --operation encode --type date --value 2000-02-29
-uv run --frozen nmr --value 'real:time:date:nor lung'
+uv run --frozen nmr --value 'date:nor lung'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
-Use `nmr --help` for the complete options and `nmr --list-types` for type paths.
+Use `nmr --help` for the complete options and `nmr --list-types` for type names.
 Frozen development commands use the checked-in package versions independently of
 machine-local resolution settings. Regenerate the lock deliberately when changing
 dependencies.
@@ -37,13 +37,13 @@ dependencies.
 ```sh
 # Preserve the actual fraction pair, including zero denominators.
 nmr --operation encode --type frac --value '2/4'
-# pure:math:frac:now
-nmr --value 'pure:math:frac:now'
+# frac:now
+nmr --value 'frac:now'
 # 2/4
 
 # The scope controls how much type information stays in the word payload.
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
-# play:game:chess:in get
+# chess:in get
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
 # play:both pride
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
@@ -64,6 +64,14 @@ nmr --operation encode --type phone --value '+442079460958' --json-output
 Without `--value`, the CLI reads stdin, or prompts when used in a terminal.
 `--value` preserves its entire argument, including whitespace, `#`, and newlines.
 There is no implicit type guessing or country inference.
+
+Every category and type name is unique throughout the tree. Parent categories
+are optional in input: `chess:in get`, `game:chess:in get`, and
+`:play:game:chess:in get` all read identically and print as `chess:in get`.
+Category scopes behave the same way: `play:game:will gas` prints as
+`game:will gas`, with the same payload. Results and typed-list entries also use
+short type labels. Internal tree paths still determine routing; shortening a
+prefix never changes its scope or the encoded number.
 
 Canonical decoding rejects unassigned type slots, invalid values, and
 noncanonical encodings. It never silently switches to browsing. Browsing may
@@ -126,14 +134,14 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the name
-`play:game:go:up trade real` with the default vocabulary.
+`go:up trade real` with the default vocabulary.
 
-Tunes use the `play:music:tune` prefix. For example:
+Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# play:music:tune:diff fact lock
-nmr --value 'play:music:tune:diff fact lock'
+# tune:diff fact lock
+nmr --value 'tune:diff fact lock'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -145,7 +153,7 @@ at most one factor of three. Thus `1/6` is allowed, `1/9` is not, and `3/9` beco
 octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
-In the browser, choose **Encode**, then `play:music:tune`. Load the example or
+In the browser, choose **Encode**, then `tune`. Load the example or
 enter interval text, preview it, and edit note durations, pitch steps, and rests
 in the rows. **Use notes** applies row edits. **Tie** joins contiguous same-pitch
 notes; repeated attacks otherwise stay distinct. Decoded tunes also offer
@@ -189,7 +197,7 @@ selected word count must be used by both people.
 ```sh
 nmr --word-file private.txt --vocabulary-info
 nmr --word-file private.txt --operation encode --type phone --value '+442079460958'
-nmr --word-file private.txt --value 'data:contact:phone:YOUR WORDS HERE'
+nmr --word-file private.txt --value 'phone:YOUR WORDS HERE'
 nmr --word-file private.txt --export-words normalized-private.txt
 ```
 
@@ -242,7 +250,7 @@ from nmr.types.fraction import Frac
 
 engine = Nmr()
 encoded = engine.encode("2/4", "frac")
-assert encoded.name == "pure:math:frac:now"
+assert encoded.name == "frac:now"
 assert engine.decode(encoded.name).value == "2/4"
 
 explored = engine.decode("pure:to", browse=True)

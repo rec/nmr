@@ -39,6 +39,8 @@ const { chromium } = require("playwright");
     await page.locator("#result").waitFor({ state: "visible" });
     const name = await page.locator("#result-name").inputValue();
     assert.equal(await page.locator("#result-value").inputValue(), secret);
+    assert.equal(await page.locator("#result-type").textContent(), "phone");
+    assert.match(await page.locator("#type option:checked").textContent(), /^phone \/ /);
     await page.locator('[data-mode="decode"]').click();
     await page.locator("#value").fill(name);
     await page.locator("#convert").click();

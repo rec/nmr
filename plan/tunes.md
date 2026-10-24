@@ -312,8 +312,9 @@ Small fixtures to verify independently during implementation:
 
 ## Integration, usability, and limits
 
-Use `play:music:tune`: add the `music` category at unused `play` slot 1 and
-the `tune` leaf at its slot 0. Existing game paths remain unchanged. The full
+Use `tune:` in printed names, with internal path `play:music:tune`: add the
+`music` category at unused `play` slot 1 and the `tune` leaf at its slot 0.
+Parent categories are optional in input and never printed. Existing game paths remain unchanged. The full
 prefix removes type-routing cost; shorter scopes use the existing five-way tree.
 There is no separate public rhythm-only type in this work.
 

@@ -21,7 +21,7 @@ def test_nested_lists_preserve_typed_details() -> None:
     encoded = engine.encode(json.dumps(value), "list")
     assert encoded.type == "list"
     decoded = json.loads(engine.decode(encoded.name).value)
-    assert decoded[0] == {"type": "real:time:date", "value": "2000-01-01"}
+    assert decoded[0] == {"type": "date", "value": "2000-01-01"}
     assert decoded[1]["value"][0]["value"] == "+442079460958;ext=001"
     assert decoded[1]["value"][1]["value"] == "2/4"
     assert engine.encode(json.dumps(decoded), "list").name == encoded.name
@@ -33,6 +33,13 @@ def test_list_order_is_part_of_its_identity() -> None:
     assert List.str_to_index(json.dumps([a, b])) != List.str_to_index(
         json.dumps([b, a])
     )
+
+
+@pytest.mark.parametrize("type_name", ["date", "time:date", "real:time:date"])
+def test_list_type_parents_are_optional_and_never_printed(type_name: str) -> None:
+    value = json.dumps([{"type": type_name, "value": "2000-01-01"}])
+    canonical = '[{"type":"date","value":"2000-01-01"}]'
+    assert List.index_to_str(List.str_to_index(value)) == canonical
 
 
 def test_noncanonical_empty_list_is_only_browsable() -> None:

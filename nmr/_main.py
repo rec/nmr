@@ -18,9 +18,9 @@ class Main(BaseModel, frozen=True):
     value: str | None = None
     """One input value. Omit to read one value per line from stdin or interactively."""
     type_name: Annotated[str | None, tyro.conf.arg(name="type")] = None
-    """Type path or unique leaf name, required for encoding."""
+    """Type name, optionally qualified by parent categories; required for encoding."""
     scope: str | None = None
-    """Encoding prefix scope. Default: full leaf path. Empty string: no prefix."""
+    """Encoding prefix scope. Default: type name. Empty string: no prefix."""
     word_file: Path | None = None
     word_count: int | None = Field(default=None, ge=1)
     case_sensitive: bool = False
@@ -41,7 +41,7 @@ class Main(BaseModel, frozen=True):
         engine = Nmr(self.word_file, self.word_count, not self.case_sensitive)
         if self.list_types:
             for path, description in engine.types().items():
-                print(f"{path}\t{description}", file=output)
+                print(f"{path.rsplit(':', 1)[-1]}\t{description}", file=output)
             return 0
         if self.vocabulary_info:
             print(

@@ -23,6 +23,8 @@ def test_published_format_fixtures() -> None:
     for case in fixture["cases"]:
         result = engine.encode(case["input"], case["type"], case["scope"])
         assert result.name == case["name"]
+        assert result.name.count(":") <= 1
+        assert ":" not in result.type
         assert result.value == case["value"]
         assert engine.decode(case["name"]).value == case["value"]
 

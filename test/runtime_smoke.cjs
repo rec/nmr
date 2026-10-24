@@ -25,6 +25,15 @@ const { loadPyodide } = require("pyodide");
   assert.equal("meta:record" in info.types, false);
   assert.equal("meta:list" in info.types, false);
   assert.ok("list" in info.types);
+  const qualified = JSON.parse(convert(JSON.stringify({
+    operation: "decode", value: ":play:game:chess:in get",
+  })));
+  assert.equal(qualified.name, "chess:in get");
+  assert.equal(qualified.type, "chess");
+  assert.equal(qualified.canonical, true);
+  assert.equal(JSON.parse(convert(JSON.stringify({
+    operation: "decode", value: "play:game:will gas",
+  }))).name, "game:will gas");
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(
@@ -103,7 +112,7 @@ const { loadPyodide } = require("pyodide");
   const widePitch = JSON.parse(preview(JSON.stringify({value: "@1 18014398509481986@1"})));
   assert.deepEqual(widePitch.events.map((event) => event.pitch), ["-9007199254740933", "9007199254741053"]);
   const tuneCustom = JSON.parse(convert(JSON.stringify({operation: "encode", type_name: "tune", value: "@1"})));
-  assert.equal(tuneCustom.name, "play:music:tune:é");
+  assert.equal(tuneCustom.name, "tune:é");
   assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: tuneCustom.name}))).value, "@1");
   const item = {operation: "encode", type_name: "int", value: "2"};
   const projected = JSON.parse(previewItem(JSON.stringify(item)));

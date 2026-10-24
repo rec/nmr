@@ -22,6 +22,14 @@ def test_canonical_decode_is_default() -> None:
     assert output.getvalue() == ""
 
 
+def test_list_types_prints_names_without_parent_categories() -> None:
+    output = io.StringIO()
+    assert Main(list_types=True).run(io.StringIO(), output, io.StringIO()) == 0
+    names = [i.split("\t", 1)[0] for i in output.getvalue().splitlines()]
+    assert "chess" in names
+    assert all(":" not in i for i in names)
+
+
 def test_tune_cli_encodes_and_decodes_the_exact_phrase() -> None:
     output, errors = io.StringIO(), io.StringIO()
     assert (
@@ -61,7 +69,7 @@ def test_json_pipeline_exposes_canonical_value_and_type() -> None:
     assert status == 0
     result = json.loads(output.getvalue())
     assert result["value"] == "2000-02-29"
-    assert result["type"] == "real:time:date"
+    assert result["type"] == "date"
     assert result["canonical"] is True
 
 
@@ -93,6 +101,6 @@ def test_command_entrypoint_parses_the_pydantic_model(monkeypatch: MonkeyPatch) 
     monkeypatch.setattr(sys, "stdout", output)
     monkeypatch.setattr(sys, "stderr", errors)
     assert main(["--operation", "encode", "--type", "frac", "--value", "0/0"]) == 0
-    assert output.getvalue().startswith("pure:math:frac:")
+    assert output.getvalue().startswith("frac:")
     assert main(["--value", "missing:the"]) == 1
-    assert "Unknown category" in errors.getvalue()
+    assert "Unknown" in errors.getvalue()

@@ -38,27 +38,30 @@ class Category(BaseModel, frozen=True):
     def leaves(
         self, prefix: str = ""
     ) -> Iterator[tuple[str, list[int], type[TypeNamer]]]:
+        for path, slots, node in self.nodes(prefix):
+            if not isinstance(node, Category):
+                yield path, slots, node
+
+    def nodes(
+        self, prefix: str = ""
+    ) -> Iterator[tuple[str, list[int], Category | type[TypeNamer]]]:
         for slot, child in enumerate(self.children):
             path = f"{prefix}{label(child)}"
+            yield path, [slot], child
             if isinstance(child, Category):
-                for name, slots, codec in child.leaves(path + ":"):
-                    yield name, [slot, *slots], codec
-            else:
-                yield path, [slot], child
+                for name, slots, node in child.nodes(path + ":"):
+                    yield name, [slot, *slots], node
 
     def lookup(self, path: str) -> tuple[Category | type[TypeNamer], list[int]]:
-        node: Category | type[TypeNamer] = self
-        slots: list[int] = []
         if not path:
-            return node, slots
-        for part in path.split(":"):
-            if not isinstance(node, Category):
-                raise ValueError(f"Extra components after a leaf: {path}")
-            matches = [(s, c) for s, c in enumerate(node.children) if label(c) == part]
-            if not matches:
-                raise ValueError(f"Unknown category or type: {path}")
-            slot, node = matches[0]
-            slots.append(slot)
+            return self, []
+        path = path.removeprefix(":")
+        matches = [
+            (n, s) for p, s, n in self.nodes() if p == path or p.endswith(":" + path)
+        ]
+        if len(matches) != 1:
+            raise ValueError(f"Unknown or ambiguous category or type: {path}")
+        node, slots = matches[0]
         return node, slots
 
     def resolve(self, index: int, browse: bool = False) -> tuple[type[TypeNamer], int]:

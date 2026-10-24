@@ -37,6 +37,32 @@ def test_vocabulary_identity_is_checked() -> None:
 
 
 @pytest.mark.parametrize(
+    "prefix", ["chess", "game:chess", "play:game:chess", ":play:game:chess"]
+)
+def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) -> None:
+    engine = Nmr()
+    result = engine.encode("e4 e5 Nf3", prefix)
+    assert result.type == "chess"
+    assert result.name == "chess:in get"
+    for browse in (False, True):
+        decoded = engine.decode(prefix + ":in get", browse=browse)
+        assert decoded == result
+
+
+@pytest.mark.parametrize("scope", ["game", "play:game"])
+def test_category_scopes_are_shortened_without_changing_the_payload(scope: str) -> None:
+    engine = Nmr()
+    result = engine.encode("e4 e5 Nf3", "chess", scope)
+    assert result.name == "game:will gas"
+    assert engine.decode(scope + ":will gas") == result
+
+
+def test_wrong_parent_categories_are_rejected() -> None:
+    with pytest.raises(ValueError, match="Unknown"):
+        Nmr().decode("data:chess:in get")
+
+
+@pytest.mark.parametrize(
     "name", [":the", "pure::the", "pure:", "pure:math:int:extra:the"]
 )
 def test_malformed_prefixes_are_not_accepted_as_canonical(name: str) -> None:

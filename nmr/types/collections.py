@@ -4,7 +4,7 @@ import json
 
 from pydantic import BaseModel, ConfigDict
 
-from ..category import route
+from ..category import Category, route
 from ..pack_numbers import Packer
 from ..type_namer import TypeNamer
 
@@ -70,10 +70,9 @@ def encode_item(item: object, depth: int) -> int:
     from ..registry import ROOT
 
     data = Item.model_validate(item)
-    matches = [(p, s, c) for p, s, c in ROOT.leaves() if data.type in (p, c.label)]
-    if len(matches) != 1:
+    codec, slots = ROOT.lookup(data.type.casefold().strip(":"))
+    if isinstance(codec, Category):
         raise ValueError(f"Unknown or ambiguous item type: {data.type}")
-    _, slots, codec = matches[0]
     if codec is List:
         index = encode_collection(data.value, depth)
     else:
@@ -87,13 +86,12 @@ def decode_item(index: int, browse: bool, depth: int) -> dict[str, object]:
     from ..registry import ROOT
 
     codec, payload = ROOT.resolve(index, browse)
-    path = next(p for p, _, c in ROOT.leaves() if c is codec)
     value = (
         decode_collection(payload, browse, depth)
         if codec is List
         else codec.index_to_str(payload, browse)
     )
-    return {"type": path, "value": value}
+    return {"type": codec.label, "value": value}
 
 
 def unique_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
