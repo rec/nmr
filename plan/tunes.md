@@ -235,11 +235,12 @@ after checking work estimates.
 ## Encode melody and rhythm together
 
 Enumerate complete tunes by total musical complexity. Each attack costs one;
-each pitch step costs its absolute semitone distance; durations retain weight
+steps from -2 through +2 semitones have no extra cost, and larger steps cost
+`abs(step)-2`; durations retain weight
 `4*h+a+3*b`; a positive gap costs one plus its duration weight. No gap costs zero.
 
     C = m + sum(duration_weight(di))
-          + sum(abs(step_i) + gap_weight(gi), i >= 2)
+          + sum(max(0, abs(step_i)-2) + gap_weight(gi), i >= 2)
 
 There is no separate length header or tuple rank. A greater number of simple
 notes competes with fewer complicated notes in the same cost budget. Eight
@@ -269,7 +270,7 @@ More generally, with `x=z^BINARY_COST`, `t=z^NUMERATOR_COST`, and
 The numerator filters count reduced fractions, including the numerator one.
 For the default attack, step, and rest costs of one, define:
 
-    P(z) = (1+z)/(1-z)        # signed pitch steps by absolute distance
+    P(z) = 5+2z/(1-z)        # five free steps, then two at each positive cost
     G(z) = 1+z*D(z)           # zero or positive gap
     H(z) = 1/(1-z*D(z)*P(z)*G(z))
     T(z) = z*D(z)*H(z)       # nonempty tunes
@@ -287,7 +288,10 @@ Within a duration weight, select its reduced numerator by the existing exact
 group counts and binary search. Ranking sums the same preceding blocks.
 Neither direction visits previously enumerated tunes.
 
-All six positive integer weights live together in `nmr/types/tune_count.py`.
+The six positive integer weights and free-step radius (two semitones) live
+together in `nmr/types/tune_count.py`. With radius `k` and tail step cost `s`,
+the pitch function is `(2k+1)+2z^s/(1-z^s)`. Free steps form a finite set;
+the positive attack cost still keeps each complexity layer finite.
 They are design constants, not runtime settings. Changing them or the within-cost
 order changes names. Do not keep an old/new enumeration toggle or infer which
 scheme a name used. Freeze the selected constants before release.
@@ -298,17 +302,17 @@ Small fixtures to verify independently during implementation:
 | --- | --- |
 | 0 | `@1` |
 | 1 | `@1 @1` |
-| 2 | `@1/2` |
-| 3 | `@1 @1 @1` |
-| 4 | `@1 @1/2` |
-| 5 | `@1 r@1 @1` |
-| 6 | `@1 1@1` |
-| 7 | `@1 -1@1` |
-| 8 | `@1/2 @1` |
-| 9 | `@1/4` |
-| 35 | `@1/3` |
-| 127 | `@2` |
-| 20896 | `@4` |
+| 2 | `@1 1@1` |
+| 3 | `@1 -1@1` |
+| 4 | `@1 2@1` |
+| 5 | `@1 -2@1` |
+| 6 | `@1/2` |
+| 7 | `@1 @1 @1` |
+| 8 | `@1 @1 1@1` |
+| 9 | `@1 @1 -1@1` |
+| 359 | `@1/3` |
+| 2591 | `@2` |
+| 6983144 | `@4` |
 
 ## Integration, usability, and limits
 
@@ -409,14 +413,14 @@ The first four, eight, and sixteen notes produce these full-prefix payloads:
 
 | Notes | Payload words | Payload |
 | --- | --- | --- |
-| 4 | 3 | `fall proof tune` |
-| 8 | 8 | `data maui disc new usual log keno kit` |
-| 16 | 15 | `game logic solid birth aqua jean lip site villa best leg throw spot dark ski` |
+| 4 | 4 | `skip sin basic own` |
+| 8 | 10 | `call drop shell john tin bind ran demo poet pen` |
+| 16 | 19 | `bid snap rice horn act bra coat was herb sport maui deck bytes had cells folk dies juan away` |
 
 Python tests check independent duration enumeration through weight 24, large
 duration indices, initial tune fixtures, arbitrary-index inverses, repeated simple
 notes, centering, ties, capacity, and resource refusals. Independent exhaustive
-enumeration through cost six checks every index and every within-layer choice
+enumeration through cost five checks every index and every within-layer choice
 against the rational recurrence. Shared format fixtures
 cover all prefix scopes and preserve earlier type names. The WebAssembly smoke
 check exercises those fixtures, custom words, exact events, and playback limits.

@@ -116,7 +116,7 @@ const { loadPyodide } = require("pyodide");
   assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: tuneCustom.name}))).value, "@1");
   const item = {operation: "encode", type_name: "int", value: "2"};
   const projected = JSON.parse(previewItem(JSON.stringify(item)));
-  assert.equal(projected.value, "@1 @1 @1");
+  assert.equal(projected.value, "@1 -1@1");
   const absoluteItem = JSON.parse(previewItem(JSON.stringify({...item, absolute: true})));
   assert.notEqual(absoluteItem.value, projected.value);
   const itemName = JSON.parse(convert(JSON.stringify(item))).name;

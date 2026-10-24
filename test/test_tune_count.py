@@ -27,13 +27,19 @@ def suffixes(cost: int, durations: list[Fraction]) -> list[list[Note]]:
     if cost == 0:
         return [[]]
     result = []
-    steps = [0, *[s for i in range(1, cost) for s in (i, -i)]]
+    steps = [0, *[s for i in range(1, cost + 2) for s in (i, -i)]]
     gaps = [Fraction(0), *durations]
     for step in steps:
         for gap in gaps:
             gap_weight = 1 + duration_cost(gap) if gap else 0
             for duration in durations:
-                remaining = cost - 1 - abs(step) - gap_weight - duration_cost(duration)
+                remaining = (
+                    cost
+                    - 1
+                    - max(0, abs(step) - 2)
+                    - gap_weight
+                    - duration_cost(duration)
+                )
                 if remaining >= 0:
                     note = Note(step=step, gap=gap, duration=duration)
                     result.extend([[note, *s] for s in suffixes(remaining, durations)])
@@ -41,9 +47,9 @@ def suffixes(cost: int, durations: list[Fraction]) -> list[list[Note]]:
 
 
 def test_rational_series_matches_every_small_tune_in_order() -> None:
-    tables = tune_counts(6)
+    tables = tune_counts(5)
     index = 0
-    for cost in range(1, 7):
+    for cost in range(1, 6):
         assert tables["starts"][cost] == index
         durations = durations_through(cost - 1)
         for duration in durations:

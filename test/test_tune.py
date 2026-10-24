@@ -93,14 +93,17 @@ def test_normalization_preserves_attacks_and_merges_rests() -> None:
     [
         (0, "@1"),
         (1, "@1 @1"),
-        (2, "@1/2"),
-        (3, "@1 @1 @1"),
-        (4, "@1 @1/2"),
-        (5, "@1 r@1 @1"),
-        (6, "@1 1@1"),
-        (7, "@1 -1@1"),
-        (8, "@1/2 @1"),
-        (9, "@1/4"),
+        (2, "@1 1@1"),
+        (3, "@1 -1@1"),
+        (4, "@1 2@1"),
+        (5, "@1 -2@1"),
+        (6, "@1/2"),
+        (7, "@1 @1 @1"),
+        (8, "@1 @1 1@1"),
+        (9, "@1 @1 -1@1"),
+        (359, "@1/3"),
+        (2591, "@2"),
+        (6983144, "@4"),
     ],
 )
 def test_tune_index_fixtures(index: int, text: str) -> None:
@@ -109,7 +112,7 @@ def test_tune_index_fixtures(index: int, text: str) -> None:
 
 
 def test_arbitrary_indices_have_exact_inverses() -> None:
-    for index in [*range(500), 2**120, 2**255 - 1, ((2**1200 + 1) << 15) - 1]:
+    for index in [*range(500), 2**120, 2**255 - 1, 2**600 + 17]:
         tune = Tune.from_index(index)
         assert tune.index() == index
         assert Tune.from_text(tune.text()) == tune

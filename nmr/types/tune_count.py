@@ -59,16 +59,21 @@ def duration_function() -> tuple[list[int], list[int]]:
     return numerator, denominator
 
 
+def pitch_cost(step: int) -> int:
+    return max(0, abs(step) - FREE_STEPS) * STEP_COST
+
+
 @lru_cache(maxsize=1)
 def tune_counts(limit: int) -> dict[str, list[int]]:
     """Count completions at each stage, all by rational series recurrences.
 
-    D=N/Q, P=(1+z**STEP_COST)/(1-z**STEP_COST), G=1+z**REST_COST*D.
+    D=N/Q, P=(2*FREE_STEPS+1)+2*z**STEP_COST/(1-z**STEP_COST).
+    G=1+z**REST_COST*D.
     H=1/(1-z**ATTACK_COST*D*P*G) counts possibly empty note suffixes.
     The three completion series are H, D*H and G*D*H.
     """
     n, q = duration_function()
-    pitch_n = polynomial_sum([1], power(STEP_COST))
+    pitch_n = polynomial_sum([2 * FREE_STEPS + 1], power(STEP_COST, 1 - 2 * FREE_STEPS))
     pitch_q = polynomial_sum([1], power(STEP_COST, -1))
     gap_n = polynomial_sum(q, polynomial_product(power(REST_COST), n))
     suffix_n = polynomial_product(q, q, pitch_q)
@@ -104,6 +109,7 @@ def tune_counts(limit: int) -> dict[str, list[int]]:
 # Enumeration constants, editable together before release, never runtime settings.
 ATTACK_COST = 1
 STEP_COST = 1
+FREE_STEPS = 2
 REST_COST = 1
 NUMERATOR_COST = 4
 BINARY_COST = 1

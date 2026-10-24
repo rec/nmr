@@ -140,8 +140,8 @@ Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:diff fact lock
-nmr --value 'tune:diff fact lock'
+# tune:both angle join human
+nmr --value 'tune:both angle join human'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -168,11 +168,12 @@ Browsing uses the discovered item's canonical name. This plays an interpretation
 of the item without replacing its value or name. Work and playback limits still
 apply, so some items cannot be previewed practically.
 
-Tunes are ordered by total complexity: one per attack, absolute semitone steps,
+Tunes are ordered by total complexity: one per attack, no extra pitch cost for
+steps from -2 through +2 semitones, and `abs(step)-2` for larger steps,
 duration weight `4h+a+3b`, and one plus duration weight for positive gaps. More
 simple notes compete with fewer complicated ones. Exact rational generating
 functions count all layers and completions; there is no separate length header.
-The six weights are centralized in `nmr/types/tune_count.py` for design changes
+The six weights and free-step radius are centralized in `nmr/types/tune_count.py` for design changes
 before release. They are not runtime switches: changing them changes names.
 
 Current codec work limits are 256 attacked notes, 20,000 text characters,
@@ -180,7 +181,7 @@ duration weight 512, total complexity 4,096, and tune indices of 4,096 bits.
 A refusal reports a work limit and never substitutes another tune. Browser previews allow 20–400 BPM,
 MIDI pitches 0–127, at most 120 seconds, and notes at least 0.01 seconds long.
 A tune can be named even when its preview is unavailable. Measured 4-, 8-, and
-16-note motifs with the default vocabulary take 3, 8, and 15 payload words in
+16-note motifs with the default vocabulary take 4, 10, and 19 payload words in
 the examples in `plan/tunes.md`; these are measurements, not general bounds.
 
 Prefixes remove type-routing overhead but cannot eliminate the information in

@@ -104,7 +104,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
         cost = len(self.notes) * tune_count.ATTACK_COST
         cost += sum(duration_cost(i.duration) for i in self.notes)
         cost += sum(
-            abs(i.step) * tune_count.STEP_COST + gap_cost(i.gap) for i in self.notes[1:]
+            tune_count.pitch_cost(i.step) + gap_cost(i.gap) for i in self.notes[1:]
         )
         if cost > MAX_COST:
             raise ValueError("Tune work limit: total complexity exceeds 4096")
@@ -117,9 +117,9 @@ class Tune(BaseModel, TypeNamer, frozen=True):
             remaining -= tune_count.ATTACK_COST
             # Pitch order is 0,+1,-1,+2,-2,... within the remaining budget.
             for i in range(signed_index(note.step)):
-                weight = abs(signed_value(i)) * tune_count.STEP_COST
+                weight = tune_count.pitch_cost(signed_value(i))
                 rank += tables["after_step"][remaining - weight]
-            remaining -= abs(note.step) * tune_count.STEP_COST
+            remaining -= tune_count.pitch_cost(note.step)
             if note.gap:
                 rank += tables["after_gap"][remaining]
                 addition, remaining = rank_duration(
@@ -167,9 +167,11 @@ class Tune(BaseModel, TypeNamer, frozen=True):
             if len(notes) >= MAX_NOTES:
                 raise ValueError("Tune work limit: at most 256 attacked notes")
             remaining -= tune_count.ATTACK_COST
-            for step_index in range(2 * (remaining // tune_count.STEP_COST) + 1):
+            for step_index in range(
+                2 * (tune_count.FREE_STEPS + remaining // tune_count.STEP_COST) + 1
+            ):
                 step = signed_value(step_index)
-                weight = abs(step) * tune_count.STEP_COST
+                weight = tune_count.pitch_cost(step)
                 count = (
                     tables["after_step"][remaining - weight]
                     if weight <= remaining

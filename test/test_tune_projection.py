@@ -61,7 +61,7 @@ def test_bridge_previews_items_without_changing_their_values() -> None:
     bridge.configure("{}")
     source = {"operation": "encode", "type_name": "int", "value": "2"}
     relative = json.loads(bridge.preview_item(json.dumps(source)))
-    assert relative["value"] == "@1 @1 @1"
+    assert relative["value"] == "@1 -1@1"
     absolute = json.loads(bridge.preview_item(json.dumps({**source, "absolute": True})))
     result = Nmr().encode("2", "int")
     assert absolute["value"] == Nmr().to_tune(result.name, absolute=True).text()
