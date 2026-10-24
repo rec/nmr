@@ -3,7 +3,7 @@ import { TunePlayer } from "./tune.js";
 
 const field = document.querySelector("#value");
 const nameButton = document.querySelector("#name");
-const presentation = { root: 48, bpm: 180 };
+const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
 const pending = new Map();

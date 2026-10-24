@@ -1,4 +1,6 @@
 /* Exact pitches and times come from the shared Python core. */
+const outputGain = 10 ** (6 / 20);
+
 export class TunePlayer {
   constructor(onEnded = () => {}) {
     this.onEnded = onEnded;
@@ -29,7 +31,7 @@ export class TunePlayer {
     const gain = this.context.createGain();
     const start = this.context.currentTime;
     voice.frequency.value = 2000;
-    gain.gain.setValueAtTime(0.025, start);
+    gain.gain.setValueAtTime(0.025 * outputGain, start);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.012);
     voice.connect(gain).connect(this.context.destination);
     voice.onended = () => { voice.disconnect(); gain.disconnect(); };
@@ -54,8 +56,8 @@ export class TunePlayer {
       voice.type = "triangle";
       voice.frequency.value = 440 * 2 ** ((event.pitch - 69) / 12);
       gain.gain.setValueAtTime(0, onset);
-      gain.gain.linearRampToValueAtTime(0.15, onset + edge);
-      gain.gain.setValueAtTime(0.15, end - edge);
+      gain.gain.linearRampToValueAtTime(0.15 * outputGain, onset + edge);
+      gain.gain.setValueAtTime(0.15 * outputGain, end - edge);
       gain.gain.linearRampToValueAtTime(0, end);
       voice.connect(gain).connect(this.context.destination);
       voice.onended = () => {
