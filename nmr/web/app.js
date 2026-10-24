@@ -3,7 +3,7 @@ import { TunePlayer } from "./tune.js";
 
 const field = document.querySelector("#value");
 const nameButton = document.querySelector("#name");
-const status = document.querySelector("#status");
+const presentation = { root: 48, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
 const pending = new Map();
@@ -14,11 +14,12 @@ let timer;
 let ready = false;
 let composing = false;
 let currentName = null;
+let previewPending = false;
 let player;
 try {
-  player = new TunePlayer();
-} catch {
-  status.textContent = "Audio is unavailable in this browser.";
+  player = new TunePlayer(() => nameButton.setAttribute("aria-pressed", "false"));
+} catch (error) {
+  console.error("Audio is unavailable in this browser.", error);
 }
 
 function request(action, payload) {
@@ -37,8 +38,9 @@ worker.onmessage = ({ data }) => {
 };
 worker.onerror = () => {
   ready = false;
-  status.textContent = "Could not start the local naming engine. Reload to try again.";
-  for (const task of pending.values()) task.reject(new Error(status.textContent));
+  const error = new Error("Could not start the local naming engine. Reload to try again.");
+  console.error(error);
+  for (const task of pending.values()) task.reject(error);
   pending.clear();
 };
 
@@ -53,16 +55,16 @@ function focus() {
 }
 function unlock() {
   player?.unlock().catch(() => {
-    status.textContent = "Sound needs permission from your browser.";
+    console.error("Sound needs permission from your browser.");
   });
 }
 function changed() {
   version++;
   playVersion++;
+  previewPending = false;
   player?.stop();
   currentName = null;
   nameButton.hidden = true;
-  status.textContent = ready ? "" : "Loading…";
   render();
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
@@ -76,27 +78,42 @@ async function recognize() {
     editor.normalize();
     render();
     currentName = result.name;
-    nameButton.textContent = result.name || "";
+    nameButton.textContent = (result.name || "").replace(":", ": ");
     nameButton.hidden = !result.name;
-    status.textContent = result.message || (result.name_mode ? "Name" : result.kind || "");
   } catch (error) {
-    if (revision === version) status.textContent = error.message;
+    if (revision === version) console.error(error);
   }
 }
 async function playName() {
   if (!player || !currentName) return;
+  if (previewPending || player.playing) {
+    playVersion++;
+    previewPending = false;
+    player.stop();
+    return;
+  }
   const name = currentName;
   const revision = ++playVersion;
+  previewPending = true;
   unlock();
   try {
-    const music = await request("preview_name", { value: name });
+    const music = await request("preview_name", { value: name, ...presentation });
     if (revision !== playVersion || currentName !== name) return;
     if (music.playback_error) throw new Error(music.playback_error);
+    previewPending = false;
     player.play(music.playback);
-    status.textContent = "Playing";
+    nameButton.setAttribute("aria-pressed", "true");
   } catch (error) {
-    if (revision === playVersion) status.textContent = error.message;
+    if (revision === playVersion) {
+      previewPending = false;
+      console.error(error);
+    }
   }
+}
+
+function insert(text) {
+  if (editor.replace(text)) changed();
+  else { player?.tick(); render(); }
 }
 
 // Mouse placement never changes the selection owned by the editor.
@@ -141,12 +158,12 @@ document.addEventListener("keydown", (event) => {
     changed(); return;
   }
   if (!command && !event.altKey && [...event.key].length === 1) {
-    event.preventDefault(); focus(); editor.replace(event.key); changed();
+    event.preventDefault(); focus(); insert(event.key);
   }
 }, true);
 document.addEventListener("paste", (event) => {
   event.preventDefault(); focus();
-  editor.replace(event.clipboardData.getData("text/plain")); changed();
+  insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
   event.preventDefault();
@@ -155,13 +172,13 @@ for (const action of ["copy", "cut"]) document.addEventListener(action, (event) 
 });
 field.addEventListener("compositionstart", () => { composing = true; });
 field.addEventListener("compositionend", (event) => {
-  composing = false; editor.replace(event.data); changed();
+  composing = false; insert(event.data);
 });
 field.addEventListener("beforeinput", (event) => {
   if (composing || event.inputType === "insertCompositionText") return;
   event.preventDefault();
   if (event.inputType === "insertText" || event.inputType === "insertReplacementText") {
-    editor.replace(event.data || ""); changed();
+    insert(event.data || "");
   } else if (event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") {
     editor.erase(event.inputType === "deleteContentBackward" ? -1 : 1); changed();
   }
@@ -177,10 +194,10 @@ async function start() {
     render();
     await recognize();
     // tune:the is the one-beat zeroth tune, independently of its root routing.
-    const intro = await request("preview", { value: "@1" });
+    const intro = await request("preview", { value: "@1", ...presentation });
     player?.setIntro(intro.playback);
   } catch (error) {
-    status.textContent = error.message;
+    console.error(error);
   }
 }
 focus();

@@ -541,7 +541,8 @@ or replacing the whole field resets that mode. Partial words remain editable;
 autocomplete is deferred. Complete nonrepeating vocabulary words are lexical names,
 even if their type slots are unassigned. No browsing repair is used. Optional
 parent prefixes are accepted and output uses the shortest label. Clicking the
-name, or pressing Enter, plays its absolute root index as a tune centered on C4.
+name, or pressing Enter, plays its absolute root index as a tune centered on C3 at 180 BPM. Clicking
+again stops playback. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the` itself, deferred to the first interaction if the
 browser blocks autoplay. Escape clears the input and stops sound.
 

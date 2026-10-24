@@ -28,10 +28,14 @@ export class Editor {
   replace(value) {
     const start = Math.min(this.anchor, this.cursor);
     const end = Math.max(this.anchor, this.cursor);
-    if (start === 0 && end === this.text.length) this.nameMode = false;
+    const replacingAll = start === 0 && end === this.text.length;
+    if (!replacingAll && this.text.trimStart().startsWith("+") &&
+        /[0-9]/.test(this.text) && /\p{L}/u.test(value)) return false;
+    if (replacingAll) this.nameMode = false;
     this.text = this.text.slice(0, start) + value.replace(/[\r\n]+/g, " ") + this.text.slice(end);
     this.anchor = this.cursor = start + value.replace(/[\r\n]+/g, " ").length;
     this.normalize();
+    return true;
   }
   move(position, extend = false) {
     this.cursor = Math.max(0, Math.min(this.text.length, position));

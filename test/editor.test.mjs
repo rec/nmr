@@ -79,3 +79,28 @@ test("typing before the vocabulary loads is recognized once it is available", ()
   assert.equal(value.nameMode, true);
   assert.equal(value.text, "the");
 });
+test("phone input rejects letters without changing text, cursor, or selection", () => {
+  const value = editor("+1");
+  assert.equal(value.replace("x"), false);
+  assert.equal(value.text, "+1");
+  assert.equal(value.cursor, 2);
+  value.move(1);
+  value.move(2, true);
+  assert.equal(value.replace("é"), false);
+  assert.equal(value.selection(), "1");
+  assert.equal(value.replace("44"), true);
+  assert.equal(value.text, "+44");
+  assert.equal(value.replace(" (20) 1234-5678"), true);
+});
+test("phone restrictions end when cleared, fully replaced, or the plus is removed", () => {
+  const value = editor("+1");
+  value.selectAll();
+  assert.equal(value.replace("THE"), true);
+  assert.equal(value.text, "the");
+  value.clear();
+  value.replace("+1");
+  value.move(0);
+  value.erase(1);
+  assert.equal(value.replace("a"), true);
+  assert.equal(value.text, "a1");
+});

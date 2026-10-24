@@ -158,7 +158,8 @@ Click the resulting word name, or press Enter, to hear that full name interprete
 as a tune. Playback uses its absolute root index, including its type path. This
 can sound different from the musical detail being named. The library's
 `Nmr.to_tune()` still supports both prefix-relative and absolute interpretations.
-Playback is centered on C4 (MIDI 60), rather than starting there.
+Browser playback runs at 180 BPM, centered on C3 (MIDI 48), rather than
+starting there. Click the name again while it plays to stop it.
 
 Tunes are ordered by total complexity: one per attack, no extra pitch cost for
 steps from -2 through +2 semitones, and `abs(step)-2` for larger steps,
@@ -236,7 +237,9 @@ place. Use arrow keys, Home/End, Shift selection, copy/cut/paste, and Backspace 
 Delete to edit. Escape clears the field and stops playback. The engine recognizes
 integers, explicit `+` phone numbers, fractions, ISO dates and times, coordinates,
 IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typed
-lists. Pure digits always mean an integer; slash pairs mean fractions. Use
+lists. Once phone input contains `+` and digits, typing letters leaves it unchanged
+and makes a quiet tick. Clear or replace the whole field to enter a different detail.
+Pure digits always mean an integer; slash pairs mean fractions. Use
 `YYYY-MM-DD` for dates. Incomplete or invalid details have no clickable name.
 
 Entering a vocabulary word switches to name mode. Case is normalized and partial
@@ -245,7 +248,7 @@ until the field is cleared or replaced entirely. Fully known, nonrepeating words
 form a name, including names whose type slots are unassigned. Optional category
 prefixes are accepted and displayed with only the shortest category or type label.
 Click a recognized name, or press Enter, to play its full root index as a tune.
-The opening sound is `tune:the` itself, a one-beat C. Browsers that block autoplay
+The opening sound is `tune:the` itself, a one-beat C3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 
 The WebAssembly bridge is tested in Node. Live browser interaction and visual

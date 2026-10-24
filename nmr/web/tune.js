@@ -1,6 +1,7 @@
 /* Exact pitches and times come from the shared Python core. */
 export class TunePlayer {
-  constructor() {
+  constructor(onEnded = () => {}) {
+    this.onEnded = onEnded;
     this.context = new AudioContext();
     this.voices = new Set();
     this.intro = null;
@@ -20,9 +21,25 @@ export class TunePlayer {
   unlock() {
     return this.context.resume();
   }
+  get playing() {
+    return this.voices.size > 0;
+  }
+  tick() {
+    const voice = this.context.createOscillator();
+    const gain = this.context.createGain();
+    const start = this.context.currentTime;
+    voice.frequency.value = 2000;
+    gain.gain.setValueAtTime(0.025, start);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.012);
+    voice.connect(gain).connect(this.context.destination);
+    voice.onended = () => { voice.disconnect(); gain.disconnect(); };
+    voice.start(start);
+    voice.stop(start + 0.012);
+  }
   stop() {
     for (const voice of this.voices) voice.stop();
     this.voices.clear();
+    this.onEnded();
   }
   play(events) {
     this.introPlayed = true;
@@ -45,6 +62,7 @@ export class TunePlayer {
         voice.disconnect();
         gain.disconnect();
         this.voices.delete(voice);
+        if (!this.playing) this.onEnded();
       };
       voice.start(onset);
       voice.stop(end);
