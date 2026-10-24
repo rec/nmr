@@ -528,28 +528,28 @@ and pipeline need rather than adding several competing output formats.
 
 ### Browser experience
 
-Treat an installation-free decoder as part of first-release usefulness. Start
-with a small accessible page: paste a name, optionally load a list, canonically
-decode, and copy the result. Provide a separate, explicitly selected browsing
-operation for exploration. A canonical error may offer browsing, but must not
-invoke it automatically. An encode view selects the type, accepts the value,
-previews its canonical interpretation, and shows the name and word count. Use full leaf
-prefixes by default so the recipient can recognize the kind of detail immediately.
+The current browser is a single controlled input beneath a large `nmr` heading.
+All typing is routed through the editor, including selection, deletion, and paste;
+clicking the field does not reposition its cursor. It optimistically recognizes
+unprefixed typed details and shows a clickable word name below. Digits mean Int;
+explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
+syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
+durations, tune notation, games, and typed lists. Incomplete input produces no name.
 
-Run conversion locally in the browser. Choose the smallest practical way to reuse
-the Python core, and measure mobile load time before committing to a browser
-runtime or dependency. Do not independently reimplement the arithmetic in
-JavaScript. If Python-in-browser is too heavy, bring that tradeoff back for a
-decision rather than quietly introduce a server handling private values.
+A recognized vocabulary word enters sticky, case-insensitive name mode. Clearing
+or replacing the whole field resets that mode. Partial words remain editable;
+autocomplete is deferred. Complete nonrepeating vocabulary words are lexical names,
+even if their type slots are unassigned. No browsing repair is used. Optional
+parent prefixes are accepted and output uses the shortest label. Clicking the
+name, or pressing Enter, plays its absolute root index as a tune centered on C4.
+The opening sound is `tune:the` itself, deferred to the first interaction if the
+browser blocks autoplay. Escape clears the input and stops sound.
 
-Default to copying a name as text. Do not automatically put sensitive input into
-URLs, history, analytics, or persistent storage. Keep imported lists in memory
-until the user explicitly chooses otherwise. Show clear errors for unknown
-prefixes, unrecognized words, insufficient capacity, and mismatched vocabulary
-identifiers when one is supplied. Do not guess corrections and decode them
-silently. Show the result for human verification because even canonical decoding
-cannot detect every substitution. Browsing results must prominently provide the
-canonical name to save or share and explain that exploratory inputs are not stable.
+Conversion and tune arithmetic run locally through the shared Python core in a
+Pyodide worker. No input values enter URLs, network requests, analytics, or storage.
+The minimal browser uses the default vocabulary; explicit canonical decoding,
+browsing, custom-list exchange, and other advanced operations remain available
+through the CLI and library.
 
 Publish several verified examples: a birthday, telephone number, coordinate,
 reference containing leading zeroes, an IP address, a custom-list exchange, and a

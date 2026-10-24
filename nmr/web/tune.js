@@ -1,153 +1,54 @@
-/* Python supplies normalized notes, centered pitches and playback times. */
-let audio;
-let voices = [];
-let previewGeneration = 0;
-
-function stopTune() {
-  for (const voice of voices) voice.stop();
-  voices = [];
-}
-function updateTuneVisibility() {
-  ++previewGeneration;
-  const editing = mode === "encode" && $("type").value === "play:music:tune";
-  $("tune-panel").hidden = !vocabulary;
-  $("tune-editor").hidden = !editing;
-  $("tune-syntax").hidden = !editing;
-  $("tune-phrase").textContent = "";
-  $("tune-pitches").textContent = "";
-  $("tune-status").textContent = "";
-  stopTune();
-}
-function tuneSource() {
-  return mode === "encode" ? $("value").value : $("result-value").value;
-}
-function noteRow(note, index) {
-  const row = document.createElement("div");
-  row.className = "tune-note";
-  for (const [key, title] of [["step", "Step"], ["duration", "Beats"], ["gap", "Rest before"]]) {
-    const label = document.createElement("label");
-    label.textContent = `${index + 1}. ${title}`;
-    const input = document.createElement("input");
-    input.dataset.field = key;
-    input.value = key === "gap" && note[key] === "0" ? "" : note[key];
-    input.setAttribute("aria-label", `Note ${index + 1} ${title}`);
-    if (key !== "step") input.setAttribute("list", "tune-rhythms");
-    if (index === 0 && key !== "duration") input.disabled = true;
-    label.append(input);
-    row.append(label);
+/* Exact pitches and times come from the shared Python core. */
+export class TunePlayer {
+  constructor() {
+    this.context = new AudioContext();
+    this.voices = new Set();
+    this.intro = null;
+    this.introPlayed = false;
+    this.context.addEventListener("statechange", () => this.startIntro());
   }
-  if (index) {
-    const tie = document.createElement("button");
-    tie.type = "button";
-    tie.textContent = "Tie";
-    tie.addEventListener("click", () => showTune(editorText(), index).catch(tuneError));
-    row.append(tie);
+  setIntro(events) {
+    this.intro = events;
+    this.startIntro();
   }
-  return row;
-}
-function editorText() {
-  return [...$("tune-notes").children].map((row, index) => {
-    const field = (key) => row.querySelector(`[data-field="${key}"]`).value.trim();
-    const gap = field("gap");
-    const rest = index && gap && gap !== "0" ? `r@${gap} ` : "";
-    return `${rest}${index ? field("step") : ""}@${field("duration")}`;
-  }).join(" ");
-}
-function tuneError(error) {
-  $("tune-status").textContent = error.message;
-}
-async function showTune(value, tie = null) {
-  const generation = ++previewGeneration;
-  stopTune();
-  const result = await request("preview", {
-    value, tie,
-    root: Number($("tune-root").value),
-    bpm: Number($("tune-bpm").value),
-  });
-  if (generation !== previewGeneration) return null;
-  renderTune(result);
-  $("tune-notes").replaceChildren(...result.notes.map(noteRow));
-  $("value").value = result.value;
-  return result;
-}
-function renderTune(result) {
-  updateTuneVisibility();
-  $("tune-phrase").textContent = result.value;
-  $("tune-pitches").textContent = "Centered MIDI pitches: " + result.events.map((event) => event.pitch).join(", ");
-  $("tune-status").textContent = result.playback_error ||
-    "Ready to play. Center and tempo change the sound, not the name.";
-}
-async function showItemTune() {
-  const generation = ++previewGeneration;
-  stopTune();
-  const result = await request("preview_item", {
-    operation: mode,
-    value: $("value").value,
-    type_name: $("type").value,
-    scope: $("scope").value,
-    vocabulary: $("expected-id").value.trim() || null,
-    absolute: $("tune-mapping").value === "absolute",
-    root: Number($("tune-root").value),
-    bpm: Number($("tune-bpm").value),
-  });
-  if (generation !== previewGeneration) return null;
-  renderTune(result);
-  return result;
-}
-$("tune-preview").addEventListener("click", () => {
-  const editing = mode === "encode" && $("type").value === "play:music:tune" &&
-    $("tune-mapping").value === "relative" && $("scope").value === "play:music:tune";
-  (editing ? showTune(tuneSource()) : showItemTune()).catch(tuneError);
-});
-$("tune-use").addEventListener("click", () => showTune(editorText()).catch(tuneError));
-$("tune-stop").addEventListener("click", () => {
-  ++previewGeneration;
-  stopTune();
-  $("tune-status").textContent = "Stopped.";
-});
-$("tune-add").addEventListener("click", () => {
-  const index = $("tune-notes").children.length;
-  if (index >= 256) return tuneError(new Error("Editor limit: 256 notes"));
-  $("tune-notes").append(noteRow({ step: 0, duration: "1/2", gap: "0" }, index));
-});
-$("tune-remove").addEventListener("click", () => {
-  if ($("tune-notes").children.length > 1) $("tune-notes").lastElementChild.remove();
-});
-$("tune-example").addEventListener("click", () =>
-  showTune("@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1").catch(tuneError));
-for (const id of ["tune-root", "tune-bpm", "tune-mapping", "scope", "expected-id", "value", "tune-notes"]) {
-  $(id).addEventListener("input", () => { ++previewGeneration; stopTune(); });
-}
-$("tune-play").addEventListener("click", async () => {
-  try {
-    // Resume from the user gesture, before waiting for the worker.
-    audio ||= new AudioContext();
-    await audio.resume();
-    const result = await showItemTune();
-    if (!result || result.playback_error) return;
-    const start = audio.currentTime + 0.05;
-    for (const event of result.playback) {
-      const voice = audio.createOscillator();
-      const gain = audio.createGain();
+  startIntro() {
+    if (this.intro && !this.introPlayed && this.context.state === "running") {
+      this.introPlayed = true;
+      this.play(this.intro);
+    }
+  }
+  unlock() {
+    return this.context.resume();
+  }
+  stop() {
+    for (const voice of this.voices) voice.stop();
+    this.voices.clear();
+  }
+  play(events) {
+    this.introPlayed = true;
+    this.stop();
+    const start = this.context.currentTime + 0.05;
+    for (const event of events) {
+      const voice = this.context.createOscillator();
+      const gain = this.context.createGain();
       const onset = start + event.onset;
       const end = onset + event.duration;
+      const edge = Math.min(0.005, event.duration / 4);
       voice.type = "triangle";
       voice.frequency.value = 440 * 2 ** ((event.pitch - 69) / 12);
       gain.gain.setValueAtTime(0, onset);
-      gain.gain.linearRampToValueAtTime(0.15, onset + Math.min(0.005, event.duration / 4));
-      gain.gain.setValueAtTime(0.15, end - Math.min(0.005, event.duration / 4));
+      gain.gain.linearRampToValueAtTime(0.15, onset + edge);
+      gain.gain.setValueAtTime(0.15, end - edge);
       gain.gain.linearRampToValueAtTime(0, end);
-      voice.connect(gain).connect(audio.destination);
+      voice.connect(gain).connect(this.context.destination);
       voice.onended = () => {
-        voice.disconnect(); gain.disconnect();
-        const active = voices.includes(voice);
-        voices = voices.filter((item) => item !== voice);
-        if (active && !voices.length) $("tune-status").textContent = "Playback finished.";
+        voice.disconnect();
+        gain.disconnect();
+        this.voices.delete(voice);
       };
       voice.start(onset);
       voice.stop(end);
-      voices.push(voice);
+      this.voices.add(voice);
     }
-    $("tune-status").textContent = "Playing…";
-  } catch (error) { tuneError(error); }
-});
+  }
+}

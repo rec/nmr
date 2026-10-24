@@ -25,8 +25,9 @@ approximate substitute. Other prefix scopes and vocabularies have their own
 names for the same tune, as elsewhere in nmr.
 
 The slices below are implemented in `nmr/types/tune.py`, the shared browser
-bridge, and the browser note editor. The enumeration and format fixtures define
-the first tune profile. Browser interaction verification remains blocked in the
+bridge, and browser playback. The current minimal browser accepts interval text
+in its single controlled field; the earlier note-row editor has been replaced.
+The enumeration and format fixtures define the first tune profile. Browser interaction verification remains blocked in the
 current environment; see the verification notes below.
 
 Additional work beyond the prompt: None.

@@ -40,6 +40,7 @@ jobs:
           version: "0.13.1"
           python-version: "3.13"
       - run: uv sync --frozen
+      - run: node --test test/editor.test.mjs
       - run: uv run --frozen nmr --operation build-web
       - run: npm install --prefix /tmp/nmr-js --no-audit --no-fund pyodide@0.29.3
       - run: NODE_PATH=/tmp/nmr-js/node_modules node test/runtime_smoke.cjs

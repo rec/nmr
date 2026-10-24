@@ -5,6 +5,7 @@ from typing import Literal
 
 from pydantic import BaseModel
 
+from nmr import recognition
 from nmr.nmr import Nmr
 from nmr.types.tune import Tune
 
@@ -34,6 +35,11 @@ class ItemPreview(Request, frozen=True):
     absolute: bool = False
     root: int = 60
     bpm: int = 120
+
+
+class RecognitionRequest(BaseModel, frozen=True):
+    value: str
+    name_mode: bool = False
 
 
 _engine = Nmr()
@@ -99,3 +105,16 @@ def render_tune(tune: Tune, root: int, bpm: int) -> str:
     except ValueError as error:
         result["playback_error"] = str(error)
     return json.dumps(result)
+
+
+def recognize(request_json: str) -> str:
+    request = RecognitionRequest.model_validate_json(request_json)
+    return recognition.recognize_input(
+        request.value, _engine, request.name_mode
+    ).model_dump_json()
+
+
+def preview_name(request_json: str) -> str:
+    request = Preview.model_validate_json(request_json)
+    tune = Tune.from_index(_engine.name_index(request.value))
+    return render_tune(tune, request.root, request.bpm)

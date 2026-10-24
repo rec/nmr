@@ -10,6 +10,7 @@ def test_browser_bundles_the_actual_core_and_pure_python_dependencies(
     page = build_browser(tmp_path / "web")
     assert page.is_file()
     assert page.with_name("worker.js").is_file()
+    assert page.with_name("editor.mjs").is_file()
     with ZipFile(page.with_name("python.zip")) as archive:
         assert archive.read("nmr/nmr.py") == Path("nmr/nmr.py").read_bytes()
         assert archive.read("nmr/words.txt") == Path("nmr/words.txt").read_bytes()

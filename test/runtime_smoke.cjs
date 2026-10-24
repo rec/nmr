@@ -99,6 +99,21 @@ const { loadPyodide } = require("pyodide");
     ).value,
     browsed.value,
   );
+  configure("{}");
+  const recognize = runtime.globals.get("recognize");
+  const previewName = runtime.globals.get("preview_name");
+  for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
+    const result = JSON.parse(recognize(JSON.stringify({ value })));
+    assert.equal(result.kind, kind);
+    assert.ok(result.name.startsWith(kind + ":"));
+  }
+  assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).name, "the of");
+  assert.equal(JSON.parse(recognize('{"value":"42","name_mode":true}')).name, null);
+  assert.equal(JSON.parse(previewName('{"value":"int:the"}')).value, "@1");
+  assert.notEqual(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");
+  recognize.destroy();
+  previewName.destroy();
+  configure(JSON.stringify({ words: ["é", "red", "blue", "green", "gold", "white", "black"] }));
   configure.destroy();
   const music = JSON.parse(preview(JSON.stringify({
     value: "@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1",
@@ -125,7 +140,7 @@ const { loadPyodide } = require("pyodide");
   preview.destroy();
   convert.destroy();
   console.log(
-    `WebAssembly bridge, all sample codecs, custom words, and browsing passed in ${Date.now() - started}ms`,
+    `WebAssembly bridge, smart recognition, name playback, codecs, custom words, and browsing passed in ${Date.now() - started}ms`,
   );
 })().catch((error) => {
   console.error(String(error));

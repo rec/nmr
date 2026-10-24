@@ -153,20 +153,12 @@ at most one factor of three. Thus `1/6` is allowed, `1/9` is not, and `3/9` beco
 octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
-In the browser, choose **Encode**, then `tune`. Load the example or
-enter interval text, preview it, and edit note durations, pitch steps, and rests
-in the rows. **Use notes** applies row edits. **Tie** joins contiguous same-pitch
-notes; repeated attacks otherwise stay distinct. Decoded tunes also offer
-playback. The default center is MIDI 60 (C4); another center transposes the sound.
-
-Every type has **Play** and **Preview tune** controls, including names entered
-for decoding or browsing. **Prefix relative** is the default: interpret the
-canonical name's word-payload index as a tune index. Selecting **Absolute** first
-includes the path from the root. Relative tunes can change when you change a
-name's prefix scope; absolute tunes stay the same. With no prefix, both agree.
-Browsing uses the discovered item's canonical name. This plays an interpretation
-of the item without replacing its value or name. Work and playback limits still
-apply, so some items cannot be previewed practically.
+In the browser, type interval text directly into the single field to name a tune.
+Click the resulting word name, or press Enter, to hear that full name interpreted
+as a tune. Playback uses its absolute root index, including its type path. This
+can sound different from the musical detail being named. The library's
+`Nmr.to_tune()` still supports both prefix-relative and absolute interpretations.
+Playback is centered on C4 (MIDI 60), rather than starting there.
 
 Tunes are ordered by total complexity: one per attack, no extra pitch cost for
 steps from -2 through +2 semitones, and `abs(step)-2` for larger steps,
@@ -206,7 +198,8 @@ nmr --word-file private.txt --export-words normalized-private.txt
 1,628 words. `--vocabulary-info` gives its SHA-256 identifier; a recipient can
 require it with `--expect-vocabulary IDENTIFIER`. The identifier includes word
 order and case policy. Export the normalized ordered list and share it through an
-already trusted channel. The browser supports both file import and pasted lists.
+already trusted channel. Custom vocabulary tools are available through the CLI
+and Python library; the minimal browser uses the default vocabulary.
 
 A private vocabulary provides obscurity, not reliable encryption. Repeated values
 produce repeated names; prefixes reveal types; a wrong vocabulary can produce a
@@ -234,9 +227,26 @@ asset loading used here. No conversion server or account is needed.
 The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
 requires a connection and a WebAssembly-capable modern browser. The project,
 chess library, and semantic-version library are bundled from the same installation
-that builds the site. Conversion runs in a worker; values and custom lists are
-never sent over the network or saved in browser storage. Export a list explicitly
-to retain it. Closing or reloading the page loses the in-memory list and inputs.
+that builds the site. Conversion runs in a worker; input values are never sent
+over the network or saved in browser storage. Reloading loses the input.
+
+The page starts with an `nmr` heading and one field. Type anywhere on the page;
+the editor owns its text and cursor, and clicking the field leaves the cursor in
+place. Use arrow keys, Home/End, Shift selection, copy/cut/paste, and Backspace or
+Delete to edit. Escape clears the field and stops playback. The engine recognizes
+integers, explicit `+` phone numbers, fractions, ISO dates and times, coordinates,
+IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typed
+lists. Pure digits always mean an integer; slash pairs mean fractions. Use
+`YYYY-MM-DD` for dates. Incomplete or invalid details have no clickable name.
+
+Entering a vocabulary word switches to name mode. Case is normalized and partial
+words remain editable; no autocomplete is applied yet. Name mode stays active
+until the field is cleared or replaced entirely. Fully known, nonrepeating words
+form a name, including names whose type slots are unassigned. Optional category
+prefixes are accepted and displayed with only the shortest category or type label.
+Click a recognized name, or press Enter, to play its full root index as a tune.
+The opening sound is `tune:the` itself, a one-beat C. Browsers that block autoplay
+will play it on the first interaction instead. Work and playback limits still apply.
 
 The WebAssembly bridge is tested in Node. Live browser interaction and visual
 verification were blocked by the local browser approval gate during development;

@@ -1,0 +1,112 @@
+"""Recognize unlabelled details without guessing ambiguous date formats."""
+
+import json
+
+import pytest
+
+from nmr.nmr import Nmr
+from nmr.recognition import recognize_input
+from nmr.types.tune import Tune
+from nmr.web import bridge
+
+
+@pytest.mark.parametrize(
+    "value,kind",
+    [
+        ("42", "int"),
+        ("-42", "int"),
+        ("9780306406157", "int"),
+        ("+1", "phone"),
+        ("+44 (0)20 7946 0958", "phone"),
+        ("8/5", "frac"),
+        ("0/0", "frac"),
+        ("2000-02-29", "date"),
+        ("12:34", "clock"),
+        ("2000-02-29T12:34:56", "local"),
+        ("2000-02-29T12:34:56Z", "instant"),
+        ("51.5, -0.12", "latlong"),
+        ("123e4567-e89b-12d3-a456-426614174000", "uuid"),
+        ("192.168.1.1", "ipv4"),
+        ("2001:db8::1", "ipv6"),
+        ("1.2.3", "semver"),
+        ("12s", "duration"),
+        ("1.25", "float"),
+        ("1e10", "float"),
+        ("978-0-306-40615-7", "isbn"),
+        ("@1 2@1", "tune"),
+        ("9x9:D4 E4", "go"),
+        ("e4 e5 Nf3", "chess"),
+        ('[{"type":"int","value":"1"}]', "list"),
+    ],
+)
+def test_details_are_named_without_type_prefixes(value: str, kind: str) -> None:
+    engine = Nmr()
+    result = recognize_input(value, engine)
+    assert result.kind == kind
+    assert result.name == engine.encode(value, kind).name
+    assert not result.name_mode
+
+
+def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
+    result = recognize_input("8/5", Nmr())
+    assert result.kind == "frac"
+    assert "YYYY-MM-DD" in result.message
+    invalid = recognize_input("2023-02-29", Nmr())
+    assert invalid.name is None
+    assert invalid.kind == "date"
+
+
+@pytest.mark.parametrize("value", ["", "unrecognised detail", ":the"])
+def test_incomplete_or_unknown_input_does_not_invent_a_name(value: str) -> None:
+    assert recognize_input(value, Nmr()).name is None
+
+
+def test_names_are_case_insensitive_and_can_be_qualified() -> None:
+    engine = Nmr()
+    assert recognize_input("ThE Of", engine).name == "the of"
+    result = recognize_input(":play:music:tune:ThE", engine)
+    assert result.name == "tune:the"
+    assert result.name_mode
+
+
+def test_partial_names_stay_in_name_mode_until_cleared() -> None:
+    engine = Nmr()
+    assert recognize_input("the unknownword", engine).name_mode
+    result = recognize_input("42", engine, name_mode=True)
+    assert result.name is None
+    assert result.name_mode
+    assert not recognize_input("", engine, name_mode=True).name_mode
+
+
+def test_repeated_words_are_not_a_valid_name() -> None:
+    result = recognize_input("the THE", Nmr())
+    assert result.name is None
+    assert result.name_mode
+    assert result.message
+
+
+def test_unassigned_names_are_playable_without_browsing_to_another_name() -> None:
+    engine = Nmr()
+    name = " ".join(engine.encode_to_name(15))
+    with pytest.raises(ValueError):
+        engine.decode(name)
+    assert recognize_input(name, engine).name == name
+    assert engine.name_index(name) == 15
+    result = json.loads(bridge.preview_name(json.dumps({"value": name})))
+    assert result["value"] == Tune.from_index(15).text()
+
+
+def test_name_playback_includes_the_type_path() -> None:
+    engine = Nmr()
+    name = engine.encode("2", "int").name
+    result = json.loads(bridge.preview_name(json.dumps({"value": name})))
+    assert result["value"] == engine.to_tune(name, absolute=True).text()
+    assert result["value"] != engine.to_tune(name).text()
+    with pytest.raises(ValueError, match="prefix"):
+        engine.name_index(":the")
+
+
+def test_browser_recognition_returns_the_controlled_mode() -> None:
+    result = json.loads(bridge.recognize('{"value":"THE"}'))
+    assert result["name"] == "the"
+    assert result["name_mode"]

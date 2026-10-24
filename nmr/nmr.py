@@ -94,9 +94,15 @@ class Nmr(Words):
     def to_tune(self, name: str, absolute: bool = False, browse: bool = False) -> Tune:
         """Interpret a canonical name's payload or full root index as a tune."""
         result = self.decode(name, browse)
-        prefix, _, payload = result.name.rpartition(":")
+        return Tune.from_index(self.name_index(result.name, absolute))
+
+    def name_index(self, name: str, absolute: bool = True) -> int:
+        """Read a word name's number without requiring an assigned object type."""
+        prefix, separator, payload = name.strip().rpartition(":")
+        if separator and not prefix:
+            raise ValueError("A prefix cannot be empty")
+        _, slots = self.root.lookup(prefix.casefold())
         index = self.decode_from_name(payload.split())
         if absolute:
-            _, slots = self.root.lookup(prefix)
             index = route(slots, index)
-        return Tune.from_index(index)
+        return index
