@@ -110,7 +110,14 @@ const { loadPyodide } = require("pyodide");
   assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).name, "the of");
   assert.equal(JSON.parse(recognize('{"value":"42","name_mode":true}')).name, null);
   assert.equal(JSON.parse(previewName('{"value":"int:the"}')).value, "@1");
-  assert.notEqual(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");
+  assert.equal(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");
+  assert.notEqual(JSON.parse(previewName('{"value":"tune:the","absolute":true}')).value, "@1");
+  const ode = JSON.parse(recognize('{"value":"tune:such like"}'));
+  assert.ok(ode.full_name && !ode.full_name.includes(":"));
+  assert.equal(JSON.parse(previewName(JSON.stringify({ value: ode.name }))).value,
+    "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
+  assert.deepEqual(JSON.parse(previewName(JSON.stringify({ value: ode.full_name }))),
+    JSON.parse(previewName(JSON.stringify({ value: ode.name, absolute: true }))));
   recognize.destroy();
   previewName.destroy();
   configure(JSON.stringify({ words: ["é", "red", "blue", "green", "gold", "white", "black"] }));

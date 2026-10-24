@@ -37,6 +37,10 @@ class ItemPreview(Request, frozen=True):
     bpm: int = 120
 
 
+class NamePreview(Preview, frozen=True):
+    absolute: bool = False
+
+
 class RecognitionRequest(BaseModel, frozen=True):
     value: str
     name_mode: bool = False
@@ -109,12 +113,17 @@ def render_tune(tune: Tune, root: int, bpm: int) -> str:
 
 def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
-    return recognition.recognize_input(
-        request.value, _engine, request.name_mode
-    ).model_dump_json()
+    result = recognition.recognize_input(request.value, _engine, request.name_mode)
+    response = result.model_dump()
+    response["full_name"] = (
+        " ".join(_engine.encode_to_name(_engine.name_index(result.name)))
+        if result.name
+        else None
+    )
+    return json.dumps(response)
 
 
 def preview_name(request_json: str) -> str:
-    request = Preview.model_validate_json(request_json)
-    tune = Tune.from_index(_engine.name_index(request.value))
+    request = NamePreview.model_validate_json(request_json)
+    tune = Tune.from_index(_engine.name_index(request.value, request.absolute))
     return render_tune(tune, request.root, request.bpm)

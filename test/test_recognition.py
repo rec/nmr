@@ -96,14 +96,40 @@ def test_unassigned_names_are_playable_without_browsing_to_another_name() -> Non
     assert result["value"] == Tune.from_index(15).text()
 
 
-def test_name_playback_includes_the_type_path() -> None:
+def test_name_playback_defaults_to_relative_with_explicit_absolute_option() -> None:
     engine = Nmr()
     name = engine.encode("2", "int").name
-    result = json.loads(bridge.preview_name(json.dumps({"value": name})))
-    assert result["value"] == engine.to_tune(name, absolute=True).text()
-    assert result["value"] != engine.to_tune(name).text()
+    relative = json.loads(bridge.preview_name(json.dumps({"value": name})))
+    absolute = json.loads(
+        bridge.preview_name(json.dumps({"value": name, "absolute": True}))
+    )
+    assert relative["value"] == engine.to_tune(name).text()
+    assert absolute["value"] == engine.to_tune(name, absolute=True).text()
+    assert relative["value"] != absolute["value"]
     with pytest.raises(ValueError, match="prefix"):
         engine.name_index(":the")
+
+
+def test_ode_to_joy_name_plays_the_original_melody_by_default() -> None:
+    result = json.loads(
+        bridge.preview_name('{"value":"tune:such like","root":53,"bpm":180}')
+    )
+    assert result["value"] == "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1"
+    assert len(result["playback"]) == 8
+    assert result["playback"][0]["duration"] == 1 / 3
+
+
+@pytest.mark.parametrize("value", ["42", "tune:such like", "THE OF"])
+def test_full_name_has_no_prefix_and_preserves_the_absolute_number(value: str) -> None:
+    engine = Nmr()
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert ":" not in result["full_name"]
+    assert engine.name_index(result["full_name"]) == engine.name_index(result["name"])
+    full = json.loads(bridge.preview_name(json.dumps({"value": result["full_name"]})))
+    absolute = json.loads(
+        bridge.preview_name(json.dumps({"value": result["name"], "absolute": True}))
+    )
+    assert full == absolute
 
 
 def test_browser_recognition_returns_the_controlled_mode() -> None:

@@ -540,9 +540,11 @@ A recognized vocabulary word enters sticky, case-insensitive name mode. Clearing
 or replacing the whole field resets that mode. Partial words remain editable;
 autocomplete is deferred. Complete nonrepeating vocabulary words are lexical names,
 even if their type slots are unassigned. No browsing repair is used. Optional
-parent prefixes are accepted and output uses the shortest label. Clicking the
-name, or pressing Enter, plays its absolute root index as a tune centered on F3 at 180 BPM. Clicking
-again stops playback. Phone input rejects typed letters with a quiet tick.
+parent prefixes are accepted and the first line uses the shortest label. Clicking
+that line plays prefix-relative, so a Tune plays its original melody. A second
+line displays the full unprefixed word name and plays the absolute root index.
+Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
+line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the` itself, deferred to the first interaction if the
 browser blocks autoplay. Escape clears the input and stops sound.
 

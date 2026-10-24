@@ -154,9 +154,9 @@ octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
 In the browser, type interval text directly into the single field to name a tune.
-Click the resulting word name, or press Enter, to hear that full name interpreted
-as a tune. Playback uses its absolute root index, including its type path. This
-can sound different from the musical detail being named. The library's
+Click the first word-name line, or press Enter, to hear its prefix-relative tune.
+For a `tune:` name this plays the named melody. A second line displays the full
+unprefixed word name and plays its absolute root index, including its type path. The library's
 `Nmr.to_tune()` still supports both prefix-relative and absolute interpretations.
 Browser playback runs at 180 BPM, centered on F3 (MIDI 53), rather than
 starting there. Click the name again while it plays to stop it.
@@ -247,7 +247,10 @@ words remain editable; no autocomplete is applied yet. Name mode stays active
 until the field is cleared or replaced entirely. Fully known, nonrepeating words
 form a name, including names whose type slots are unassigned. Optional category
 prefixes are accepted and displayed with only the shortest category or type label.
-Click a recognized name, or press Enter, to play its full root index as a tune.
+The first clickable name line plays prefix-relative by default. The second line
+shows the full unprefixed name and plays the absolute root index. Clicking the
+other line switches playback; clicking the playing line stops it. Enter plays
+the first line unless the second button has keyboard focus.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 

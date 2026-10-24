@@ -3,6 +3,7 @@ import { TunePlayer } from "./tune.js";
 
 const field = document.querySelector("#value");
 const nameButton = document.querySelector("#name");
+const fullNameButton = document.querySelector("#full-name");
 const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
@@ -15,9 +16,14 @@ let ready = false;
 let composing = false;
 let currentName = null;
 let previewPending = false;
+let playingButton = null;
 let player;
 try {
-  player = new TunePlayer(() => nameButton.setAttribute("aria-pressed", "false"));
+  player = new TunePlayer(() => {
+    nameButton.setAttribute("aria-pressed", "false");
+    fullNameButton.setAttribute("aria-pressed", "false");
+    playingButton = null;
+  });
 } catch (error) {
   console.error("Audio is unavailable in this browser.", error);
 }
@@ -65,6 +71,7 @@ function changed() {
   player?.stop();
   currentName = null;
   nameButton.hidden = true;
+  fullNameButton.hidden = true;
   render();
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
@@ -80,32 +87,39 @@ async function recognize() {
     currentName = result.name;
     nameButton.textContent = (result.name || "").replace(":", ": ");
     nameButton.hidden = !result.name;
+    fullNameButton.textContent = result.full_name || "";
+    fullNameButton.hidden = !result.full_name;
   } catch (error) {
     if (revision === version) console.error(error);
   }
 }
-async function playName() {
+async function playName(absolute = false) {
+  const button = absolute ? fullNameButton : nameButton;
   if (!player || !currentName) return;
-  if (previewPending || player.playing) {
+  if (playingButton === button && (previewPending || player.playing)) {
     playVersion++;
     previewPending = false;
     player.stop();
     return;
   }
+  player.stop();
+  playingButton = button;
   const name = currentName;
   const revision = ++playVersion;
   previewPending = true;
   unlock();
   try {
-    const music = await request("preview_name", { value: name, ...presentation });
+    const music = await request("preview_name", { value: name, absolute, ...presentation });
     if (revision !== playVersion || currentName !== name) return;
     if (music.playback_error) throw new Error(music.playback_error);
     previewPending = false;
     player.play(music.playback);
-    nameButton.setAttribute("aria-pressed", "true");
+    playingButton = button;
+    button.setAttribute("aria-pressed", "true");
   } catch (error) {
     if (revision === playVersion) {
       previewPending = false;
+      playingButton = null;
       console.error(error);
     }
   }
@@ -129,7 +143,8 @@ document.addEventListener("selectionchange", () => {
        field.selectionEnd !== Math.max(editor.anchor, editor.cursor))) render();
 });
 document.addEventListener("pointerdown", unlock, true);
-nameButton.addEventListener("click", playName);
+nameButton.addEventListener("click", () => playName());
+fullNameButton.addEventListener("click", () => playName(true));
 document.addEventListener("keydown", (event) => {
   unlock();
   if (event.isComposing || event.key === "Tab") return;
@@ -138,9 +153,9 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault(); focus(); editor.selectAll(); render(); return;
   }
   if (command && ["c", "x", "v"].includes(event.key.toLowerCase())) { focus(); return; }
-  if (event.key === "Enter") { event.preventDefault(); playName(); return; }
+  if (event.key === "Enter") { event.preventDefault(); playName(document.activeElement === fullNameButton); return; }
   if (event.key === "Escape") { event.preventDefault(); editor.clear(); changed(); focus(); return; }
-  if (event.key === " " && document.activeElement === nameButton) return;
+  if (event.key === " " && [nameButton, fullNameButton].includes(document.activeElement)) return;
   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
     event.preventDefault(); focus();
     const left = event.key === "ArrowLeft";
