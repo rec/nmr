@@ -1,5 +1,5 @@
 /* Exact pitches and times come from the shared Python core. */
-const outputGain = 10 ** (12 / 20);
+const outputGain = 10 ** (24 / 20);
 
 export class TunePlayer {
   constructor(onEnded = () => {}) {
