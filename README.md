@@ -102,7 +102,14 @@ expands; save the canonical output instead.
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
 | `list` | Ordered typed values, including nested lists. |
-| `string` | Exact Unicode text, including case, whitespace, and the empty string. No Unicode normalization is applied. |
+| `string` | Unicode text, preserving case and allowed spaces; excludes U+0000–001F, U+007F–009F, and surrogates. The empty string is supported. No Unicode normalization is applied. |
+
+String character indices count `a`–`z`, then `A`–`Z`, then the remaining allowed
+U+0020–00FF characters in code-point order, then higher Unicode scalar values.
+Character tuples use the shared diagonal enumeration by total sum; the length
+is encoded with the same trailing-binary length tag as List. For example,
+`dfasdfasdf` is `string:she dump stan learn river`. Browsing wraps character
+indices outside the alphabet and repairs noncanonical empty-string indices.
 
 Clock, local time, timestamps, and durations use microseconds. Excess precision is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
@@ -243,7 +250,8 @@ and makes a quiet tick. Clear or replace the whole field to enter a different de
 Pure digits always mean an integer; slash pairs mean fractions. Use
 `YYYY-MM-DD` for dates. Incomplete vocabulary words and type syntax wait for more
 input. Otherwise unrecognized text uses `string:` names, preserving its original
-case and whitespace. Recognized types with invalid values are not silently
+case and allowed spaces. The String codec rejects control ranges U+0000–001F,
+U+007F–009F, and surrogate code points. Recognized types with invalid values are not silently
 converted into strings. Recognition keeps updating as the text changes.
 
 Entering a vocabulary word switches to name mode. Case is normalized and partial

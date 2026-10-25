@@ -756,12 +756,24 @@ buildable installation-free decoder, but no public URL or PyPI release was creat
 
 ### String fallback
 
-`data:string` occupies slot 3 under `data`. It names exact Unicode scalar strings,
-including the empty string, without normalizing case, whitespace, or Unicode
-composition. Its enumeration ranks sequences over the Unicode scalar alphabet,
-skipping surrogate code points, with the existing `rank_digits`/`unrank_digits`
-bijection. Every nonnegative index constructs a string; browsing uses that same
-inverse. Lone surrogates are rejected. Vocabulary capacity still limits name size.
+`data:string` occupies slot 3 under `data`. It preserves case, allowed whitespace,
+and Unicode composition exactly, including the empty string. It excludes
+U+0000–001F, U+007F–009F (including DELETE), and surrogate code points U+D800–DFFF.
+The character order is `a`–`z` (0–25), `A`–`Z` (26–51), the remaining allowed
+U+0020–00FF code points in ascending order (52–190), then U+0100 upward, skipping
+surrogates. The alphabet has 1,111,999 characters.
+
+For a nonempty string of length `n`, let `p` be the shared `Packer(count=n)`
+diagonal rank of its character indices. Its string index is
+`((2*p + 1) << n) - 1`. The empty string has index zero. Decoding reads `n` from
+the trailing zero bits of `index + 1`, then unpacks the remaining tuple rank.
+This is the existing List-style length tag, and distinguishes `a`, `aa`, and
+`aaa`, whose character tuples all rank zero. Strict decoding rejects invalid
+character indices and noncanonical empty-string aliases; browsing wraps invalid
+character indices modulo the alphabet size and maps empty-string aliases to empty.
+Vocabulary capacity still limits name size. `dfasdfasdf` now has the name
+`string:she dump stan learn river`.
+
 The GUI leaves an empty field empty, but explicit library/CLI String encoding
 supports the empty string. String is the fallback for otherwise unrecognized
 input, while incomplete vocabulary words and predefined types wait for completion.
