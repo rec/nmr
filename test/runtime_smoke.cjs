@@ -22,6 +22,7 @@ const { loadPyodide } = require("pyodide");
   assert.equal(info.count, 1628);
   assert.equal(info.identifier, fixture.vocabulary);
   assert.equal("data:text" in info.types, false);
+  assert.ok("data:string" in info.types);
   assert.equal("meta:record" in info.types, false);
   assert.equal("meta:list" in info.types, false);
   assert.ok("list" in info.types);
@@ -52,6 +53,7 @@ const { loadPyodide } = require("pyodide");
     assert.equal(decoded.value, sample.value);
   }
   for (const [type, value] of [
+    ["string", "  Mixed Case 🎵  "],
     ["frac", "2/4"],
     ["date", "2000-02-29"],
     ["chess", "e4 e5 Nf3"],
@@ -108,6 +110,10 @@ const { loadPyodide } = require("pyodide");
     assert.ok(result.name.startsWith(kind + ":"));
   }
   assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).name, "the of");
+  const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
+  assert.equal(string.kind, "string");
+  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: string.name}))).value, "  xyzzy!  ");
+  assert.equal(JSON.parse(recognize('{"value":"th"}')).name, null);
   assert.equal(JSON.parse(recognize('{"value":"42","name_mode":true}')).name, null);
   assert.equal(JSON.parse(previewName('{"value":"int:the"}')).value, "@1");
   assert.equal(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");

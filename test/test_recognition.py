@@ -56,8 +56,26 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
     assert invalid.kind == "date"
 
 
-@pytest.mark.parametrize("value", ["", "unrecognised detail", ":the"])
-def test_incomplete_or_unknown_input_does_not_invent_a_name(value: str) -> None:
+@pytest.mark.parametrize(
+    "value",
+    [
+        "",
+        "th",
+        "tun",
+        "+",
+        "@",
+        "[",
+        "1.",
+        "1/",
+        "1e-",
+        "1.2.",
+        "v1",
+        "1/+",
+        "1.2,-",
+        "N",
+    ],
+)
+def test_incomplete_type_or_word_prefix_waits_for_more_input(value: str) -> None:
     assert recognize_input(value, Nmr()).name is None
 
 
@@ -136,3 +154,26 @@ def test_browser_recognition_returns_the_controlled_mode() -> None:
     result = json.loads(bridge.recognize('{"value":"THE"}'))
     assert result["name"] == "the"
     assert result["name_mode"]
+
+
+@pytest.mark.parametrize(
+    "value", ["xyzzy", "  Hello, World!  ", ":the", "你好，世界！", "🎵"]
+)
+def test_unrecognized_text_uses_string_mode_without_losing_whitespace(
+    value: str,
+) -> None:
+    engine = Nmr()
+    result = recognize_input(value, engine)
+    assert result.kind == "string"
+    assert not result.name_mode
+    assert result.name == engine.encode(value, "string").name
+    assert engine.decode(result.name).value == value
+
+
+def test_unknown_text_can_become_a_word_or_type_as_it_is_edited() -> None:
+    engine = Nmr()
+    assert recognize_input("xyzzy", engine).kind == "string"
+    assert recognize_input("the", engine).name_mode
+    assert recognize_input("42", engine).kind == "int"
+    assert recognize_input("@1", engine).kind == "tune"
+    assert recognize_input("tune:unfinishedword", engine).name is None

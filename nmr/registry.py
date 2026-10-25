@@ -12,6 +12,7 @@ from .types.ip_address import IPv4, IPv6
 from .types.lat_long import LatLong
 from .types.phone_number import Phone
 from .types.sem_ver import Semver
+from .types.string import String
 from .types.temporal import Clock, Date, Duration, Instant, Local
 from .types.tune import Tune
 from .types.uuid import Uuid
@@ -30,6 +31,7 @@ ROOT = Category(
         Category("computer", IPv4, IPv6, Uuid, Semver),
         Category("contact", Phone),
         Category("id", Isbn, Upc),
+        String,
     ),
     Category("play", Category("game", Chess, Go), Category("music", Tune)),
     List,

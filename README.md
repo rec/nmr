@@ -102,6 +102,7 @@ expands; save the canonical output instead.
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
 | `list` | Ordered typed values, including nested lists. |
+| `string` | Exact Unicode text, including case, whitespace, and the empty string. No Unicode normalization is applied. |
 
 Clock, local time, timestamps, and durations use microseconds. Excess precision is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
@@ -240,7 +241,10 @@ IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typ
 lists. Once phone input contains `+` and digits, typing letters leaves it unchanged
 and makes a quiet tick. Clear or replace the whole field to enter a different detail.
 Pure digits always mean an integer; slash pairs mean fractions. Use
-`YYYY-MM-DD` for dates. Incomplete or invalid details have no clickable name.
+`YYYY-MM-DD` for dates. Incomplete vocabulary words and type syntax wait for more
+input. Otherwise unrecognized text uses `string:` names, preserving its original
+case and whitespace. Recognized types with invalid values are not silently
+converted into strings. Recognition keeps updating as the text changes.
 
 Entering a vocabulary word switches to name mode. Case is normalized and partial
 words remain editable; no autocomplete is applied yet. Name mode stays active

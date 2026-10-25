@@ -5,6 +5,7 @@ from nmr.types import bounded, lat_long
 from nmr.types.temporal import DAY, DAYS, Instant, Local
 
 CASES = [
+    ("string", "  Mixed Case 🎵  ", "  Mixed Case 🎵  "),
     ("ipv4", "127.0.0.1", "127.0.0.1"),
     ("ipv6", "2001:0:130f::9c0:876a:130b", "2001:0:130f::9c0:876a:130b"),
     (
@@ -97,15 +98,16 @@ def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> No
     assert engine.decode(result.name).value == result.value
 
 
-def test_text_is_not_a_supported_type_or_category_slot() -> None:
+def test_string_uses_the_former_text_slot_without_a_text_alias() -> None:
     engine = Nmr()
     assert "data:text" not in engine.types()
     with pytest.raises(ValueError, match="Unknown"):
         engine.encode("hello", "text")
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("data:text:the")
-    with pytest.raises(ValueError, match="unassigned"):
-        engine.decode("data:" + " ".join(engine.encode_to_name(3)))
+    result = engine.decode("data:" + " ".join(engine.encode_to_name(3)))
+    assert result.type == "string"
+    assert result.value == ""
 
 
 def test_semver_browsing_normalizes_invalid_metadata() -> None:

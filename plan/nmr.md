@@ -163,7 +163,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
 | `real` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
 | `real:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
-| `data` | 0: `computer`, 1: `contact`, 2: `id` (categories). |
+| `data` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `string`. |
 | `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
 | `data:contact` | 0: `phone`. |
 | `data:id` | 0: `isbn`, 1: `upc`. |
@@ -534,7 +534,10 @@ clicking the field does not reposition its cursor. It optimistically recognizes
 unprefixed typed details and shows a clickable word name below. Digits mean Int;
 explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
 syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
-durations, tune notation, games, and typed lists. Incomplete input produces no name.
+durations, tune notation, games, and typed lists. Incomplete word and type prefixes
+wait for more input. Otherwise unrecognized text enters String mode; its exact
+case and whitespace are preserved. Recognized invalid typed values remain errors,
+and existing name mode remains in control once a vocabulary word is entered.
 
 A recognized vocabulary word enters sticky, case-insensitive name mode. Clearing
 or replacing the whole field resets that mode. Partial words remain editable;
@@ -703,7 +706,7 @@ human answer to use the delivered library, CLI, or static browser build.
    documentation, and replacements for obsolete maintenance paths.
 6. Added the requested Go extension in an unused leaf slot, preserving existing
    canonical names and sharing the implementation across Python and WebAssembly.
-7. Removed the public Text type and its browser choice. Its former slot is
+7. Removed the public Text type and its browser choice. Its former slot was
    unassigned; other types retain their names. Shared digit ranking remains for
    compact codecs.
 8. Removed Record and its field-name encoding. Lists retain their slot, canonical
@@ -750,3 +753,15 @@ not a cold mobile-browser benchmark. No claim of human usability testing is made
 
 External distribution remains a deployment task: the repository contains a
 buildable installation-free decoder, but no public URL or PyPI release was created.
+
+### String fallback
+
+`data:string` occupies slot 3 under `data`. It names exact Unicode scalar strings,
+including the empty string, without normalizing case, whitespace, or Unicode
+composition. Its enumeration ranks sequences over the Unicode scalar alphabet,
+skipping surrogate code points, with the existing `rank_digits`/`unrank_digits`
+bijection. Every nonnegative index constructs a string; browsing uses that same
+inverse. Lone surrogates are rejected. Vocabulary capacity still limits name size.
+The GUI leaves an empty field empty, but explicit library/CLI String encoding
+supports the empty string. String is the fallback for otherwise unrecognized
+input, while incomplete vocabulary words and predefined types wait for completion.

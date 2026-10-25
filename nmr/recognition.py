@@ -16,6 +16,7 @@ class Recognition(BaseModel, frozen=True):
 
 
 def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recognition:
+    original = value
     value = value.strip()
     if not value:
         return Recognition()
@@ -49,9 +50,20 @@ def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recogni
                 kind = candidate
                 break
     if kind is None:
-        return Recognition()
+        if node is not None:
+            return Recognition(kind=label(node))
+        if not any(i.isspace() for i in value) and (
+            any(i.startswith(value.casefold()) for i in words)
+            or any(
+                label(n).startswith(value.casefold()) for _, _, n in engine.root.nodes()
+            )
+        ):
+            return Recognition()
+        if any(re.fullmatch(i, value) for i in INCOMPLETE_TYPES):
+            return Recognition()
+        kind = "string"
     try:
-        result = engine.encode(value, kind)
+        result = engine.encode(original if kind == "string" else value, kind)
     except ValueError:
         return Recognition(kind=kind, message=f"Not yet a valid {kind}")
     message = (
@@ -82,4 +94,16 @@ PATTERNS: list[tuple[str, str]] = [
     (r"(?:9x9|13x13|19x19):.*", "go"),
     (r"(?:[a-h][1-8].*|[KQRBN][a-h1-8x].*|O-O.*)", "chess"),
     (r"\[.*\]", "list"),
+]
+
+INCOMPLETE_TYPES: list[str] = [
+    r"[+@-]",
+    r"\[.*",
+    r"-?[0-9]+(?:\.[0-9]+)?[eE][+-]?",
+    r"-?[0-9]+[./,-]",
+    r"v?[0-9]+(?:\.[0-9]*){1,3}",
+    r"v[0-9]+",
+    r"[+-]?[0-9]+\s*/\s*[+-]?",
+    r"[+-]?[0-9]+(?:\.[0-9]+)?\s*,\s*[+-]?",
+    r"[KQRBN]",
 ]
