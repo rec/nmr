@@ -14,7 +14,7 @@ export class Editor {
   normalize() {
     if (!this.text) this.nameMode = false;
     const first = this.text.trimStart().split(/\s/)[0].toLowerCase();
-    if (this.words.has(first)) this.nameMode = true;
+    if (this.words.has(first) && /\s/.test(this.text.trimStart())) this.nameMode = true;
     if (this.nameMode) {
       const canonical = (text) => text.replace(/\S+/g, (word) =>
         this.words.get(word.toLowerCase()) || word.toLowerCase());

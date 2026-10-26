@@ -30,6 +30,9 @@ def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recogni
             pass
     tokens = (payload if node is not None else value).split()
     if name_mode or (tokens and tokens[0].casefold() in words):
+        committed = (
+            name_mode or node is not None or any(i.isspace() for i in original.lstrip())
+        )
         if tokens and all(i.casefold() in words for i in tokens):
             normalized = [words[i.casefold()] for i in tokens]
             try:
@@ -39,7 +42,7 @@ def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recogni
             name = " ".join(normalized)
             if node is not None:
                 name = label(node) + ":" + name
-            return Recognition(name=name, kind="name", name_mode=True)
+            return Recognition(name=name, kind="name", name_mode=committed)
         return Recognition(name_mode=True)
     kind = None
     if value.startswith("+") and any(i.isdecimal() for i in value):

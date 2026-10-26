@@ -104,6 +104,23 @@ const { loadPyodide } = require("pyodide");
   configure("{}");
   const recognize = runtime.globals.get("recognize");
   const previewName = runtime.globals.get("preview_name");
+  const { Editor } = await import("../nmr/web/editor.mjs");
+  for (const value of ["asdf", "Hello!", "dfasdfasdf", "iPhone"]) {
+    const editor = new Editor();
+    editor.setWords(info.words);
+    let result;
+    for (const character of value) {
+      editor.replace(character);
+      result = JSON.parse(recognize(JSON.stringify({ value: editor.text, name_mode: editor.nameMode })));
+      if (result.name_mode) editor.nameMode = true;
+      editor.normalize();
+    }
+    assert.equal(editor.text, value, "String typing must preserve case");
+    assert.equal(result.kind, "string", `Typing ${value} must reach String recognition`);
+    assert.ok(result.name && result.full_name, "Both name lines need a value");
+    assert.equal(JSON.parse(convert(JSON.stringify({ operation: "decode", value: result.name }))).value, value);
+  }
+
   for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
     const result = JSON.parse(recognize(JSON.stringify({ value })));
     assert.equal(result.kind, kind);

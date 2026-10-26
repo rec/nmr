@@ -28,6 +28,11 @@ const { chromium } = require("playwright");
         return !button.hidden && button.textContent.startsWith(prefix.replace(":", ": "));
       }, prefix);
     };
+    for (const value of ["asdf", "Hello!", "dfasdfasdf", "iPhone"]) {
+      await enter(value, "string:");
+      assert.equal(await page.locator("#value").inputValue(), value);
+      assert.equal(await page.locator("#full-name").isVisible(), true);
+    }
     await enter("xyzzy!", "string:");
     assert.equal(await page.locator("#full-name").isVisible(), true);
     await page.keyboard.press("Escape");

@@ -537,9 +537,12 @@ syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
 durations, tune notation, games, and typed lists. Incomplete word and type prefixes
 wait for more input. Otherwise unrecognized text enters String mode; its exact
 case and whitespace are preserved. Recognized invalid typed values remain errors,
-and existing name mode remains in control once a vocabulary word is entered.
+and committed name mode remains in control until the field is cleared or replaced.
 
-A recognized vocabulary word enters sticky, case-insensitive name mode. Clearing
+A recognized vocabulary word immediately displays a name, but only a following
+space commits sticky, case-insensitive name mode. This allows typing through a
+short word such as `a`, `he`, or `i` into an ordinary case-preserving string.
+An explicit recognized name prefix also commits name mode. Clearing
 or replacing the whole field resets that mode. Partial words remain editable;
 autocomplete is deferred. Complete nonrepeating vocabulary words are lexical names,
 even if their type slots are unassigned. No browsing repair is used. Optional

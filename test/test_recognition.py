@@ -150,10 +150,13 @@ def test_full_name_has_no_prefix_and_preserves_the_absolute_number(value: str) -
     assert full == absolute
 
 
-def test_browser_recognition_returns_the_controlled_mode() -> None:
+def test_a_matching_word_is_shown_before_name_mode_is_committed() -> None:
     result = json.loads(bridge.recognize('{"value":"THE"}'))
     assert result["name"] == "the"
-    assert result["name_mode"]
+    assert not result["name_mode"]
+    committed = json.loads(bridge.recognize('{"value":"THE "}'))
+    assert committed["name"] == "the"
+    assert committed["name_mode"]
 
 
 @pytest.mark.parametrize(
@@ -173,7 +176,7 @@ def test_unrecognized_text_uses_string_mode_without_losing_whitespace(
 def test_unknown_text_can_become_a_word_or_type_as_it_is_edited() -> None:
     engine = Nmr()
     assert recognize_input("xyzzy", engine).kind == "string"
-    assert recognize_input("the", engine).name_mode
+    assert recognize_input("the ", engine).name_mode
     assert recognize_input("42", engine).kind == "int"
     assert recognize_input("@1", engine).kind == "tune"
     assert recognize_input("tune:unfinishedword", engine).name is None

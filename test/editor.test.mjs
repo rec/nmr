@@ -36,24 +36,24 @@ test("moves and deletes whole Unicode characters and words", () => {
   value.erase(1, true);
   assert.equal(value.text, " world");
 });
-test("enters name mode on a complete word without completing its prefixes", () => {
+test("commits name mode at a word boundary without completing prefixes", () => {
   const value = editor("A");
-  assert.equal(value.nameMode, true);
-  assert.equal(value.text, "a");
+  assert.equal(value.nameMode, false);
+  assert.equal(value.text, "A");
   value.replace("N");
-  assert.equal(value.text, "an");
+  assert.equal(value.text, "AN");
   value.replace("D");
-  assert.equal(value.text, "and");
+  assert.equal(value.text, "AND");
   value.replace(" TH");
   assert.equal(value.text, "and th");
   assert.equal(value.nameMode, true);
 });
 test("name mode is sticky through edits, but clearing or replacing resets it", () => {
-  const value = editor("THE");
-  assert.equal(value.text, "the");
+  const value = editor("THE ");
+  assert.equal(value.text, "the ");
   value.move(0);
   value.erase(1);
-  assert.equal(value.text, "he");
+  assert.equal(value.text, "he ");
   assert.equal(value.nameMode, true);
   value.selectAll();
   value.replace("42");
@@ -73,11 +73,11 @@ test("pasted multiline text stays a single controlled line", () => {
 });
 test("typing before the vocabulary loads is recognized once it is available", () => {
   const value = new Editor();
-  value.replace("THE");
+  value.replace("THE ");
   assert.equal(value.nameMode, false);
   value.setWords(["the"]);
   assert.equal(value.nameMode, true);
-  assert.equal(value.text, "the");
+  assert.equal(value.text, "the ");
 });
 test("phone input rejects letters without changing text, cursor, or selection", () => {
   const value = editor("+1");
@@ -96,11 +96,22 @@ test("phone restrictions end when cleared, fully replaced, or the plus is remove
   const value = editor("+1");
   value.selectAll();
   assert.equal(value.replace("THE"), true);
-  assert.equal(value.text, "the");
+  assert.equal(value.text, "THE");
   value.clear();
   value.replace("+1");
   value.move(0);
   value.erase(1);
   assert.equal(value.replace("a"), true);
   assert.equal(value.text, "a1");
+});
+
+test("typing through a vocabulary word can still produce a case-preserving string", () => {
+  const value = new Editor();
+  value.setWords(["a", "as", "he", "i"]);
+  for (const text of ["asdf", "Hello!", "iPhone"]) {
+    value.clear();
+    for (const character of text) value.replace(character);
+    assert.equal(value.text, text);
+    assert.equal(value.nameMode, false);
+  }
 });

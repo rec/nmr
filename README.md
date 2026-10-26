@@ -254,8 +254,10 @@ case and allowed spaces. The String codec rejects control ranges U+0000–001F,
 U+007F–009F, and surrogate code points. Recognized types with invalid values are not silently
 converted into strings. Recognition keeps updating as the text changes.
 
-Entering a vocabulary word switches to name mode. Case is normalized and partial
-words remain editable; no autocomplete is applied yet. Name mode stays active
+A complete vocabulary word immediately shows its name. Following the first word
+with a space commits name mode; until then, continuing to type can turn that
+word into a string without changing its case. In committed name mode, case is
+normalized and partial words remain editable; no autocomplete is applied yet. Name mode stays active
 until the field is cleared or replaced entirely. Fully known, nonrepeating words
 form a name, including names whose type slots are unassigned. Optional category
 prefixes are accepted and displayed with only the shortest category or type label.
