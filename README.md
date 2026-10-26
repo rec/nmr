@@ -248,21 +248,20 @@ IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typ
 lists. Once phone input contains `+` and digits, typing letters leaves it unchanged
 and makes a quiet tick. Clear or replace the whole field to enter a different detail.
 Pure digits always mean an integer; slash pairs mean fractions. Use
-`YYYY-MM-DD` for dates. Incomplete vocabulary words and type syntax wait for more
-input. Otherwise unrecognized text uses `string:` names, preserving its original
+`YYYY-MM-DD` for dates. Incomplete explicit type syntax waits for more input.
+Otherwise unrecognized text uses `string:` names, preserving its original
 case and allowed spaces. The String codec rejects control ranges U+0000–001F,
 U+007F–009F, and surrogate code points. Recognized types with invalid values are not silently
 converted into strings. Recognition keeps updating as the text changes.
 
-A complete vocabulary word immediately shows its name. Following the first word
-with a space commits name mode; until then, continuing to type can turn that
-word into a string without changing its case. Matching is case-insensitive in
-both provisional and committed name mode; the field always keeps the original
-case, including partial words. Generated names use the vocabulary's spelling.
-No autocomplete is applied yet. Name mode stays active
-until the field is cleared or replaced entirely. Fully known, nonrepeating words
-form a name, including names whose type slots are unassigned. Optional category
-prefixes are accepted and displayed with only the shortest category or type label.
+Recognition evaluates the whole field after each edit. Complete nonrepeating
+vocabulary words form a name, matched case-insensitively; unknown words make the
+whole input a String, even when earlier words were vocabulary words. Thus `T` is
+a String, `Tom` is a vocabulary name, and `Tom R` is a String. Input case is never
+rewritten. Generated names use the vocabulary's spelling. There is no persistent
+name-mode lock or autocomplete. Explicit category/type prefixes are accepted for
+names, and output uses only the shortest category or type label. Lexical names
+can be played even when their type slots are unassigned.
 The first clickable name line plays prefix-relative by default. The second line
 shows the full unprefixed name and plays the absolute root index. Clicking the
 other line switches playback; clicking the playing line stops it. Enter plays

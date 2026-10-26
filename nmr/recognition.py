@@ -11,11 +11,10 @@ from .nmr import Nmr
 class Recognition(BaseModel, frozen=True):
     name: str | None = None
     kind: str | None = None
-    name_mode: bool = False
     message: str = ""
 
 
-def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recognition:
+def recognize_input(value: str, engine: Nmr) -> Recognition:
     original = value
     value = value.strip()
     if not value:
@@ -29,21 +28,15 @@ def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recogni
         except ValueError:
             pass
     tokens = (payload if node is not None else value).split()
-    if name_mode or (tokens and tokens[0].casefold() in words):
-        committed = (
-            name_mode or node is not None or any(i.isspace() for i in original.lstrip())
-        )
-        if tokens and all(i.casefold() in words for i in tokens):
-            normalized = [words[i.casefold()] for i in tokens]
-            try:
-                engine.decode_from_name(normalized)
-            except ValueError as error:
-                return Recognition(name_mode=True, message=str(error))
+    if tokens and all(i.casefold() in words for i in tokens):
+        normalized = [words[i.casefold()] for i in tokens]
+        if len(set(normalized)) == len(normalized):
             name = " ".join(normalized)
             if node is not None:
                 name = label(node) + ":" + name
-            return Recognition(name=name, kind="name", name_mode=committed)
-        return Recognition(name_mode=True)
+            return Recognition(name=name, kind="name")
+        if node is not None:
+            return Recognition(kind="name", message="Name repeats a word")
     kind = None
     if value.startswith("+") and any(i.isdecimal() for i in value):
         kind = "phone"
@@ -55,13 +48,6 @@ def recognize_input(value: str, engine: Nmr, name_mode: bool = False) -> Recogni
     if kind is None:
         if node is not None:
             return Recognition(kind=label(node))
-        if not any(i.isspace() for i in value) and (
-            any(i.startswith(value.casefold()) for i in words)
-            or any(
-                label(n).startswith(value.casefold()) for _, _, n in engine.root.nodes()
-            )
-        ):
-            return Recognition()
         if any(re.fullmatch(i, value) for i in INCOMPLETE_TYPES):
             return Recognition()
         kind = "string"

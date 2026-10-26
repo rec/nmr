@@ -1,20 +1,9 @@
-/* The page owns the text, selection, and transition into vocabulary-name mode. */
+/* The page owns text and selection; the Python core recognizes the whole input. */
 export class Editor {
   constructor() {
     this.text = "";
     this.anchor = 0;
     this.cursor = 0;
-    this.nameMode = false;
-    this.words = new Set();
-  }
-  setWords(words) {
-    this.words = new Set(words.map((word) => word.toLowerCase()));
-    this.normalize();
-  }
-  normalize() {
-    if (!this.text) this.nameMode = false;
-    const first = this.text.trimStart().split(/\s/)[0].toLowerCase();
-    if (this.words.has(first) && /\s/.test(this.text.trimStart())) this.nameMode = true;
   }
   replace(value) {
     const start = Math.min(this.anchor, this.cursor);
@@ -22,10 +11,8 @@ export class Editor {
     const replacingAll = start === 0 && end === this.text.length;
     if (!replacingAll && this.text.trimStart().startsWith("+") &&
         /[0-9]/.test(this.text) && /\p{L}/u.test(value)) return false;
-    if (replacingAll) this.nameMode = false;
     this.text = this.text.slice(0, start) + value.replace(/[\r\n]+/g, " ") + this.text.slice(end);
     this.anchor = this.cursor = start + value.replace(/[\r\n]+/g, " ").length;
-    this.normalize();
     return true;
   }
   move(position, extend = false) {

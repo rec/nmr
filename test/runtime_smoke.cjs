@@ -107,13 +107,10 @@ const { loadPyodide } = require("pyodide");
   const { Editor } = await import("../nmr/web/editor.mjs");
   for (const value of ["asdf", "asdfasdf", "Hello!", "dfasdfasdf", "iPhone"]) {
     const editor = new Editor();
-    editor.setWords(info.words);
     let result;
     for (const character of value) {
       editor.replace(character);
-      result = JSON.parse(recognize(JSON.stringify({ value: editor.text, name_mode: editor.nameMode })));
-      if (result.name_mode) editor.nameMode = true;
-      editor.normalize();
+      result = JSON.parse(recognize(JSON.stringify({ value: editor.text })));
     }
     assert.equal(editor.text, value, "String typing must preserve case");
     assert.equal(result.kind, "string", `Typing ${value} must reach String recognition`);
@@ -121,6 +118,14 @@ const { loadPyodide } = require("pyodide");
     assert.equal(JSON.parse(convert(JSON.stringify({ operation: "decode", value: result.name }))).value, value);
   }
 
+  const person = new Editor();
+  for (const [character, kind] of [["T", "string"], ["o", "name"], ["m", "name"], [" ", "name"], ["R", "string"]]) {
+    person.replace(character);
+    const result = JSON.parse(recognize(JSON.stringify({value: person.text})));
+    assert.equal(result.kind, kind);
+    assert.ok(result.name && result.full_name, `Both name lines must exist for ${person.text}`);
+  }
+  assert.equal(person.text, "Tom R");
   for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
     const result = JSON.parse(recognize(JSON.stringify({ value })));
     assert.equal(result.kind, kind);
@@ -128,13 +133,10 @@ const { loadPyodide } = require("pyodide");
   }
   for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
     const editor = new Editor();
-    editor.setWords(info.words);
     let result;
     for (const character of value) {
       editor.replace(character);
-      result = JSON.parse(recognize(JSON.stringify({ value: editor.text, name_mode: editor.nameMode })));
-      if (result.name_mode) editor.nameMode = true;
-      editor.normalize();
+      result = JSON.parse(recognize(JSON.stringify({ value: editor.text })));
     }
     assert.equal(editor.text, value, "Name matching must preserve the input case");
     assert.equal(result.kind, "name");
@@ -144,8 +146,7 @@ const { loadPyodide } = require("pyodide");
   const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
   assert.equal(string.kind, "string");
   assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: string.name}))).value, "  xyzzy!  ");
-  assert.equal(JSON.parse(recognize('{"value":"th"}')).name, null);
-  assert.equal(JSON.parse(recognize('{"value":"42","name_mode":true}')).name, null);
+  assert.equal(JSON.parse(recognize('{"value":"th"}')).kind, "string");
   assert.equal(JSON.parse(previewName('{"value":"int:the"}')).value, "@1");
   assert.equal(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");
   assert.notEqual(JSON.parse(previewName('{"value":"tune:the","absolute":true}')).value, "@1");

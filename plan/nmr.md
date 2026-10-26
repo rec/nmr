@@ -534,23 +534,23 @@ clicking the field does not reposition its cursor. It optimistically recognizes
 unprefixed typed details and shows a clickable word name below. Digits mean Int;
 explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
 syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
-durations, tune notation, games, and typed lists. Incomplete word and type prefixes
-wait for more input. Otherwise unrecognized text enters String mode; its exact
-case and whitespace are preserved. Recognized invalid typed values remain errors,
-and committed name mode remains in control until the field is cleared or replaced.
+durations, tune notation, games, and typed lists. Incomplete explicit type syntax
+waits for more input. Otherwise unrecognized text enters String mode; its exact
+case and whitespace are preserved. Recognized invalid typed values remain errors.
 
-A recognized vocabulary word immediately displays a name, but only a following
-space commits sticky, case-insensitive name mode. This allows typing through a
-short word such as `a`, `he`, or `i` into an ordinary case-preserving string.
-An explicit recognized name prefix also commits name mode. Clearing
-or replacing the whole field resets that mode. Partial words remain editable;
-autocomplete is deferred. Matching ignores case without rewriting the field;
-input case and selection remain unchanged, including in committed name mode.
-Complete nonrepeating vocabulary words are lexical names,
-even if their type slots are unassigned. No browsing repair is used. Optional
-parent prefixes are accepted and the first line uses the shortest label. Clicking
-that line plays prefix-relative, so a Tune plays its original melody. A second
-line displays the full unprefixed word name and plays the absolute root index.
+Recognition uses the whole current field, without a persistent name-mode latch.
+Complete nonrepeating vocabulary words are lexical names, matched without regard
+to case; otherwise ordinary text becomes a String. An initially recognized word
+never prevents a later unknown word from becoming part of a String. `T` produces
+a String, `To` and `Tom` produce vocabulary names, and `Tom R` produces a String.
+Input case and selection are never rewritten. Repeated bare vocabulary words also
+become a String; explicitly prefixed names still reject repeated words. Explicit
+prefixes with incomplete payloads remain pending. Autocomplete is deferred.
+Lexical names can be played even if their type slots are unassigned, without
+browsing repairs. Optional parent prefixes are accepted, and the first line uses
+the shortest label. That line plays prefix-relative, so a Tune plays its original
+melody. A second line displays the full unprefixed word name and plays its absolute
+root index.
 Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
 line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the` itself, deferred to the first interaction if the
@@ -781,4 +781,4 @@ Vocabulary capacity still limits name size. `dfasdfasdf` now has the name
 
 The GUI leaves an empty field empty, but explicit library/CLI String encoding
 supports the empty string. String is the fallback for otherwise unrecognized
-input, while incomplete vocabulary words and predefined types wait for completion.
+input; only explicit incomplete type syntax waits for completion.

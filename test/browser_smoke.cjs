@@ -33,11 +33,18 @@ const { chromium } = require("playwright");
       assert.equal(await page.locator("#value").inputValue(), value);
       assert.equal(await page.locator("#full-name").isVisible(), true);
     }
+    await page.keyboard.press("Escape");
+    for (const character of "Tom R") {
+      await page.keyboard.type(character);
+      await page.waitForFunction(() => !document.querySelector("#name").hidden && !document.querySelector("#full-name").hidden);
+    }
+    assert.equal(await page.locator("#value").inputValue(), "Tom R");
+    await page.waitForFunction(() => !document.querySelector("#name").hidden && document.querySelector("#name").textContent.startsWith("string: "));
     await enter("xyzzy!", "string:");
     assert.equal(await page.locator("#full-name").isVisible(), true);
     await page.keyboard.press("Escape");
     await page.keyboard.type("th");
-    await page.waitForFunction(() => document.querySelector("#name").hidden);
+    await page.waitForFunction(() => !document.querySelector("#name").hidden && document.querySelector("#name").textContent.startsWith("string: "));
     await enter("42", "int:");
     await page.keyboard.press("Home");
     await page.locator("#value").click({ position: { x: 100, y: 15 } });
@@ -58,7 +65,7 @@ const { chromium } = require("playwright");
     await enter("THE OF", "the of");
     assert.equal(await page.locator("#value").inputValue(), "THE OF");
     await page.keyboard.type(" qzx");
-    await page.waitForFunction(() => document.querySelector("#name").hidden);
+    await page.waitForFunction(() => !document.querySelector("#name").hidden && document.querySelector("#name").textContent.startsWith("string: "));
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.type("0");
     await page.waitForFunction(() => document.querySelector("#name").textContent === "int: the");

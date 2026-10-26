@@ -44,7 +44,6 @@ def test_details_are_named_without_type_prefixes(value: str, kind: str) -> None:
     result = recognize_input(value, engine)
     assert result.kind == kind
     assert result.name == engine.encode(value, kind).name
-    assert not result.name_mode
 
 
 def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
@@ -60,8 +59,6 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
     "value",
     [
         "",
-        "th",
-        "tun",
         "+",
         "@",
         "[",
@@ -75,7 +72,7 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
         "N",
     ],
 )
-def test_incomplete_type_or_word_prefix_waits_for_more_input(value: str) -> None:
+def test_incomplete_explicit_type_waits_for_more_input(value: str) -> None:
     assert recognize_input(value, Nmr()).name is None
 
 
@@ -84,22 +81,21 @@ def test_names_are_case_insensitive_and_can_be_qualified() -> None:
     assert recognize_input("ThE Of", engine).name == "the of"
     result = recognize_input(":play:music:tune:ThE", engine)
     assert result.name == "tune:the"
-    assert result.name_mode
+    assert result.kind == "name"
 
 
-def test_partial_names_stay_in_name_mode_until_cleared() -> None:
+@pytest.mark.parametrize("value", ["the unknownword", "the THE"])
+def test_text_that_is_not_a_complete_unique_name_becomes_a_string(value: str) -> None:
     engine = Nmr()
-    assert recognize_input("the unknownword", engine).name_mode
-    result = recognize_input("42", engine, name_mode=True)
-    assert result.name is None
-    assert result.name_mode
-    assert not recognize_input("", engine, name_mode=True).name_mode
+    result = recognize_input(value, engine)
+    assert result.kind == "string"
+    assert engine.decode(result.name).value == value
 
 
-def test_repeated_words_are_not_a_valid_name() -> None:
-    result = recognize_input("the THE", Nmr())
+def test_explicit_names_still_reject_duplicate_words() -> None:
+    result = recognize_input("tune:the THE", Nmr())
     assert result.name is None
-    assert result.name_mode
+    assert result.kind == "name"
     assert result.message
 
 
@@ -150,13 +146,26 @@ def test_full_name_has_no_prefix_and_preserves_the_absolute_number(value: str) -
     assert full == absolute
 
 
-def test_a_matching_word_is_shown_before_name_mode_is_committed() -> None:
-    result = json.loads(bridge.recognize('{"value":"THE"}'))
-    assert result["name"] == "the"
-    assert not result["name_mode"]
-    committed = json.loads(bridge.recognize('{"value":"THE "}'))
-    assert committed["name"] == "the"
-    assert committed["name_mode"]
+@pytest.mark.parametrize(
+    "value,kind",
+    [
+        ("T", "string"),
+        ("To", "name"),
+        ("Tom", "name"),
+        ("Tom ", "name"),
+        ("Tom R", "string"),
+        ("Tom Ri", "string"),
+        ("Tom Ritchford", "string"),
+    ],
+)
+def test_every_step_of_typing_a_persons_name_populates_both_lines(
+    value: str, kind: str
+) -> None:
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert result["kind"] == kind
+    assert result["name"] and result["full_name"]
+    if kind == "string":
+        assert Nmr().decode(result["name"]).value == value
 
 
 @pytest.mark.parametrize(
@@ -168,7 +177,6 @@ def test_unrecognized_text_uses_string_mode_without_losing_whitespace(
     engine = Nmr()
     result = recognize_input(value, engine)
     assert result.kind == "string"
-    assert not result.name_mode
     assert result.name == engine.encode(value, "string").name
     assert engine.decode(result.name).value == value
 
@@ -176,7 +184,7 @@ def test_unrecognized_text_uses_string_mode_without_losing_whitespace(
 def test_unknown_text_can_become_a_word_or_type_as_it_is_edited() -> None:
     engine = Nmr()
     assert recognize_input("xyzzy", engine).kind == "string"
-    assert recognize_input("the ", engine).name_mode
+    assert recognize_input("the ", engine).kind == "name"
     assert recognize_input("42", engine).kind == "int"
     assert recognize_input("@1", engine).kind == "tune"
     assert recognize_input("tune:unfinishedword", engine).name is None

@@ -79,10 +79,8 @@ function changed() {
 async function recognize() {
   const revision = version;
   try {
-    const result = await request("recognize", { value: editor.text, name_mode: editor.nameMode });
+    const result = await request("recognize", { value: editor.text });
     if (revision !== version) return;
-    if (result.name_mode) editor.nameMode = true;
-    editor.normalize();
     render();
     currentName = result.name;
     nameButton.textContent = (result.name || "").replace(":", ": ");
@@ -202,8 +200,7 @@ field.addEventListener("input", () => { if (!composing) render(); });
 
 async function start() {
   try {
-    const info = await request("configure", {});
-    editor.setWords(info.words);
+    await request("configure", {});
     ready = true;
     field.dataset.ready = "true";
     render();

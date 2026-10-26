@@ -43,7 +43,6 @@ class NamePreview(Preview, frozen=True):
 
 class RecognitionRequest(BaseModel, frozen=True):
     value: str
-    name_mode: bool = False
 
 
 _engine = Nmr()
@@ -113,7 +112,7 @@ def render_tune(tune: Tune, root: int, bpm: int) -> str:
 
 def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
-    result = recognition.recognize_input(request.value, _engine, request.name_mode)
+    result = recognition.recognize_input(request.value, _engine)
     response = result.model_dump()
     response["full_name"] = (
         " ".join(_engine.encode_to_name(_engine.name_index(result.name)))

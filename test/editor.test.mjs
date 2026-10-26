@@ -4,7 +4,6 @@ import { Editor } from "../nmr/web/editor.mjs";
 
 function editor(text = "") {
   const value = new Editor();
-  value.setWords(["a", "an", "and", "the", "of"]);
   value.replace(text);
   return value;
 }
@@ -36,9 +35,8 @@ test("moves and deletes whole Unicode characters and words", () => {
   value.erase(1, true);
   assert.equal(value.text, " world");
 });
-test("commits name mode at a word boundary without completing prefixes", () => {
+test("typing across word boundaries preserves the original case", () => {
   const value = editor("A");
-  assert.equal(value.nameMode, false);
   assert.equal(value.text, "A");
   value.replace("N");
   assert.equal(value.text, "AN");
@@ -46,38 +44,25 @@ test("commits name mode at a word boundary without completing prefixes", () => {
   assert.equal(value.text, "AND");
   value.replace(" TH");
   assert.equal(value.text, "AND TH");
-  assert.equal(value.nameMode, true);
 });
-test("name mode is sticky through edits, but clearing or replacing resets it", () => {
+test("replacement and clearing preserve the original case and reset the cursor", () => {
   const value = editor("THE ");
   assert.equal(value.text, "THE ");
   value.move(0);
   value.erase(1);
   assert.equal(value.text, "HE ");
-  assert.equal(value.nameMode, true);
   value.selectAll();
   value.replace("42");
-  assert.equal(value.nameMode, false);
   value.selectAll();
   value.replace("THE OF");
-  assert.equal(value.nameMode, true);
   assert.equal(value.text, "THE OF");
   value.clear();
-  assert.equal(value.nameMode, false);
   assert.equal(value.cursor, 0);
 });
 test("pasted multiline text stays a single controlled line", () => {
   const value = editor("THE\nOF");
   assert.equal(value.text, "THE OF");
   assert.equal(value.cursor, 6);
-});
-test("typing before the vocabulary loads is recognized once it is available", () => {
-  const value = new Editor();
-  value.replace("THE ");
-  assert.equal(value.nameMode, false);
-  value.setWords(["the"]);
-  assert.equal(value.nameMode, true);
-  assert.equal(value.text, "THE ");
 });
 test("phone input rejects letters without changing text, cursor, or selection", () => {
   const value = editor("+1");
@@ -107,24 +92,19 @@ test("phone restrictions end when cleared, fully replaced, or the plus is remove
 
 test("typing through a vocabulary word can still produce a case-preserving string", () => {
   const value = new Editor();
-  value.setWords(["a", "as", "he", "i"]);
   for (const text of ["asdf", "Hello!", "iPhone"]) {
     value.clear();
     for (const character of text) value.replace(character);
     assert.equal(value.text, text);
-    assert.equal(value.nameMode, false);
   }
 });
 
-test("matching vocabulary never changes input casing, including committed name mode", () => {
+test("editing mixed-case text preserves its case and selection", () => {
   const value = new Editor();
-  value.setWords(["tom", "the", "of"]);
   for (const character of "Tom THE oF ") value.replace(character);
-  assert.equal(value.nameMode, true);
   assert.equal(value.text, "Tom THE oF ");
   value.move(1);
   value.move(3, true);
-  value.normalize();
   assert.equal(value.selection(), "om");
   assert.equal(value.anchor, 1);
   assert.equal(value.cursor, 3);
