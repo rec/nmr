@@ -71,7 +71,7 @@ class Words:
             raise ValueError("Word length outside vocabulary capacity")
         return self._counts.count(n)
 
-    def encode_to_name(self, num: int) -> list[str]:
+    def to_truename(self, num: int) -> list[str]:
         if num < 0:
             raise ValueError("Only accepts non-negative numbers")
         length = next(
@@ -90,12 +90,12 @@ class Words:
             digits.append(digit)
         return [self.words[i] for i in reversed(digits)]
 
-    def decode_from_name(self, name: Sequence[str]) -> int:
-        words = [self.normalize(i) for i in name]
+    def from_truename(self, truename: Sequence[str]) -> int:
+        words = [self.normalize(i) for i in truename]
         if not words:
-            raise ValueError("A name needs at least one word")
+            raise ValueError("A truename needs at least one word")
         if len(words) != len(set(words)):
-            raise ValueError("A name cannot repeat words")
+            raise ValueError("A truename cannot repeat words")
         unknown = [i for i in words if i not in self.inverse]
         if unknown:
             raise ValueError("Unrecognized words: " + ", ".join(unknown))
@@ -106,7 +106,7 @@ class Words:
             total = total * (self.count - len(digits) + i + 1) + digit
         return self.count_words(len(words) - 1) + total
 
-    def is_name(self, words: Sequence[str]) -> bool:
+    def is_truename(self, words: Sequence[str]) -> bool:
         tokens = [self.normalize(i) for i in words]
         return (
             bool(tokens)

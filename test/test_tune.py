@@ -138,15 +138,15 @@ def test_centering_uses_cumulative_pitches_and_exact_events() -> None:
 
 
 @pytest.mark.parametrize("scope", ["", "play", "play:music", "play:music:tune"])
-def test_names_round_trip_in_all_scopes_and_vocabularies(scope: str) -> None:
+def test_truenames_round_trip_in_all_scopes_and_vocabularies(scope: str) -> None:
     for engine in [Nmr(), Nmr([f"word{i}" for i in range(32)])]:
         result = engine.encode("@1 2@1/2 r@1/3 -1@2/3", "tune", scope)
-        assert engine.decode(result.name) == result
-        assert engine.decode(result.name, browse=True) == result
+        assert engine.decode(result.truename) == result
+        assert engine.decode(result.truename, browse=True) == result
 
 
 @pytest.mark.parametrize("count", [4, 8, 16])
-def test_personal_motif_name_lengths(count: int) -> None:
+def test_personal_motif_truename_lengths(count: int) -> None:
     # The opening of Twinkle, with a rest and exact dotted/triplet rhythms.
     pitches = [0, 0, 7, 7, 9, 9, 7, 5, 5, 4, 4, 2, 2, 0, 7, 7][:count]
     durations = [
@@ -158,9 +158,9 @@ def test_personal_motif_name_lengths(count: int) -> None:
         [Fraction(1, 3) if i == 4 else Fraction(0) for i in range(count)],
     )
     result = Nmr().encode(tune.text(), "tune")
-    assert Nmr().decode(result.name).value == tune.text()
-    words = len(result.name.rsplit(":", 1)[-1].split())
-    print(f"{count} notes: {words} payload words; {result.name}")
+    assert Nmr().decode(result.truename).value == tune.text()
+    words = len(result.truename.rsplit(":", 1)[-1].split())
+    print(f"{count} notes: {words} payload words; {result.truename}")
 
 
 def test_playback_preserves_events_and_refuses_unrenderable_tunes() -> None:
@@ -208,6 +208,6 @@ def test_work_limits_do_not_repair_the_tune() -> None:
         Tune(notes=[Note(), Note(step=2**2000)]).index()
 
 
-def test_name_capacity_is_explicit() -> None:
+def test_truename_capacity_is_explicit() -> None:
     with pytest.raises(ValueError, match="[Cc]apacity|vocabulary|[Ll]arge|[Ww]ords"):
         Nmr(["one", "two"]).encode("@1 12@1", "tune")

@@ -17,14 +17,14 @@ from nmr.types.phone_number import Phone
         ("+٤٤ ٢٠ ٧٩٤٦ ٠٩٥٨", "+442079460958"),
     ],
 )
-def test_international_formats_normalize_to_the_same_named_digits(
+def test_international_formats_normalize_to_the_same_encoded_digits(
     value: str, canonical: str
 ) -> None:
     engine = Nmr()
     result = engine.encode(value, "phone")
     assert result.value == canonical
-    assert result.name == engine.encode(canonical, "phone").name
-    assert engine.decode(result.name).value == canonical
+    assert result.truename == engine.encode(canonical, "phone").truename
+    assert engine.decode(result.truename).value == canonical
 
 
 @pytest.mark.parametrize(
@@ -54,4 +54,4 @@ def test_canonical_digits_decode_without_numbering_metadata(
     for value in ["+1", "+999123456789012", "+442079460958;ext=004"]:
         result = engine.encode(value, "phone")
         assert result.value == value
-        assert engine.decode(result.name).value == value
+        assert engine.decode(result.truename).value == value

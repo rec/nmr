@@ -5,11 +5,11 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict
 
 from ..pack_numbers import pair, unpair
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 from .integer import parse_integer, signed_index, signed_value
 
 
-class Frac(BaseModel, TypeNamer, frozen=True):
+class Frac(BaseModel, TypeTruenamer, frozen=True):
     numerator: int
     denominator: int
     label: ClassVar[str] = "frac"

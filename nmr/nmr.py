@@ -1,4 +1,4 @@
-"""Canonical naming and explicit browsing over the category tree."""
+"""Canonical truename conversion and explicit browsing over the category tree."""
 
 from collections.abc import Sequence
 from pathlib import Path
@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from .category import Category, route
 from .registry import ROOT
-from .type_namer import TypeNamer
+from .type_truenamer import TypeTruenamer
 from .types.tune import Tune
 from .words import Words
 
@@ -15,7 +15,7 @@ from .words import Words
 class Result(BaseModel, frozen=True):
     type: str
     value: str
-    name: str
+    truename: str
     vocabulary: str
     canonical: bool
 
@@ -42,23 +42,23 @@ class Nmr(Words):
         _, prefix_slots = self.root.lookup(prefix)
         if slots[: len(prefix_slots)] != prefix_slots:
             raise ValueError("Prefix scope does not contain the selected type")
-        name = " ".join(self.encode_to_name(route(slots[len(prefix_slots) :], index)))
+        truename = " ".join(self.to_truename(route(slots[len(prefix_slots) :], index)))
         if prefix:
-            name = prefix.rsplit(":", 1)[-1] + ":" + name
+            truename = prefix.rsplit(":", 1)[-1] + ":" + truename
         return Result(
             type=codec.label,
             value=canonical_value,
-            name=name,
+            truename=truename,
             vocabulary=self.identifier,
             canonical=True,
         )
 
     def decode(
-        self, name: str, browse: bool = False, vocabulary: str | None = None
+        self, truename: str, browse: bool = False, vocabulary: str | None = None
     ) -> Result:
         if vocabulary is not None and vocabulary != self.identifier:
             raise ValueError("Vocabulary identifier does not match the selected list")
-        prefix, separator, payload = name.strip().rpartition(":")
+        prefix, separator, payload = truename.strip().rpartition(":")
         if separator and not prefix:
             raise ValueError("A prefix cannot be empty")
         if not separator:
@@ -66,8 +66,8 @@ class Nmr(Words):
             prefix = ""
         prefix = prefix.casefold()
         node, _ = self.root.lookup(prefix)
-        index = self.decode_from_name(payload.split())
-        codec: type[TypeNamer]
+        index = self.from_truename(payload.split())
+        codec: type[TypeTruenamer]
         if isinstance(node, Category):
             codec, value_index = node.resolve(index, browse)
         else:
@@ -78,12 +78,14 @@ class Nmr(Words):
         normalized = " ".join(self.normalize(i) for i in payload.split())
         if prefix:
             normalized = prefix.rsplit(":", 1)[-1] + ":" + normalized
-        canonical = result.name == normalized
+        canonical = result.truename == normalized
         if not browse and not canonical:
-            raise ValueError("Noncanonical name; use browse explicitly to explore it")
+            raise ValueError(
+                "Noncanonical truename; use browse explicitly to explore it"
+            )
         return result.model_copy(update={"canonical": canonical})
 
-    def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeNamer]]:
+    def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeTruenamer]]:
         name = type_name.casefold().strip(":")
         node, slots = self.root.lookup(name)
         if isinstance(node, Category):
@@ -91,18 +93,20 @@ class Nmr(Words):
         path = next(p for p, s, _ in self.root.leaves() if s == slots)
         return path, slots, node
 
-    def to_tune(self, name: str, absolute: bool = False, browse: bool = False) -> Tune:
-        """Interpret a canonical name's payload or full root index as a tune."""
-        result = self.decode(name, browse)
-        return Tune.from_index(self.name_index(result.name, absolute))
+    def to_tune(
+        self, truename: str, absolute: bool = False, browse: bool = False
+    ) -> Tune:
+        """Interpret a canonical truename's payload or full root index as a tune."""
+        result = self.decode(truename, browse)
+        return Tune.from_index(self.truename_index(result.truename, absolute))
 
-    def name_index(self, name: str, absolute: bool = True) -> int:
-        """Read a word name's number without requiring an assigned object type."""
-        prefix, separator, payload = name.strip().rpartition(":")
+    def truename_index(self, truename: str, absolute: bool = True) -> int:
+        """Read a truename's number without requiring an assigned object type."""
+        prefix, separator, payload = truename.strip().rpartition(":")
         if separator and not prefix:
             raise ValueError("A prefix cannot be empty")
         _, slots = self.root.lookup(prefix.casefold())
-        index = self.decode_from_name(payload.split())
+        index = self.from_truename(payload.split())
         if absolute:
             index = route(slots, index)
         return index

@@ -11,8 +11,8 @@ def test_all_small_permutations_are_bijective() -> None:
     indices = set()
     for n in range(1, len(words) + 1):
         for p in itertools.permutations(words, n):
-            index = engine.decode_from_name(p)
-            assert engine.encode_to_name(index) == list(p)
+            index = engine.from_truename(p)
+            assert engine.to_truename(index) == list(p)
             indices.add(index)
     assert indices == set(range(engine.count_words()))
 
@@ -25,10 +25,10 @@ def test_invalid_vocabularies_are_rejected(words: list[str]) -> None:
         Words(words)
 
 
-@pytest.mark.parametrize("name", [[], ["one", "one"], ["missing"]])
-def test_invalid_names_are_rejected(name: list[str]) -> None:
+@pytest.mark.parametrize("truename", [[], ["one", "one"], ["missing"]])
+def test_invalid_truenames_are_rejected(truename: list[str]) -> None:
     with pytest.raises(ValueError):
-        Words(["one", "two"]).decode_from_name(name)
+        Words(["one", "two"]).from_truename(truename)
 
 
 def test_vocabulary_identity_covers_order_case_policy_and_unicode() -> None:

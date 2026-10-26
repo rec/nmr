@@ -3,10 +3,10 @@ import re
 from phonenumbers import phonenumberutil
 
 from ..pack_numbers import rank_digits, unrank_digits
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 
 
-class Phone(TypeNamer):
+class Phone(TypeTruenamer):
     label = "phone"
     description = (
         "International phone (+country code, up to 15 digits), optional ;ext=digits"

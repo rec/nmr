@@ -3,11 +3,11 @@
 from string import ascii_lowercase, ascii_uppercase
 
 from ..pack_numbers import Packer
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 from .bounded import bounded
 
 
-class String(TypeNamer):
+class String(TypeTruenamer):
     label = "string"
     description = "Unicode text excluding C0/C1 controls, DELETE, and surrogates"
 

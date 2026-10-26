@@ -1,4 +1,4 @@
-"""Typed ordered lists, independent of vocabulary and name spelling."""
+"""Typed ordered lists, independent of vocabulary and truename spelling."""
 
 import json
 
@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ..category import Category, route
 from ..pack_numbers import Packer
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 
 
 class Item(BaseModel, frozen=True):
@@ -16,7 +16,7 @@ class Item(BaseModel, frozen=True):
     model_config = ConfigDict(extra="forbid", strict=True)
 
 
-class List(TypeNamer):
+class List(TypeTruenamer):
     label = "list"
     description = 'Ordered typed values: [{"type":"int","value":"42"}, ...]'
 

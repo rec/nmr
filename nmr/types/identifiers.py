@@ -1,10 +1,10 @@
 import re
 
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 from .bounded import bounded
 
 
-class Isbn(TypeNamer):
+class Isbn(TypeTruenamer):
     label = "isbn"
     description = (
         "ISBN-10 or ISBN-13 with a valid check digit (assignment is not checked)"
@@ -35,7 +35,7 @@ class Isbn(TypeNamer):
         return body + retail_check(body)
 
 
-class Upc(TypeNamer):
+class Upc(TypeTruenamer):
     label = "upc"
     description = "UPC-A: 12 digits including its check digit"
 

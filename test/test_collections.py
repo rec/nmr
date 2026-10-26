@@ -20,11 +20,11 @@ def test_nested_lists_preserve_typed_details() -> None:
     engine = Nmr()
     encoded = engine.encode(json.dumps(value), "list")
     assert encoded.type == "list"
-    decoded = json.loads(engine.decode(encoded.name).value)
+    decoded = json.loads(engine.decode(encoded.truename).value)
     assert decoded[0] == {"type": "date", "value": "2000-01-01"}
     assert decoded[1]["value"][0]["value"] == "+442079460958;ext=001"
     assert decoded[1]["value"][1]["value"] == "2/4"
-    assert engine.encode(json.dumps(decoded), "list").name == encoded.name
+    assert engine.encode(json.dumps(decoded), "list").truename == encoded.truename
 
 
 def test_list_order_is_part_of_its_identity() -> None:

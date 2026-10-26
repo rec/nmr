@@ -2,8 +2,8 @@ import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
 
 const field = document.querySelector("#value");
-const nameButton = document.querySelector("#name");
-const fullNameButton = document.querySelector("#full-name");
+const truenameButton = document.querySelector("#truename");
+const fullTruenameButton = document.querySelector("#full-truename");
 const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
@@ -14,14 +14,14 @@ let playVersion = 0;
 let timer;
 let ready = false;
 let composing = false;
-let currentName = null;
+let currentTruename = null;
 let previewPending = false;
 let playingButton = null;
 let player;
 try {
   player = new TunePlayer(() => {
-    nameButton.setAttribute("aria-pressed", "false");
-    fullNameButton.setAttribute("aria-pressed", "false");
+    truenameButton.setAttribute("aria-pressed", "false");
+    fullTruenameButton.setAttribute("aria-pressed", "false");
     playingButton = null;
   });
 } catch (error) {
@@ -44,7 +44,7 @@ worker.onmessage = ({ data }) => {
 };
 worker.onerror = () => {
   ready = false;
-  const error = new Error("Could not start the local naming engine. Reload to try again.");
+  const error = new Error("Could not start the local truename engine. Reload to try again.");
   console.error(error);
   for (const task of pending.values()) task.reject(error);
   pending.clear();
@@ -76,9 +76,9 @@ function changed() {
   playVersion++;
   previewPending = false;
   player?.stop();
-  currentName = null;
-  nameButton.hidden = true;
-  fullNameButton.hidden = true;
+  currentTruename = null;
+  truenameButton.hidden = true;
+  fullTruenameButton.hidden = true;
   render();
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
@@ -88,18 +88,18 @@ async function recognize() {
   try {
     const result = await request("recognize", { value: editor.text });
     if (revision !== version) return;
-    currentName = result.name;
-    nameButton.textContent = (result.name || "").replace(":", ": ");
-    nameButton.hidden = !result.name;
-    fullNameButton.textContent = result.full_name || "";
-    fullNameButton.hidden = !result.full_name;
+    currentTruename = result.truename;
+    truenameButton.textContent = (result.truename || "").replace(":", ": ");
+    truenameButton.hidden = !result.truename;
+    fullTruenameButton.textContent = result.full_truename || "";
+    fullTruenameButton.hidden = !result.full_truename;
   } catch (error) {
     if (revision === version) console.error(error);
   }
 }
-async function playName(absolute = false) {
-  const button = absolute ? fullNameButton : nameButton;
-  if (!player || !currentName) return;
+async function playTruename(absolute = false) {
+  const button = absolute ? fullTruenameButton : truenameButton;
+  if (!player || !currentTruename) return;
   if (playingButton === button && (previewPending || player.playing)) {
     playVersion++;
     previewPending = false;
@@ -108,13 +108,13 @@ async function playName(absolute = false) {
   }
   player.stop();
   playingButton = button;
-  const name = currentName;
+  const truename = currentTruename;
   const revision = ++playVersion;
   previewPending = true;
   unlock();
   try {
-    const music = await request("preview_name", { value: name, absolute, ...presentation });
-    if (revision !== playVersion || currentName !== name) return;
+    const music = await request("preview_truename", { value: truename, absolute, ...presentation });
+    if (revision !== playVersion || currentTruename !== truename) return;
     if (music.playback_error) throw new Error(music.playback_error);
     previewPending = false;
     player.play(music.playback);
@@ -139,8 +139,8 @@ document.addEventListener("selectionchange", () => {
   if (document.activeElement === field) readSelection();
 });
 document.addEventListener("pointerdown", unlock, true);
-nameButton.addEventListener("click", () => playName());
-fullNameButton.addEventListener("click", () => playName(true));
+truenameButton.addEventListener("click", () => playTruename());
+fullTruenameButton.addEventListener("click", () => playTruename(true));
 document.addEventListener("keydown", (event) => {
   unlock();
   if (event.isComposing || event.key === "Tab") return;
@@ -149,9 +149,9 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault(); focus(); editor.selectAll(); render(); return;
   }
   if (command && ["c", "x", "v"].includes(event.key.toLowerCase())) { focus(); return; }
-  if (event.key === "Enter") { event.preventDefault(); playName(document.activeElement === fullNameButton); return; }
+  if (event.key === "Enter") { event.preventDefault(); playTruename(document.activeElement === fullTruenameButton); return; }
   if (event.key === "Escape") { event.preventDefault(); editor.clear(); changed(); focus(); return; }
-  if (event.key === " " && [nameButton, fullNameButton].includes(document.activeElement)) return;
+  if (event.key === " " && [truenameButton, fullTruenameButton].includes(document.activeElement)) return;
   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
     event.preventDefault(); focus();
     const left = event.key === "ArrowLeft";

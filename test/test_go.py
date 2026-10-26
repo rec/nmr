@@ -70,14 +70,14 @@ def test_browsing_returns_a_canonically_namable_game(index: int) -> None:
     assert Go.index_to_str(Go.str_to_index(game)) == game
 
 
-def test_prefix_scopes_and_custom_words_name_the_same_game() -> None:
-    namer = Nmr()
+def test_prefix_scopes_and_custom_words_truename_the_same_game() -> None:
+    truenamer = Nmr()
     for scope in [None, "play:game", "play", ""]:
-        result = namer.encode("9x9:D4 E4 pass pass", "go", scope)
-        assert namer.decode(result.name).value == "9x9:D4 E4 pass pass"
+        result = truenamer.encode("9x9:D4 E4 pass pass", "go", scope)
+        assert truenamer.decode(result.truename).value == "9x9:D4 E4 pass pass"
     custom = Nmr(["red", "blue", "green", "gold", "white", "black", "pink"])
     result = custom.encode("A1", "go")
-    assert custom.decode(result.name).value == "19x19:A1"
+    assert custom.decode(result.truename).value == "19x19:A1"
 
 
 def test_work_limits_and_negative_indices_are_rejected(

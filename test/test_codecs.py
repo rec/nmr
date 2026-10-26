@@ -42,8 +42,8 @@ def test_codecs_round_trip_at_each_scope(kind: str, value: str, canonical: str) 
     for scope in scopes:
         result = engine.encode(value, kind, scope)
         assert result.value == canonical
-        assert engine.decode(result.name).value == canonical
-        assert engine.decode(result.name, browse=True).name == result.name
+        assert engine.decode(result.truename).value == canonical
+        assert engine.decode(result.truename, browse=True).truename == result.truename
 
 
 @pytest.mark.parametrize(
@@ -90,12 +90,12 @@ def test_temporal_and_coordinate_boundaries() -> None:
 def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> None:
     engine = Nmr()
     path = engine.find_type(kind)[0]
-    name = path + ":" + " ".join(engine.encode_to_name(2**200))
+    truename = path + ":" + " ".join(engine.to_truename(2**200))
     with pytest.raises(ValueError):
-        engine.decode(name)
-    result = engine.decode(name, browse=True)
+        engine.decode(truename)
+    result = engine.decode(truename, browse=True)
     assert not result.canonical
-    assert engine.decode(result.name).value == result.value
+    assert engine.decode(result.truename).value == result.value
 
 
 def test_string_uses_the_former_text_slot_without_a_text_alias() -> None:
@@ -105,7 +105,7 @@ def test_string_uses_the_former_text_slot_without_a_text_alias() -> None:
         engine.encode("hello", "text")
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("data:text:the")
-    result = engine.decode("data:" + " ".join(engine.encode_to_name(3)))
+    result = engine.decode("data:" + " ".join(engine.to_truename(3)))
     assert result.type == "string"
     assert result.value == ""
 

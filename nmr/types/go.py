@@ -2,10 +2,10 @@
 
 import re
 
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 
 
-class Go(TypeNamer):
+class Go(TypeTruenamer):
     label = "go"
     description = "Go moves from an empty board: [19x19:|9x9:|13x13:] D4 Q16 pass"
 

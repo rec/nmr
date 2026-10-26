@@ -22,7 +22,7 @@ def test_canonical_decode_is_default() -> None:
     assert output.getvalue() == ""
 
 
-def test_list_types_prints_names_without_parent_categories() -> None:
+def test_list_types_prints_truenames_without_parent_categories() -> None:
     output = io.StringIO()
     assert Main(list_types=True).run(io.StringIO(), output, io.StringIO()) == 0
     names = [i.split("\t", 1)[0] for i in output.getvalue().splitlines()]
@@ -38,9 +38,9 @@ def test_tune_cli_encodes_and_decodes_the_exact_phrase() -> None:
         )
         == 0
     )
-    name = output.getvalue().strip()
+    truename = output.getvalue().strip()
     decoded = io.StringIO()
-    assert Main(value=name).run(io.StringIO(), decoded, errors) == 0
+    assert Main(value=truename).run(io.StringIO(), decoded, errors) == 0
     assert decoded.getvalue().strip() == "@1 2@1/2 r@1/3 -1@2/3"
     assert errors.getvalue() == ""
 
@@ -71,16 +71,18 @@ def test_json_pipeline_exposes_canonical_value_and_type() -> None:
     assert result["value"] == "2000-02-29"
     assert result["type"] == "date"
     assert result["canonical"] is True
+    assert result["truename"] == "date:nor lung"
+    assert "name" not in result
 
 
-def test_browsing_prints_canonical_name_to_stderr() -> None:
+def test_browsing_prints_canonical_truename_to_stderr() -> None:
     output, errors = io.StringIO(), io.StringIO()
     assert (
         Main(operation="browse", value="pure:to").run(io.StringIO(), output, errors)
         == 0
     )
     assert output.getvalue().strip() == "0"
-    assert "Canonical name: pure:the" in errors.getvalue()
+    assert "Canonical truename: pure:the" in errors.getvalue()
 
 
 def test_encoding_requires_an_explicit_type() -> None:

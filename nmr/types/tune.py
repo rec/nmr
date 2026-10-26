@@ -9,7 +9,7 @@ from typing import ClassVar
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 from . import tune_count
 from .integer import signed_index, signed_value
 
@@ -28,7 +28,7 @@ class Note(BaseModel, frozen=True):
         return value
 
 
-class Tune(BaseModel, TypeNamer, frozen=True):
+class Tune(BaseModel, TypeTruenamer, frozen=True):
     notes: list[Note] = Field(min_length=1, max_length=256)
     label: ClassVar[str] = "tune"
     description: ClassVar[str] = "Melody and rhythm: @1 2@1/2 r@1/3 -1@2/3"

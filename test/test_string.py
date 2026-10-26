@@ -28,8 +28,8 @@ def test_strings_round_trip_at_each_prefix_scope(value: str) -> None:
     for scope in [None, "data", ""]:
         result = engine.encode(value, "string", scope)
         assert result.value == value
-        assert engine.decode(result.name).value == value
-        assert engine.decode(result.name, browse=True).value == value
+        assert engine.decode(result.truename).value == value
+        assert engine.decode(result.truename, browse=True).value == value
 
 
 @pytest.mark.parametrize(
@@ -70,8 +70,8 @@ def test_equal_length_strings_follow_diagonal_order() -> None:
 
 
 def test_common_letters_produce_short_names() -> None:
-    name = Nmr().encode("dfasdfasdf", "string").name
-    assert len(name.partition(":")[2].split()) <= 5
+    truename = Nmr().encode("dfasdfasdf", "string").truename
+    assert len(truename.partition(":")[2].split()) <= 5
 
 
 @pytest.mark.parametrize("index", [0, 1, 2, 3, 0xD800, 2**120, 2**1000])

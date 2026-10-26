@@ -22,11 +22,11 @@ def test_published_format_fixtures() -> None:
     assert engine.identifier == fixture["vocabulary"]
     for case in fixture["cases"]:
         result = engine.encode(case["input"], case["type"], case["scope"])
-        assert result.name == case["name"]
-        assert result.name.count(":") <= 1
+        assert result.truename == case["truename"]
+        assert result.truename.count(":") <= 1
         assert ":" not in result.type
         assert result.value == case["value"]
-        assert engine.decode(case["name"]).value == case["value"]
+        assert engine.decode(case["truename"]).value == case["value"]
 
 
 def test_new_categories_preserve_every_established_fixture() -> None:
@@ -38,12 +38,12 @@ def test_new_categories_preserve_every_established_fixture() -> None:
     engine = Nmr(root=expanded)
     fixture = json.loads(Path(__file__).with_name("format.json").read_text())
     for case in fixture["cases"]:
-        assert engine.decode(case["name"]).value == case["value"]
+        assert engine.decode(case["truename"]).value == case["value"]
         assert (
-            engine.encode(case["input"], case["type"], case["scope"]).name
-            == case["name"]
+            engine.encode(case["input"], case["type"], case["scope"]).truename
+            == case["truename"]
         )
-    new_name = engine.encode("42", "added", scope="").name
-    assert engine.decode(new_name).value == "42"
+    new_truename = engine.encode("42", "added", scope="").truename
+    assert engine.decode(new_truename).value == "42"
     with pytest.raises(ValueError, match="unassigned"):
-        Nmr().decode(new_name)
+        Nmr().decode(new_truename)

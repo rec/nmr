@@ -3,8 +3,8 @@
 ## Purpose and scope
 
 Give people a practical way to turn their important details into short, reproducible
-word names, share those names, and let friends recover the original details easily.
-Keep the more playful ambition: a short name can also discover an interesting,
+truenames, share those truenames, and let friends recover the original details easily.
+Keep the more playful ambition: a short truename can also discover an interesting,
 valid object, including a legal chess game.
 
 The user subsequently authorized autonomous implementation of this whole plan,
@@ -17,11 +17,11 @@ Additional work beyond the prompt: None.
 
 ### Decisions established in discussion
 
-* Existing names occur only in this project's unit tests. There are no external
-  names to preserve; revise those fixtures deliberately when establishing the format.
-* Once established, canonical names must remain backward compatible forever.
+* Existing truenames occur only in this project's unit tests. There are no external
+  truenames to preserve; revise those fixtures deliberately when establishing the format.
+* Once established, canonical truenames must remain backward compatible forever.
   There is no later incompatible format reset. Adding types must remain possible
-  without changing the meaning of any existing canonical name.
+  without changing the meaning of any existing canonical truename.
 * The root slots, in order, are `pure`, `real`, `data`, `play`, and the `list`
   leaf. Every category node has five slots, with fixed radix five.
 * Below the root, the last slot, index 4, may be empty or contain a category,
@@ -44,7 +44,7 @@ The release should provide:
 * Optional hierarchical prefixes that reveal the type and reduce the integer
   encoded by the word payload, using the same permanent numeration in every scope.
 * Straightforward custom-word-list creation, loading, and sharing.
-* Explicit guarantees about canonical names, losslessness, completeness, capacity,
+* Explicit guarantees about canonical truenames, losslessness, completeness, capacity,
   and the limits of privacy.
 
 Do not include accounts, cloud storage, social features, native mobile apps,
@@ -58,7 +58,7 @@ This is the historical assessment that informed the repair work. These paths and
 defects describe the starting point, not the current implementation.
 
 `Words` ranks and unranks sequences without repeated words using a configurable,
-ordered vocabulary. `TypeNamer` maps values to nonnegative integers, and
+ordered vocabulary. `TypeTruenamer` maps values to nonnegative integers, and
 `category.py` packs group and subtype identifiers into a global integer. `Nmr`
 joins these operations. There are useful round-trip and word-stability tests.
 
@@ -75,12 +75,12 @@ modules are unfinished. Declaring a category does not mean its codec exists.
 | Area | Observed issue | Required outcome |
 | --- | --- | --- |
 | Integer packing | `Packer` uses floating-point square root to invert Cantor pairing. | Exact integer arithmetic, including large indices and pairing boundaries. |
-| Fractions | `fractions.Fraction` reduces pairs, rejects zero denominators, and the codec collapses zero numerators. | Replace the named representation with `Frac`; preserve both signed integers exactly, including `0/0`. |
-| Type selection | `get_class` refers to an undefined variable and builds its lookup from metaclass names; parsing catches every exception. | Deterministic type lookup; expected parse failures separated from programming errors; explicit ambiguity handling. |
+| Fractions | `fractions.Fraction` reduces pairs, rejects zero denominators, and the codec collapses zero numerators. | Replace the truename representation with `Frac`; preserve both signed integers exactly, including `0/0`. |
+| Type selection | `get_class` refers to an undefined variable and builds its lookup from metaclass truenames; parsing catches every exception. | Deterministic type lookup; expected parse failures separated from programming errors; explicit ambiguity handling. |
 | Registration | Import order controls availability, and reserved categories can reach missing codecs. | One deliberate supported-type registry; independent of test import order; unsupported slots handled according to the chosen completeness contract. |
 | Coordinates | Longitude formatting modifies latitude; latitude endpoints are conflated; precision documentation disagrees with the scale. | Correct hemispheres and boundaries, defined coordinate equivalence, explicit resolution, and no silent precision loss. |
 | Semantic versions | Prerelease and build metadata are parsed but discarded during encoding. | Preserve the complete supported version or reject unsupported forms before encoding. |
-| Time | Duplicate class definitions, undefined names, mismatched constants, incomplete decoders, approximate calculations. | Replace the unfinished implementation with the agreed, exact date/time codecs. |
+| Time | Duplicate class definitions, undefined truenames, mismatched constants, incomplete decoders, approximate calculations. | Replace the unfinished implementation with the agreed, exact date/time codecs. |
 | Phone numbers | Duplicate definitions and copied semantic-version code. | A working, clearly bounded phone codec. |
 | Chess | Encodes FEN fields; arbitrary decoded fields need not form a legal position, and positions do not preserve a game's moves. | Separate the promised object and legality guarantee before choosing its enumeration. |
 | CLI | Disabled tests, unused options, disconnected random generation, ignored stored error status, and argument quoting that can alter input. | A coherent, tested command interface, faithful input handling, and meaningful exit codes. |
@@ -93,27 +93,27 @@ Unrelated `TAGS` and `reflog.txt` files were left untouched.
 
 ## Define the format before adding codecs
 
-### Canonical values and names
+### Canonical values and truenames
 
 For the permanent format, a fixed ordered vocabulary, and a prefix scope:
 
-1. Every supported canonical value has exactly one canonical name within capacity.
-2. Canonically decoding that name recovers the same typed canonical value.
-3. Different canonical values of the same type never share a canonical name.
-4. Different prefixes may give different names for the same typed value.
-5. Canonical decoding rejects every name outside the image of canonical encoding.
-6. Browsing may accept a noncanonical name and return an object with a different
-   canonical name. This does not make the original input a canonical name.
+1. Every supported canonical value has exactly one canonical truename within capacity.
+2. Canonically decoding that truename recovers the same typed canonical value.
+3. Different canonical values of the same type never share a canonical truename.
+4. Different prefixes may give different truenames for the same typed value.
+5. Canonical decoding rejects every truename outside the image of canonical encoding.
+6. Browsing may accept a noncanonical truename and return an object with a different
+   canonical truename. This does not make the original input a canonical truename.
 
 Canonical encoding is an injection from the supported target objects into the
-name space. Canonical decoding is its partial inverse. That image can be sparse;
-many well-formed names need not name anything canonically. Density depends on the
+truename space. Canonical decoding is its partial inverse. That image can be sparse;
+many well-formed truenames need not encode anything canonically. Density depends on the
 codec: an integer-pair enumeration can fill its leaf space without requiring
 every other codec to do so.
 
 After resolving the exact allocation and decoding the object, verify canonical
 membership by re-encoding under the same prefix and vocabulary. Compare the
-normalized name tokens under the documented lexical rules. Reject reserved slots,
+normalized truename tokens under the documented lexical rules. Reject reserved slots,
 invalid objects, and noncanonical indices; never silently fall back to browsing.
 
 Distinguish value preservation from spelling preservation. For example, equivalent
@@ -124,14 +124,14 @@ round, truncate, infer a country, or discard timezone information silently.
 
 An object's identity is defined by its type, not universally by numerical equality.
 In particular, `Frac(1, 2)` and `Frac(2, 4)` are distinct objects and get distinct
-canonical names even though converting them to rational values gives equal results.
+canonical truenames even though converting them to rational values gives equal results.
 
 The existing category table, codec mappings, and default vocabulary can be revised
 now because only local tests use them. Establish final allocations and fixtures
 before release; do not build a legacy decoder for the abandoned mappings. After
 that point, allocations, vocabulary order, normalization, and canonical codec
 semantics must remain stable forever. Extensions may fill reserved space but may
-not reinterpret an existing canonical name. Changes to browsing results do not
+not reinterpret an existing canonical truename. Changes to browsing results do not
 weaken this guarantee. No future version switch is an escape from it.
 
 ### Permanent, extensible type allocation
@@ -174,12 +174,12 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 All unlisted slots are empty. Science, art, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
 
-Naming short tunes is nmr's original motivating purpose. `plan/tunes.md` defines
+Finding truenames for short tunes is nmr's original motivating purpose. `plan/tunes.md` defines
 the implemented combined melody/rhythm profile, transposition equivalence, and
 centered playback presentation.
 
-Represent the hierarchy with `Category(name, *children)`, storing children as
-`tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an
+Represent the hierarchy with `Category(truename, *children)`, storing children as
+`tuple[Category | type[TypeTruenamer], ...]`. Tuple order assigns slots without an
 integer-keyed dictionary. Every category has one to five children; entries cannot
 be `None`, and unused slots follow the final child. This representation preserves
 the numbered ordering of its children.
@@ -202,7 +202,7 @@ type: choose category meanings with their descendants in mind.
 List moved from `meta:list` to `list`; the `meta` category is removed. List's
 global route is now `4 + 5*n` instead of `4 + 25*n`. Fully prefixed scalar-only
 lists retain their word payloads with the shorter `list:` prefix. Unprefixed
-and nested-list names use the shorter route. Other type slots are unchanged.
+and nested-list truenames use the shorter route. Other type slots are unchanged.
 
 Published slots and category paths never move. A published leaf never becomes a
 category, and an occupied category never becomes a leaf. Never resize a node or
@@ -211,13 +211,13 @@ is an ordinary named category and contributes to the visible prefix path.
 
 For a slot `s` and remaining payload integer `n`, routing is `s + 5*n`; decoding
 uses division with remainder by five. Each additional category edge adds a radix
-step. The word-permutation ranking remains unchanged. Measure actual name lengths
+step. The word-permutation ranking remains unchanged. Measure actual truename lengths
 and prefix savings using this layout. Finite vocabulary capacity still bounds
 which particular objects can be expressed with a particular list.
 
 Unassigned slots are invalid in canonical decoding. Browsing may redirect them
 to supported children. When an unassigned slot is later populated, its browsing
-result may change, but no previously canonical name changes meaning. Never
+result may change, but no previously canonical truename changes meaning. Never
 redirect an already canonical input.
 
 ### Hierarchical prefixes
@@ -249,16 +249,16 @@ not the spelling or meaning of the category path. A prefix restricts decoding to
 its scope; it must never be treated as a hint that the decoder can ignore. Remove a
 prefix only by decoding and re-encoding, never by deleting its text.
 
-Use exact, documented prefix names, normalized consistently across clients. Do
+Use exact, documented prefix truenames, normalized consistently across clients. Do
 not initially add abbreviations or synonyms. Reject unknown paths, missing
 payloads, and extra path components with useful errors. Explicit encode/decode
-operations must distinguish a prefixed name from raw values containing colons,
+operations must distinguish a prefixed truename from raw values containing colons,
 such as IPv6, timestamps, or URLs.
 
 Recommend the most specific prefix as the default output, with an explicit
 selection for a broader or unprefixed scope. A narrower scope cannot increase
 the canonical payload word count for the same type-relative integer, but the
-prefix may make the whole printed name longer. Show actual counts rather than
+prefix may make the whole printed truename longer. Show actual counts rather than
 promise a fixed saving.
 
 The example `they see what they may` repeats `they`, contrary to the existing
@@ -277,7 +277,7 @@ import order, randomness, or machine-local state. Share the parsing and ranking
 machinery; keep the decision to redirect explicit.
 
 Browsing must agree with canonical decoding on every canonical input. For other
-inputs it returns the discovered typed object and that object's canonical name
+inputs it returns the discovered typed object and that object's canonical truename
 under the selected scope and vocabulary. Save or share that canonical output,
 not the exploratory input. If it cannot be represented under the selected scope
 and vocabulary, report capacity failure rather than claiming a usable discovery;
@@ -290,7 +290,7 @@ fails. Prefix restrictions apply in both modes.
 
 Completeness is a browsing guarantee: every syntactically valid payload inside a
 published range produces an object satisfying the type's validity rules and a
-representable canonical name. Canonical decoding is intentionally partial.
+representable canonical truename. Canonical decoding is intentionally partial.
 Wrapping routing indices alone cannot make an invalid object legal; each codec
 must supply a valid construction or a defined domain mapping.
 
@@ -301,7 +301,7 @@ at most `k` words is:
 
 `C(W, k) = sum(W! / (W-j)!, j=1..min(k, W))`
 
-Those names represent indices `0 <= n < C(W, k)`. With all lengths allowed, the
+Those truenames represent indices `0 <= n < C(W, k)`. With all lengths allowed, the
 space contains `W!` full-length permutations plus all shorter permutations. At
 1,600-plus words it is enormous. Keep accurate capacity checks, especially for
 small custom lists; never silently discard data on overflow.
@@ -324,9 +324,9 @@ children are redirected within the prefix scope. Publish complete leaf ranges
 first and broader ranges where that construction is established. Unlike canonical
 allocations, these browsing redirects do not reserve permanent aliases.
 
-Always show the canonical name after browsing. Canonical decoding rejects names
-outside the canonical image, which catches some mistakes, but a mistyped name can
-still be another canonical name. Neither mode authenticates the sender or proves
+Always show the canonical truename after browsing. Canonical decoding rejects truenames
+outside the canonical image, which catches some mistakes, but a mistyped truename can
+still be another canonical truename. Neither mode authenticates the sender or proves
 that the decoded object is the intended one.
 
 ## First-release type coverage
@@ -349,21 +349,21 @@ chosen permanent expansion mechanism.
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |
 | Semantic versions | Major, minor, patch, prerelease, and build metadata. | Browsing repairs empty metadata identifiers and numeric prerelease leading zeroes; canonical decoding rejects invalid indices. Capacity still applies to the repaired output. |
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
-| Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
-| Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical name fits. |
+| Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
+| Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
 | Lists | Typed ordered lists; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
 
 Measure realistic output lengths for every proposed use case. If common details
-produce impractically long names, revise the release scope or representation
+produce impractically long truenames, revise the release scope or representation
 before describing the product as easy to share. Do not add compression or contact
 bundles without a demonstrated need and an explicit decision.
 
 ### `Int`, `Frac`, and `Float`
 
-Use these exact names for the namable numeric classes. Reuse existing numerical
+Use these exact truenames for the namable numeric classes. Reuse existing numerical
 classes for numerical operations; do not implement a new arithmetic system.
 `Float` stores binary64 bits and returns the standard Python float through
 `.float()`. NaN spelling is `bits:HEX` to preserve payload and sign. There is no
@@ -379,7 +379,7 @@ need not be part of that identity.
 
 Encode each signed component using the integer enumeration, then pair the two
 nonnegative indices exactly. Decode the pair by reversing those operations. The
-named object must never pass through `fractions.Fraction` during that round trip.
+encoded object must never pass through `fractions.Fraction` during that round trip.
 
 Expose two explicit numerical conversions:
 
@@ -402,14 +402,14 @@ extended-fraction arithmetic or numerical equality between different pairs.
 
 ## Chess: legal games and positions
 
-The existing code names FEN positions, not games. A valid FEN structure does not
+The existing code truenames FEN positions, not games. A valid FEN structure does not
 prove that a position is reachable from the standard starting position. A game
 also includes its move sequence; several games can lead to the same position.
 
 The implemented first-release object is a finite sequence of legal moves from the
 standard initial position, including an unfinished game. Accept a simple move
 sequence or PGN main line; explain that comments, variations, and headers are not
-part of the named object unless separately included in the agreed scope.
+part of the encoded object unless separately included in the agreed scope.
 
 A concrete complete enumeration is the rooted tree of legal games:
 
@@ -421,7 +421,7 @@ A concrete complete enumeration is the rooted tree of legal games:
    selects a move and the quotient continues from the resulting position.
 4. At a terminal position, canonical decoding requires the remaining index to be
    zero. Browsing may map a remaining positive index to the sequence ending there,
-   then return that sequence's canonical name.
+   then return that sequence's canonical truename.
 
 This constructs reachable games directly and supports inverse ranking without
 enumerating all positions. Freeze automatic termination rules, including draws,
@@ -429,7 +429,7 @@ and distinguish claimable draws from automatic endings. Measure work for extreme
 indices before publishing a word-length guarantee; enforce limits before decoding,
 not after silently truncating the game.
 
-The chess leaf names a game, not a FEN position. Move ordering is lexical UCI.
+The chess leaf truenames a game, not a FEN position. Move ordering is lexical UCI.
 Automatic game endings include fivefold repetition and the 75-move rule; claimable
 draws do not force termination. Both encoding and decoding enforce a 4096-ply work
 limit. PGN headers, comments, variations, and results are not part of the object.
@@ -437,7 +437,7 @@ limit. PGN headers, comments, variations, and results are not part of the object
 ### Go
 
 The requested Go extension occupies previously empty `play:game` slot 1. No
-existing allocation or canonical name changes. The value is a move sequence
+existing allocation or canonical truename changes. The value is a move sequence
 starting with Black on an empty board. Input optionally begins `19x19:`, `9x9:`,
 or `13x13:`; the default is 19×19, and canonical output always includes the size.
 Coordinates use columns `ABCDEFGHJKLMNOPQRST`, with row 1 at the bottom, plus
@@ -451,7 +451,7 @@ connected opposing groups without liberties before checking the played group.
 Suicide is illegal. Situational superko rejects a stone move that recreates an
 earlier board and next-player combination, including the initial empty board.
 Passes are exempt from repetition checks, recorded in history, and two consecutive
-passes terminate the named sequence. These move legality rules follow the
+passes terminate the encoded sequence. These move legality rules follow the
 [AGA concise rules](https://www.usgo-archive.org/files/pdf/conciserules.pdf).
 
 Canonical decoding rejects positive residuals after termination; browsing returns
@@ -465,7 +465,7 @@ aliases, all sizes, prefix equivalence, custom vocabularies, and frozen fixtures
 ## Custom word lists and privacy
 
 The same ordered list and normalization rules must be available to sender and
-recipient. Order is part of the encoding; changing it changes the names.
+recipient. Order is part of the encoding; changing it changes the truenames.
 
 Provide one shared workflow across CLI and browser:
 
@@ -476,7 +476,7 @@ Provide one shared workflow across CLI and browser:
    from the normalized ordered list and its normalization policy.
 4. Encode and decode with that same list. Export the normalized file for a friend
    to import. Default-list use requires no configuration.
-5. Show the vocabulary identifier beside shared names where practical, so friends
+5. Show the vocabulary identifier beside shared truenames where practical, so friends
    can compare it with their selected list. Keep it distinct from type prefixes.
 
 Define Unicode normalization and case handling once and test them across clients.
@@ -486,7 +486,7 @@ sizes, ordering, and non-ASCII words. A smaller list requires more words and may
 not have enough total capacity for a requested value.
 
 **A private word list is not reliable encryption.** A known or guessed value can
-reveal information about the mapping; deterministic names expose repeated values;
+reveal information about the mapping; deterministic truenames expose repeated values;
 type prefixes reveal the type. A wrong list can produce a plausible, incorrect
 decode. Its identifier helps choose a list but does not authenticate the message,
 and may let someone test guesses about the list.
@@ -500,7 +500,7 @@ If security means actual confidentiality, authenticated encryption and key shari
 must become an explicit requirement before implementation. Do not design custom
 cryptography from word permutations. Encryption would add key-management UX and
 payload overhead, and authentication failures necessarily sit outside the promise
-that every short name decodes. That is a release-scope decision, not a feature to
+that every short truename decodes. That is a release-scope decision, not a feature to
 quietly append to this plan.
 
 ## Easy encoding and decoding
@@ -522,7 +522,7 @@ status; successful piped output remains usable as data.
 
 An encode result should make the canonical value, selected type/prefix, payload,
 and vocabulary identity available to callers. A decode result should expose the
-typed value and its canonical name. Browsing additionally reports whether it
+typed value and its canonical truename. Browsing additionally reports whether it
 redirected a noncanonical input. Keep machine output limited to what the browser
 and pipeline need rather than adding several competing output formats.
 
@@ -533,25 +533,25 @@ Typing is routed through the editor, including deletion and paste. The field
 accepts native click placement, drag selection, and double-click word selection;
 its selection is synchronized before edits. Recognition updates never reset the
 cursor or selection. It optimistically recognizes
-unprefixed typed details and shows a clickable word name below. Digits mean Int;
+unprefixed typed details and shows a clickable truename below. Digits mean Int;
 explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
 syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
 durations, tune notation, games, and typed lists. Incomplete explicit type syntax
 waits for more input. Otherwise unrecognized text enters String mode; its exact
 case and whitespace are preserved. Recognized invalid typed values remain errors.
 
-Recognition uses the whole current field, without a persistent name-mode latch.
-Complete nonrepeating vocabulary words are lexical names, matched without regard
+Recognition uses the whole current field, without a persistent truename-mode latch.
+Complete nonrepeating vocabulary words are lexical truenames, matched without regard
 to case; otherwise ordinary text becomes a String. An initially recognized word
 never prevents a later unknown word from becoming part of a String. `T` produces
-a String, `To` and `Tom` produce vocabulary names, and `Tom R` produces a String.
+a String, `To` and `Tom` produce vocabulary truenames, and `Tom R` produces a String.
 Input case and selection are never rewritten. Repeated bare vocabulary words also
-become a String; explicitly prefixed names still reject repeated words. Explicit
+become a String; explicitly prefixed truenames still reject repeated words. Explicit
 prefixes with incomplete payloads remain pending. Autocomplete is deferred.
-Lexical names can be played even if their type slots are unassigned, without
+Lexical truenames can be played even if their type slots are unassigned, without
 browsing repairs. Optional parent prefixes are accepted, and the first line uses
 the shortest label. That line plays prefix-relative, so a Tune plays its original
-melody. A second line displays the full unprefixed word name and plays its absolute
+melody. A second line displays the full unprefixed truename and plays its absolute
 root index.
 Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
 line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.
@@ -567,7 +567,7 @@ through the CLI and library.
 Publish several verified examples: a birthday, telephone number, coordinate,
 reference containing leading zeroes, an IP address, a custom-list exchange, and a
 short legal chess game. Show equivalent unprefixed, group-prefixed, and
-leaf-prefixed names generated by the implementation.
+leaf-prefixed truenames generated by the implementation.
 
 ## Delivery order and verification
 
@@ -602,11 +602,11 @@ word-count boundaries, and reserved slots. Verify canonical rejection and explic
 browsing separately, including agreement on canonical inputs. Simulate adding
 children at multiple depths, including creating a category in an empty last slot
 and extending through existing last-slot categories. Every previously canonical
-name must retain its meaning at every prefix scope. Verify radix five and reject
+truename must retain its meaning at every prefix scope. Verify radix five and reject
 leaf allocations in slot 4 below the root. Verify the root permits List in slot 4
 and cannot be nested, and that new category edges appear
 in the corresponding prefix paths. Former browsing inputs may change discovery
-results without invalidating those saved names.
+results without invalidating those saved truenames.
 
 Exit criterion: all advertised scope ranges satisfy their published guarantees,
 and invalid syntax never masquerades as a browsing input.
@@ -637,9 +637,9 @@ its bounds.
 ### 5. Complete the recipient experience
 
 Finish CLI behavior, custom-list exchange, and the local browser interface using
-the same core. Measure representative name lengths and browser load time. Have
-someone unfamiliar with the project decode both a default-list name and a
-private-list name using only the instructions they would receive from a friend.
+the same core. Measure representative truename lengths and browser load time. Have
+someone unfamiliar with the project decode both a default-list truename and a
+private-list truename using only the instructions they would receive from a friend.
 
 Exit criterion: the recipient can identify the type, select the right vocabulary,
 canonically decode, distinguish browsing from decoding, and copy the canonical
@@ -659,7 +659,7 @@ browser during conversion.
   fixtures against the current registry. Never rely on a later incompatible format.
 * Run the project's required pytest, Ruff, type-checking, and pyupgrade checks
   when implementation changes warrant them. Use `nmr` and `test` as the paths;
-  the supplied `recs` check command is not the project name here.
+  the supplied `recs` check command is not the project truename here.
 * Verify CLI failures and exit codes, wheel and source-distribution installs,
   bundled vocabulary access outside the checkout, and actual browser operation.
 * Review user documentation for unsupported claims, especially security,
@@ -684,7 +684,7 @@ human answer to use the delivered library, CLI, or static browser build.
 | Security | Private vocabularies provide obscurity. Actual encryption, key management, and password storage claims are excluded. |
 | Main use cases | The implemented type matrix; generic string encoding is excluded. |
 | Browser delivery | Static local conversion through pinned Pyodide 0.29.3 in a worker, with the same bundled Python core. |
-| Chess identity | Standard-start legal move sequences; unfinished and empty games count. FEN naming is replaced. |
+| Chess identity | Standard-start legal move sequences; unfinished and empty games count. FEN encoding is replaced. |
 | Browsing | Explicitly selected; deterministic redirects through supported children, finite-domain modulo, codec-specific repairs. Canonical decoding remains the default. |
 | Repetition | Repeated words are invalid in both modes. |
 | Practical lengths | Generated examples show birthday: 2 words, international phone: 4, coordinate: 6, three-ply chess: 2. No universal shortness claim. |
@@ -704,7 +704,7 @@ human answer to use the delivered library, CLI, or static browser build.
 ### Completed slices
 
 1. Added Tyro/Pydantic in a dedicated dependency commit and established the baseline.
-2. Replaced the naming core, category allocation, numeric models, word validation,
+2. Replaced the truename core, category allocation, numeric models, word validation,
    and CLI; removed the broken old codec implementations.
 3. Added everyday codecs, legal chess enumeration, and typed lists.
 4. Added the static browser build, worker bridge, vocabulary UI, and WebAssembly
@@ -712,12 +712,12 @@ human answer to use the delivered library, CLI, or static browser build.
 5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
    documentation, and replacements for obsolete maintenance paths.
 6. Added the requested Go extension in an unused leaf slot, preserving existing
-   canonical names and sharing the implementation across Python and WebAssembly.
+   canonical truenames and sharing the implementation across Python and WebAssembly.
 7. Removed the public Text type and its browser choice. Its former slot was
-   unassigned; other types retain their names. Shared digit ranking remains for
+   unassigned; other types retain their truenames. Shared digit ranking remains for
    compact codecs.
 8. Removed Record and its field-name encoding. Lists retain their slot, canonical
-   names, nesting, order, and work limits; the former Record slot is unassigned.
+   truenames, nesting, order, and work limits; the former Record slot is unassigned.
 9. Moved List to root slot 4, removed `meta`, and limited the last-slot exception
    to the unnamed, non-nestable root. Updated routing fixtures for the shorter path.
 10. Replaced repeated pairing with direct sum-layer tuple enumeration. For total
@@ -727,9 +727,9 @@ human answer to use the delivered library, CLI, or static browser build.
     forward/backward nested-pairing option and the separate balanced list tree.
     SemVer packs all five integer components directly; lists pack all item indices
     directly while retaining the length header and empty-list representation.
-    Two-part ranks and fraction names remain unchanged. SemVer and longer-list
+    Two-part ranks and fraction truenames remain unchanged. SemVer and longer-list
     fixtures deliberately adopt the new mapping; no legacy decoder is retained.
-    Balance is by component sum, not by bit length, so individual names can grow.
+    Balance is by component sum, not by bit length, so individual truenames can grow.
 
 ### Verification and limits
 
@@ -778,7 +778,7 @@ This is the existing List-style length tag, and distinguishes `a`, `aa`, and
 `aaa`, whose character tuples all rank zero. Strict decoding rejects invalid
 character indices and noncanonical empty-string aliases; browsing wraps invalid
 character indices modulo the alphabet size and maps empty-string aliases to empty.
-Vocabulary capacity still limits name size. `dfasdfasdf` now has the name
+Vocabulary capacity still limits truename size. `dfasdfasdf` now has the truename
 `string:she dump stan learn river`.
 
 The GUI leaves an empty field empty, but explicit library/CLI String encoding

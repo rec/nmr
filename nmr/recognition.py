@@ -9,7 +9,7 @@ from .nmr import Nmr
 
 
 class Recognition(BaseModel, frozen=True):
-    name: str | None = None
+    truename: str | None = None
     kind: str | None = None
     message: str = ""
 
@@ -31,12 +31,12 @@ def recognize_input(value: str, engine: Nmr) -> Recognition:
     if tokens and all(i.casefold() in words for i in tokens):
         normalized = [words[i.casefold()] for i in tokens]
         if len(set(normalized)) == len(normalized):
-            name = " ".join(normalized)
+            truename = " ".join(normalized)
             if node is not None:
-                name = label(node) + ":" + name
-            return Recognition(name=name, kind="name")
+                truename = label(node) + ":" + truename
+            return Recognition(truename=truename, kind="truename")
         if node is not None:
-            return Recognition(kind="name", message="Name repeats a word")
+            return Recognition(kind="truename", message="Truename repeats a word")
     kind = None
     if value.startswith("+") and any(i.isdecimal() for i in value):
         kind = "phone"
@@ -58,7 +58,7 @@ def recognize_input(value: str, engine: Nmr) -> Recognition:
     message = (
         "Slash pairs are fractions; use YYYY-MM-DD for dates." if kind == "frac" else ""
     )
-    return Recognition(name=result.name, kind=kind, message=message)
+    return Recognition(truename=result.truename, kind=kind, message=message)
 
 
 PATTERNS: list[tuple[str, str]] = [

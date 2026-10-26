@@ -39,11 +39,11 @@ from nmr.web import bridge
         ('[{"type":"int","value":"1"}]', "list"),
     ],
 )
-def test_details_are_named_without_type_prefixes(value: str, kind: str) -> None:
+def test_details_are_encoded_without_type_prefixes(value: str, kind: str) -> None:
     engine = Nmr()
     result = recognize_input(value, engine)
     assert result.kind == kind
-    assert result.name == engine.encode(value, kind).name
+    assert result.truename == engine.encode(value, kind).truename
 
 
 def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
@@ -51,7 +51,7 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
     assert result.kind == "frac"
     assert "YYYY-MM-DD" in result.message
     invalid = recognize_input("2023-02-29", Nmr())
-    assert invalid.name is None
+    assert invalid.truename is None
     assert invalid.kind == "date"
 
 
@@ -73,60 +73,64 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
     ],
 )
 def test_incomplete_explicit_type_waits_for_more_input(value: str) -> None:
-    assert recognize_input(value, Nmr()).name is None
+    assert recognize_input(value, Nmr()).truename is None
 
 
-def test_names_are_case_insensitive_and_can_be_qualified() -> None:
+def test_truenames_are_case_insensitive_and_can_be_qualified() -> None:
     engine = Nmr()
-    assert recognize_input("ThE Of", engine).name == "the of"
+    assert recognize_input("ThE Of", engine).truename == "the of"
     result = recognize_input(":play:music:tune:ThE", engine)
-    assert result.name == "tune:the"
-    assert result.kind == "name"
+    assert result.truename == "tune:the"
+    assert result.kind == "truename"
 
 
 @pytest.mark.parametrize("value", ["the unknownword", "the THE"])
-def test_text_that_is_not_a_complete_unique_name_becomes_a_string(value: str) -> None:
+def test_text_that_is_not_a_complete_unique_truename_becomes_a_string(
+    value: str,
+) -> None:
     engine = Nmr()
     result = recognize_input(value, engine)
     assert result.kind == "string"
-    assert engine.decode(result.name).value == value
+    assert engine.decode(result.truename).value == value
 
 
-def test_explicit_names_still_reject_duplicate_words() -> None:
+def test_explicit_truenames_still_reject_duplicate_words() -> None:
     result = recognize_input("tune:the THE", Nmr())
-    assert result.name is None
-    assert result.kind == "name"
+    assert result.truename is None
+    assert result.kind == "truename"
     assert result.message
 
 
-def test_unassigned_names_are_playable_without_browsing_to_another_name() -> None:
+def test_unassigned_truenames_are_playable_without_browsing_to_another_truename() -> (
+    None
+):
     engine = Nmr()
-    name = " ".join(engine.encode_to_name(15))
+    truename = " ".join(engine.to_truename(15))
     with pytest.raises(ValueError):
-        engine.decode(name)
-    assert recognize_input(name, engine).name == name
-    assert engine.name_index(name) == 15
-    result = json.loads(bridge.preview_name(json.dumps({"value": name})))
+        engine.decode(truename)
+    assert recognize_input(truename, engine).truename == truename
+    assert engine.truename_index(truename) == 15
+    result = json.loads(bridge.preview_truename(json.dumps({"value": truename})))
     assert result["value"] == Tune.from_index(15).text()
 
 
-def test_name_playback_defaults_to_relative_with_explicit_absolute_option() -> None:
+def test_truename_playback_defaults_to_relative_with_explicit_absolute_option() -> None:
     engine = Nmr()
-    name = engine.encode("2", "int").name
-    relative = json.loads(bridge.preview_name(json.dumps({"value": name})))
+    truename = engine.encode("2", "int").truename
+    relative = json.loads(bridge.preview_truename(json.dumps({"value": truename})))
     absolute = json.loads(
-        bridge.preview_name(json.dumps({"value": name, "absolute": True}))
+        bridge.preview_truename(json.dumps({"value": truename, "absolute": True}))
     )
-    assert relative["value"] == engine.to_tune(name).text()
-    assert absolute["value"] == engine.to_tune(name, absolute=True).text()
+    assert relative["value"] == engine.to_tune(truename).text()
+    assert absolute["value"] == engine.to_tune(truename, absolute=True).text()
     assert relative["value"] != absolute["value"]
     with pytest.raises(ValueError, match="prefix"):
-        engine.name_index(":the")
+        engine.truename_index(":the")
 
 
-def test_ode_to_joy_name_plays_the_original_melody_by_default() -> None:
+def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
     result = json.loads(
-        bridge.preview_name('{"value":"tune:such like","root":53,"bpm":180}')
+        bridge.preview_truename('{"value":"tune:such like","root":53,"bpm":180}')
     )
     assert result["value"] == "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1"
     assert len(result["playback"]) == 8
@@ -134,14 +138,22 @@ def test_ode_to_joy_name_plays_the_original_melody_by_default() -> None:
 
 
 @pytest.mark.parametrize("value", ["42", "tune:such like", "THE OF"])
-def test_full_name_has_no_prefix_and_preserves_the_absolute_number(value: str) -> None:
+def test_full_truename_has_no_prefix_and_preserves_the_absolute_number(
+    value: str,
+) -> None:
     engine = Nmr()
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
-    assert ":" not in result["full_name"]
-    assert engine.name_index(result["full_name"]) == engine.name_index(result["name"])
-    full = json.loads(bridge.preview_name(json.dumps({"value": result["full_name"]})))
+    assert ":" not in result["full_truename"]
+    assert engine.truename_index(result["full_truename"]) == engine.truename_index(
+        result["truename"]
+    )
+    full = json.loads(
+        bridge.preview_truename(json.dumps({"value": result["full_truename"]}))
+    )
     absolute = json.loads(
-        bridge.preview_name(json.dumps({"value": result["name"], "absolute": True}))
+        bridge.preview_truename(
+            json.dumps({"value": result["truename"], "absolute": True})
+        )
     )
     assert full == absolute
 
@@ -150,9 +162,9 @@ def test_full_name_has_no_prefix_and_preserves_the_absolute_number(value: str) -
     "value,kind",
     [
         ("T", "string"),
-        ("To", "name"),
-        ("Tom", "name"),
-        ("Tom ", "name"),
+        ("To", "truename"),
+        ("Tom", "truename"),
+        ("Tom ", "truename"),
         ("Tom R", "string"),
         ("Tom Ri", "string"),
         ("Tom Ritchford", "string"),
@@ -163,9 +175,9 @@ def test_every_step_of_typing_a_persons_name_populates_both_lines(
 ) -> None:
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
     assert result["kind"] == kind
-    assert result["name"] and result["full_name"]
+    assert result["truename"] and result["full_truename"]
     if kind == "string":
-        assert Nmr().decode(result["name"]).value == value
+        assert Nmr().decode(result["truename"]).value == value
 
 
 @pytest.mark.parametrize(
@@ -177,14 +189,14 @@ def test_unrecognized_text_uses_string_mode_without_losing_whitespace(
     engine = Nmr()
     result = recognize_input(value, engine)
     assert result.kind == "string"
-    assert result.name == engine.encode(value, "string").name
-    assert engine.decode(result.name).value == value
+    assert result.truename == engine.encode(value, "string").truename
+    assert engine.decode(result.truename).value == value
 
 
 def test_unknown_text_can_become_a_word_or_type_as_it_is_edited() -> None:
     engine = Nmr()
     assert recognize_input("xyzzy", engine).kind == "string"
-    assert recognize_input("the ", engine).kind == "name"
+    assert recognize_input("the ", engine).kind == "truename"
     assert recognize_input("42", engine).kind == "int"
     assert recognize_input("@1", engine).kind == "tune"
-    assert recognize_input("tune:unfinishedword", engine).name is None
+    assert recognize_input("tune:unfinishedword", engine).truename is None

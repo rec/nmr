@@ -1,8 +1,8 @@
-from ..type_namer import TypeNamer
+from ..type_truenamer import TypeTruenamer
 from .bounded import bounded, scaled_integer, scaled_string
 
 
-class LatLong(TypeNamer):
+class LatLong(TypeTruenamer):
     label = "latlong"
     description = "Latitude,longitude in decimal degrees, exact to 0.000001 degree"
 

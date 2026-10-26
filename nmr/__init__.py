@@ -1,1 +1,1 @@
-"""Name typed objects with reversible, nonrepeating word sequences."""
+"""Encode typed objects as reversible, nonrepeating truenames."""

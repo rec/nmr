@@ -7,8 +7,8 @@ from nmr.words import Words
 def test_all_unsigned(n: int) -> None:
     engine = Words(count=n)
     for i in range(engine.count_words()):
-        assert engine.decode_from_name(engine.encode_to_name(i)) == i
+        assert engine.from_truename(engine.to_truename(i)) == i
     with pytest.raises(ValueError):
-        engine.encode_to_name(-1)
+        engine.to_truename(-1)
     with pytest.raises(ValueError):
-        engine.encode_to_name(engine.count_words())
+        engine.to_truename(engine.count_words())

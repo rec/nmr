@@ -37,7 +37,7 @@ class ItemPreview(Request, frozen=True):
     bpm: int = 120
 
 
-class NamePreview(Preview, frozen=True):
+class TruenamePreview(Preview, frozen=True):
     absolute: bool = False
 
 
@@ -85,12 +85,12 @@ def preview_item(request_json: str) -> str:
     request = ItemPreview.model_validate_json(request_json)
     if request.vocabulary is not None and request.vocabulary != _engine.identifier:
         raise ValueError("Vocabulary identifier does not match the selected list")
-    name = (
-        _engine.encode(request.value, request.type_name, request.scope).name
+    truename = (
+        _engine.encode(request.value, request.type_name, request.scope).truename
         if request.operation == "encode"
         else request.value
     )
-    tune = _engine.to_tune(name, request.absolute, request.operation == "browse")
+    tune = _engine.to_tune(truename, request.absolute, request.operation == "browse")
     return render_tune(tune, request.root, request.bpm)
 
 
@@ -114,15 +114,15 @@ def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
     result = recognition.recognize_input(request.value, _engine)
     response = result.model_dump()
-    response["full_name"] = (
-        " ".join(_engine.encode_to_name(_engine.name_index(result.name)))
-        if result.name
+    response["full_truename"] = (
+        " ".join(_engine.to_truename(_engine.truename_index(result.truename)))
+        if result.truename
         else None
     )
     return json.dumps(response)
 
 
-def preview_name(request_json: str) -> str:
-    request = NamePreview.model_validate_json(request_json)
-    tune = Tune.from_index(_engine.name_index(request.value, request.absolute))
+def preview_truename(request_json: str) -> str:
+    request = TruenamePreview.model_validate_json(request_json)
+    tune = Tune.from_index(_engine.truename_index(request.value, request.absolute))
     return render_tune(tune, request.root, request.bpm)

@@ -1,9 +1,9 @@
-# Naming short tunes
+# Truenames for short tunes
 
 ## Purpose and contract
 
-Naming short tunes is nmr's original motivating purpose. A tune contains both
-melody and rhythm, and its name should recover something a friend can hear.
+Finding truenames for short tunes is nmr's original motivating purpose. A tune contains both
+melody and rhythm, and its truename should recover something a friend can hear.
 This plan supersedes the treatment of music as optional and transposition as
 undecided in the other planning documents.
 
@@ -18,11 +18,11 @@ index fits that vocabulary gets exactly one canonical payload. Equivalent input
 spellings normalize before ranking.
 
 There is one unavoidable capacity qualification: a finite vocabulary with no
-repeated words has finitely many names. It cannot name an infinite tune space.
-The integer bijection is unbounded; a selected vocabulary names its initial
+repeated words has finitely many truenames. It cannot encode an infinite tune space.
+The integer bijection is unbounded; a selected vocabulary truenames its initial
 finite segment. Out-of-capacity tunes get an explicit error, not a shortened or
 approximate substitute. Other prefix scopes and vocabularies have their own
-names for the same tune, as elsewhere in nmr.
+truenames for the same tune, as elsewhere in nmr.
 
 The slices below are implemented in `nmr/types/tune.py`, the shared browser
 bridge, and browser playback. The current minimal browser accepts interval text
@@ -48,11 +48,11 @@ the first relative pitch remains zero internally.
 * Use integer semitone differences in twelve-tone equal temperament. Preserve
   direction and octave distances; do not reduce intervals modulo twelve.
   Microtonal grids would require a separately allocated profile, not a local
-  setting that changes the meaning of existing names.
+  setting that changes the meaning of existing truenames.
 * The first relative pitch is implicitly zero. Presentation centers the sequence
   around a configurable root, default C4, using the rule below. Changing the
   presentation root or transposing every input pitch equally does not change
-  the name. The first sounding note need not be C.
+  the truename. The first sounding note need not be C.
 * There is no inferred scale or tonic. Centering on C does not make the tune
   C major. Chromatic intervals remain available.
 * Each note has an exact positive duration in beats. Each later note also has
@@ -63,7 +63,7 @@ the first relative pitch remains zero internally.
   a different rhythm; changing playback BPM alone does not. Do not silently
   normalize the first duration to one. Full proportional-rhythm equivalence
   would be a different identity decision.
-* Leading and trailing silence are outside the named phrase. Remove them from
+* Leading and trailing silence are outside the encoded phrase. Remove them from
   keyboard or imported performance input before producing interval notation,
   and show that normalization before encoding. Interval text itself must start
   with `@`, never a rest or offset. Reject an empty or all-rest input.
@@ -72,7 +72,7 @@ the first relative pitch remains zero internally.
 * A rest does not reset the pitch reference: the next interval is measured from
   the previous sounding note.
 
-These rules name an abstract musical phrase, not a performance or score file.
+These rules truename an abstract musical phrase, not a performance or score file.
 There is no requirement that a generated tune be pleasant or recognizable.
 
 ## What divisions by two and three mean
@@ -127,7 +127,7 @@ rest tokens. Same-pitch attacks are never merged automatically.
 The UI may accept absolute pitches through a keyboard or note editor, then
 convert them to successive differences and discard the initial absolute pitch.
 Show the normalized phrase and allow playback before encoding. The core numeric
-notation does not need note names to represent the melody.
+notation does not need note truenames to represent the melody.
 
 ## Presentation centering
 
@@ -160,7 +160,7 @@ Averaging the intervals instead would yield `0.6`; that is not the centering rul
 Use the same placement for playback and absolute-pitch displays. The exact
 arithmetic mean can remain within half a semitone of the configured root because
 the placement shifts by whole semitones. Changing the root transposes the entire
-presentation; it must not change the interval text, ranking, or canonical name.
+presentation; it must not change the interval text, ranking, or canonical truename.
 Centering is a presentation transform, not a step in the integer enumeration.
 
 ## A dense duration enumeration
@@ -176,7 +176,7 @@ Instead enumerate only reduced durations, in finite complexity layers. Set
 The numerator bit-length costs four per step, delaying long durations. Binary
 subdivision costs one per step. The optional factor of three costs three,
 so thirds arrive modestly later; further factors of three are excluded. These
-weights define the enumeration, not playback settings; freeze them before names
+weights define the enumeration, not playback settings; freeze them before truenames
 are published. This favors short binary durations, including very short ones,
 so assess the musical balance through playback during implementation.
 
@@ -294,8 +294,8 @@ together in `nmr/types/tune_count.py`. With radius `k` and tail step cost `s`,
 the pitch function is `(2k+1)+2z^s/(1-z^s)`. Free steps form a finite set;
 the positive attack cost still keeps each complexity layer finite.
 They are design constants, not runtime settings. Changing them or the within-cost
-order changes names. Do not keep an old/new enumeration toggle or infer which
-scheme a name used. Freeze the selected constants before release.
+order changes truenames. Do not keep an old/new enumeration toggle or infer which
+scheme a truename used. Freeze the selected constants before release.
 
 Small fixtures to verify independently during implementation:
 
@@ -317,7 +317,7 @@ Small fixtures to verify independently during implementation:
 
 ## Integration, usability, and limits
 
-Use `tune:` in printed names, with internal path `play:music:tune`: add the
+Use `tune:` in printed truenames, with internal path `play:music:tune`: add the
 `music` category at unused `play` slot 1 and the `tune` leaf at its slot 0.
 Parent categories are optional in input and never printed. Existing game paths remain unchanged. The full
 prefix removes type-routing cost; shorter scopes use the existing five-way tree.
@@ -333,16 +333,16 @@ this plan.
 
 The mathematical pitch domain has no hard interval or octave limit. Playback
 devices do. Reject or explain an unrenderable preview without folding pitches
-into another octave, truncating the phrase, or changing its name. A valid tune
+into another octave, truncating the phrase, or changing its truename. A valid tune
 index need not yield an attractive tune or one comfortably audible on a device.
 
 Keep mathematical identity separate from operational work limits. Estimate note
 count, component sizes, duration-enumeration work, and playback length before
 allocating large structures or scheduling sound. A resource refusal must say so;
 it must not masquerade as an invalid tune or return a different tune. Publish
-tested practical bounds rather than claiming every vocabulary-sized name can
+tested practical bounds rather than claiming every vocabulary-sized truename can
 always be rendered on every device. Avoid silently imposing a new musical limit
-that would change the named domain.
+that would change the encoded domain.
 
 Canonical decoding remains the default. For supported payloads within work and
 capacity limits, browsing can use the identical inverse and return a canonical
@@ -368,7 +368,7 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
    index round trips. Empty tunes and all-rest input must fail clearly. Verify that
    optional later zeros normalize to omission without changing a tune's rank.
 4. Allocate the leaf and add canonical fixtures for the existing vocabulary,
-   custom vocabularies, full and ancestor prefixes, and unprefixed names. Keep
+   custom vocabularies, full and ancestor prefixes, and unprefixed truenames. Keep
    all non-tune type fixtures unchanged; update tune fixtures when tuning the
    pre-release enumeration.
 5. Build the editor and playback through the shared browser bridge. Test decoded
@@ -377,17 +377,17 @@ identity, nonrepeating words, and capacity errors follow the existing nmr rules.
    Test cumulative-pitch centering, positive and negative rounding including
    exact ties, duration/rest independence, and configurable roots. The example
    must center at two semitones, not at the mean interval of one semitone.
-   Changing the presentation root must leave every name unchanged.
-6. Measure names for personally meaningful four-, eight-, and sixteen-note
+   Changing the presentation root must leave every truename unchanged.
+6. Measure truenames for personally meaningful four-, eight-, and sixteen-note
    phrases, with repeated notes, octave leaps, rests, dotted rhythms, and mixed
    binary/ternary subdivisions. Include repeated simple notes, many-note counts,
    large duration weights, capacity boundaries, and explicit resource refusals.
 7. Run the repository checks, shared Python/WebAssembly fixtures, and browser UI
    tests where access is available. Commit the final mapping and fixtures before
-   describing its names as permanent.
+   describing its truenames as permanent.
 
 Acceptance requires a demonstrated rank/unrank bijection, practical examples of
-name lengths, and input/playback that preserves both melody and rhythm. Do not
+truename lengths, and input/playback that preserves both melody and rhythm. Do not
 claim a six-word bound or replace the exact rhythm with an approximation to meet
 an attractive example length.
 
@@ -398,7 +398,7 @@ duration weight 512, total complexity 4,096, or a 4,096-bit tune index. These ar
 operational bounds, not changes to the mathematical domain. Browser playback additionally requires
 20–400 BPM, centered MIDI pitches in 0–127, total length at most 120 seconds,
 and individual notes at least 0.01 seconds long. A playback refusal leaves the
-normalized phrase available for naming.
+normalized phrase available for truename generation.
 
 The editor exposes successive semitone steps, durations, and gaps before notes,
 with half/third rhythmic presets. It applies ties explicitly. Absolute-pitch

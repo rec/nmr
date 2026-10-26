@@ -86,11 +86,11 @@ class Main(BaseModel, frozen=True):
                     print(result.model_dump_json(), file=output)
                 else:
                     print(
-                        result.name if self.operation == "encode" else result.value,
+                        result.truename if self.operation == "encode" else result.value,
                         file=output,
                     )
                     if self.operation == "browse":
-                        print(f"Canonical name: {result.name}", file=errors)
+                        print(f"Canonical truename: {result.truename}", file=errors)
             if self.value is not None:
                 break
         return status

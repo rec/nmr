@@ -1,10 +1,10 @@
-"""Contract shared by the codecs in the naming tree."""
+"""Contract shared by the codecs in the truename tree."""
 
 from abc import ABC, abstractmethod
 from typing import ClassVar
 
 
-class TypeNamer(ABC):
+class TypeTruenamer(ABC):
     label: ClassVar[str]
     description: ClassVar[str]
 

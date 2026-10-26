@@ -29,12 +29,12 @@ const { loadPyodide } = require("pyodide");
   const qualified = JSON.parse(convert(JSON.stringify({
     operation: "decode", value: ":play:game:chess:in get",
   })));
-  assert.equal(qualified.name, "chess:in get");
+  assert.equal(qualified.truename, "chess:in get");
   assert.equal(qualified.type, "chess");
   assert.equal(qualified.canonical, true);
   assert.equal(JSON.parse(convert(JSON.stringify({
     operation: "decode", value: "play:game:will gas",
-  }))).name, "game:will gas");
+  }))).truename, "game:will gas");
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(
@@ -46,9 +46,9 @@ const { loadPyodide } = require("pyodide");
         }),
       ),
     );
-    assert.equal(encoded.name, sample.name);
+    assert.equal(encoded.truename, sample.truename);
     const decoded = JSON.parse(
-      convert(JSON.stringify({ operation: "decode", value: sample.name })),
+      convert(JSON.stringify({ operation: "decode", value: sample.truename })),
     );
     assert.equal(decoded.value, sample.value);
   }
@@ -66,11 +66,11 @@ const { loadPyodide } = require("pyodide");
       convert(JSON.stringify({ operation: "encode", type_name: type, value })),
     );
     const decoded = JSON.parse(
-      convert(JSON.stringify({ operation: "decode", value: encoded.name })),
+      convert(JSON.stringify({ operation: "decode", value: encoded.truename })),
     );
     assert.equal(decoded.value, encoded.value);
     if (type === "phone") assert.equal(encoded.value, "+442079460958;ext=004");
-    console.log(`${type}: ${encoded.name}`);
+    console.log(`${type}: ${encoded.truename}`);
   }
   configure(
     JSON.stringify({
@@ -84,7 +84,7 @@ const { loadPyodide } = require("pyodide");
   );
   assert.equal(
     JSON.parse(
-      convert(JSON.stringify({ operation: "decode", value: custom.name })),
+      convert(JSON.stringify({ operation: "decode", value: custom.truename })),
     ).value,
     "-2",
   );
@@ -97,13 +97,13 @@ const { loadPyodide } = require("pyodide");
   assert.equal(browsed.canonical, false);
   assert.equal(
     JSON.parse(
-      convert(JSON.stringify({ operation: "decode", value: browsed.name })),
+      convert(JSON.stringify({ operation: "decode", value: browsed.truename })),
     ).value,
     browsed.value,
   );
   configure("{}");
   const recognize = runtime.globals.get("recognize");
-  const previewName = runtime.globals.get("preview_name");
+  const previewTruename = runtime.globals.get("preview_truename");
   const { Editor } = await import("../nmr/web/editor.mjs");
   for (const value of ["asdf", "asdfasdf", "Hello!", "dfasdfasdf", "iPhone"]) {
     const editor = new Editor();
@@ -114,22 +114,22 @@ const { loadPyodide } = require("pyodide");
     }
     assert.equal(editor.text, value, "String typing must preserve case");
     assert.equal(result.kind, "string", `Typing ${value} must reach String recognition`);
-    assert.ok(result.name && result.full_name, "Both name lines need a value");
-    assert.equal(JSON.parse(convert(JSON.stringify({ operation: "decode", value: result.name }))).value, value);
+    assert.ok(result.truename && result.full_truename, "Both truename lines need a value");
+    assert.equal(JSON.parse(convert(JSON.stringify({ operation: "decode", value: result.truename }))).value, value);
   }
 
   const person = new Editor();
-  for (const [character, kind] of [["T", "string"], ["o", "name"], ["m", "name"], [" ", "name"], ["R", "string"]]) {
+  for (const [character, kind] of [["T", "string"], ["o", "truename"], ["m", "truename"], [" ", "truename"], ["R", "string"]]) {
     person.replace(character);
     const result = JSON.parse(recognize(JSON.stringify({value: person.text})));
     assert.equal(result.kind, kind);
-    assert.ok(result.name && result.full_name, `Both name lines must exist for ${person.text}`);
+    assert.ok(result.truename && result.full_truename, `Both truename lines must exist for ${person.text}`);
   }
   assert.equal(person.text, "Tom R");
   for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
     const result = JSON.parse(recognize(JSON.stringify({ value })));
     assert.equal(result.kind, kind);
-    assert.ok(result.name.startsWith(kind + ":"));
+    assert.ok(result.truename.startsWith(kind + ":"));
   }
   for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
     const editor = new Editor();
@@ -138,26 +138,26 @@ const { loadPyodide } = require("pyodide");
       editor.replace(character);
       result = JSON.parse(recognize(JSON.stringify({ value: editor.text })));
     }
-    assert.equal(editor.text, value, "Name matching must preserve the input case");
-    assert.equal(result.kind, "name");
-    assert.ok(result.name && result.full_name, "Matching mixed-case names must populate both lines");
+    assert.equal(editor.text, value, "Truename matching must preserve the input case");
+    assert.equal(result.kind, "truename");
+    assert.ok(result.truename && result.full_truename, "Matching mixed-case truenames must populate both lines");
   }
-  assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).name, "the of");
+  assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).truename, "the of");
   const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
   assert.equal(string.kind, "string");
-  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: string.name}))).value, "  xyzzy!  ");
+  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: string.truename}))).value, "  xyzzy!  ");
   assert.equal(JSON.parse(recognize('{"value":"th"}')).kind, "string");
-  assert.equal(JSON.parse(previewName('{"value":"int:the"}')).value, "@1");
-  assert.equal(JSON.parse(previewName('{"value":"tune:the"}')).value, "@1");
-  assert.notEqual(JSON.parse(previewName('{"value":"tune:the","absolute":true}')).value, "@1");
+  assert.equal(JSON.parse(previewTruename('{"value":"int:the"}')).value, "@1");
+  assert.equal(JSON.parse(previewTruename('{"value":"tune:the"}')).value, "@1");
+  assert.notEqual(JSON.parse(previewTruename('{"value":"tune:the","absolute":true}')).value, "@1");
   const ode = JSON.parse(recognize('{"value":"tune:such like"}'));
-  assert.ok(ode.full_name && !ode.full_name.includes(":"));
-  assert.equal(JSON.parse(previewName(JSON.stringify({ value: ode.name }))).value,
+  assert.ok(ode.full_truename && !ode.full_truename.includes(":"));
+  assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,
     "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
-  assert.deepEqual(JSON.parse(previewName(JSON.stringify({ value: ode.full_name }))),
-    JSON.parse(previewName(JSON.stringify({ value: ode.name, absolute: true }))));
+  assert.deepEqual(JSON.parse(previewTruename(JSON.stringify({ value: ode.full_truename }))),
+    JSON.parse(previewTruename(JSON.stringify({ value: ode.truename, absolute: true }))));
   recognize.destroy();
-  previewName.destroy();
+  previewTruename.destroy();
   configure(JSON.stringify({ words: ["é", "red", "blue", "green", "gold", "white", "black"] }));
   configure.destroy();
   const music = JSON.parse(preview(JSON.stringify({
@@ -172,20 +172,20 @@ const { loadPyodide } = require("pyodide");
   const widePitch = JSON.parse(preview(JSON.stringify({value: "@1 18014398509481986@1"})));
   assert.deepEqual(widePitch.events.map((event) => event.pitch), ["-9007199254740933", "9007199254741053"]);
   const tuneCustom = JSON.parse(convert(JSON.stringify({operation: "encode", type_name: "tune", value: "@1"})));
-  assert.equal(tuneCustom.name, "tune:é");
-  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: tuneCustom.name}))).value, "@1");
+  assert.equal(tuneCustom.truename, "tune:é");
+  assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: tuneCustom.truename}))).value, "@1");
   const item = {operation: "encode", type_name: "int", value: "2"};
   const projected = JSON.parse(previewItem(JSON.stringify(item)));
   assert.equal(projected.value, "@1 -1@1");
   const absoluteItem = JSON.parse(previewItem(JSON.stringify({...item, absolute: true})));
   assert.notEqual(absoluteItem.value, projected.value);
-  const itemName = JSON.parse(convert(JSON.stringify(item))).name;
-  assert.deepEqual(JSON.parse(previewItem(JSON.stringify({operation: "decode", value: itemName}))), projected);
+  const itemTruename = JSON.parse(convert(JSON.stringify(item))).truename;
+  assert.deepEqual(JSON.parse(previewItem(JSON.stringify({operation: "decode", value: itemTruename}))), projected);
   previewItem.destroy();
   preview.destroy();
   convert.destroy();
   console.log(
-    `WebAssembly bridge, smart recognition, name playback, codecs, custom words, and browsing passed in ${Date.now() - started}ms`,
+    `WebAssembly bridge, smart recognition, truename playback, codecs, custom words, and browsing passed in ${Date.now() - started}ms`,
   );
 })().catch((error) => {
   console.error(String(error));

@@ -1,16 +1,16 @@
 # nmr
 
-Give exact details reversible names made from ordinary words. Name a birthday,
+Find reversible truenames made from ordinary words for a birthday,
 short tune, phone number, coordinate, fraction, identifier, or legal chess game,
 then let a friend recover it with the same vocabulary.
 
-A name contains a readable type prefix and a payload without repeated words:
+A truename contains a readable type prefix and a payload without repeated words:
 
 ```text
 date:nor lung
 ```
 
-That name means `2000-02-29`. Canonical decoding is the default. Browsing is an
+That truename means `2000-02-29`. Canonical decoding is the default. Browsing is an
 explicit operation for discovering objects from other word combinations.
 
 ## Install and try
@@ -49,15 +49,15 @@ nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
 # sons paint
 
-# Explore a noncanonical name. The stable name is printed to stderr.
+# Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
 # 0
-# Canonical name: pure:the
+# Canonical truename: pure:the
 
 # One value per line; errors go to stderr and produce exit status 1.
 printf '2000-02-29\n2024-12-31\n' | nmr --operation encode --type date
 
-# JSON includes type, canonical value, name, vocabulary ID, and canonical status.
+# JSON includes type, canonical value, truename, vocabulary ID, and canonical status.
 nmr --operation encode --type phone --value '+442079460958' --json-output
 ```
 
@@ -76,7 +76,7 @@ prefix never changes its scope or the encoded number.
 Canonical decoding rejects unassigned type slots, invalid values, and
 noncanonical encodings. It never silently switches to browsing. Browsing may
 redirect those indices, returns a real supported object, and supplies its
-canonical name. Exploratory inputs can discover different objects as the tree
+canonical truename. Exploratory inputs can discover different objects as the tree
 expands; save the canonical output instead.
 
 ## Supported details
@@ -120,14 +120,14 @@ Formatted phone input is normalized with `phonenumberslite`, using international
 E.164 digits plus our `;ext=digits` suffix. For example,
 `+44 (0)20 7946 0958 ext. 004` becomes `+442079460958;ext=004`. The library
 handles national trunk prefixes, significant leading zeroes, Unicode digits,
-and vanity letters. Review the normalized result before sharing its name.
+and vanity letters. Review the normalized result before sharing its truename.
 An explicit `+` country code is still required; nmr does not guess a region.
 Already canonical `+digits` values are literal identifiers, including unassigned
-or short values, so established names do not depend on changing library metadata.
+or short values, so established truenames do not depend on changing library metadata.
 This is input normalization, not a check that a number is assigned or reachable.
 
-Chess names preserve the move sequence, including unfinished games and the empty
-game. PGN comments, headers, variations, and stated results are not named. Automatic
+Chess truenames preserve the move sequence, including unfinished games and the empty
+game. PGN comments, headers, variations, and stated results are not included in the truename. Automatic
 endings apply, including fivefold repetition and the 75-move rule; claimable draws
 are not automatic endings. Moves are ordered lexically by UCI, independent of
 library iteration order. Work is limited to 4096 plies per operation.
@@ -137,11 +137,11 @@ the bottom, and `pass`. Black plays first. Use `9x9:D4 E4 pass pass` or
 `13x13:J10`; an omitted size means 19×19. Canonical output always includes the
 size. Captures apply before checking suicide, which is forbidden. Situational
 superko forbids repeating a previous board with the same player to move; passes
-are exempt, and two consecutive passes end the named play sequence. These move
+are exempt, and two consecutive passes end the encoded play sequence. These move
 legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/pdf/conciserules.pdf).
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
-4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the name
+4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
 `go:up trade real` with the default vocabulary.
 
 Tunes use the `tune` prefix. For example:
@@ -157,17 +157,17 @@ The first note starts with `@duration`. Later steps are signed semitone differen
 from the previous sounding note; omit a zero step. `r@duration` adds a rest.
 Durations are exact beats, with reduced denominators containing powers of two and
 at most one factor of three. Thus `1/6` is allowed, `1/9` is not, and `3/9` becomes
-`1/3`. Transposition, playback tempo, and the center note do not change a name;
+`1/3`. Transposition, playback tempo, and the center note do not change a truename;
 octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
-In the browser, type interval text directly into the single field to name a tune.
-Click the first word-name line, or press Enter, to hear its prefix-relative tune.
-For a `tune:` name this plays the named melody. A second line displays the full
-unprefixed word name and plays its absolute root index, including its type path. The library's
+In the browser, type interval text directly into the single field to encode a tune.
+Click the first truename line, or press Enter, to hear its prefix-relative tune.
+For a `tune:` truename this plays the encoded melody. A second line displays the full
+unprefixed truename and plays its absolute root index, including its type path. The library's
 `Nmr.to_tune()` still supports both prefix-relative and absolute interpretations.
 Browser playback runs at 180 BPM, centered on F3 (MIDI 53), rather than
-starting there. Click the name again while it plays to stop it.
+starting there. Click the truename again while it plays to stop it.
 
 Tunes are ordered by total complexity: one per attack, no extra pitch cost for
 steps from -2 through +2 semitones, and `abs(step)-2` for larger steps,
@@ -175,13 +175,13 @@ duration weight `4h+a+3b`, and one plus duration weight for positive gaps. More
 simple notes compete with fewer complicated ones. Exact rational generating
 functions count all layers and completions; there is no separate length header.
 The six weights and free-step radius are centralized in `nmr/types/tune_count.py` for design changes
-before release. They are not runtime switches: changing them changes names.
+before release. They are not runtime switches: changing them changes truenames.
 
 Current codec work limits are 256 attacked notes, 20,000 text characters,
 duration weight 512, total complexity 4,096, and tune indices of 4,096 bits.
 A refusal reports a work limit and never substitutes another tune. Browser previews allow 20–400 BPM,
 MIDI pitches 0–127, at most 120 seconds, and notes at least 0.01 seconds long.
-A tune can be named even when its preview is unavailable. Measured 4-, 8-, and
+A tune can receive a truename even when its preview is unavailable. Measured 4-, 8-, and
 16-note motifs with the default vocabulary take 4, 10, and 19 payload words in
 the examples in `plan/tunes.md`; these are measurements, not general bounds.
 
@@ -211,13 +211,13 @@ already trusted channel. Custom vocabulary tools are available through the CLI
 and Python library; the minimal browser uses the default vocabulary.
 
 A private vocabulary provides obscurity, not reliable encryption. Repeated values
-produce repeated names; prefixes reveal types; a wrong vocabulary can produce a
+produce repeated truenames; prefixes reveal types; a wrong vocabulary can produce a
 plausible result. The vocabulary identifier detects a mismatch when supplied,
 but does not authenticate the sender or the message. Verify important details.
 
-Names never repeat a word, so a vocabulary has finite capacity:
+Truenames never repeat a word, so a vocabulary has finite capacity:
 `sum(W! / (W-k)!, k=1..W)`. Overflow produces an error; a larger vocabulary may be
-needed. Many mistyped names are rejected, but another valid canonical name cannot
+needed. Many mistyped truenames are rejected, but another valid canonical truename cannot
 be distinguished from an intentional one without additional information.
 
 ## Browser tool
@@ -242,7 +242,7 @@ over the network or saved in browser storage. Reloading loses the input.
 The page starts with an `nmr` heading and one field. Type anywhere on the page;
 click the field to position its cursor, drag to select, or double-click to select
 a word. Selection and insertion in the middle work normally, including while
-recognition updates the name lines. Use arrow keys, Home/End, Shift selection,
+recognition updates the truename lines. Use arrow keys, Home/End, Shift selection,
 copy/cut/paste, and Backspace or
 Delete to edit. Escape clears the field and stops playback. The engine recognizes
 integers, explicit `+` phone numbers, fractions, ISO dates and times, coordinates,
@@ -251,21 +251,21 @@ lists. Once phone input contains `+` and digits, typing letters leaves it unchan
 and makes a quiet tick. Clear or replace the whole field to enter a different detail.
 Pure digits always mean an integer; slash pairs mean fractions. Use
 `YYYY-MM-DD` for dates. Incomplete explicit type syntax waits for more input.
-Otherwise unrecognized text uses `string:` names, preserving its original
+Otherwise unrecognized text uses `string:` truenames, preserving its original
 case and allowed spaces. The String codec rejects control ranges U+0000–001F,
 U+007F–009F, and surrogate code points. Recognized types with invalid values are not silently
 converted into strings. Recognition keeps updating as the text changes.
 
 Recognition evaluates the whole field after each edit. Complete nonrepeating
-vocabulary words form a name, matched case-insensitively; unknown words make the
+vocabulary words form a truename, matched case-insensitively; unknown words make the
 whole input a String, even when earlier words were vocabulary words. Thus `T` is
-a String, `Tom` is a vocabulary name, and `Tom R` is a String. Input case is never
-rewritten. Generated names use the vocabulary's spelling. There is no persistent
-name-mode lock or autocomplete. Explicit category/type prefixes are accepted for
-names, and output uses only the shortest category or type label. Lexical names
+a String, `Tom` is a vocabulary truename, and `Tom R` is a String. Input case is never
+rewritten. Generated truenames use the vocabulary's spelling. There is no persistent
+truename-mode lock or autocomplete. Explicit category/type prefixes are accepted for
+truenames, and output uses only the shortest category or type label. Lexical truenames
 can be played even when their type slots are unassigned.
-The first clickable name line plays prefix-relative by default. The second line
-shows the full unprefixed name and plays the absolute root index. Clicking the
+The first clickable truename line plays prefix-relative by default. The second line
+shows the full unprefixed truename and plays the absolute root index. Clicking the
 other line switches playback; clicking the playing line stops it. Enter plays
 the first line unless the second button has keyboard focus.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
@@ -284,11 +284,11 @@ from nmr.types.fraction import Frac
 
 engine = Nmr()
 encoded = engine.encode("2/4", "frac")
-assert encoded.name == "frac:now"
-assert engine.decode(encoded.name).value == "2/4"
+assert encoded.truename == "frac:now"
+assert engine.decode(encoded.truename).value == "2/4"
 
 explored = engine.decode("pure:to", browse=True)
-assert engine.decode(explored.name).value == explored.value
+assert engine.decode(explored.truename).value == explored.value
 
 fraction = Frac(numerator=2, denominator=4)
 assert fraction.float() == 0.5
@@ -303,7 +303,7 @@ otherwise delegates to the standard rational conversion; finite overflow raises
 `Int` lives in `nmr.types.integer`; `Float` in `nmr.types.floating` stores exact
 binary64 bits and exposes `.float()`.
 
-Lists use explicit typed values rather than vocabulary-dependent names:
+Lists use explicit typed values rather than vocabulary-dependent truenames:
 
 ```json
 [{"type":"date","value":"2000-02-29"},{"type":"phone","value":"+442079460958"}]
@@ -323,7 +323,7 @@ tuples are unchanged, and two-part tuples retain the Cantor pairing order.
 List items share one tuple rank, and semantic versions pack major, minor, patch,
 prerelease, and build indices as five components without nested pairing. The list
 length is stored separately. This balances by sum, not by component bit length;
-it does not guarantee a shorter name for every object.
+it does not guarantee a shorter truename for every object.
 
 ## Format and development
 
@@ -334,7 +334,7 @@ exempt from the last-slot rule and cannot be nested. New types expand beneath
 the four root categories. Published allocations never move, and leaves never
 turn into categories.
 
-List names use `list:` directly. An unprefixed list routes as `4 + 5 * payload`,
+List truenames use `list:` directly. An unprefixed list routes as `4 + 5 * payload`,
 with one fewer routing step than the former `meta:list` path. Nested lists also
 benefit from the shorter route; other type allocations are unchanged.
 
