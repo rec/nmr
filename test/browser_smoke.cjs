@@ -71,15 +71,15 @@ const { chromium } = require("playwright");
       ["+1", "phone:"], ["8/5", "frac:"], ["2000-02-29", "date:"],
       ["12:34", "clock:"], ["51.5, -0.12", "latlong:"], ["@1 2@1", "tune:"],
     ]) await enter(value, kind);
-    for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
-      await enter(value, "name:" + value.trim().replace(/^name:/i, "").trimStart());
-      assert.equal(await page.locator("#value").inputValue(), value);
-      assert.equal(await page.locator("#full-truename").isVisible(), true);
-    }
-    await enter("THE OF", "name:THE OF");
-    assert.equal(await page.locator("#value").inputValue(), "THE OF");
-    await page.keyboard.type(" qzx");
-    await page.waitForFunction(() => !document.querySelector("#truename").hidden && document.querySelector("#truename").textContent.startsWith("string: "));
+    await enter("Tom Ritchford", "string:");
+    await page.locator("#swap").click();
+    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "True Name" &&
+      document.querySelector("#truename").textContent === 'string: "Tom Ritchford"');
+    assert.equal(await page.locator("#full-truename").isVisible(), false);
+    assert.equal(new URL(page.url()).searchParams.get("mode"), "truename");
+    await page.locator("#swap").click();
+    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
+    assert.equal(await page.locator("#value").inputValue(), 'string: "Tom Ritchford"');
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.type("0");
     await page.waitForFunction(() => document.querySelector("#truename").textContent === "int: the");
@@ -91,25 +91,28 @@ const { chromium } = require("playwright");
     await enter("+1", "phone:");
     await page.keyboard.type("abc");
     assert.equal(await page.locator("#value").inputValue(), "+1");
-    await enter("NAME:the of", "name:the of");
-    await enter("date:nor lung", "name:date:nor lung");
-    assert.equal(await page.locator("#full-truename").textContent(), "date: 2000-02-29");
-    await enter("name:missingword", "name:missingword");
-    await page.waitForFunction(() => document.querySelector("#full-truename").textContent.startsWith("Could not browse:"));
-    assert.equal(await page.locator("#full-truename").isEnabled(), false);
-    await enter("tune:such like", "name:tune:such like");
-    assert.equal(await page.locator("#full-truename").isVisible(), true);
-    assert.ok((await page.locator("#full-truename").textContent()).startsWith("tune: @1"));
+    await page.locator("#swap").click();
+    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "True Name");
+    await enter("date:nor lung", "date:2000-02-29");
+    assert.equal(await page.locator("#full-truename").isVisible(), false);
+    const nameBookmark = page.url();
+    await page.reload();
+    await page.waitForSelector('#value[data-ready="true"]', { timeout: 120000 });
+    assert.equal(page.url(), nameBookmark);
+    assert.equal(await page.locator("#source-heading").textContent(), "True Name");
+    await page.waitForFunction(() => document.querySelector("#truename").textContent === "date: 2000-02-29");
+    requests.length = 0;
+    await page.keyboard.press("Escape");
+    await page.keyboard.type("missingword");
+    await page.waitForFunction(() => !document.querySelector("#truename").hidden);
+    assert.equal(await page.locator("#truename").isEnabled(), false);
+    await enter("tune:such like", "tune:@1");
     await page.locator("#truename").click();
     await page.waitForFunction(() => document.querySelector("#truename").getAttribute("aria-pressed") === "true");
-    await page.locator("#full-truename").click();
-    await page.waitForFunction(() => document.querySelector("#full-truename").getAttribute("aria-pressed") === "true");
+    await page.locator("#truename").click();
     assert.equal(await page.locator("#truename").getAttribute("aria-pressed"), "false");
-    await page.locator("#full-truename").click();
-    assert.equal(await page.locator("#full-truename").getAttribute("aria-pressed"), "false");
-    await enter(":play:music:tune:THE", "name::play:music:tune:THE");
-    await page.keyboard.press("Enter");
-    await page.waitForFunction(() => document.querySelector("#truename").getAttribute("aria-pressed") === "true");
+    await page.locator("#swap").click();
+    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("#value").inputValue(), "");
     assert.equal(await page.locator("#truename").isVisible(), false);
@@ -144,7 +147,7 @@ const { chromium } = require("playwright");
 
     await page.setViewportSize({ width: 375, height: 812 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
-    console.log("Single-field recognition, mouse selection, editing, playback, and local-only conversion passed");
+    console.log("Two-pane conversion, swapping, mouse selection, editing, playback, and local-only conversion passed");
   } finally {
     await browser.close();
   }

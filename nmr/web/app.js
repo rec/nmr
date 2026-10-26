@@ -4,6 +4,10 @@ import { TunePlayer } from "./tune.js";
 const field = document.querySelector("#value");
 const truenameButton = document.querySelector("#truename");
 const fullTruenameButton = document.querySelector("#full-truename");
+const swapButton = document.querySelector("#swap");
+const sourceHeading = document.querySelector("#source-heading");
+const targetHeading = document.querySelector("#target-heading");
+let mode = new URL(window.location.href).searchParams.get("mode") === "truename" ? "truename" : "description";
 const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
@@ -75,6 +79,7 @@ function unlock() {
 function changed() {
   const url = new URL(window.location.href);
   url.searchParams.set("q", editor.text);
+  url.searchParams.set("mode", mode);
   window.history.replaceState(window.history.state, "", url);
   version++;
   playVersion++;
@@ -88,34 +93,46 @@ function changed() {
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
 }
+function describeObject(object) {
+  return `${object.type}: ${object.type === "string" ? JSON.stringify(object.value) : object.value}`;
+}
+function captions() {
+  sourceHeading.textContent = mode === "description" ? "Description" : "True Name";
+  targetHeading.textContent = mode === "description" ? "True Name" : "Description";
+}
 async function recognize() {
   const revision = version;
   try {
-    const result = await request("recognize", { value: editor.text });
+    const result = await request("recognize", { value: editor.text, mode });
     if (revision !== version) return;
     currentTruename = result.truename;
-    const isTruename = result.kind === "truename";
     currentObject = result.browsed || null;
-    truenameButton.textContent = isTruename
-      ? "name: " + editor.text.trim().replace(/^name:/i, "").trimStart()
-      : (result.truename || "").replace(":", ": ");
-    truenameButton.hidden = !isTruename && !result.truename;
-    truenameButton.disabled = !result.truename;
-    if (isTruename) {
-      const value = currentObject && (currentObject.type === "string" || currentObject.value === "")
-        ? JSON.stringify(currentObject.value) : currentObject?.value;
-      fullTruenameButton.textContent = currentObject
-        ? `${currentObject.type}: ${value}` : `Could not browse: ${result.browse_error}`;
-    } else {
-      fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
-    }
-    fullTruenameButton.hidden = !isTruename && !result.full_truename;
-    fullTruenameButton.disabled = isTruename && !currentObject;
-    fullTruenameButton.setAttribute("aria-label", isTruename
-      ? "Play or stop the browsed object's tune" : "Play or stop the full-truename tune");
+    const browsing = mode === "truename";
+    truenameButton.textContent = browsing
+      ? (currentObject ? describeObject(currentObject) : result.browse_error || "")
+      : (result.truename || result.message || "").replace(":", ": ");
+    truenameButton.hidden = !truenameButton.textContent;
+    truenameButton.disabled = browsing ? !currentObject : !result.truename;
+    truenameButton.setAttribute("aria-label", browsing
+      ? "Play or stop the described object's tune" : "Play or stop the prefix-relative tune");
+    fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
+    fullTruenameButton.hidden = browsing || !result.full_truename;
+    fullTruenameButton.disabled = false;
   } catch (error) {
     if (revision === version) console.error(error);
   }
+}
+async function swap() {
+  const revision = version;
+  clearTimeout(timer);
+  if (ready) await recognize();
+  if (revision !== version) return;
+  const value = mode === "description" ? currentTruename : currentObject && describeObject(currentObject);
+  mode = mode === "description" ? "truename" : "description";
+  if (value) { editor.selectAll(); editor.replace(value); }
+  captions();
+  changed();
+  focus();
 }
 async function playTruename(absolute = false) {
   const button = absolute ? fullTruenameButton : truenameButton;
@@ -129,7 +146,7 @@ async function playTruename(absolute = false) {
   player.stop();
   playingButton = button;
   const truename = currentTruename;
-  const object = absolute ? currentObject : null;
+  const object = mode === "truename" ? currentObject : null;
   const revision = ++playVersion;
   previewPending = true;
   unlock();
@@ -162,11 +179,13 @@ document.addEventListener("selectionchange", () => {
   if (document.activeElement === field) readSelection();
 });
 document.addEventListener("pointerdown", unlock, true);
+swapButton.addEventListener("click", swap);
 truenameButton.addEventListener("click", () => playTruename());
 fullTruenameButton.addEventListener("click", () => playTruename(true));
 document.addEventListener("keydown", (event) => {
   unlock();
   if (event.isComposing || event.key === "Tab") return;
+  if (document.activeElement === swapButton && ["Enter", " "].includes(event.key)) return;
   const command = event.ctrlKey || event.metaKey;
   if (command && event.key.toLowerCase() === "a") {
     event.preventDefault(); focus(); editor.selectAll(); render(); return;
@@ -236,5 +255,6 @@ async function start() {
 }
 const query = new URL(window.location.href).searchParams.get("q");
 if (query !== null) editor.replace(query);
+captions();
 focus();
 start();

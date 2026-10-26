@@ -69,7 +69,7 @@ The convenience marker `name:` explicitly identifies a truename. It adds no
 category or radix step: `name:the of` and `the of` have the same index, as do
 `name:tune:the` and `tune:the`. Matching the marker ignores case. Use `--scope name`
 to encode a full root truename with the marker. For ordinary typed objects, the
-browser's second line shows `name:` followed by the full root word sequence.
+browser's second True Name result shows `name:` followed by the full root word sequence.
 
 Every category and type name is unique throughout the tree. Parent categories
 are optional in input: `chess:in get`, `game:chess:in get`, and
@@ -252,39 +252,41 @@ characters are escaped. For example: `/nmr?q=Tom+Ritchford`.
 The query is part of the shared URL and is sent to the hosting server when that
 URL is opened or reloaded. The app does not save the input in local storage.
 
-The page starts with an `nmr` heading and one field. Type anywhere on the page;
-click the field to position its cursor, drag to select, or double-click to select
-a word. Selection and insertion in the middle work normally, including while
-recognition updates the truename lines. Use arrow keys, Home/End, Shift selection,
-copy/cut/paste, and Backspace or
-Delete to edit. Escape clears the field and stops playback. The engine recognizes
-integers, explicit `+` phone numbers, fractions, ISO dates and times, coordinates,
-IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typed
-lists. Once phone input contains `+` and digits, typing letters leaves it unchanged
-and makes a quiet tick. Clear or replace the whole field to enter a different detail.
-Pure digits always mean an integer; slash pairs mean fractions. Use
-`YYYY-MM-DD` for dates. Incomplete explicit type syntax waits for more input.
-Otherwise unrecognized text uses `string:` truenames, preserving its original
-case and allowed spaces. The String codec rejects control ranges U+0000–001F,
-U+007F–009F, and surrogate code points. Recognized types with invalid values are not silently
-converted into strings. Recognition keeps updating as the text changes.
+The page has two panes beneath the `nmr` heading: Description and True Name.
+The left pane is always editable. Swap exchanges the captions and moves the first
+converted result into the editor. With no result, it keeps the current text.
+The direction is saved as `mode=description` or `mode=truename` alongside `q`;
+links without a mode start in Description mode.
 
-Recognition evaluates the whole field after each edit. Complete nonrepeating
-vocabulary words form a truename, matched case-insensitively; unknown words make the
-whole input a String, even when earlier words were vocabulary words. Thus `T` is
-a String, `Tom` is a vocabulary truename, and `Tom R` is a String. Input case is never
-rewritten. Generated truenames use the vocabulary's spelling. There is no persistent
-truename-mode lock or autocomplete. Explicit category/type prefixes are accepted for
-truenames, and output uses only the shortest category or type label. Lexical truenames
-can be played even when their type slots are unassigned.
-For ordinary typed objects, the first clickable truename plays prefix-relative;
-the second shows the full root truename with `name:` and plays the absolute index.
-For truename input, the first line instead displays `name:` followed by the entered
-text, preserving its case. The second shows the browsed object's type and value,
-for example `date: 2000-02-29`. Clicking that object plays its own prefix-relative
-tune. Browsing failures appear on the second line instead of hiding the input. Clicking the
-other line switches playback; clicking the playing line stops it. Enter plays
-the first line unless the second button has keyboard focus.
+In Description mode, the engine recognizes integers, explicit `+` phone numbers,
+fractions, ISO dates and times, coordinates, IP addresses, UUIDs, versions,
+durations, chess/Go moves, tune notation, and typed lists. Pure digits mean an
+integer; slash pairs mean fractions. Use `YYYY-MM-DD` for dates. Other text,
+including vocabulary words such as `Tom`, becomes a String with its original case
+and spaces. Incomplete type syntax waits for more input; invalid typed values
+remain errors. Type labels can make a description explicit, such as
+`upc: 036000291452` or `string: "123"`. Strings in typed descriptions use JSON
+quoting so swapping preserves their type, quotes, and whitespace.
+
+In True Name mode, the entire input is decoded using browsing, with optional
+category/type prefixes and case-insensitive word matching. The right pane shows
+the found object's type and value. Failed decoding shows an error instead of
+switching to String. The field's original spelling is never rewritten.
+
+Click a result on the right to play its tune. Description mode offers both the
+prefix-relative truename and the full root truename, marked `name:`. True Name
+mode offers the browsed object's description and plays its prefix-relative tune.
+Click the playing result to stop, or another result to switch. Enter plays the
+first result unless the second has focus.
+
+Type anywhere on the page; click the field to position its cursor, drag to select,
+or double-click to select a word. Arrow keys, Home/End, Shift selection,
+copy/cut/paste, and insertion in the middle work normally. Escape clears the field
+and stops playback. Phone input containing `+` and digits rejects typed letters
+with a quiet tick. Clear or replace the whole field to enter a different detail.
+The String codec rejects control ranges U+0000–001F, U+007F–009F, and surrogate
+code points.
+
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 

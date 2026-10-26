@@ -531,46 +531,35 @@ and pipeline need rather than adding several competing output formats.
 
 ### Browser experience
 
-The current browser is a single controlled input beneath a large `nmr` heading.
-Typing is routed through the editor, including deletion and paste. The field
-accepts native click placement, drag selection, and double-click word selection;
-its selection is synchronized before edits. Recognition updates never reset the
-cursor or selection. It optimistically recognizes
-unprefixed typed details and shows a clickable truename below. Digits mean Int;
-explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
-syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,
-durations, tune notation, games, and typed lists. Incomplete explicit type syntax
-waits for more input. Otherwise unrecognized text enters String mode; its exact
-case and whitespace are preserved. Recognized invalid typed values remain errors.
+The browser has Description and True Name panes side by side, beneath a centered
+`nmr` heading and the subtitle "true names of canonical things". The left pane
+always contains the editable field; the right contains clickable results. On small
+screens the panes stack. Swap exchanges captions and puts the first converted
+result into the editor. If no conversion is available, it keeps the text.
 
-Recognition uses the whole current field, without a persistent truename-mode latch.
-Complete nonrepeating vocabulary words are lexical truenames, matched without regard
-to case; otherwise ordinary text becomes a String. An initially recognized word
-never prevents a later unknown word from becoming part of a String. `T` produces
-a String, `To` and `Tom` produce vocabulary truenames, and `Tom R` produces a String.
-Input case and selection are never rewritten. Repeated bare vocabulary words also
-become a String; explicitly prefixed truenames still reject repeated words. Explicit
-prefixes with incomplete payloads remain pending. Autocomplete is deferred.
-When the input is a truename, the first line displays `name:` and the entered
-text with its original case. The second line displays the object discovered by
-`decode(..., browse=True)`, including its type and canonical value. This can repair
-unassigned slots and codec-specific noncanonical indices. A browsing failure is
-shown on that line without suppressing the input. The first line plays the input's
-prefix-relative tune; clicking the found object plays that object's prefix-relative
-tune. Strings and empty values are quoted for readable presentation.
-For ordinary typed objects, the first line uses the shortest type label and plays
-prefix-relative; the second displays the `name:`-marked full root truename and
-plays its absolute index.
-Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
-line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.
-The opening sound is `tune:the` itself, deferred to the first interaction if the
-browser blocks autoplay. Escape clears the input and stops sound.
+Description mode recognizes unprefixed details by shape and otherwise encodes
+literal String text, including vocabulary words. True Name mode exclusively uses
+`decode(..., browse=True)` and displays the found object's type and value, or a
+browsing error. Matching ignores case, while input preserves its original spelling.
+Description output offers a prefix-relative truename and a `name:`-marked full
+root truename. True Name output offers the browsed object's description. Typed
+descriptions such as `upc: 036000291452` and `string: "123"` preserve types on
+swapping; String values use JSON quoting to preserve exact whitespace and quotes.
+
+Typing, deletion, paste, native click placement, drag selection, and double-click
+word selection remain supported. Recognition never resets cursor or selection.
+Right-hand results play their tunes at F3 and 180 BPM. Clicking the playing result
+stops it; clicking another switches playback. Enter plays the first result unless
+the second has focus. Phone input rejects typed letters with a quiet tick.
+The opening sound is `tune:the`, deferred to the first interaction if autoplay is
+blocked. Escape clears the editor and stops sound.
 
 Conversion and tune arithmetic run locally through the shared Python core in a
 Pyodide worker. Each edit synchronizes the field to URL parameter `q` through
 `history.replaceState`, preserving other parameters and the fragment without
 adding history entries or issuing requests. On page load, an existing `q` fills
-the field before recognition starts. The resulting URL can be bookmarked or sent
+the field before recognition starts. The `mode` parameter preserves the editing
+direction, defaulting to Description when absent. The resulting URL can be bookmarked or sent
 to a friend; opening or reloading it sends the query to the hosting server. The
 app does not add analytics or persist the input in local storage.
 The minimal browser uses the default vocabulary; explicit canonical decoding,

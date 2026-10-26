@@ -119,7 +119,7 @@ const { loadPyodide } = require("pyodide");
   }
 
   const person = new Editor();
-  for (const [character, kind] of [["T", "string"], ["o", "truename"], ["m", "truename"], [" ", "truename"], ["R", "string"]]) {
+  for (const [character, kind] of [["T", "string"], ["o", "string"], ["m", "string"], [" ", "string"], ["R", "string"]]) {
     person.replace(character);
     const result = JSON.parse(recognize(JSON.stringify({value: person.text})));
     assert.equal(result.kind, kind);
@@ -132,17 +132,11 @@ const { loadPyodide } = require("pyodide");
     assert.ok(result.truename.startsWith(kind + ":"));
   }
   for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
-    const editor = new Editor();
-    let result;
-    for (const character of value) {
-      editor.replace(character);
-      result = JSON.parse(recognize(JSON.stringify({ value: editor.text })));
-    }
-    assert.equal(editor.text, value, "Truename matching must preserve the input case");
+    const result = JSON.parse(recognize(JSON.stringify({ value, mode: "truename" })));
     assert.equal(result.kind, "truename");
-    assert.ok(result.truename && result.browsed, "Matching mixed-case truenames must return an object");
+    assert.ok(result.truename && result.browsed);
+    assert.equal(result.truename, value);
   }
-  assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).truename, "the of");
   const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
   assert.equal(string.kind, "string");
   assert.equal(JSON.parse(convert(JSON.stringify({operation: "decode", value: string.truename}))).value, "  xyzzy!  ");
@@ -150,12 +144,12 @@ const { loadPyodide } = require("pyodide");
   assert.equal(JSON.parse(previewTruename('{"value":"int:the"}')).value, "@1");
   assert.equal(JSON.parse(previewTruename('{"value":"tune:the"}')).value, "@1");
   assert.notEqual(JSON.parse(previewTruename('{"value":"tune:the","absolute":true}')).value, "@1");
-  assert.equal(JSON.parse(recognize('{"value":"NAME:THE OF"}')).truename, "name:the of");
+  assert.equal(JSON.parse(recognize('{"value":"NAME:THE OF","mode":"truename"}')).truename, "NAME:THE OF");
   assert.deepEqual(JSON.parse(previewTruename('{"value":"name:the"}')),
     JSON.parse(previewTruename('{"value":"the"}')));
   assert.deepEqual(JSON.parse(previewTruename('{"value":"name:tune:the"}')),
     JSON.parse(previewTruename('{"value":"tune:the"}')));
-  const ode = JSON.parse(recognize('{"value":"tune:such like"}'));
+  const ode = JSON.parse(recognize('{"value":"tune:such like","mode":"truename"}'));
   assert.equal(ode.browsed.type, "tune");
   assert.equal(ode.browsed.value, "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
   assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,

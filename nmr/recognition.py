@@ -1,11 +1,12 @@
 """Shape-based recognition for the browser's single controlled input."""
 
+import json
 import re
 
 from pydantic import BaseModel
 
-from .category import label
-from .nmr import Nmr, unmark_truename
+from .category import Category, label
+from .nmr import Nmr
 
 
 class Recognition(BaseModel, frozen=True):
@@ -14,35 +15,29 @@ class Recognition(BaseModel, frozen=True):
     message: str = ""
 
 
-def recognize_input(value: str, engine: Nmr) -> Recognition:
-    original = value
-    value, marked = unmark_truename(value)
+def describe_input(value: str, engine: Nmr) -> Recognition:
     if not value:
-        return Recognition(kind="truename" if marked else None)
-    words = {w.casefold(): w for w in engine.words}
-    prefix, separator, payload = value.rpartition(":")
+        return Recognition()
+    prefix, separator, payload = value.lstrip().partition(":")
     node = None
-    if separator and prefix:
+    if separator:
         try:
-            node, _ = engine.root.lookup(prefix.casefold())
+            node, _ = engine.root.lookup(prefix.strip().casefold())
         except ValueError:
             pass
-    if marked and separator and node is None:
-        return Recognition(kind="truename", message="Unknown or malformed prefix")
-    tokens = (payload if node is not None else value).split()
-    if tokens and all(i.casefold() in words for i in tokens):
-        normalized = [words[i.casefold()] for i in tokens]
-        if len(set(normalized)) == len(normalized):
-            truename = " ".join(normalized)
-            if node is not None:
-                truename = label(node) + ":" + truename
-            if marked:
-                truename = "name:" + truename
-            return Recognition(truename=truename, kind="truename")
-        if marked or node is not None:
-            return Recognition(kind="truename", message="Truename repeats a word")
-    if marked:
-        return Recognition(kind="truename")
+    if node is not None and not isinstance(node, Category):
+        kind = label(node)
+        try:
+            payload = payload.removeprefix(" ")
+            if kind == "string":
+                decoded: object = json.loads(payload)
+                if not isinstance(decoded, str):
+                    raise ValueError("Expected a quoted string")
+                payload = decoded
+            result = engine.encode(payload, kind)
+        except ValueError:
+            return Recognition(kind=kind, message=f"Not yet a valid {kind}")
+        return Recognition(truename=result.truename, kind=kind)
     kind = None
     if value.startswith("+") and any(i.isdecimal() for i in value):
         kind = "phone"
@@ -52,13 +47,11 @@ def recognize_input(value: str, engine: Nmr) -> Recognition:
                 kind = candidate
                 break
     if kind is None:
-        if node is not None:
-            return Recognition(kind=label(node))
         if any(re.fullmatch(i, value) for i in INCOMPLETE_TYPES):
             return Recognition()
         kind = "string"
     try:
-        result = engine.encode(original if kind == "string" else value, kind)
+        result = engine.encode(value, kind)
     except ValueError:
         return Recognition(kind=kind, message=f"Not yet a valid {kind}")
     message = (

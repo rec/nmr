@@ -43,6 +43,7 @@ class TruenamePreview(Preview, frozen=True):
 
 class RecognitionRequest(BaseModel, frozen=True):
     value: str
+    mode: Literal["description", "truename"] = "description"
 
 
 _engine = Nmr()
@@ -112,20 +113,23 @@ def render_tune(tune: Tune, root: int, bpm: int) -> str:
 
 def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
-    result = recognition.recognize_input(request.value, _engine)
-    response = result.model_dump()
-    response["full_truename"] = None
-    if result.kind == "truename":
-        try:
-            response["browsed"] = _engine.decode(
-                request.value, browse=True
-            ).model_dump()
-        except ValueError as error:
-            response["browse_error"] = str(error)
-    elif result.truename:
-        response["full_truename"] = "name:" + " ".join(
-            _engine.to_truename(_engine.truename_index(result.truename))
-        )
+    if request.mode == "truename":
+        response: dict[str, object] = {"kind": "truename", "truename": None}
+        if request.value.strip():
+            try:
+                result = _engine.decode(request.value, browse=True)
+                response["browsed"] = result.model_dump()
+                response["truename"] = request.value
+            except ValueError as error:
+                response["browse_error"] = str(error)
+    else:
+        description = recognition.describe_input(request.value, _engine)
+        response = description.model_dump()
+        response["full_truename"] = None
+        if description.truename:
+            response["full_truename"] = "name:" + " ".join(
+                _engine.to_truename(_engine.truename_index(description.truename))
+            )
     return json.dumps(response)
 
 
