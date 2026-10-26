@@ -150,8 +150,13 @@ const { loadPyodide } = require("pyodide");
   assert.equal(JSON.parse(previewTruename('{"value":"int:the"}')).value, "@1");
   assert.equal(JSON.parse(previewTruename('{"value":"tune:the"}')).value, "@1");
   assert.notEqual(JSON.parse(previewTruename('{"value":"tune:the","absolute":true}')).value, "@1");
+  assert.equal(JSON.parse(recognize('{"value":"NAME:THE OF"}')).truename, "name:the of");
+  assert.deepEqual(JSON.parse(previewTruename('{"value":"name:the"}')),
+    JSON.parse(previewTruename('{"value":"the"}')));
+  assert.deepEqual(JSON.parse(previewTruename('{"value":"name:tune:the"}')),
+    JSON.parse(previewTruename('{"value":"tune:the"}')));
   const ode = JSON.parse(recognize('{"value":"tune:such like"}'));
-  assert.ok(ode.full_truename && !ode.full_truename.includes(":"));
+  assert.ok(ode.full_truename.startsWith("name:"));
   assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,
     "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
   assert.deepEqual(JSON.parse(previewTruename(JSON.stringify({ value: ode.full_truename }))),

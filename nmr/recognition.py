@@ -5,7 +5,7 @@ import re
 from pydantic import BaseModel
 
 from .category import label
-from .nmr import Nmr
+from .nmr import Nmr, unmark_truename
 
 
 class Recognition(BaseModel, frozen=True):
@@ -16,9 +16,9 @@ class Recognition(BaseModel, frozen=True):
 
 def recognize_input(value: str, engine: Nmr) -> Recognition:
     original = value
-    value = value.strip()
+    value, marked = unmark_truename(value)
     if not value:
-        return Recognition()
+        return Recognition(kind="truename" if marked else None)
     words = {w.casefold(): w for w in engine.words}
     prefix, separator, payload = value.rpartition(":")
     node = None
@@ -27,6 +27,8 @@ def recognize_input(value: str, engine: Nmr) -> Recognition:
             node, _ = engine.root.lookup(prefix.casefold())
         except ValueError:
             pass
+    if marked and separator and node is None:
+        return Recognition(kind="truename", message="Unknown or malformed prefix")
     tokens = (payload if node is not None else value).split()
     if tokens and all(i.casefold() in words for i in tokens):
         normalized = [words[i.casefold()] for i in tokens]
@@ -34,9 +36,13 @@ def recognize_input(value: str, engine: Nmr) -> Recognition:
             truename = " ".join(normalized)
             if node is not None:
                 truename = label(node) + ":" + truename
+            if marked:
+                truename = "name:" + truename
             return Recognition(truename=truename, kind="truename")
-        if node is not None:
+        if marked or node is not None:
             return Recognition(kind="truename", message="Truename repeats a word")
+    if marked:
+        return Recognition(kind="truename")
     kind = None
     if value.startswith("+") and any(i.isdecimal() for i in value):
         kind = "phone"

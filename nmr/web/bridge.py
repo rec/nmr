@@ -115,7 +115,7 @@ def recognize(request_json: str) -> str:
     result = recognition.recognize_input(request.value, _engine)
     response = result.model_dump()
     response["full_truename"] = (
-        " ".join(_engine.to_truename(_engine.truename_index(result.truename)))
+        "name:" + " ".join(_engine.to_truename(_engine.truename_index(result.truename)))
         if result.truename
         else None
     )

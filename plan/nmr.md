@@ -229,6 +229,9 @@ including an optional leading colon, but output always prints only the final
 category or type name. Thus `:play:game:chess:in get` prints as `chess:in get`.
 
 * No prefix: words encode the global integer.
+* `name:`: a convenience marker with no category, slot, or radix cost. It is
+  removed before interpreting the remaining truename, so it can also wrap an
+  existing category/type prefix. The browser uses it on the full-root second line.
 * `play:`: words encode the integer inside the play category.
 * `game:`: words encode the integer inside the game category.
 * `chess:`: words encode the integer inside the chess leaf.
@@ -551,7 +554,7 @@ prefixes with incomplete payloads remain pending. Autocomplete is deferred.
 Lexical truenames can be played even if their type slots are unassigned, without
 browsing repairs. Optional parent prefixes are accepted, and the first line uses
 the shortest label. That line plays prefix-relative, so a Tune plays its original
-melody. A second line displays the full unprefixed truename and plays its absolute
+melody. A second line displays the full root truename marked with `name:` and plays its absolute
 root index.
 Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
 line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.

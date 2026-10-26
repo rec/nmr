@@ -91,7 +91,7 @@ async function recognize() {
     currentTruename = result.truename;
     truenameButton.textContent = (result.truename || "").replace(":", ": ");
     truenameButton.hidden = !result.truename;
-    fullTruenameButton.textContent = result.full_truename || "";
+    fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
     fullTruenameButton.hidden = !result.full_truename;
   } catch (error) {
     if (revision === version) console.error(error);

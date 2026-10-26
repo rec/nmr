@@ -68,3 +68,44 @@ def test_wrong_parent_categories_are_rejected() -> None:
 def test_malformed_prefixes_are_not_accepted_as_canonical(truename: str) -> None:
     with pytest.raises(ValueError):
         Nmr().decode(truename)
+
+
+@pytest.mark.parametrize("prefix", ["name", "NAME", "NaMe"])
+def test_name_prefix_has_no_category_cost(prefix: str) -> None:
+    engine = Nmr()
+    bare = engine.encode("2/4", "frac", scope="")
+    marked = prefix + ":" + bare.truename
+    assert engine.truename_index(marked) == engine.truename_index(bare.truename)
+    decoded = engine.decode(marked)
+    assert decoded.value == bare.value
+    assert decoded.truename == "name:" + bare.truename
+    assert decoded.canonical
+    assert engine.to_tune(marked) == engine.to_tune(bare.truename)
+    assert engine.encode("2/4", "frac", scope="name").truename == decoded.truename
+    assert "name" not in engine.types()
+    assert all("name" not in i.split(":") for i in engine.types())
+
+
+def test_name_prefix_preserves_browsing_repairs() -> None:
+    engine = Nmr()
+    bare = " ".join(engine.to_truename(15))
+    with pytest.raises(ValueError, match="unassigned"):
+        engine.decode("name:" + bare)
+    browsed = engine.decode("name:" + bare, browse=True)
+    assert browsed.value == engine.decode(bare, browse=True).value
+    assert browsed.truename.startswith("name:")
+    assert not browsed.canonical
+
+
+@pytest.mark.parametrize("scope", ["", "play", "game", "chess"])
+def test_name_marker_can_wrap_an_existing_prefix(scope: str) -> None:
+    engine = Nmr()
+    source = engine.encode("e4 e5 Nf3", "chess", scope).truename
+    marked = "name:" + source
+    assert engine.decode(marked).value == engine.decode(source).value
+    assert engine.decode(marked).truename == marked
+    for absolute in (False, True):
+        assert engine.truename_index(marked, absolute) == engine.truename_index(
+            source, absolute
+        )
+        assert engine.to_tune(marked, absolute) == engine.to_tune(source, absolute)

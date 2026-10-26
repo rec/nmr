@@ -39,7 +39,7 @@ class Nmr(Words):
         index = codec.str_to_index(value)
         canonical_value = codec.index_to_str(index)
         prefix = path if scope is None else scope.casefold().strip(":")
-        _, prefix_slots = self.root.lookup(prefix)
+        _, prefix_slots = self.root.lookup("" if prefix == "name" else prefix)
         if slots[: len(prefix_slots)] != prefix_slots:
             raise ValueError("Prefix scope does not contain the selected type")
         truename = " ".join(self.to_truename(route(slots[len(prefix_slots) :], index)))
@@ -58,7 +58,8 @@ class Nmr(Words):
     ) -> Result:
         if vocabulary is not None and vocabulary != self.identifier:
             raise ValueError("Vocabulary identifier does not match the selected list")
-        prefix, separator, payload = truename.strip().rpartition(":")
+        truename, marked = unmark_truename(truename)
+        prefix, separator, payload = truename.rpartition(":")
         if separator and not prefix:
             raise ValueError("A prefix cannot be empty")
         if not separator:
@@ -83,7 +84,12 @@ class Nmr(Words):
             raise ValueError(
                 "Noncanonical truename; use browse explicitly to explore it"
             )
-        return result.model_copy(update={"canonical": canonical})
+        return result.model_copy(
+            update={
+                "canonical": canonical,
+                "truename": "name:" + result.truename if marked else result.truename,
+            }
+        )
 
     def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeTruenamer]]:
         name = type_name.casefold().strip(":")
@@ -102,7 +108,8 @@ class Nmr(Words):
 
     def truename_index(self, truename: str, absolute: bool = True) -> int:
         """Read a truename's number without requiring an assigned object type."""
-        prefix, separator, payload = truename.strip().rpartition(":")
+        truename, _ = unmark_truename(truename)
+        prefix, separator, payload = truename.rpartition(":")
         if separator and not prefix:
             raise ValueError("A prefix cannot be empty")
         _, slots = self.root.lookup(prefix.casefold())
@@ -110,3 +117,12 @@ class Nmr(Words):
         if absolute:
             index = route(slots, index)
         return index
+
+
+def unmark_truename(value: str) -> tuple[str, bool]:
+    """Remove the category-free marker before interpreting a truename's index."""
+    value = value.strip()
+    prefix, separator, payload = value.partition(":")
+    if separator and prefix.casefold() == "name":
+        return payload.strip(), True
+    return value, False

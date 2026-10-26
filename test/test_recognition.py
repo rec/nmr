@@ -138,12 +138,13 @@ def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
 
 
 @pytest.mark.parametrize("value", ["42", "tune:such like", "THE OF"])
-def test_full_truename_has_no_prefix_and_preserves_the_absolute_number(
+def test_full_truename_has_name_prefix_without_changing_the_absolute_number(
     value: str,
 ) -> None:
     engine = Nmr()
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
-    assert ":" not in result["full_truename"]
+    assert result["full_truename"].startswith("name:")
+    assert result["full_truename"].count(":") == 1
     assert engine.truename_index(result["full_truename"]) == engine.truename_index(
         result["truename"]
     )
@@ -200,3 +201,32 @@ def test_unknown_text_can_become_a_word_or_type_as_it_is_edited() -> None:
     assert recognize_input("42", engine).kind == "int"
     assert recognize_input("@1", engine).kind == "tune"
     assert recognize_input("tune:unfinishedword", engine).truename is None
+
+
+@pytest.mark.parametrize("value", ["name:THE OF", "NAME:the of"])
+def test_name_prefix_explicitly_selects_truename_recognition(value: str) -> None:
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert result["kind"] == "truename"
+    assert result["truename"] == "name:the of"
+    assert result["full_truename"] == "name:the of"
+    marked = json.loads(bridge.preview_truename(json.dumps({"value": value})))
+    bare = json.loads(bridge.preview_truename('{"value":"the of"}'))
+    assert marked == bare
+
+
+@pytest.mark.parametrize(
+    "value", ["name:", "name:unrecognizedword", "name:the THE", "name:42", "name:+1"]
+)
+def test_invalid_explicit_name_input_is_not_treated_as_a_string(value: str) -> None:
+    result = recognize_input(value, Nmr())
+    assert result.truename is None
+    assert result.kind == "truename"
+
+
+def test_name_marker_preserves_an_existing_type_prefix() -> None:
+    result = json.loads(bridge.recognize('{"value":"NAME:TUNE:THE"}'))
+    assert result["kind"] == "truename"
+    assert result["truename"] == "name:tune:the"
+    assert Nmr().truename_index(result["full_truename"]) == Nmr().truename_index(
+        "tune:the"
+    )

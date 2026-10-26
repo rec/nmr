@@ -65,6 +65,12 @@ Without `--value`, the CLI reads stdin, or prompts when used in a terminal.
 `--value` preserves its entire argument, including whitespace, `#`, and newlines.
 There is no implicit type guessing or country inference.
 
+The convenience marker `name:` explicitly identifies a truename. It adds no
+category or radix step: `name:the of` and `the of` have the same index, as do
+`name:tune:the` and `tune:the`. Matching the marker ignores case. Use `--scope name`
+to encode a full root truename with the marker. The browser's second line always
+shows `name:` followed by the full root word sequence.
+
 Every category and type name is unique throughout the tree. Parent categories
 are optional in input: `chess:in get`, `game:chess:in get`, and
 `:play:game:chess:in get` all read identically and print as `chess:in get`.
@@ -164,7 +170,7 @@ trailing rests disappear, and a phrase must start with a sounding note.
 In the browser, type interval text directly into the single field to encode a tune.
 Click the first truename line, or press Enter, to hear its prefix-relative tune.
 For a `tune:` truename this plays the encoded melody. A second line displays the full
-unprefixed truename and plays its absolute root index, including its type path. The library's
+root truename marked with `name:` and plays its absolute root index, including its type path. The library's
 `Nmr.to_tune()` still supports both prefix-relative and absolute interpretations.
 Browser playback runs at 180 BPM, centered on F3 (MIDI 53), rather than
 starting there. Click the truename again while it plays to stop it.
@@ -265,7 +271,7 @@ truename-mode lock or autocomplete. Explicit category/type prefixes are accepted
 truenames, and output uses only the shortest category or type label. Lexical truenames
 can be played even when their type slots are unassigned.
 The first clickable truename line plays prefix-relative by default. The second line
-shows the full unprefixed truename and plays the absolute root index. Clicking the
+shows the full root truename with the `name:` marker and plays the absolute root index. Clicking the
 other line switches playback; clicking the playing line stops it. Enter plays
 the first line unless the second button has keyboard focus.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
