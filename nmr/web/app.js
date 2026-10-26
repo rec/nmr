@@ -72,6 +72,9 @@ function unlock() {
   });
 }
 function changed() {
+  const url = new URL(window.location.href);
+  url.searchParams.set("q", editor.text);
+  window.history.replaceState(window.history.state, "", url);
   version++;
   playVersion++;
   previewPending = false;
@@ -211,5 +214,7 @@ async function start() {
     console.error(error);
   }
 }
+const query = new URL(window.location.href).searchParams.get("q");
+if (query !== null) editor.replace(query);
 focus();
 start();

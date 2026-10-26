@@ -111,6 +111,32 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#full-truename").isVisible(), false);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], "Typing must not send details over the network");
+    const historyLength = await page.evaluate(() => history.length);
+    const original = new URL(page.url());
+    await page.keyboard.press("Escape");
+    let query = "";
+    for (const character of "Tom Ritchford + café & 🎵") {
+      await page.keyboard.type(character);
+      query += character;
+      assert.equal(new URL(page.url()).searchParams.get("q"), query);
+    }
+    const bookmark = new URL(page.url());
+    assert.ok(bookmark.search.includes("q=Tom+Ritchford+%2B+caf%C3%A9+%26+"));
+    assert.equal(bookmark.pathname, original.pathname);
+    assert.equal(bookmark.hash, original.hash);
+    assert.equal(bookmark.searchParams.get("v"), original.searchParams.get("v"));
+    assert.equal(await page.evaluate(() => history.length), historyLength);
+    assert.deepEqual(requests, [], "Updating the bookmark must not send requests");
+    await page.reload();
+    assert.equal(await page.locator("#value").inputValue(), query);
+    await page.waitForSelector('#value[data-ready="true"]', { timeout: 120000 });
+    await page.waitForFunction(() => !document.querySelector("#truename").hidden &&
+      document.querySelector("#truename").textContent.startsWith("string: "));
+    await page.keyboard.press("Escape");
+    assert.equal(new URL(page.url()).searchParams.get("q"), "");
+    await page.reload();
+    assert.equal(await page.locator("#value").inputValue(), "");
+
     await page.setViewportSize({ width: 375, height: 812 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     console.log("Single-field recognition, mouse selection, editing, playback, and local-only conversion passed");

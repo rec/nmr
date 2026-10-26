@@ -562,7 +562,12 @@ The opening sound is `tune:the` itself, deferred to the first interaction if the
 browser blocks autoplay. Escape clears the input and stops sound.
 
 Conversion and tune arithmetic run locally through the shared Python core in a
-Pyodide worker. No input values enter URLs, network requests, analytics, or storage.
+Pyodide worker. Each edit synchronizes the field to URL parameter `q` through
+`history.replaceState`, preserving other parameters and the fragment without
+adding history entries or issuing requests. On page load, an existing `q` fills
+the field before recognition starts. The resulting URL can be bookmarked or sent
+to a friend; opening or reloading it sends the query to the hosting server. The
+app does not add analytics or persist the input in local storage.
 The minimal browser uses the default vocabulary; explicit canonical decoding,
 browsing, custom-list exchange, and other advanced operations remain available
 through the CLI and library.

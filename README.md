@@ -242,8 +242,14 @@ asset loading used here. No conversion server or account is needed.
 The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
 requires a connection and a WebAssembly-capable modern browser. The project,
 chess library, and semantic-version library are bundled from the same installation
-that builds the site. Conversion runs in a worker; input values are never sent
-over the network or saved in browser storage. Reloading loses the input.
+that builds the site. Conversion runs locally in a worker. Each text edit updates
+`q` in the current URL without a network request or an extra browser history entry.
+Copy or bookmark that URL to share the query; opening it fills the field and runs
+recognition. Spaces appear as `+`, and literal plus signs and other special
+characters are escaped. For example: `/nmr?q=Tom+Ritchford`.
+
+The query is part of the shared URL and is sent to the hosting server when that
+URL is opened or reloaded. The app does not save the input in local storage.
 
 The page starts with an `nmr` heading and one field. Type anywhere on the page;
 click the field to position its cursor, drag to select, or double-click to select
