@@ -529,8 +529,10 @@ and pipeline need rather than adding several competing output formats.
 ### Browser experience
 
 The current browser is a single controlled input beneath a large `nmr` heading.
-All typing is routed through the editor, including selection, deletion, and paste;
-clicking the field does not reposition its cursor. It optimistically recognizes
+Typing is routed through the editor, including deletion and paste. The field
+accepts native click placement, drag selection, and double-click word selection;
+its selection is synchronized before edits. Recognition updates never reset the
+cursor or selection. It optimistically recognizes
 unprefixed typed details and shows a clickable word name below. Digits mean Int;
 explicit `+` with digits means Phone; slash pairs mean Frac and dates require ISO
 syntax. Other supported shapes include times, coordinates, IPs, UUIDs, versions,

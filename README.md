@@ -240,8 +240,10 @@ that builds the site. Conversion runs in a worker; input values are never sent
 over the network or saved in browser storage. Reloading loses the input.
 
 The page starts with an `nmr` heading and one field. Type anywhere on the page;
-the editor owns its text and cursor, and clicking the field leaves the cursor in
-place. Use arrow keys, Home/End, Shift selection, copy/cut/paste, and Backspace or
+click the field to position its cursor, drag to select, or double-click to select
+a word. Selection and insertion in the middle work normally, including while
+recognition updates the name lines. Use arrow keys, Home/End, Shift selection,
+copy/cut/paste, and Backspace or
 Delete to edit. Escape clears the field and stops playback. The engine recognizes
 integers, explicit `+` phone numbers, fractions, ISO dates and times, coordinates,
 IP addresses, UUIDs, versions, durations, chess/Go moves, tune notation, and typed

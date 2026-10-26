@@ -111,3 +111,18 @@ test("editing mixed-case text preserves its case and selection", () => {
   value.replace("OM");
   assert.equal(value.text, "TOM THE oF ");
 });
+
+test("backward selections replace and delete the selected text in the middle", () => {
+  const value = editor("12345");
+  value.move(4);
+  value.move(1, true);
+  assert.equal(value.selection(), "234");
+  value.replace("X");
+  assert.equal(value.text, "1X5");
+  assert.equal(value.cursor, 2);
+  value.move(2);
+  value.move(1, true);
+  value.erase(1);
+  assert.equal(value.text, "15");
+  assert.equal(value.cursor, 1);
+});

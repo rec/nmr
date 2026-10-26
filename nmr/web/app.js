@@ -56,8 +56,15 @@ function render() {
     editor.cursor < editor.anchor ? "backward" : "forward");
 }
 function focus() {
+  readSelection();
   field.focus({ preventScroll: true });
   render();
+}
+function readSelection() {
+  if (composing || field.value !== editor.text) return;
+  const backward = field.selectionDirection === "backward";
+  editor.anchor = backward ? field.selectionEnd : field.selectionStart;
+  editor.cursor = backward ? field.selectionStart : field.selectionEnd;
 }
 function unlock() {
   player?.unlock().catch(() => {
@@ -81,7 +88,6 @@ async function recognize() {
   try {
     const result = await request("recognize", { value: editor.text });
     if (revision !== version) return;
-    render();
     currentName = result.name;
     nameButton.textContent = (result.name || "").replace(":", ": ");
     nameButton.hidden = !result.name;
@@ -128,17 +134,9 @@ function insert(text) {
   else { player?.tick(); render(); }
 }
 
-// Mouse placement never changes the selection owned by the editor.
-field.addEventListener("pointerdown", (event) => {
-  event.preventDefault();
-  focus();
-});
-field.addEventListener("click", (event) => { event.preventDefault(); render(); });
-field.addEventListener("focus", render);
+field.addEventListener("select", readSelection);
 document.addEventListener("selectionchange", () => {
-  if (document.activeElement === field && !composing &&
-      (field.selectionStart !== Math.min(editor.anchor, editor.cursor) ||
-       field.selectionEnd !== Math.max(editor.anchor, editor.cursor))) render();
+  if (document.activeElement === field) readSelection();
 });
 document.addEventListener("pointerdown", unlock, true);
 nameButton.addEventListener("click", () => playName());
@@ -179,16 +177,18 @@ document.addEventListener("paste", (event) => {
   insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
+  readSelection();
   event.preventDefault();
   event.clipboardData.setData("text/plain", editor.selection());
   if (action === "cut") { editor.replace(""); changed(); }
 });
-field.addEventListener("compositionstart", () => { composing = true; });
+field.addEventListener("compositionstart", () => { readSelection(); composing = true; });
 field.addEventListener("compositionend", (event) => {
   composing = false; insert(event.data);
 });
 field.addEventListener("beforeinput", (event) => {
   if (composing || event.inputType === "insertCompositionText") return;
+  readSelection();
   event.preventDefault();
   if (event.inputType === "insertText" || event.inputType === "insertReplacementText") {
     insert(event.data || "");
@@ -203,7 +203,6 @@ async function start() {
     await request("configure", {});
     ready = true;
     field.dataset.ready = "true";
-    render();
     await recognize();
     // tune:the is the one-beat zeroth tune, independently of its root routing.
     const intro = await request("preview", { value: "@1", ...presentation });
