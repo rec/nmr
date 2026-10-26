@@ -105,7 +105,7 @@ const { loadPyodide } = require("pyodide");
   const recognize = runtime.globals.get("recognize");
   const previewName = runtime.globals.get("preview_name");
   const { Editor } = await import("../nmr/web/editor.mjs");
-  for (const value of ["asdf", "Hello!", "dfasdfasdf", "iPhone"]) {
+  for (const value of ["asdf", "asdfasdf", "Hello!", "dfasdfasdf", "iPhone"]) {
     const editor = new Editor();
     editor.setWords(info.words);
     let result;
