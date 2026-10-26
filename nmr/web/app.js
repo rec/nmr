@@ -15,6 +15,7 @@ let timer;
 let ready = false;
 let composing = false;
 let currentTruename = null;
+let currentObject = null;
 let previewPending = false;
 let playingButton = null;
 let player;
@@ -80,6 +81,7 @@ function changed() {
   previewPending = false;
   player?.stop();
   currentTruename = null;
+  currentObject = null;
   truenameButton.hidden = true;
   fullTruenameButton.hidden = true;
   render();
@@ -92,10 +94,25 @@ async function recognize() {
     const result = await request("recognize", { value: editor.text });
     if (revision !== version) return;
     currentTruename = result.truename;
-    truenameButton.textContent = (result.truename || "").replace(":", ": ");
-    truenameButton.hidden = !result.truename;
-    fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
-    fullTruenameButton.hidden = !result.full_truename;
+    const isTruename = result.kind === "truename";
+    currentObject = result.browsed || null;
+    truenameButton.textContent = isTruename
+      ? "name: " + editor.text.trim().replace(/^name:/i, "").trimStart()
+      : (result.truename || "").replace(":", ": ");
+    truenameButton.hidden = !isTruename && !result.truename;
+    truenameButton.disabled = !result.truename;
+    if (isTruename) {
+      const value = currentObject && (currentObject.type === "string" || currentObject.value === "")
+        ? JSON.stringify(currentObject.value) : currentObject?.value;
+      fullTruenameButton.textContent = currentObject
+        ? `${currentObject.type}: ${value}` : `Could not browse: ${result.browse_error}`;
+    } else {
+      fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
+    }
+    fullTruenameButton.hidden = !isTruename && !result.full_truename;
+    fullTruenameButton.disabled = isTruename && !currentObject;
+    fullTruenameButton.setAttribute("aria-label", isTruename
+      ? "Play or stop the browsed object's tune" : "Play or stop the full-truename tune");
   } catch (error) {
     if (revision === version) console.error(error);
   }
@@ -112,11 +129,14 @@ async function playTruename(absolute = false) {
   player.stop();
   playingButton = button;
   const truename = currentTruename;
+  const object = absolute ? currentObject : null;
   const revision = ++playVersion;
   previewPending = true;
   unlock();
   try {
-    const music = await request("preview_truename", { value: truename, absolute, ...presentation });
+    const music = object
+      ? await request("preview_item", { operation: "encode", type_name: object.type, value: object.value, ...presentation })
+      : await request("preview_truename", { value: truename, absolute, ...presentation });
     if (revision !== playVersion || currentTruename !== truename) return;
     if (music.playback_error) throw new Error(music.playback_error);
     previewPending = false;

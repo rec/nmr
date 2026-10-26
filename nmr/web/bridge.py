@@ -114,11 +114,18 @@ def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
     result = recognition.recognize_input(request.value, _engine)
     response = result.model_dump()
-    response["full_truename"] = (
-        "name:" + " ".join(_engine.to_truename(_engine.truename_index(result.truename)))
-        if result.truename
-        else None
-    )
+    response["full_truename"] = None
+    if result.kind == "truename":
+        try:
+            response["browsed"] = _engine.decode(
+                request.value, browse=True
+            ).model_dump()
+        except ValueError as error:
+            response["browse_error"] = str(error)
+    elif result.truename:
+        response["full_truename"] = "name:" + " ".join(
+            _engine.to_truename(_engine.truename_index(result.truename))
+        )
     return json.dumps(response)
 
 

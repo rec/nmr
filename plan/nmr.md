@@ -231,7 +231,7 @@ category or type name. Thus `:play:game:chess:in get` prints as `chess:in get`.
 * No prefix: words encode the global integer.
 * `name:`: a convenience marker with no category, slot, or radix cost. It is
   removed before interpreting the remaining truename, so it can also wrap an
-  existing category/type prefix. The browser uses it on the full-root second line.
+  existing category/type prefix. The browser uses it to mark displayed truenames.
 * `play:`: words encode the integer inside the play category.
 * `game:`: words encode the integer inside the game category.
 * `chess:`: words encode the integer inside the chess leaf.
@@ -551,11 +551,16 @@ a String, `To` and `Tom` produce vocabulary truenames, and `Tom R` produces a St
 Input case and selection are never rewritten. Repeated bare vocabulary words also
 become a String; explicitly prefixed truenames still reject repeated words. Explicit
 prefixes with incomplete payloads remain pending. Autocomplete is deferred.
-Lexical truenames can be played even if their type slots are unassigned, without
-browsing repairs. Optional parent prefixes are accepted, and the first line uses
-the shortest label. That line plays prefix-relative, so a Tune plays its original
-melody. A second line displays the full root truename marked with `name:` and plays its absolute
-root index.
+When the input is a truename, the first line displays `name:` and the entered
+text with its original case. The second line displays the object discovered by
+`decode(..., browse=True)`, including its type and canonical value. This can repair
+unassigned slots and codec-specific noncanonical indices. A browsing failure is
+shown on that line without suppressing the input. The first line plays the input's
+prefix-relative tune; clicking the found object plays that object's prefix-relative
+tune. Strings and empty values are quoted for readable presentation.
+For ordinary typed objects, the first line uses the shortest type label and plays
+prefix-relative; the second displays the `name:`-marked full root truename and
+plays its absolute index.
 Both use F3 at 180 BPM. Clicking the playing line stops it; clicking the other
 line switches playback. Enter defaults to the first line, or the second when focused. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the` itself, deferred to the first interaction if the

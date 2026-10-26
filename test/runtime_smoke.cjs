@@ -123,7 +123,7 @@ const { loadPyodide } = require("pyodide");
     person.replace(character);
     const result = JSON.parse(recognize(JSON.stringify({value: person.text})));
     assert.equal(result.kind, kind);
-    assert.ok(result.truename && result.full_truename, `Both truename lines must exist for ${person.text}`);
+    assert.ok(result.truename && (kind === "truename" ? result.browsed : result.full_truename), `Both results must exist for ${person.text}`);
   }
   assert.equal(person.text, "Tom R");
   for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
@@ -140,7 +140,7 @@ const { loadPyodide } = require("pyodide");
     }
     assert.equal(editor.text, value, "Truename matching must preserve the input case");
     assert.equal(result.kind, "truename");
-    assert.ok(result.truename && result.full_truename, "Matching mixed-case truenames must populate both lines");
+    assert.ok(result.truename && result.browsed, "Matching mixed-case truenames must return an object");
   }
   assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).truename, "the of");
   const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
@@ -156,11 +156,12 @@ const { loadPyodide } = require("pyodide");
   assert.deepEqual(JSON.parse(previewTruename('{"value":"name:tune:the"}')),
     JSON.parse(previewTruename('{"value":"tune:the"}')));
   const ode = JSON.parse(recognize('{"value":"tune:such like"}'));
-  assert.ok(ode.full_truename.startsWith("name:"));
+  assert.equal(ode.browsed.type, "tune");
+  assert.equal(ode.browsed.value, "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
   assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,
     "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
-  assert.deepEqual(JSON.parse(previewTruename(JSON.stringify({ value: ode.full_truename }))),
-    JSON.parse(previewTruename(JSON.stringify({ value: ode.truename, absolute: true }))));
+  assert.deepEqual(JSON.parse(previewItem(JSON.stringify({operation: "encode", type_name: ode.browsed.type, value: ode.browsed.value}))),
+    JSON.parse(previewTruename(JSON.stringify({value: ode.truename}))));
   recognize.destroy();
   previewTruename.destroy();
   configure(JSON.stringify({ words: ["é", "red", "blue", "green", "gold", "white", "black"] }));

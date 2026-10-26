@@ -137,7 +137,7 @@ def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
     assert result["playback"][0]["duration"] == 1 / 3
 
 
-@pytest.mark.parametrize("value", ["42", "tune:such like", "THE OF"])
+@pytest.mark.parametrize("value", ["42", "@1", "Tom R"])
 def test_full_truename_has_name_prefix_without_changing_the_absolute_number(
     value: str,
 ) -> None:
@@ -176,8 +176,11 @@ def test_every_step_of_typing_a_persons_name_populates_both_lines(
 ) -> None:
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
     assert result["kind"] == kind
-    assert result["truename"] and result["full_truename"]
-    if kind == "string":
+    assert result["truename"]
+    if kind == "truename":
+        assert result["browsed"]
+    else:
+        assert result["full_truename"]
         assert Nmr().decode(result["truename"]).value == value
 
 
@@ -208,7 +211,8 @@ def test_name_prefix_explicitly_selects_truename_recognition(value: str) -> None
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
     assert result["kind"] == "truename"
     assert result["truename"] == "name:the of"
-    assert result["full_truename"] == "name:the of"
+    assert result["full_truename"] is None
+    assert result["browsed"] == Nmr().decode(value, browse=True).model_dump()
     marked = json.loads(bridge.preview_truename(json.dumps({"value": value})))
     bare = json.loads(bridge.preview_truename('{"value":"the of"}'))
     assert marked == bare
@@ -227,6 +231,34 @@ def test_name_marker_preserves_an_existing_type_prefix() -> None:
     result = json.loads(bridge.recognize('{"value":"NAME:TUNE:THE"}'))
     assert result["kind"] == "truename"
     assert result["truename"] == "name:tune:the"
-    assert Nmr().truename_index(result["full_truename"]) == Nmr().truename_index(
-        "tune:the"
-    )
+    assert result["browsed"]["type"] == "tune"
+    assert result["browsed"]["value"] == "@1"
+
+
+@pytest.mark.parametrize("value", ["date:nor lung", "tune:such like", "Tom"])
+def test_truename_input_returns_its_browsed_object(value: str) -> None:
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert result["kind"] == "truename"
+    assert result["browsed"] == Nmr().decode(value, browse=True).model_dump()
+    assert result["full_truename"] is None
+
+
+def test_truename_input_browses_unassigned_slots_instead_of_rejecting_them() -> None:
+    engine = Nmr()
+    value = "name:" + " ".join(engine.to_truename(15))
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert result["browsed"]["type"] == "int"
+    assert result["browsed"]["value"] == "0"
+    assert not result["browsed"]["canonical"]
+
+
+@pytest.mark.parametrize(
+    "value", ["name:missingword", "name:tune:" + " ".join(Nmr().to_truename(2**4096))]
+)
+def test_browsing_failures_are_reported_without_losing_truename_mode(
+    value: str,
+) -> None:
+    result = json.loads(bridge.recognize(json.dumps({"value": value})))
+    assert result["kind"] == "truename"
+    assert result["browse_error"]
+    assert "browsed" not in result
