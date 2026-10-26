@@ -256,8 +256,10 @@ converted into strings. Recognition keeps updating as the text changes.
 
 A complete vocabulary word immediately shows its name. Following the first word
 with a space commits name mode; until then, continuing to type can turn that
-word into a string without changing its case. In committed name mode, case is
-normalized and partial words remain editable; no autocomplete is applied yet. Name mode stays active
+word into a string without changing its case. Matching is case-insensitive in
+both provisional and committed name mode; the field always keeps the original
+case, including partial words. Generated names use the vocabulary's spelling.
+No autocomplete is applied yet. Name mode stays active
 until the field is cleared or replaced entirely. Fully known, nonrepeating words
 form a name, including names whose type slots are unassigned. Optional category
 prefixes are accepted and displayed with only the shortest category or type label.

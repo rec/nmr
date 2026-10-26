@@ -5,25 +5,16 @@ export class Editor {
     this.anchor = 0;
     this.cursor = 0;
     this.nameMode = false;
-    this.words = new Map();
+    this.words = new Set();
   }
   setWords(words) {
-    this.words = new Map(words.map((word) => [word.toLowerCase(), word]));
+    this.words = new Set(words.map((word) => word.toLowerCase()));
     this.normalize();
   }
   normalize() {
     if (!this.text) this.nameMode = false;
     const first = this.text.trimStart().split(/\s/)[0].toLowerCase();
     if (this.words.has(first) && /\s/.test(this.text.trimStart())) this.nameMode = true;
-    if (this.nameMode) {
-      const canonical = (text) => text.replace(/\S+/g, (word) =>
-        this.words.get(word.toLowerCase()) || word.toLowerCase());
-      const before = canonical(this.text.slice(0, this.cursor));
-      const anchor = canonical(this.text.slice(0, this.anchor));
-      this.text = canonical(this.text);
-      this.cursor = before.length;
-      this.anchor = anchor.length;
-    }
   }
   replace(value) {
     const start = Math.min(this.anchor, this.cursor);

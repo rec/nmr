@@ -50,8 +50,13 @@ const { chromium } = require("playwright");
       ["+1", "phone:"], ["8/5", "frac:"], ["2000-02-29", "date:"],
       ["12:34", "clock:"], ["51.5, -0.12", "latlong:"], ["@1 2@1", "tune:"],
     ]) await enter(value, kind);
+    for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
+      await enter(value, value.trim().toLowerCase().replace(/.*:/, "tune:"));
+      assert.equal(await page.locator("#value").inputValue(), value);
+      assert.equal(await page.locator("#full-name").isVisible(), true);
+    }
     await enter("THE OF", "the of");
-    assert.equal(await page.locator("#value").inputValue(), "the of");
+    assert.equal(await page.locator("#value").inputValue(), "THE OF");
     await page.keyboard.type(" qzx");
     await page.waitForFunction(() => document.querySelector("#name").hidden);
     await page.keyboard.press("ControlOrMeta+A");

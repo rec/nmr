@@ -126,6 +126,20 @@ const { loadPyodide } = require("pyodide");
     assert.equal(result.kind, kind);
     assert.ok(result.name.startsWith(kind + ":"));
   }
+  for (const value of ["Tom", "Tom ", "tOm THE oF", "TUNE:sUcH LiKe"]) {
+    const editor = new Editor();
+    editor.setWords(info.words);
+    let result;
+    for (const character of value) {
+      editor.replace(character);
+      result = JSON.parse(recognize(JSON.stringify({ value: editor.text, name_mode: editor.nameMode })));
+      if (result.name_mode) editor.nameMode = true;
+      editor.normalize();
+    }
+    assert.equal(editor.text, value, "Name matching must preserve the input case");
+    assert.equal(result.kind, "name");
+    assert.ok(result.name && result.full_name, "Matching mixed-case names must populate both lines");
+  }
   assert.equal(JSON.parse(recognize('{"value":"THE OF"}')).name, "the of");
   const string = JSON.parse(recognize('{"value":"  xyzzy!  "}'));
   assert.equal(string.kind, "string");

@@ -45,15 +45,15 @@ test("commits name mode at a word boundary without completing prefixes", () => {
   value.replace("D");
   assert.equal(value.text, "AND");
   value.replace(" TH");
-  assert.equal(value.text, "and th");
+  assert.equal(value.text, "AND TH");
   assert.equal(value.nameMode, true);
 });
 test("name mode is sticky through edits, but clearing or replacing resets it", () => {
   const value = editor("THE ");
-  assert.equal(value.text, "the ");
+  assert.equal(value.text, "THE ");
   value.move(0);
   value.erase(1);
-  assert.equal(value.text, "he ");
+  assert.equal(value.text, "HE ");
   assert.equal(value.nameMode, true);
   value.selectAll();
   value.replace("42");
@@ -61,14 +61,14 @@ test("name mode is sticky through edits, but clearing or replacing resets it", (
   value.selectAll();
   value.replace("THE OF");
   assert.equal(value.nameMode, true);
-  assert.equal(value.text, "the of");
+  assert.equal(value.text, "THE OF");
   value.clear();
   assert.equal(value.nameMode, false);
   assert.equal(value.cursor, 0);
 });
 test("pasted multiline text stays a single controlled line", () => {
   const value = editor("THE\nOF");
-  assert.equal(value.text, "the of");
+  assert.equal(value.text, "THE OF");
   assert.equal(value.cursor, 6);
 });
 test("typing before the vocabulary loads is recognized once it is available", () => {
@@ -77,7 +77,7 @@ test("typing before the vocabulary loads is recognized once it is available", ()
   assert.equal(value.nameMode, false);
   value.setWords(["the"]);
   assert.equal(value.nameMode, true);
-  assert.equal(value.text, "the ");
+  assert.equal(value.text, "THE ");
 });
 test("phone input rejects letters without changing text, cursor, or selection", () => {
   const value = editor("+1");
@@ -114,4 +114,20 @@ test("typing through a vocabulary word can still produce a case-preserving strin
     assert.equal(value.text, text);
     assert.equal(value.nameMode, false);
   }
+});
+
+test("matching vocabulary never changes input casing, including committed name mode", () => {
+  const value = new Editor();
+  value.setWords(["tom", "the", "of"]);
+  for (const character of "Tom THE oF ") value.replace(character);
+  assert.equal(value.nameMode, true);
+  assert.equal(value.text, "Tom THE oF ");
+  value.move(1);
+  value.move(3, true);
+  value.normalize();
+  assert.equal(value.selection(), "om");
+  assert.equal(value.anchor, 1);
+  assert.equal(value.cursor, 3);
+  value.replace("OM");
+  assert.equal(value.text, "TOM THE oF ");
 });

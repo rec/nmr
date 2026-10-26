@@ -544,7 +544,9 @@ space commits sticky, case-insensitive name mode. This allows typing through a
 short word such as `a`, `he`, or `i` into an ordinary case-preserving string.
 An explicit recognized name prefix also commits name mode. Clearing
 or replacing the whole field resets that mode. Partial words remain editable;
-autocomplete is deferred. Complete nonrepeating vocabulary words are lexical names,
+autocomplete is deferred. Matching ignores case without rewriting the field;
+input case and selection remain unchanged, including in committed name mode.
+Complete nonrepeating vocabulary words are lexical names,
 even if their type slots are unassigned. No browsing repair is used. Optional
 parent prefixes are accepted and the first line uses the shortest label. Clicking
 that line plays prefix-relative, so a Tune plays its original melody. A second
