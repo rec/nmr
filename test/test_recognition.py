@@ -36,7 +36,7 @@ from nmr.web import bridge
         ("@1 2@1", "tune"),
         ("9x9:D4 E4", "go"),
         ("e4 e5 Nf3", "chess"),
-        ('[{"type":"int","value":"1"}]', "list"),
+        ('[{"type":"int","value":"1"},{"type":"int","value":"0"}]', "list"),
     ],
 )
 def test_details_are_encoded_without_type_prefixes(value: str, kind: str) -> None:

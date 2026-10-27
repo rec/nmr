@@ -220,24 +220,24 @@
     },
     {
       "type": "list",
-      "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
-      "value": "[{\"type\":\"int\",\"value\":\"1\"}]",
+      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
+      "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "scope": null,
-      "truename": "list:lack"
+      "truename": "list:on gage"
     },
     {
       "type": "list",
-      "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
-      "value": "[{\"type\":\"int\",\"value\":\"1\"}]",
+      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
+      "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "scope": "",
-      "truename": "the drag"
+      "truename": "site kid"
     },
     {
       "type": "list",
       "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "scope": null,
-      "truename": "list:of at rob"
+      "truename": "list:sue old"
     }
   ]
 }

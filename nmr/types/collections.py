@@ -18,7 +18,7 @@ class Item(BaseModel, frozen=True):
 
 class List(TypeTruenamer):
     label = "list"
-    description = 'Ordered typed values: [{"type":"int","value":"42"}, ...]'
+    description = 'Two or more ordered typed values: [{"type":"int","value":"42"}, ...]'
 
     @staticmethod
     def str_to_index(value: str) -> int:
@@ -38,11 +38,13 @@ def encode_collection(value: object, depth: int) -> int:
         raise ValueError("Collections allow at most eight nesting levels")
     if not isinstance(value, list):
         raise ValueError("A list must be a JSON array")
+    if len(value) < 2:
+        raise ValueError("Lists require at least two items")
     if len(value) > MAX_ITEMS:
         raise ValueError("Collections allow at most 256 items")
     values = [encode_item(i, depth + 1) for i in value]
-    packed = Packer(count=len(values)).pack(*values) if values else 0
-    return ((2 * packed + 1) << len(values)) - 1
+    packed = Packer(count=len(values)).pack(*values)
+    return ((2 * packed + 1) << (len(values) - 2)) - 1
 
 
 def parse_collection(value: str) -> object:
@@ -56,13 +58,12 @@ def decode_collection(index: int, browse: bool, depth: int) -> list[dict[str, ob
     if depth >= MAX_DEPTH:
         raise ValueError("Collections allow at most eight nesting levels")
     number = index + 1
-    length = (number & -number).bit_length() - 1
+    length_tag = (number & -number).bit_length() - 1
+    length = length_tag + 2
     if length > MAX_ITEMS:
         raise ValueError("Collection index exceeds the 256-item work limit")
-    packed = (number >> length) // 2
-    if length == 0 and packed and not browse:
-        raise ValueError("Noncanonical empty collection")
-    values = Packer(count=length).unpack(packed) if length else []
+    packed = (number >> length_tag) // 2
+    values = Packer(count=length).unpack(packed)
     return [decode_item(i, browse, depth + 1) for i in values]
 
 

@@ -354,7 +354,7 @@ chosen permanent expansion mechanism.
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
 | Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
-| Lists | Typed ordered lists; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
+| Lists | Typed ordered lists of two or more items; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
@@ -742,7 +742,8 @@ human answer to use the delivered library, CLI, or static browser build.
     binary search, ending with the existing exact two-part inverse. Removed the
     forward/backward nested-pairing option and the separate balanced list tree.
     SemVer packs all five integer components directly; lists pack all item indices
-    directly while retaining the length header and empty-list representation.
+    directly with a length header. Lists now encode length minus two and exclude
+    empty and single-item values.
     Two-part ranks and fraction truenames remain unchanged. SemVer and longer-list
     fixtures deliberately adopt the new mapping; no legacy decoder is retained.
     Balance is by component sum, not by bit length, so individual truenames can grow.

@@ -37,20 +37,43 @@ def test_list_order_is_part_of_its_identity() -> None:
 
 @pytest.mark.parametrize("type_name", ["date", "time:date", "real:time:date"])
 def test_list_type_parents_are_optional_and_never_printed(type_name: str) -> None:
-    value = json.dumps([{"type": type_name, "value": "2000-01-01"}])
-    canonical = '[{"type":"date","value":"2000-01-01"}]'
+    value = json.dumps([{"type": type_name, "value": "2000-01-01"}] * 2)
+    canonical = (
+        '[{"type":"date","value":"2000-01-01"},{"type":"date","value":"2000-01-01"}]'
+    )
     assert List.index_to_str(List.str_to_index(value)) == canonical
 
 
-def test_noncanonical_empty_list_is_only_browsable() -> None:
-    with pytest.raises(ValueError, match="Noncanonical"):
-        List.index_to_str(2)
-    assert List.index_to_str(2, browse=True) == "[]"
+@pytest.mark.parametrize("value", [[], [{"type": "int", "value": "0"}]])
+def test_lists_need_at_least_two_items(value: list[object]) -> None:
+    with pytest.raises(ValueError, match="at least two"):
+        List.str_to_index(json.dumps(value))
+    nested = [{"type": "list", "value": value}, {"type": "int", "value": "0"}]
+    with pytest.raises(ValueError, match="at least two"):
+        List.str_to_index(json.dumps(nested))
+
+
+@pytest.mark.parametrize("browse", [False, True])
+def test_zeroth_list_has_two_items(browse: bool) -> None:
+    value = '[{"type":"int","value":"0"},{"type":"int","value":"0"}]'
+    assert List.index_to_str(0, browse) == value
+    assert List.str_to_index(value) == 0
+
+
+@pytest.mark.parametrize("length", [2, 256])
+def test_list_length_limits_round_trip(length: int) -> None:
+    value = [{"type": "int", "value": "0"}] * length
+    assert json.loads(List.index_to_str(List.str_to_index(json.dumps(value)))) == value
 
 
 @pytest.mark.parametrize(
     "value",
-    ["{}", "[1]", '[{"type":"int","value":1}]', '[{"type":"missing","value":"1"}]'],
+    [
+        "{}",
+        "[1, 2]",
+        '[{"type":"int","value":1},{"type":"int","value":"0"}]',
+        '[{"type":"missing","value":"1"},{"type":"int","value":"0"}]',
+    ],
 )
 def test_collection_rejects_ambiguous_items(value: str) -> None:
     with pytest.raises(ValueError):
@@ -72,15 +95,15 @@ def test_record_is_not_a_supported_type_or_category_slot() -> None:
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("meta:the")
     with pytest.raises(ValueError, match="Unknown"):
-        List.str_to_index('[{"type":"record","value":{}}]')
+        List.str_to_index('[{"type":"record","value":{}},{"type":"int","value":"0"}]')
 
 
 def test_collection_work_limits_are_explicit() -> None:
     with pytest.raises(ValueError, match="256"):
         List.str_to_index(json.dumps([{"type": "int", "value": "0"}] * 257))
-    value: object = []
+    value: object = [{"type": "int", "value": "0"}] * 2
     for _ in range(8):
-        value = [{"type": "list", "value": value}]
+        value = [{"type": "list", "value": value}, {"type": "int", "value": "0"}]
     with pytest.raises(ValueError, match="eight"):
         List.str_to_index(json.dumps(value))
 

@@ -342,7 +342,7 @@ Lists use explicit typed values rather than vocabulary-dependent truenames:
 
 Encode that JSON with type `list`. Type names normalize to full paths; scalar
 values must be strings. Nested lists use JSON arrays, not JSON encoded inside
-strings. Lists preserve order. Limits are 256 items per list and eight nesting
+strings. Lists preserve order and require at least two items. Limits are 256 items per list and eight nesting
 levels; arbitrary browsing can encounter these work limits and is not promised
 to succeed for every list index.
 
@@ -353,7 +353,8 @@ rank 69. Inversion uses integer binomial comparisons and binary search. One-part
 tuples are unchanged, and two-part tuples retain the Cantor pairing order.
 List items share one tuple rank, and semantic versions pack major, minor, patch,
 prerelease, and build indices as five components without nested pairing. The list
-length is stored separately. This balances by sum, not by component bit length;
+length minus two is stored in the trailing-binary length tag, so list index zero
+contains two zero-valued items. This balances by sum, not by component bit length;
 it does not guarantee a shorter truename for every object.
 
 ## Format and development
