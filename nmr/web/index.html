@@ -13,13 +13,17 @@
     <main>
       <h1>nmr</h1>
       <h2>true names of canonical things</h2>
+      <button id="swap" type="button" aria-label="Swap Description and True Name" title="Swap Description and True Name">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4" />
+        </svg>
+      </button>
       <div class="panes">
         <section class="pane" aria-labelledby="source-heading">
           <h3 id="source-heading">Description</h3>
           <input id="value" aria-labelledby="source-heading" type="text" autocomplete="off"
             autocapitalize="off" spellcheck="false" autofocus />
         </section>
-        <button id="swap" type="button" aria-label="Swap Description and True Name">Swap</button>
         <section class="pane" aria-labelledby="target-heading" aria-live="polite">
           <h3 id="target-heading">True Name</h3>
           <button id="truename" class="truename" type="button" hidden aria-label="Play or stop the prefix-relative tune" aria-pressed="false"></button>
