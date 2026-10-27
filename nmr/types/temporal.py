@@ -1,7 +1,7 @@
 """Gregorian date/time codecs with exact microsecond arithmetic, independent of TZ."""
 
 import re
-from datetime import date, datetime, time, timezone
+from datetime import date, time
 
 from ..type_truenamer import TypeTruenamer
 from .bounded import bounded, scaled_integer, scaled_string
@@ -45,48 +45,6 @@ class Clock(TypeTruenamer):
         hours, seconds = divmod(seconds, 3600)
         minutes, seconds = divmod(seconds, 60)
         return time(hours, minutes, seconds, micros).isoformat()
-
-
-class Local(TypeTruenamer):
-    label = "local"
-    description = "Local date and time YYYY-MM-DDTHH:MM:SS[.ffffff], no timezone"
-
-    @staticmethod
-    def str_to_index(value: str) -> int:
-        parts = value.split("T")
-        if len(parts) != 2:
-            raise ValueError("Use YYYY-MM-DDTHH:MM:SS[.ffffff]")
-        return Date.str_to_index(parts[0]) * DAY + Clock.str_to_index(parts[1])
-
-    @staticmethod
-    def index_to_str(index: int, browse: bool = False) -> str:
-        day, clock = divmod(bounded(index, DAYS * DAY, browse), DAY)
-        return Date.index_to_str(day) + "T" + Clock.index_to_str(clock)
-
-
-class Instant(TypeTruenamer):
-    label = "instant"
-    description = "Offset-aware timestamp, normalized to UTC; years 0001 through 9999"
-
-    @staticmethod
-    def str_to_index(value: str) -> int:
-        if not re.fullmatch(
-            r"[0-9]{4}-[0-9]{2}-[0-9]{2}T"
-            + CLOCK
-            + r"(?:Z|[+-](?:[01][0-9]|2[0-3]):[0-5][0-9])",
-            value,
-        ):
-            raise ValueError("Timestamp needs an explicit Z or ±HH:MM offset")
-        timestamp = datetime.fromisoformat(value.replace("Z", "+00:00"))
-        try:
-            timestamp = timestamp.astimezone(timezone.utc)
-        except OverflowError as error:
-            raise ValueError("UTC timestamp outside years 0001 through 9999") from error
-        return Local.str_to_index(timestamp.replace(tzinfo=None).isoformat())
-
-    @staticmethod
-    def index_to_str(index: int, browse: bool = False) -> str:
-        return Local.index_to_str(index, browse) + "Z"
 
 
 class Duration(TypeTruenamer):

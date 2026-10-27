@@ -94,8 +94,6 @@ expands; save the canonical output instead.
 | `float` | Python binary64 float. Signed zero is preserved; `bits:7ff8000000000042` specifies an exact NaN payload. |
 | `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
 | `clock` | `HH:MM[:SS[.ffffff]]`, no timezone, hours 00 through 23. |
-| `local` | Date and clock separated by `T`, without an offset. |
-| `instant` | Timestamp with `Z` or an explicit `±HH:MM` offset; canonical output is UTC. |
 | `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
 | `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
@@ -117,7 +115,7 @@ is encoded with the same trailing-binary length tag as List. For example,
 `dfasdfasdf` is `string:she dump stan learn river`. Browsing wraps character
 indices outside the alphabet and repairs noncanonical empty-string indices.
 
-Clock, local time, timestamps, and durations use microseconds. Excess precision is
+Time of day and durations use microseconds. Excess precision is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
 ignore longitude at either pole. Phone and retail-code validity is structural;
 no assignment, ownership, or reachability checks are made.

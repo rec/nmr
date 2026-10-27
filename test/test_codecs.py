@@ -2,7 +2,7 @@ import pytest
 
 from nmr.nmr import Nmr
 from nmr.types import bounded, lat_long
-from nmr.types.temporal import DAY, DAYS, Instant, Local
+from nmr.types.temporal import DAY, DAYS, Clock, Date
 
 CASES = [
     ("string", "  Mixed Case 🎵  ", "  Mixed Case 🎵  "),
@@ -21,8 +21,6 @@ CASES = [
     ("latlong", "10,180", "10,-180"),
     ("date", "2000-02-29", "2000-02-29"),
     ("clock", "23:59:59.999999", "23:59:59.999999"),
-    ("local", "2000-02-29T12:30", "2000-02-29T12:30:00"),
-    ("instant", "2000-01-01T00:30:00+01:00", "1999-12-31T23:30:00Z"),
     ("duration", "-0.000001s", "-0.000001s"),
     ("isbn", "978-0-306-40615-7", "9780306406157"),
     ("isbn", "0-306-40615-2", "0306406152"),
@@ -53,9 +51,6 @@ def test_codecs_round_trip_at_each_scope(kind: str, value: str, canonical: str) 
         ("date", "12/11/2000"),
         ("clock", "24:00"),
         ("clock", "12:00:00.1234567"),
-        ("local", "2000-01-01T12:00Z"),
-        ("instant", "2000-01-01T12:00"),
-        ("instant", "2000-01-01T12:00+00:60"),
         ("clock", "12:60"),
         ("phone", "020 1234 5678"),
         ("phone", "+123;ext="),
@@ -74,8 +69,8 @@ def test_invalid_details_are_not_silently_changed(kind: str, value: str) -> None
 
 
 def test_temporal_and_coordinate_boundaries() -> None:
-    assert Local.index_to_str(DAYS * DAY - 1) == "9999-12-31T23:59:59.999999"
-    assert Instant.index_to_str(0) == "0001-01-01T00:00:00Z"
+    assert Date.index_to_str(DAYS - 1) == "9999-12-31"
+    assert Clock.index_to_str(DAY - 1) == "23:59:59.999999"
     for index in [0, 1, lat_long.SIZE - 2, lat_long.SIZE - 1]:
         assert (
             lat_long.LatLong.str_to_index(lat_long.LatLong.index_to_str(index)) == index
@@ -120,3 +115,21 @@ def test_semver_browsing_normalizes_invalid_metadata() -> None:
     value = Semver.index_to_str(index, browse=True)
     assert value == "0.0.0-1.0.0+0.0.0"
     assert Semver.index_to_str(Semver.str_to_index(value)) == value
+
+
+@pytest.mark.parametrize("kind", ["local", "instant"])
+def test_removed_datetime_types_are_not_available(kind: str) -> None:
+    engine = Nmr()
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.find_type(kind)
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.decode(kind + ":the")
+
+
+def test_duration_is_part_of_the_time_category() -> None:
+    engine = Nmr()
+    assert engine.find_type("duration")[0] == "real:time:duration"
+    result = engine.encode("-0.000001s", "duration", scope="real:time")
+    assert result.truename.startswith("time:")
+    assert engine.decode(result.truename).type == "duration"
+    assert engine.decode(result.truename).value == "-0.000001s"

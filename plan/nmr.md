@@ -161,8 +161,8 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | --- | --- |
 | `pure` | 0: `math` (category). |
 | `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
-| `real` | 0: `time` (category), 1: `latlong`, 2: `duration`. |
-| `real:time` | 0: `date`, 1: `clock`, 2: `local`, 3: `instant`. |
+| `real` | 0: `time` (category), 1: `latlong`. |
+| `real:time` | 0: `date`, 1: `clock`, 2: `duration`. |
 | `data` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `string`. |
 | `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
 | `data:contact` | 0: `phone`. |
@@ -344,7 +344,7 @@ chosen permanent expansion mechanism.
 | `Frac` | Ordered pairs of arbitrary signed integers, including zero denominators; preserve the pair exactly. | Every payload index through exact signed-integer encoding and pairing. |
 | `Float` | Exact Python binary64 bits, including signed zero, infinity, NaN signs and payloads. `bits:HEX` supplies an exact pattern. | Full 64-bit domain; higher indices wrap only when browsing. |
 | Dates | Gregorian calendar dates, including birthdays; recommend years 1 through 9999 initially. | Dense day enumeration; browsing redirects beyond the finite range. |
-| Times and timestamps | Separate time of day, local date-time, and offset-aware timestamp meanings. Recommend microsecond resolution and explicit offsets initially. | Enumerate valid components, with precisely bounded domains. |
+| Time and duration | Time of day without a date or timezone, and signed elapsed seconds; both use microsecond resolution. | Enumerate valid components, with precisely bounded domains. |
 | Durations | Signed elapsed time with exact supported resolution. Calendar months/years are not fixed durations. | Every payload index in the defined representation. |
 | Phone numbers | International numbers with explicit country calling code and optional extension. Normalize formatted input with `phonenumberslite` to E.164 digits and `;ext=digits`; retain significant zeroes. Already canonical digits remain literal and metadata-independent. No implicit regional parsing. | No assignment or reachability check; decoded identities do not depend on numbering-plan metadata. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |

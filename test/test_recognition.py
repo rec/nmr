@@ -22,8 +22,6 @@ from nmr.web import bridge
         ("0/0", "frac"),
         ("2000-02-29", "date"),
         ("12:34", "clock"),
-        ("2000-02-29T12:34:56", "local"),
-        ("2000-02-29T12:34:56Z", "instant"),
         ("51.5, -0.12", "latlong"),
         ("123e4567-e89b-12d3-a456-426614174000", "uuid"),
         ("192.168.1.1", "ipv4"),
@@ -265,3 +263,11 @@ def test_browsing_failures_are_reported_without_losing_truename_mode(
     assert result["kind"] == "truename"
     assert result["browse_error"]
     assert "browsed" not in result
+
+
+@pytest.mark.parametrize("value", ["2000-02-29T12:34:56", "2000-02-29T12:34:56Z"])
+def test_datetime_text_is_a_string_after_removing_datetime_types(value: str) -> None:
+    engine = Nmr()
+    result = describe_input(value, engine)
+    assert result.kind == "string"
+    assert engine.decode(result.truename).value == value
