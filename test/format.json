@@ -1,33 +1,33 @@
 {
-  "vocabulary": "643a015f51785101f7796f1bf398be8fd8f333da0994db335b4e6c596ffaeb18",
+  "vocabulary": "15295be6e5cd16adbbe6a05377bd77d14671e7545eda59c560ac84ef630f6d25",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:open lease sale point"
+      "truename": "tune:open proud sale large"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sam fixed ward proof"
+      "truename": "music:sam wrong ward empty"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the ion pink river trap"
+      "truename": "play:the ion pink album trap"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a pearl link man acid"
+      "truename": "a opera link man acid"
     },
     {
       "type": "int",
@@ -62,7 +62,7 @@
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city dame cause dust"
+      "truename": "phone:city dame focus dust"
     },
     {
       "type": "latlong",
@@ -104,14 +104,14 @@
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site radio map"
+      "truename": "go:site until map"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the storm what drink"
+      "truename": "the paint what henry"
     },
     {
       "type": "go",
@@ -139,7 +139,7 @@
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "truename": "float:surf goto tower todd dan star"
+      "truename": "float:surf goto jason todd dan star"
     },
     {
       "type": "float",
@@ -167,28 +167,28 @@
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:maria steve kick"
+      "truename": "ip:plaza label kick"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:cat rear nor myth ok rio hung peer there using wide jeep"
+      "truename": "ip:cat rear nor myth ok rio hung peer first phone wide jeep"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:many steel sons even share of sap opera oval some idea moon"
+      "truename": "uuid:many fixed sons even added of sap asset oval some idea moon"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this asset sound hawk count brown neon foul learn toe seed shift date diet park dont mail both mess holy none nine slip mike less"
+      "truename": "semver:this blank final hawk claim glass cope keno print toe seed simon date diet park dont mail both mess holy none nine slip mike less"
     },
     {
       "type": "isbn",
@@ -202,7 +202,7 @@
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:label yet west"
+      "truename": "upc:scott yet west"
     }
   ]
 }
