@@ -162,7 +162,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `pure` | 0: `math` (category). |
 | `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
 | `real` | 0: `time` (category), 1: `latlong`. |
-| `real:time` | 0: `date`, 1: `clock`, 2: `duration`. |
+| `real:time` | 0: `date`, 1: `time` (Time type), 2: `duration`. |
 | `data` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `string`. |
 | `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
 | `data:contact` | 0: `phone`. |
@@ -170,6 +170,11 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `play` | 0: `game`, 1: `music` (categories). |
 | `play:game` | 0: `chess`, 1: `go`. |
 | `play:music` | 0: `tune`. |
+
+The category `real:time` and its Time leaf `real:time:time` deliberately share
+`time`. Bare `time:` always selects the leaf. Category-scoped names retain
+`real:time:` so they cannot be confused with leaf payloads. Qualified Time paths
+normalize to one `time:` prefix; other category and type labels remain unique.
 
 All unlisted slots are empty. Science, art, and additional games retain
 their agreed conceptual homes but do not acquire placeholder leaf allocations.
@@ -222,11 +227,12 @@ redirect an already canonical input.
 
 ### Hierarchical prefixes
 
-Use a unique category or type name followed by a colon and a word payload.
-All category and type labels must be globally unique, including across levels;
-a registry unit test enforces this. Parent categories may be supplied on input,
-including an optional leading colon, but output always prints only the final
-category or type name. Thus `:play:game:chess:in also` prints as `chess:in also`.
+Use a category or type name followed by a colon and a word payload.
+Category and type labels are globally unique except for the `time` category and
+Time type; a registry unit test enforces this exact exception. Bare `time:` means
+the Time type; `real:time:` means its category. Parent categories may be supplied
+on input, including an optional leading colon. Output prints the shortest prefix
+that preserves the selected scope, keeping `real:time:` for the category. Thus `:play:game:chess:in also` prints as `chess:in also`.
 
 * No prefix: words encode the global integer.
 * `name:`: a convenience marker with no category, slot, or radix cost. It is

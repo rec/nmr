@@ -44,7 +44,7 @@ class Nmr(Words):
             raise ValueError("Prefix scope does not contain the selected type")
         truename = " ".join(self.to_truename(route(slots[len(prefix_slots) :], index)))
         if prefix:
-            truename = prefix.rsplit(":", 1)[-1] + ":" + truename
+            truename = short_prefix(self.root, prefix) + ":" + truename
         return Result(
             type=codec.label,
             value=canonical_value,
@@ -78,7 +78,7 @@ class Nmr(Words):
         result = self.encode(value, path, prefix)
         normalized = " ".join(self.normalize(i) for i in payload.split())
         if prefix:
-            normalized = prefix.rsplit(":", 1)[-1] + ":" + normalized
+            normalized = short_prefix(self.root, prefix) + ":" + normalized
         canonical = result.truename == normalized
         if not browse and not canonical:
             raise ValueError(
@@ -126,3 +126,12 @@ def unmark_truename(value: str) -> tuple[str, bool]:
     if separator and prefix.casefold() == "name":
         return payload.strip(), True
     return value, False
+
+
+def short_prefix(root: Category, prefix: str) -> str:
+    """Shorten a prefix only when it still selects the same routing scope."""
+    prefix = prefix.removeprefix(":")
+    short = prefix.rsplit(":", 1)[-1]
+    if short in {"", "name"}:
+        return short
+    return short if root.lookup(short)[1] == root.lookup(prefix)[1] else prefix

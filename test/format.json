@@ -149,11 +149,11 @@
       "truename": "float:hook iron bit bell grey mild"
     },
     {
-      "type": "clock",
+      "type": "time",
       "input": "23:59:59.999999",
       "value": "23:59:59.999999",
       "scope": null,
-      "truename": "clock:are them want read"
+      "truename": "time:are them want read"
     },
     {
       "type": "duration",

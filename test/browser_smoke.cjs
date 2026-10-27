@@ -93,7 +93,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), "1342");
     for (const [value, kind] of [
       ["+1", "phone:"], ["8/5", "frac:"], ["2000-02-29", "date:"],
-      ["12:34", "clock:"], ["51.5, -0.12", "latlong:"], ["@1 2@1", "tune:"],
+      ["12:34", "time:"], ["51.5, -0.12", "latlong:"], ["@1 2@1", "tune:"],
     ]) await enter(value, kind);
     await enter("Tom Ritchford", "string:");
     await page.locator("#swap").click();

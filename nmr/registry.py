@@ -13,7 +13,7 @@ from .types.lat_long import LatLong
 from .types.phone_number import Phone
 from .types.sem_ver import Semver
 from .types.string import String
-from .types.temporal import Clock, Date, Duration
+from .types.temporal import Date, Duration, Time
 from .types.tune import Tune
 from .types.uuid import Uuid
 
@@ -22,7 +22,7 @@ ROOT = Category(
     Category("pure", Category("math", Int, Frac, Float)),
     Category(
         "real",
-        Category("time", Date, Clock, Duration),
+        Category("time", Date, Time, Duration),
         LatLong,
     ),
     Category(

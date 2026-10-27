@@ -6,13 +6,18 @@ from nmr.types.collections import List
 from nmr.types.floating import Float
 from nmr.types.fraction import Frac
 from nmr.types.integer import Int
+from nmr.types.temporal import Time
 from nmr.types.uuid import Uuid
 
 
-def test_all_category_and_type_names_are_globally_unique() -> None:
-    names = [label(i).casefold() for _, _, i in ROOT.nodes()]
-    duplicates = sorted({i for i in names if names.count(i) > 1})
-    assert not duplicates, f"Category/type names occur more than once: {duplicates}"
+def test_category_and_type_names_are_unique_except_the_time_category_and_type() -> None:
+    nodes = [(p, label(n).casefold()) for p, _, n in ROOT.nodes()]
+    duplicates = {
+        n: [p for p, k in nodes if k == n]
+        for _, n in nodes
+        if sum(k == n for _, k in nodes) > 1
+    }
+    assert duplicates == {"time": ["real:time", "real:time:time"]}
 
 
 @pytest.mark.parametrize(
@@ -83,3 +88,10 @@ def test_categories_reject_invalid_children() -> None:
         Category("unrelated", str)
     with pytest.raises(ValueError, match="unique"):
         Category("duplicate", Int, Int)
+
+
+def test_bare_time_selects_the_leaf_and_real_time_selects_the_category() -> None:
+    assert ROOT.lookup("time") == (Time, [1, 0, 1])
+    node, slots = ROOT.lookup("real:time")
+    assert isinstance(node, Category)
+    assert slots == [1, 0]

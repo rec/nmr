@@ -26,6 +26,7 @@ test("scalar descriptions retain their type label and canonical formatting", () 
   assert.equal(describeObject({type: "string", value: "Tom"}), 'string: "Tom"');
   assert.equal(describeObject({type: "chess", value: ""}), 'chess: ');
   assert.equal(describeObject({type: "float", value: "-0.0"}), 'float: -0.0');
+  assert.equal(describeObject({type: "time", value: "12:34:00"}), 'time: 12:34:00');
 });
 
 test("empty chess games remain visible and distinct from empty strings inside lists", () => {

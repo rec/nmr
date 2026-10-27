@@ -71,7 +71,10 @@ category or radix step: `name:the of` and `the of` have the same index, as do
 to encode a full root truename with the marker. For ordinary typed objects, the
 browser's second true name result shows `name:` followed by the full root word sequence.
 
-Every category and type name is unique throughout the tree. Parent categories
+Category and type names are unique except for the `time` category and Time type.
+Bare `time:` selects the type; `real:time:` selects the category containing Date,
+Time, and Duration. Outputs use a single `time:` for the type and keep `real:time:`
+when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
 `:play:game:chess:in also` all read identically and print as `chess:in also`.
 Category scopes behave the same way: `play:game:was hope` prints as
@@ -93,7 +96,7 @@ expands; save the canonical output instead.
 | `frac` | Signed numerator/denominator pair; `1/2`, `2/4`, `0/2`, `0/0`, and `1/0` are distinct objects. |
 | `float` | Python binary64 float. Signed zero is preserved; `bits:7ff8000000000042` specifies an exact NaN payload. |
 | `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
-| `clock` | `HH:MM[:SS[.ffffff]]`, no timezone, hours 00 through 23. |
+| `time` | `HH:MM[:SS[.ffffff]]`, no timezone, hours 00 through 23. |
 | `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
 | `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |

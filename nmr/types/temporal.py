@@ -23,13 +23,13 @@ class Date(TypeTruenamer):
         return date.fromordinal(1 + bounded(index, DAYS, browse)).isoformat()
 
 
-class Clock(TypeTruenamer):
-    label = "clock"
+class Time(TypeTruenamer):
+    label = "time"
     description = "Time of day HH:MM[:SS[.ffffff]], without a timezone"
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        if not re.fullmatch(CLOCK, value):
+        if not re.fullmatch(TIME, value):
             raise ValueError(
                 "Use HH:MM[:SS[.ffffff]], with at most six fractional digits"
             )
@@ -62,7 +62,7 @@ class Duration(TypeTruenamer):
         return scaled_string(signed_value(index), SECOND) + "s"
 
 
-CLOCK = r"(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9](?:\.[0-9]{1,6})?)?"
+TIME = r"(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9](?:\.[0-9]{1,6})?)?"
 SECOND = 10**6
 DAY = 86400 * SECOND
 DAYS = date.max.toordinal()

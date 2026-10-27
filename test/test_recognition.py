@@ -21,7 +21,7 @@ from nmr.web import bridge
         ("8/5", "frac"),
         ("0/0", "frac"),
         ("2000-02-29", "date"),
-        ("12:34", "clock"),
+        ("12:34", "time"),
         ("51.5, -0.12", "latlong"),
         ("123e4567-e89b-12d3-a456-426614174000", "uuid"),
         ("192.168.1.1", "ipv4"),
@@ -271,3 +271,11 @@ def test_datetime_text_is_a_string_after_removing_datetime_types(value: str) -> 
     result = describe_input(value, engine)
     assert result.kind == "string"
     assert engine.decode(result.truename).value == value
+
+
+def test_explicit_time_description_selects_the_type_instead_of_the_category() -> None:
+    engine = Nmr()
+    result = describe_input("time: 12:34", engine)
+    assert result.kind == "time"
+    assert engine.decode(result.truename).value == "12:34:00"
+    assert result.truename.count(":") == 1

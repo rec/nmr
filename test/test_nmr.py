@@ -109,3 +109,41 @@ def test_name_marker_can_wrap_an_existing_prefix(scope: str) -> None:
             source, absolute
         )
         assert engine.to_tune(marked, absolute) == engine.to_tune(source, absolute)
+
+
+@pytest.mark.parametrize(
+    "prefix", ["time", "time:time", "real:time:time", ":real:time:time"]
+)
+def test_time_paths_read_as_the_type_and_print_one_time_prefix(prefix: str) -> None:
+    engine = Nmr()
+    result = engine.encode("12:34", prefix)
+    assert result.type == "time"
+    assert result.value == "12:34:00"
+    assert result.truename.startswith("time:")
+    assert result.truename.count(":") == 1
+    payload = result.truename.partition(":")[2]
+    assert engine.decode(prefix + ":" + payload) == result
+    assert engine.truename_index(prefix + ":" + payload) == engine.truename_index(
+        result.truename
+    )
+
+
+@pytest.mark.parametrize(
+    "kind,value", [("date", "2000-02-29"), ("time", "12:34"), ("duration", "1s")]
+)
+def test_time_category_scope_stays_distinct_from_the_type(
+    kind: str, value: str
+) -> None:
+    engine = Nmr()
+    result = engine.encode(value, kind, scope="real:time")
+    assert result.truename.startswith("real:time:")
+    assert engine.decode(result.truename) == result
+    assert engine.decode(":" + result.truename) == result
+    assert engine.truename_index(result.truename) == engine.truename_index(
+        engine.encode(value, kind).truename
+    )
+
+
+def test_time_short_prefix_cannot_be_used_as_a_duration_category_scope() -> None:
+    with pytest.raises(ValueError, match="does not contain"):
+        Nmr().encode("1s", "duration", scope="time")

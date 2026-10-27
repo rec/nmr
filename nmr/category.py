@@ -59,6 +59,9 @@ class Category(BaseModel, frozen=True):
         matches = [
             (n, s) for p, s, n in self.nodes() if p == path or p.endswith(":" + path)
         ]
+        # Bare time names the leaf; real:time still addresses its category.
+        if path == "time" and len(matches) > 1:
+            matches = [(n, s) for n, s in matches if not isinstance(n, Category)]
         if len(matches) != 1:
             raise ValueError(f"Unknown or ambiguous category or type: {path}")
         node, slots = matches[0]

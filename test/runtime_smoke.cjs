@@ -126,7 +126,7 @@ const { loadPyodide } = require("pyodide");
     assert.ok(result.truename && (kind === "truename" ? result.browsed : result.full_truename), `Both results must exist for ${person.text}`);
   }
   assert.equal(person.text, "Tom R");
-  for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "clock"], ["2000-02-29", "date"]]) {
+  for (const [value, kind] of [["42", "int"], ["+1", "phone"], ["8/5", "frac"], ["12:34", "time"], ["2000-02-29", "date"]]) {
     const result = JSON.parse(recognize(JSON.stringify({ value })));
     assert.equal(result.kind, kind);
     assert.ok(result.truename.startsWith(kind + ":"));
