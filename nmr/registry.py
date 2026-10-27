@@ -27,9 +27,9 @@ ROOT = Category(
     ),
     Category(
         "data",
-        Category("computer", IP, Uuid, Semver),
-        Category("contact", Phone),
-        Category("id", Isbn, Upc),
+        Category("address", IP, Phone),
+        Category("register", Isbn, Upc),
+        Category("id", Uuid, Semver),
         String,
     ),
     Category("play", Category("game", Chess, Go), Category("music", Tune)),

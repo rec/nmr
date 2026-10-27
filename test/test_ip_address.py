@@ -43,7 +43,7 @@ def test_ip_browsing_wraps_within_the_selected_family(
 
 def test_ip_versions_are_one_registered_type_without_the_old_labels() -> None:
     engine = Nmr()
-    assert engine.find_type("ip")[0] == "data:computer:ip"
+    assert engine.find_type("ip")[0] == "data:address:ip"
     for name in ["ipv4", "ipv6"]:
         with pytest.raises(ValueError, match="Unknown"):
             engine.find_type(name)

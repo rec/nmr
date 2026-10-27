@@ -1,6 +1,7 @@
 import pytest
 
 from nmr.category import Category, label, route
+from nmr.nmr import Nmr
 from nmr.registry import ROOT
 from nmr.types.collections import List
 from nmr.types.floating import Float
@@ -95,3 +96,24 @@ def test_bare_time_selects_the_leaf_and_real_time_selects_the_category() -> None
     node, slots = ROOT.lookup("real:time")
     assert isinstance(node, Category)
     assert slots == [1, 0]
+
+
+@pytest.mark.parametrize(
+    "type_name,path",
+    [
+        ("ip", "data:address:ip"),
+        ("phone", "data:address:phone"),
+        ("isbn", "data:register:isbn"),
+        ("upc", "data:register:upc"),
+        ("uuid", "data:id:uuid"),
+        ("semver", "data:id:semver"),
+    ],
+)
+def test_data_types_use_their_requested_categories(type_name: str, path: str) -> None:
+    assert Nmr().find_type(type_name)[0] == path
+
+
+@pytest.mark.parametrize("category", ["computer", "contact"])
+def test_removed_data_categories_are_not_available(category: str) -> None:
+    with pytest.raises(ValueError, match="Unknown"):
+        ROOT.lookup(category)

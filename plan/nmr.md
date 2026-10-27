@@ -152,8 +152,8 @@ The root allocation is settled:
 
 `pure` is the category name; “canonical” refers to encoding and decoding,
 not a category. Place the existing mathematical and scientific types under
-`pure`; time and coordinates under `real`; computer, contact, and
-commercial identifier types under `data`; art and games under `play`; and
+`pure`; time and coordinates under `real`; addresses, registered values, and
+identifiers under `data`; art and games under `play`; and
 List directly in root slot 4. Exact subcategory names, slot
 assignments and structural leaves are now explicit in `nmr/registry.py`:
 
@@ -163,10 +163,10 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
 | `real` | 0: `time` (category), 1: `latlong`. |
 | `real:time` | 0: `date`, 1: `time` (Time type), 2: `duration`. |
-| `data` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `string`. |
-| `data:computer` | 0: `ip`, 1: `uuid`, 2: `semver`. |
-| `data:contact` | 0: `phone`. |
-| `data:id` | 0: `isbn`, 1: `upc`. |
+| `data` | 0: `address`, 1: `register`, 2: `id` (categories), 3: `string`. |
+| `data:address` | 0: `ip`, 1: `phone`. |
+| `data:register` | 0: `isbn`, 1: `upc`; values backed by an external registry. |
+| `data:id` | 0: `uuid`, 1: `semver`. |
 | `play` | 0: `game`, 1: `music` (categories). |
 | `play:game` | 0: `chess`, 1: `go`. |
 | `play:music` | 0: `tune`. |
