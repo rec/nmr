@@ -531,15 +531,15 @@ and pipeline need rather than adding several competing output formats.
 
 ### Browser experience
 
-The browser has Description and True Name panes side by side, beneath a centered
+The browser has description and true name panes side by side, beneath a centered
 `nmr` heading and the subtitle "true names of canonical things". The left pane
 always contains the editable field; the right contains clickable results. On small
 screens the panes stack. Swap exchanges captions and puts the first converted
 result into the editor. Without a conversion, swapping starts with an empty
-editor so Description text cannot violate the True Name vocabulary rules.
+editor so description text cannot violate the true name vocabulary rules.
 
-Description mode recognizes unprefixed details by shape and otherwise encodes
-literal String text, including vocabulary words. True Name mode uses a controlled
+description mode recognizes unprefixed details by shape and otherwise encodes
+literal String text, including vocabulary words. true name mode uses a controlled
 typed/guessed editor. All completed words are
 unique vocabulary entries; the final fragment must start an unused word. Guessed
 continuations are grey and selected randomly. Lowercase letters and Space enter
@@ -557,29 +557,29 @@ stay fixed outside word editing; loaded words normalize to lowercase.
 `decode(..., browse=True)` receives completed, accepted words only. Neither a
 partial word nor its guess changes or hides the description. Recognition responses
 remain valid across partial edits when their accepted words are unchanged.
-Description output offers a prefix-relative truename and a `name:`-marked full
-root truename. True Name output offers the browsed object's description. Typed
+description output offers a prefix-relative truename and a `name:`-marked full
+root truename. true name output offers the browsed object's description. Typed
 descriptions such as `upc: 036000291452` and `string: "123"` preserve types on
 swapping; String values use JSON quoting to preserve exact whitespace and quotes.
 Displayed lists use their items' canonical values, such as `[0/0, 10.0.0.1]`,
 with nested brackets and quoted strings. Typed JSON stays internal to conversion
-and is restored when swapping a list into Description mode.
+and is restored when swapping a list into description mode.
 
-In Description mode, typing, deletion, paste, native click placement, drag
+In description mode, typing, deletion, paste, native click placement, drag
 selection, and double-click word selection remain supported. Recognition never
 resets cursor or selection.
 Right-hand results play their tunes at F3 and 180 BPM. Clicking the playing result
-stops it; clicking another switches playback. In Description mode, Enter plays
+stops it; clicking another switches playback. In description mode, Enter plays
 the first result unless the second has focus. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the`, deferred to the first interaction if autoplay is
-blocked. In Description mode, Escape clears the editor and stops sound.
+blocked. In description mode, Escape clears the editor and stops sound.
 
 Conversion and tune arithmetic run locally through the shared Python core in a
-Pyodide worker. The URL always contains one parameter: `desc` for Description
-mode or `name` for True Name mode. Each edit and swap updates it through
+Pyodide worker. The URL always contains one parameter: `desc` for description
+mode or `name` for true name mode. Each edit and swap updates it through
 `history.replaceState`, preserving the fragment without adding history entries
 or issuing requests. On page load, this parameter restores the text and direction;
-without either parameter, the editor starts with an empty Description. The resulting URL can be bookmarked or sent
+without either parameter, the editor starts with an empty description. The resulting URL can be bookmarked or sent
 to a friend; opening or reloading it sends the query to the hosting server. The
 app does not add analytics or persist the input in local storage.
 The minimal browser uses the default vocabulary; explicit canonical decoding,

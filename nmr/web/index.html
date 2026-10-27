@@ -13,20 +13,20 @@
     <main>
       <h1>nmr</h1>
       <h2>true names of canonical things</h2>
-      <button id="swap" type="button" aria-label="Swap Description and True Name" title="Swap Description and True Name">
+      <button id="swap" type="button" aria-label="Swap description and true name" title="Swap description and true name">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M4 7h16m-4-4 4 4-4 4M20 17H4m4-4-4 4 4 4" />
         </svg>
       </button>
       <div class="panes">
         <section class="pane" aria-labelledby="source-heading">
-          <h3 id="source-heading">Description</h3>
+          <h3 id="source-heading">description</h3>
           <input id="value" aria-labelledby="source-heading" type="text" autocomplete="off"
             autocapitalize="off" spellcheck="false" autofocus />
           <div id="name-editor" role="textbox" tabindex="0" aria-labelledby="source-heading" aria-autocomplete="inline" hidden><span id="typed"></span><span class="name-caret" aria-hidden="true"></span><span id="guessed"></span></div>
         </section>
         <section id="result-pane" class="pane" aria-labelledby="target-heading" aria-live="polite">
-          <h3 id="target-heading">True Name</h3>
+          <h3 id="target-heading">true name</h3>
           <button id="truename" class="truename" type="button" hidden aria-label="Play or stop the prefix-relative tune" aria-pressed="false"></button>
           <button id="full-truename" class="truename" type="button" hidden aria-label="Play or stop the full-truename tune" aria-pressed="false"></button>
         </section>

@@ -69,7 +69,7 @@ The convenience marker `name:` explicitly identifies a truename. It adds no
 category or radix step: `name:the of` and `the of` have the same index, as do
 `name:tune:the` and `tune:the`. Matching the marker ignores case. Use `--scope name`
 to encode a full root truename with the marker. For ordinary typed objects, the
-browser's second True Name result shows `name:` followed by the full root word sequence.
+browser's second true name result shows `name:` followed by the full root word sequence.
 
 Every category and type name is unique throughout the tree. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
@@ -252,14 +252,14 @@ characters are escaped. For example: `/nmr?desc=Tom+Ritchford`.
 The query is part of the shared URL and is sent to the hosting server when that
 URL is opened or reloaded. The app does not save the input in local storage.
 
-The page has two panes beneath the `nmr` heading: Description and True Name.
+The page has two panes beneath the `nmr` heading: description and true name.
 The left pane is always editable. Swap exchanges the captions and moves the first
 converted result into the editor. With no result, it starts with an empty editor.
-URLs contain exactly one parameter: `desc` for Description mode or `name` for
-True Name mode, including when the field is empty. Opening a link restores both
-the text and direction. A URL without either starts with an empty Description.
+URLs contain exactly one parameter: `desc` for description mode or `name` for
+true name mode, including when the field is empty. Opening a link restores both
+the text and direction. A URL without either starts with an empty description.
 
-In Description mode, the engine recognizes integers, explicit `+` phone numbers,
+In description mode, the engine recognizes integers, explicit `+` phone numbers,
 fractions, ISO dates and times, coordinates, IP addresses, UUIDs, versions,
 durations, chess/Go moves, tune notation, and typed lists. Pure digits mean an
 integer; slash pairs mean fractions. Use `YYYY-MM-DD` for dates. Other text,
@@ -269,7 +269,7 @@ remain errors. Type labels can make a description explicit, such as
 `upc: 036000291452` or `string: "123"`. Strings in typed descriptions use JSON
 quoting so swapping preserves their type, quotes, and whitespace.
 
-In True Name mode, accepted text is followed by a grey suggested continuation.
+In true name mode, accepted text is followed by a grey suggested continuation.
 Completed words must be distinct vocabulary words; the current fragment must
 match an unused word's beginning. Suggestions are chosen randomly. Only lowercase
 letters and Space enter text; impossible letters and other editing keys make a
@@ -288,13 +288,13 @@ it and updates the description. Type
 prefixes from swaps and bookmarks stay fixed before the controlled word sequence.
 Swapping or loading a bookmark accepts complete words and normalizes their case.
 
-Click a result on the right to play its tune. Description mode offers both the
-prefix-relative truename and the full root truename, marked `name:`. True Name
+Click a result on the right to play its tune. description mode offers both the
+prefix-relative truename and the full root truename, marked `name:`. true name
 mode offers the browsed object's description and plays its prefix-relative tune.
-Click the playing result to stop, or another result to switch. In Description
+Click the playing result to stop, or another result to switch. In description
 mode, Enter plays the first result unless the second has focus.
 
-In Description mode, type anywhere on the page; click the field to position its cursor, drag to select,
+In description mode, type anywhere on the page; click the field to position its cursor, drag to select,
 or double-click to select a word. Arrow keys, Home/End, Shift selection,
 copy/cut/paste, and insertion in the middle work normally. Escape clears the field
 and stops playback. Phone input containing `+` and digits rejects typed letters
@@ -347,7 +347,7 @@ Encode that JSON with type `list`. Type names normalize to full paths; scalar
 values must be strings. Nested lists use JSON arrays, not JSON encoded inside
 strings. Browser results show the values directly, for example
 `list: [0/0, 10.0.0.1]`, with nested brackets and quoted strings. Swapping back to
-Description retains typed JSON input so every item keeps its type.
+description retains typed JSON input so every item keeps its type.
 Lists preserve order and require at least two items. Limits are 256 items per list and eight nesting
 levels; arbitrary browsing can encounter these work limits and is not promised
 to succeed for every list index.

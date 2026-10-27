@@ -121,8 +121,8 @@ function changed() {
   if (ready) timer = setTimeout(recognize, 120);
 }
 function captions() {
-  sourceHeading.textContent = mode === "description" ? "Description" : "True Name";
-  targetHeading.textContent = mode === "description" ? "True Name" : "Description";
+  sourceHeading.textContent = mode === "description" ? "description" : "true name";
+  targetHeading.textContent = mode === "description" ? "true name" : "description";
 }
 async function recognize() {
   const value = recognitionValue();
