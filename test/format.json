@@ -163,18 +163,18 @@
       "truename": "duration:and"
     },
     {
-      "type": "ipv4",
+      "type": "ip",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ipv4:shut belt quote"
+      "truename": "ip:maria steve kick"
     },
     {
-      "type": "ipv6",
+      "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ipv6:less first buys rare form pack miss zip patch labor trio wild"
+      "truename": "ip:cat rear nor myth ok rio hung peer there using wide jeep"
     },
     {
       "type": "uuid",

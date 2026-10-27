@@ -8,7 +8,7 @@ from .types.fraction import Frac
 from .types.go import Go
 from .types.identifiers import Isbn, Upc
 from .types.integer import Int
-from .types.ip_address import IPv4, IPv6
+from .types.ip_address import IP
 from .types.lat_long import LatLong
 from .types.phone_number import Phone
 from .types.sem_ver import Semver
@@ -27,7 +27,7 @@ ROOT = Category(
     ),
     Category(
         "data",
-        Category("computer", IPv4, IPv6, Uuid, Semver),
+        Category("computer", IP, Uuid, Semver),
         Category("contact", Phone),
         Category("id", Isbn, Upc),
         String,

@@ -164,7 +164,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `real` | 0: `time` (category), 1: `latlong`. |
 | `real:time` | 0: `date`, 1: `time` (Time type), 2: `duration`. |
 | `data` | 0: `computer`, 1: `contact`, 2: `id` (categories), 3: `string`. |
-| `data:computer` | 0: `ipv4`, 1: `ipv6`, 2: `uuid`, 3: `semver`. |
+| `data:computer` | 0: `ip`, 1: `uuid`, 2: `semver`. |
 | `data:contact` | 0: `phone`. |
 | `data:id` | 0: `isbn`, 1: `upc`. |
 | `play` | 0: `game`, 1: `music` (categories). |
@@ -354,7 +354,7 @@ chosen permanent expansion mechanism.
 | Durations | Signed elapsed time with exact supported resolution. Calendar months/years are not fixed durations. | Every payload index in the defined representation. |
 | Phone numbers | International numbers with explicit country calling code and optional extension. Normalize formatted input with `phonenumberslite` to E.164 digits and `;ext=digits`; retain significant zeroes. Already canonical digits remain literal and metadata-independent. No implicit regional parsing. | No assignment or reachability check; decoded identities do not depend on numbering-plan metadata. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
-| IP addresses | IPv4 and IPv6; canonical standard spelling. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
+| IP addresses | One IP class with a `use_ip6` boolean; canonical standard spelling. The index is twice the address integer plus its family flag. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |
 | Semantic versions | Major, minor, patch, prerelease, and build metadata. | Browsing repairs empty metadata identifiers and numeric prerelease leading zeroes; canonical decoding rejects invalid indices. Capacity still applies to the repaired output. |
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |

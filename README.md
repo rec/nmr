@@ -100,7 +100,7 @@ expands; save the canonical output instead.
 | `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
 | `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
-| `ipv4`, `ipv6` | Full address domains; interface-scoped IPv6 is unsupported. |
+| `ip` | IPv4 or IPv6 addresses, with a `use_ip6` family flag; interface scopes are unsupported. |
 | `uuid` | All 128 bits, without imposing version restrictions. |
 | `semver` | Complete semantic version, including prerelease and build metadata; optional input `v`. |
 | `isbn` | ISBN-10 or ISBN-13 with check digits; ISBN-13 begins 978 or 979. |

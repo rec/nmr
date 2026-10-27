@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { describeObject } from "../nmr/web/description.mjs";
 
 test("lists display each item's own value without typed JSON records", () => {
-  const items = [{type: "frac", value: "0/0"}, {type: "ipv4", value: "10.0.0.1"}];
+  const items = [{type: "frac", value: "0/0"}, {type: "ip", value: "10.0.0.1"}];
   assert.equal(describeObject({type: "list", value: JSON.stringify(items)}), "list: [0/0, 10.0.0.1]");
 });
 

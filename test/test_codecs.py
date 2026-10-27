@@ -6,8 +6,8 @@ from nmr.types.temporal import DAY, DAYS, Date, Time
 
 CASES = [
     ("string", "  Mixed Case 🎵  ", "  Mixed Case 🎵  "),
-    ("ipv4", "127.0.0.1", "127.0.0.1"),
-    ("ipv6", "2001:0:130f::9c0:876a:130b", "2001:0:130f::9c0:876a:130b"),
+    ("ip", "127.0.0.1", "127.0.0.1"),
+    ("ip", "2001:0:130f::9c0:876a:130b", "2001:0:130f::9c0:876a:130b"),
     (
         "uuid",
         "123e4567-e89b-12d3-a456-426614174000",
@@ -59,7 +59,7 @@ def test_codecs_round_trip_at_each_scope(kind: str, value: str, canonical: str) 
         ("latlong", "1.1234567,2"),
         ("latlong", "91,0"),
         ("semver", "1.2.3-01"),
-        ("ipv6", "fe80::1%en0"),
+        ("ip", "fe80::1%en0"),
         ("chess", "e4 nonsense"),
     ],
 )
@@ -80,7 +80,7 @@ def test_temporal_and_coordinate_boundaries() -> None:
 
 
 @pytest.mark.parametrize(
-    "kind", ["ipv4", "uuid", "date", "time", "latlong", "isbn", "upc"]
+    "kind", ["ip", "uuid", "date", "time", "latlong", "isbn", "upc"]
 )
 def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> None:
     engine = Nmr()
