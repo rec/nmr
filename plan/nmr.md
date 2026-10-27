@@ -547,13 +547,15 @@ text; impossible letters and other editing keys produce a 20 ms tick at the
 presentation root. Space accepts the suggestion. Right accepts at least one
 character, continuing through forced characters until a branch or completion.
 Completion adds a space and suggests an unused next word. Left and Backspace
-return one letter to guessed text, also removing an automatic space at a boundary.
+return to the previous character choice, skipping forced stretches and removing
+an automatic space at a word boundary. For example, Left takes `axis ` back to `a`.
 Up/Down cycle matching continuations or eligible next words. The cursor stays at
 the typed/guessed boundary; clicking and selection cannot move it. Tab and focused
 buttons retain keyboard accessibility. Type prefixes supplied by swaps or links
 stay fixed outside word editing; loaded words normalize to lowercase.
-`decode(..., browse=True)` previews the selected completion of a partial word,
-while a suggested next word is excluded until accepted.
+`decode(..., browse=True)` receives completed, accepted words only. Neither a
+partial word nor its guess changes or hides the description. Recognition responses
+remain valid across partial edits when their accepted words are unchanged.
 Description output offers a prefix-relative truename and a `name:`-marked full
 root truename. True Name output offers the browsed object's description. Typed
 descriptions such as `upc: 036000291452` and `string: "123"` preserve types on

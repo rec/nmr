@@ -276,12 +276,14 @@ letters and Space enter text; impossible letters and other editing keys make a
 quiet 20 ms F3 tick instead. Space accepts the selected suggestion. Right accepts
 at least one letter, continuing through unambiguous characters. Completing the
 selected word inserts a space and suggests an unused next word. Left and Backspace
-move one letter back into the guess, removing an automatic space when needed.
+move back to the previous character choice, skipping forced stretches and removing
+an automatic space when needed. For example, `axis ` returns to `a`.
 Up/Down cycle through matching continuations or eligible next words. Clicking and
 selection cannot move this cursor. Tab still navigates the page controls.
 
-The right pane uses browsing to preview a partially typed word's selected
-completion. A guessed next word does not affect decoding until accepted. Type
+The right pane uses browsing to decode completed, accepted words only. Partial
+words and guesses do not change or hide the description. Completing a word accepts
+it and updates the description. Type
 prefixes from swaps and bookmarks stay fixed before the controlled word sequence.
 Swapping or loading a bookmark accepts complete words and normalizes their case.
 

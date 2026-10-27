@@ -20,8 +20,9 @@ export class TruenameEditor {
   get text() {
     return this.prefix + this.typed;
   }
-  get completion() {
-    return (this.text + (this.current ? this.guessed : "")).trimEnd();
+  get accepted() {
+    const words = this.typed.slice(0, this.typed.lastIndexOf(" ") + 1).trimEnd();
+    return words ? this.prefix + words : "";
   }
   suggest() {
     const options = this.options;
@@ -81,7 +82,12 @@ export class TruenameEditor {
       this.typed = this.typed.slice(0, -1);
       this.choice = this.current;
     }
-    this.typed = this.typed.slice(0, -1);
+    do {
+      this.typed = this.typed.slice(0, -1);
+      if (!this.current) break;
+      const next = new Set(this.options.map((word) => word[this.current.length]));
+      if (next.size > 1) break;
+    } while (this.current);
     return true;
   }
   cycle(direction) {

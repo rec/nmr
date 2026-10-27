@@ -23,13 +23,13 @@ function invariant(editor) {
 test("suggests an eligible next word without accepting it", () => {
   const editor = new TruenameEditor(["the", "there", "then"]);
   assert.equal(editor.typed, "");
-  assert.equal(editor.completion, "");
+  assert.equal(editor.accepted, "");
   assert.ok(editor.words.includes(editor.guessed));
   choose(editor, "there");
   assert.equal(editor.type("t"), true);
   assert.equal(editor.typed, "t");
   assert.equal(editor.guessed, "here");
-  assert.equal(editor.completion, "there");
+  assert.equal(editor.accepted, "");
 });
 
 test("right accepts shared characters and stops at each choice", () => {
@@ -41,6 +41,7 @@ test("right accepts shared characters and stops at each choice", () => {
   editor.right();
   assert.equal(editor.typed, "the");
   assert.equal(editor.guessed, "re");
+  assert.equal(editor.accepted, "");
   editor.right();
   assert.equal(editor.typed, "there ");
   assert.ok(!editor.options.includes("there"));
@@ -55,21 +56,51 @@ test("right accepts the entire remaining word when there is one continuation", (
   assert.equal(editor.guessed, "cat");
 });
 
-test("left restores accepted characters to the guess and crosses automatic spaces", () => {
-  const editor = new TruenameEditor(["cat", "dog"]);
-  choose(editor, "cat");
+test("left reverses right's jumps between word choices", () => {
+  const editor = new TruenameEditor(["the", "there", "then", "thin"]);
+  choose(editor, "there");
   editor.right();
-  assert.equal(editor.typed, "cat ");
+  editor.right();
+  editor.right();
+  assert.equal(editor.typed, "there ");
   editor.left();
-  assert.equal(editor.typed, "ca");
-  assert.equal(editor.guessed, "t");
+  assert.equal(editor.typed, "the");
+  assert.equal(editor.guessed, "re");
   editor.left();
-  assert.equal(editor.typed, "c");
-  assert.equal(editor.guessed, "at");
+  assert.equal(editor.typed, "th");
+  assert.equal(editor.guessed, "ere");
   editor.left();
   assert.equal(editor.typed, "");
-  assert.equal(editor.guessed, "cat");
+  assert.equal(editor.guessed, "there");
   assert.equal(editor.left(), false);
+});
+
+test("left skips forced letters typed before accepting the whole word", () => {
+  const editor = new TruenameEditor(["axis", "atom", "a"]);
+  editor.load("ax");
+  editor.right();
+  assert.equal(editor.typed, "axis ");
+  editor.left();
+  assert.equal(editor.typed, "a");
+  assert.equal(editor.guessed, "xis");
+});
+
+test("only completed words contribute to decoding, independent of guesses", () => {
+  const editor = new TruenameEditor(["cat", "car", "dog", "dot"]);
+  editor.load("name:tune: cat d");
+  assert.equal(editor.accepted, "name:tune: cat");
+  const original = editor.choice;
+  editor.cycle(1);
+  assert.notEqual(editor.choice, original);
+  assert.equal(editor.accepted, "name:tune: cat");
+  editor.right();
+  assert.equal(editor.typed, "cat do");
+  assert.equal(editor.accepted, "name:tune: cat");
+  const chosen = editor.choice;
+  editor.right();
+  assert.equal(editor.accepted, "name:tune: cat " + chosen);
+  editor.left();
+  assert.equal(editor.accepted, "name:tune: cat");
 });
 
 test("cycles next words and matching continuations in both directions", () => {
@@ -94,7 +125,7 @@ test("space accepts the guess and used words never reappear", () => {
   choose(editor, "cat");
   editor.type(" ");
   assert.equal(editor.typed, "cat ");
-  assert.equal(editor.completion, "cat");
+  assert.equal(editor.accepted, "cat");
   assert.deepEqual(editor.options, ["car", "dog"]);
   editor.type("d");
   editor.type(" ");
@@ -106,8 +137,8 @@ test("space accepts the guess and used words never reappear", () => {
   assert.equal(editor.right(), false);
   assert.equal(editor.type("c"), false);
   editor.left();
-  assert.equal(editor.typed, "cat dog ca");
-  assert.equal(editor.guessed, "r");
+  assert.equal(editor.typed, "cat dog ");
+  assert.equal(editor.guessed, "car");
   invariant(editor);
 });
 
@@ -127,8 +158,8 @@ test("loads bookmark and swap values with a separate fixed prefix", () => {
   assert.equal(editor.text, "name:tune: cat dog ");
   assert.equal(editor.guessed, "car");
   editor.left();
-  assert.equal(editor.text, "name:tune: cat do");
-  assert.equal(editor.guessed, "g");
+  assert.equal(editor.text, "name:tune: cat ");
+  assert.equal(editor.guessed, "dog");
   assert.equal(editor.load("cat ca"), true);
   assert.equal(editor.guessed, "r");
   for (const invalid of ["cat cat", "unknown dog", "cat z", "42:dog"]) {

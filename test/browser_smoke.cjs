@@ -125,6 +125,13 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").isVisible(), false);
     await page.waitForFunction(() => document.querySelector("#truename").textContent === "date: 2000-02-29");
     await checkResultCopy();
+    const description = await page.locator("#truename").textContent();
+    await page.keyboard.type("z");
+    assert.equal(await page.locator("#truename").isVisible(), true);
+    assert.equal(await page.locator("#truename").textContent(), description);
+    await page.keyboard.press("ArrowDown");
+    assert.equal(await page.locator("#truename").textContent(), description);
+    await page.keyboard.press("ArrowLeft");
     const originalTyped = await page.locator("#typed").textContent();
     const nextGuess = await page.locator("#guessed").textContent();
     assert.ok(nextGuess);
@@ -202,6 +209,21 @@ const { chromium } = require("playwright");
     await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
     assert.equal(await page.locator("#value").inputValue(),
       'list: [{"type":"int","value":"0"},{"type":"int","value":"0"}]');
+
+    const axisUrl = new URL(page.url());
+    axisUrl.search = new URLSearchParams({name: "ax"}).toString();
+    await page.goto(axisUrl.href);
+    await page.waitForSelector('#name-editor[data-ready="true"]', { timeout: 120000 });
+    assert.equal(await page.locator("#typed").textContent(), "ax");
+    assert.equal(await page.locator("#guessed").textContent(), "is");
+    assert.equal(await page.locator("#truename").isVisible(), false);
+    await page.keyboard.press("ArrowRight");
+    assert.equal(await page.locator("#typed").textContent(), "axis ");
+    await page.waitForFunction(() => !document.querySelector("#truename").hidden);
+    await page.keyboard.press("ArrowLeft");
+    assert.equal(await page.locator("#typed").textContent(), "a");
+    assert.equal(await page.locator("#guessed").textContent(), "xis");
+    assert.equal(await page.locator("#truename").isVisible(), false);
 
     await page.setViewportSize({ width: 375, height: 812 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);

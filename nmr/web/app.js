@@ -25,6 +25,8 @@ let version = 0;
 let playVersion = 0;
 let timer;
 let ready = false;
+let previousValue;
+let previousMode;
 let composing = false;
 let currentTruename = null;
 let currentObject = null;
@@ -66,6 +68,9 @@ worker.onerror = () => {
 function inputText() {
   return mode === "truename" && nameEditor ? nameEditor.text : editor.text;
 }
+function recognitionValue() {
+  return mode === "truename" ? nameEditor?.accepted || "" : editor.text;
+}
 function render() {
   field.hidden = mode === "truename";
   nameField.hidden = mode !== "truename";
@@ -100,6 +105,11 @@ function changed() {
   url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
   window.history.replaceState(window.history.state, "", url);
   version++;
+  render();
+  const value = recognitionValue();
+  if (value === previousValue && mode === previousMode) return;
+  previousValue = value;
+  previousMode = mode;
   playVersion++;
   previewPending = false;
   player?.stop();
@@ -107,7 +117,6 @@ function changed() {
   currentObject = null;
   truenameButton.hidden = true;
   fullTruenameButton.hidden = true;
-  render();
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
 }
@@ -116,10 +125,11 @@ function captions() {
   targetHeading.textContent = mode === "description" ? "True Name" : "Description";
 }
 async function recognize() {
-  const revision = version;
+  const value = recognitionValue();
+  const direction = mode;
   try {
-    const result = await request("recognize", { value: mode === "truename" ? nameEditor?.completion || "" : editor.text, mode });
-    if (revision !== version) return;
+    const result = await request("recognize", { value, mode: direction });
+    if (value !== recognitionValue() || direction !== mode) return;
     currentTruename = result.truename;
     currentObject = result.browsed || null;
     const browsing = mode === "truename";
@@ -134,7 +144,7 @@ async function recognize() {
     fullTruenameButton.hidden = browsing || !result.full_truename;
     fullTruenameButton.disabled = false;
   } catch (error) {
-    if (revision === version) console.error(error);
+    if (value === recognitionValue() && direction === mode) console.error(error);
   }
 }
 async function swap() {
