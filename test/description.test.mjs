@@ -27,3 +27,12 @@ test("scalar descriptions retain their type label and canonical formatting", () 
   assert.equal(describeObject({type: "chess", value: ""}), 'chess: ');
   assert.equal(describeObject({type: "float", value: "-0.0"}), 'float: -0.0');
 });
+
+test("empty chess games remain visible and distinct from empty strings inside lists", () => {
+  const items = [
+    {type: "int", value: "0"},
+    {type: "list", value: [{type: "chess", value: ""}, {type: "string", value: ""}]},
+  ];
+  assert.equal(describeObject({type: "list", value: JSON.stringify(items)}),
+    'list: [0, [chess: "", ""]]');
+});
