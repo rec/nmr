@@ -555,11 +555,11 @@ The opening sound is `tune:the`, deferred to the first interaction if autoplay i
 blocked. Escape clears the editor and stops sound.
 
 Conversion and tune arithmetic run locally through the shared Python core in a
-Pyodide worker. Each edit synchronizes the field to URL parameter `q` through
-`history.replaceState`, preserving other parameters and the fragment without
-adding history entries or issuing requests. On page load, an existing `q` fills
-the field before recognition starts. The `mode` parameter preserves the editing
-direction, defaulting to Description when absent. The resulting URL can be bookmarked or sent
+Pyodide worker. The URL always contains one parameter: `desc` for Description
+mode or `name` for True Name mode. Each edit and swap updates it through
+`history.replaceState`, preserving the fragment without adding history entries
+or issuing requests. On page load, this parameter restores the text and direction;
+without either parameter, the editor starts with an empty Description. The resulting URL can be bookmarked or sent
 to a friend; opening or reloading it sends the query to the hosting server. The
 app does not add analytics or persist the input in local storage.
 The minimal browser uses the default vocabulary; explicit canonical decoding,

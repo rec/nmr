@@ -244,10 +244,10 @@ The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
 requires a connection and a WebAssembly-capable modern browser. The project,
 chess library, and semantic-version library are bundled from the same installation
 that builds the site. Conversion runs locally in a worker. Each text edit updates
-`q` in the current URL without a network request or an extra browser history entry.
+`desc` or `name` in the current URL without a network request or an extra browser history entry.
 Copy or bookmark that URL to share the query; opening it fills the field and runs
 recognition. Spaces appear as `+`, and literal plus signs and other special
-characters are escaped. For example: `/nmr?q=Tom+Ritchford`.
+characters are escaped. For example: `/nmr?desc=Tom+Ritchford`.
 
 The query is part of the shared URL and is sent to the hosting server when that
 URL is opened or reloaded. The app does not save the input in local storage.
@@ -255,8 +255,9 @@ URL is opened or reloaded. The app does not save the input in local storage.
 The page has two panes beneath the `nmr` heading: Description and True Name.
 The left pane is always editable. Swap exchanges the captions and moves the first
 converted result into the editor. With no result, it keeps the current text.
-The direction is saved as `mode=description` or `mode=truename` alongside `q`;
-links without a mode start in Description mode.
+URLs contain exactly one parameter: `desc` for Description mode or `name` for
+True Name mode, including when the field is empty. Opening a link restores both
+the text and direction. A URL without either starts with an empty Description.
 
 In Description mode, the engine recognizes integers, explicit `+` phone numbers,
 fractions, ISO dates and times, coordinates, IP addresses, UUIDs, versions,

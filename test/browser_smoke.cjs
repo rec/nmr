@@ -76,7 +76,8 @@ const { chromium } = require("playwright");
     await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "True Name" &&
       document.querySelector("#truename").textContent === 'string: "Tom Ritchford"');
     assert.equal(await page.locator("#full-truename").isVisible(), false);
-    assert.equal(new URL(page.url()).searchParams.get("mode"), "truename");
+    assert.deepEqual([...new URL(page.url()).searchParams.keys()], ["name"]);
+    assert.equal(new URL(page.url()).searchParams.get("name"), await page.locator("#value").inputValue());
     await page.locator("#swap").click();
     await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
     assert.equal(await page.locator("#value").inputValue(), 'string: "Tom Ritchford"');
@@ -126,13 +127,13 @@ const { chromium } = require("playwright");
     for (const character of "Tom Ritchford + café & 🎵") {
       await page.keyboard.type(character);
       query += character;
-      assert.equal(new URL(page.url()).searchParams.get("q"), query);
+      assert.equal(new URL(page.url()).searchParams.get("desc"), query);
+      assert.deepEqual([...new URL(page.url()).searchParams.keys()], ["desc"]);
     }
     const bookmark = new URL(page.url());
-    assert.ok(bookmark.search.includes("q=Tom+Ritchford+%2B+caf%C3%A9+%26+"));
+    assert.ok(bookmark.search.includes("desc=Tom+Ritchford+%2B+caf%C3%A9+%26+"));
     assert.equal(bookmark.pathname, original.pathname);
     assert.equal(bookmark.hash, original.hash);
-    assert.equal(bookmark.searchParams.get("v"), original.searchParams.get("v"));
     assert.equal(await page.evaluate(() => history.length), historyLength);
     assert.deepEqual(requests, [], "Updating the bookmark must not send requests");
     await page.reload();
@@ -141,7 +142,7 @@ const { chromium } = require("playwright");
     await page.waitForFunction(() => !document.querySelector("#truename").hidden &&
       document.querySelector("#truename").textContent.startsWith("string: "));
     await page.keyboard.press("Escape");
-    assert.equal(new URL(page.url()).searchParams.get("q"), "");
+    assert.equal(new URL(page.url()).searchParams.get("desc"), "");
     await page.reload();
     assert.equal(await page.locator("#value").inputValue(), "");
 

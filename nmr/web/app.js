@@ -7,7 +7,8 @@ const fullTruenameButton = document.querySelector("#full-truename");
 const swapButton = document.querySelector("#swap");
 const sourceHeading = document.querySelector("#source-heading");
 const targetHeading = document.querySelector("#target-heading");
-let mode = new URL(window.location.href).searchParams.get("mode") === "truename" ? "truename" : "description";
+const parameters = new URL(window.location.href).searchParams;
+let mode = parameters.has("name") ? "truename" : "description";
 const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 const worker = new Worker("worker.js");
@@ -78,8 +79,8 @@ function unlock() {
 }
 function changed() {
   const url = new URL(window.location.href);
-  url.searchParams.set("q", editor.text);
-  url.searchParams.set("mode", mode);
+  url.search = "";
+  url.searchParams.set(mode === "truename" ? "name" : "desc", editor.text);
   window.history.replaceState(window.history.state, "", url);
   version++;
   playVersion++;
@@ -253,8 +254,9 @@ async function start() {
     console.error(error);
   }
 }
-const query = new URL(window.location.href).searchParams.get("q");
+const query = parameters.get(mode === "truename" ? "name" : "desc");
 if (query !== null) editor.replace(query);
 captions();
+changed();
 focus();
 start();
