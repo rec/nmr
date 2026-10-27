@@ -16,7 +16,6 @@ from nmr.web import bridge
         ("date", "2000-02-29"),
         ("chess", "e4 e5 Nf3"),
         ("go", "9x9:D4 E4"),
-        ("list", '[{"type":"int","value":"0"},{"type":"int","value":"0"}]'),
         ("tune", "@1 2@1/2"),
     ],
 )

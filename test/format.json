@@ -13,21 +13,21 @@
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:lie among tile epic"
+      "truename": "music:sam fixed ward proof"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:of lady tried river file"
+      "truename": "play:the ion pink river trap"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "by sofa rare spent toe"
+      "truename": "a pearl link man acid"
     },
     {
       "type": "int",
@@ -41,7 +41,7 @@
       "input": "42",
       "value": "42",
       "scope": "",
-      "truename": "in bowl"
+      "truename": "and jump"
     },
     {
       "type": "frac",
@@ -83,21 +83,21 @@
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play:game",
-      "truename": "game:was hope"
+      "truename": "game:your land"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:open beast"
+      "truename": "play:most undo"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "lie genre"
+      "truename": "rest bull"
     },
     {
       "type": "go",
@@ -111,7 +111,7 @@
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "and major break cab"
+      "truename": "the storm what drink"
     },
     {
       "type": "go",
@@ -203,27 +203,6 @@
       "value": "036000291452",
       "scope": null,
       "truename": "upc:label yet west"
-    },
-    {
-      "type": "list",
-      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "scope": null,
-      "truename": "list:on gage"
-    },
-    {
-      "type": "list",
-      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "scope": "",
-      "truename": "site kid"
-    },
-    {
-      "type": "list",
-      "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
-      "scope": null,
-      "truename": "list:sue old"
     }
   ]
 }

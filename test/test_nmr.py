@@ -53,8 +53,8 @@ def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) ->
 def test_category_scopes_are_shortened_without_changing_the_payload(scope: str) -> None:
     engine = Nmr()
     result = engine.encode("e4 e5 Nf3", "chess", scope)
-    assert result.truename == "game:was hope"
-    assert engine.decode(scope + ":was hope") == result
+    assert result.truename == "game:your land"
+    assert engine.decode(scope + ":your land") == result
 
 
 def test_wrong_parent_categories_are_rejected() -> None:

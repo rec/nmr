@@ -1,4 +1,4 @@
-"""Five-way routing. Only the unnamed root may have a leaf in slot four."""
+"""Four-way routing. The last slot can be empty or a category, never a leaf."""
 
 from __future__ import annotations
 
@@ -8,7 +8,7 @@ from pydantic import BaseModel, ConfigDict, model_validator
 
 from .type_name import TypeNamer
 
-RADIX = 5
+RADIX = 4
 
 
 class Category(BaseModel, frozen=True):
@@ -21,12 +21,10 @@ class Category(BaseModel, frozen=True):
     @model_validator(mode="after")
     def validate_children(self) -> Category:
         if not 1 <= len(self.children) <= RADIX:
-            raise ValueError(f"Child count {len(self.children)} is out of range 1..5")
-        if (
-            self.name
-            and len(self.children) == RADIX
-            and not isinstance(self.children[-1], Category)
-        ):
+            raise ValueError(
+                f"Child count {len(self.children)} is out of range 1..{RADIX}"
+            )
+        if len(self.children) == RADIX and not isinstance(self.children[-1], Category):
             raise ValueError("The last slot can never be a leaf")
         if any(isinstance(i, Category) and not i.name for i in self.children):
             raise ValueError("The unnamed root cannot be nested inside a category")

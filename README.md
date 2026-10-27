@@ -45,9 +45,9 @@ nmr --value 'frac:who'
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
 # chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:open beast
+# play:most undo
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
-# lie genre
+# rest bull
 
 # Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
@@ -77,8 +77,8 @@ Time, and Duration. Outputs use a single `time:` for the type and keep `real:tim
 when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
 `:play:game:chess:in also` all read identically and print as `chess:in also`.
-Category scopes behave the same way: `play:game:was hope` prints as
-`game:was hope`, with the same payload. Results and typed-list entries also use
+Category scopes behave the same way: `play:game:your land` prints as
+`game:your land`, with the same payload. Results also use
 short type labels. Internal tree paths still determine routing; shortening a
 prefix never changes its scope or the encoded number.
 
@@ -108,13 +108,12 @@ expands; save the canonical output instead.
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
-| `list` | Ordered typed values, including nested lists. |
 | `string` | Unicode text, preserving case and allowed spaces; excludes U+0000–001F, U+007F–009F, and surrogates. The empty string is supported. No Unicode normalization is applied. |
 
 String character indices count `a`–`z`, then `A`–`Z`, then the remaining allowed
 U+0020–00FF characters in code-point order, then higher Unicode scalar values.
 Character tuples use the shared diagonal enumeration by total sum; the length
-is encoded with the same trailing-binary length tag as List. For example,
+is encoded with a trailing-binary length tag. For example,
 `dfasdfasdf` is `string:she dump stan learn river`. Browsing wraps character
 indices outside the alphabet and repairs noncanonical empty-string indices.
 
@@ -262,7 +261,7 @@ the text and direction. A URL without either starts with an empty description.
 
 In description mode, the engine recognizes integers, explicit `+` phone numbers,
 fractions, ISO dates and times, coordinates, IP addresses, UUIDs, versions,
-durations, chess/Go moves, tune notation, and typed lists. Pure digits mean an
+durations, chess/Go moves, and tune notation. Pure digits mean an
 integer; slash pairs mean fractions. Use `YYYY-MM-DD` for dates. Other text,
 including vocabulary words such as `Tom`, becomes a String with its original case
 and spaces. Incomplete type syntax waits for more input; invalid typed values
@@ -338,51 +337,29 @@ otherwise delegates to the standard rational conversion; finite overflow raises
 `Int` lives in `nmr.types.integer`; `Float` in `nmr.types.floating` stores exact
 binary64 bits and exposes `.float()`.
 
-Lists use explicit typed values rather than vocabulary-dependent truenames:
-
-```json
-[{"type":"date","value":"2000-02-29"},{"type":"phone","value":"+442079460958"}]
-```
-
-Encode that JSON with type `list`. Type names normalize to full paths; scalar
-values must be strings. Nested lists use JSON arrays, not JSON encoded inside
-strings. Browser results show the values directly, for example
-`list: [0/0, 10.0.0.1]`, with nested brackets and quoted strings. Swapping back to
-description retains typed JSON input so every item keeps its type.
-Lists preserve order and require at least two items. Limits are 256 items per list and eight nesting
-levels; arbitrary browsing can encounter these work limits and is not promised
-to succeed for every list index.
-
 Integer tuples are ranked directly by total sum. For `n` nonnegative integers
 with total `S`, preceding sum layers contain `comb(S + n - 1, n)` tuples; the
 remaining offset is the rank of the tail tuple. For example, `(2, 1, 3)` has
 rank 69. Inversion uses integer binomial comparisons and binary search. One-part
 tuples are unchanged, and two-part tuples retain the Cantor pairing order.
-List items share one tuple rank, and semantic versions pack major, minor, patch,
-prerelease, and build indices as five components without nested pairing. The list
-length minus two is stored in the trailing-binary length tag, so list index zero
-contains two zero-valued items. This balances by sum, not by component bit length;
-it does not guarantee a shorter truename for every object.
+Semantic versions pack major, minor, patch, prerelease, and build indices as five
+components without nested pairing. This balances by sum, not by component bit
+length; it does not guarantee a shorter truename for every object.
 
 ## Format and development
 
-The five root slots are `pure`, `real`, `data`, `play`, and the `list` leaf.
-Every category has radix five. Below the root, slots 0–3 may hold leaves or
-categories; slot 4 can only be empty or a category. The unnamed root alone is
-exempt from the last-slot rule and cannot be nested. New types expand beneath
-the four root categories. Published allocations never move, and leaves never
-turn into categories.
-
-List truenames use `list:` directly. An unprefixed list routes as `4 + 5 * payload`,
-with one fewer routing step than the former `meta:list` path. Nested lists also
-benefit from the shorter route; other type allocations are unchanged.
+The four root slots are `pure`, `real`, `data`, and `play`. Every category has
+radix four. Slots 0–2 may hold leaves or categories; slot 3 can only be empty or a
+category. This rule applies at every depth, including the root. The unnamed root
+cannot be nested. Published allocations never move, and leaves never turn into
+categories.
 
 The exact allocations are in `nmr/registry.py`, using positional constructors
 such as `Category("game", Chess, Go)`. Children are stored in an immutable tuple
 of categories or codec classes. Tuple positions define the slots; unused slots
-follow the last child. Categories require one to five children, with no `None`
+follow the last child. Categories require one to four children, with no `None`
 entries or empty placeholder categories. Prefixes are ordinary paths
-through that tree. At each edge, `parent_index = slot + 5 * child_index`.
+through that tree. At each edge, `parent_index = slot + 4 * child_index`.
 A fuller prefix removes more of those routing components from the word payload.
 `test/format.json` freezes shared Python and WebAssembly examples.
 

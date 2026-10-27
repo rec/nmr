@@ -22,12 +22,11 @@ Additional work beyond the prompt: None.
 * Once established, canonical truenames must remain backward compatible forever.
   There is no later incompatible format reset. Adding types must remain possible
   without changing the meaning of any existing canonical truename.
-* The root slots, in order, are `pure`, `real`, `data`, `play`, and the `list`
-  leaf. Every category node has five slots, with fixed radix five.
-* Below the root, the last slot, index 4, may be empty or contain a category,
-  never a leaf. The root is exempt. Slots 0 through 3 may be empty, leaves, or
-  categories. Below the root, this rule applies at every depth; expansion uses
-  ordinary categories.
+* The root slots, in order, are `pure`, `real`, `data`, and `play`. Every category
+  node has four slots, with fixed radix four. List is not a supported type.
+* The last slot, index 3, may be empty or contain a category, never a leaf.
+  Slots 0 through 2 may be empty, leaves, or categories. This rule applies at
+  every depth, including the root; expansion uses ordinary categories.
 * Canonical decoding is the default. Browsing is a separate, explicit operation
   that can map unassigned or out-of-range indices into supported choices.
 * The namable numeric classes are `Int`, `Frac`, and `Float`.
@@ -136,7 +135,7 @@ weaken this guarantee. No future version switch is an escape from it.
 
 ### Permanent, extensible type allocation
 
-Use fixed branching of five at every category node, including the root. Replace
+Use fixed branching of four at every category node, including the root. Replace
 the separate radix override table with this uniform rule. It governs type routing,
 not the internal enumeration of objects within a leaf codec.
 
@@ -148,13 +147,11 @@ The root allocation is settled:
 | 1 | `real` | Time and geographic location, including latitude/longitude. |
 | 2 | `data` | Computing, communication, contacts, and identifiers. |
 | 3 | `play` | Art, music, and games. |
-| 4 | `list` (leaf) | Ordered typed values, including nested lists. |
 
 `pure` is the category name; “canonical” refers to encoding and decoding,
 not a category. Place the existing mathematical and scientific types under
 `pure`; time and coordinates under `real`; addresses, registered values, and
-identifiers under `data`; art and games under `play`; and
-List directly in root slot 4. Exact subcategory names, slot
+identifiers under `data`; and art and games under `play`. Exact subcategory names, slot
 assignments and structural leaves are now explicit in `nmr/registry.py`:
 
 | Category path | Occupied child slots |
@@ -185,29 +182,21 @@ centered playback presentation.
 
 Represent the hierarchy with `Category(truename, *children)`, storing children as
 `tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an
-integer-keyed dictionary. Every category has one to five children; entries cannot
+integer-keyed dictionary. Every category has one to four children; entries cannot
 be `None`, and unused slots follow the final child. This representation preserves
 the numbered ordering of its children.
 
-Below the root, slots 0 through 3 may be empty, a specifically defined leaf type,
-or a category. Slot 4 may be empty or a category, but must never be a leaf. The
-unnamed root alone is exempt and cannot be nested. Its fifth child is List.
-Every named category uses the five-slot structure and last-slot restriction
-recursively; no new root slots can be added.
+At every level, slots 0 through 2 may hold a specifically defined leaf type or
+a category. Slot 3 may be empty or a category, but must never be a leaf. The
+unnamed root follows the same restriction and cannot be nested. Its four children
+are `pure`, `real`, `data`, and `play`.
 
-To extend a full named category, descend through slot 4. If that slot is empty,
-create a category there and place the new type in an available slot 0 through 3
-beneath it.
-In a finite tree, repeatedly following slot 4 eventually reaches an empty slot,
-so space for extension always exists. Other slots can also contain categories,
-allowing broader organization rather than forcing all growth down the last path.
-This guarantees structural room, not a semantically appropriate home for every
-type: choose category meanings with their descendants in mind.
-
-List moved from `meta:list` to `list`; the `meta` category is removed. List's
-global route is now `4 + 5*n` instead of `4 + 25*n`. Fully prefixed scalar-only
-lists retain their word payloads with the shorter `list:` prefix. Unprefixed
-and nested-list truenames use the shorter route. Other type slots are unchanged.
+To extend a full category, descend through slot 3. If that slot is empty, create
+a category there and place the new type in an available slot 0 through 2 beneath
+it. In a finite tree, repeatedly following slot 3 eventually reaches an empty
+slot, so space for extension always exists. Other slots can also contain
+categories. This guarantees structural room, not a semantically appropriate home
+for every type: choose category meanings with their descendants in mind.
 
 Published slots and category paths never move. A published leaf never becomes a
 category, and an occupied category never becomes a leaf. Never resize a node or
@@ -245,10 +234,10 @@ that preserves the selected scope, keeping `real:time:` for the category. Thus `
 For that illustrative path, let `g` be the game slot within `play`, `c` the chess
 slot within `game`, and `n` the type-relative integer. The global integer is:
 
-`I = 3 + 5 * (g + 5 * (c + 5*n))`
+`I = 3 + 4 * (g + 4 * (c + 4*n))`
 
 The payload integers for no prefix, `play:`, `game:`, and
-`chess:` are respectively `I`, `g + 5*(c + 5*n)`, `c + 5*n`, and `n`.
+`chess:` are respectively `I`, `g + 4*(c + 4*n)`, `c + 4*n`, and `n`.
 The values of `g` and `c` are not assigned by this example. Decoding a prefix
 restores the omitted fixed routing components. This preserves the type-relative
 integer and makes the forms equivalent without changing the word-ranking algorithm.
@@ -360,7 +349,6 @@ chosen permanent expansion mechanism.
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
 | Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
-| Lists | Typed ordered lists of two or more items; nested typed values are supported. | Canonical round trips; browsing can encounter the 256-item/eight-level work limits. No unrestricted completeness promise. |
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
@@ -567,9 +555,6 @@ description output offers a prefix-relative truename and a `name:`-marked full
 root truename. true name output offers the browsed object's description. Typed
 descriptions such as `upc: 036000291452` and `string: "123"` preserve types on
 swapping; String values use JSON quoting to preserve exact whitespace and quotes.
-Displayed lists use their items' canonical values, such as `[0/0, 10.0.0.1]`,
-with nested brackets and quoted strings. Typed JSON stays internal to conversion
-and is restored when swapping a list into description mode.
 
 In description mode, typing, deletion, paste, native click placement, drag
 selection, and double-click word selection remain supported. Recognition never
@@ -603,7 +588,7 @@ leaf-prefixed truenames generated by the implementation.
 
 The implementation choices are recorded in the final section: child placement,
 chess identity, security expectations, browser delivery, `Float` representation,
-type scope, and browsing limits. The five root categories, fixed radix five,
+type scope, and browsing limits. The four root categories, fixed radix four,
 last-slot restriction, canonical decoding default, and permanent compatibility
 are settled requirements. Record the prefix grammar, canonicalization
 rules, stable allocations, and per-type bounds before changing encoders. Replace
@@ -630,10 +615,10 @@ word-count boundaries, and reserved slots. Verify canonical rejection and explic
 browsing separately, including agreement on canonical inputs. Simulate adding
 children at multiple depths, including creating a category in an empty last slot
 and extending through existing last-slot categories. Every previously canonical
-truename must retain its meaning at every prefix scope. Verify radix five and reject
-leaf allocations in slot 4 below the root. Verify the root permits List in slot 4
-and cannot be nested, and that new category edges appear
-in the corresponding prefix paths. Former browsing inputs may change discovery
+truename must retain its meaning at every prefix scope. Verify radix four and
+reject leaf allocations in slot 3 at every level, including the root. Verify that
+the unnamed root cannot be nested and new category edges appear in the
+corresponding prefix paths. Former browsing inputs may change discovery
 results without invalidating those saved truenames.
 
 Exit criterion: all advertised scope ranges satisfy their published guarantees,
@@ -708,7 +693,7 @@ human answer to use the delivered library, CLI, or static browser build.
 
 | Original decision area | Implemented choice |
 | --- | --- |
-| Tree and placement | Five-way tree and explicit allocations above; no legacy decoder. Golden fixtures freeze the new format. |
+| Tree and placement | Four-way tree and explicit allocations above; no legacy decoder. Golden fixtures freeze the new format. |
 | Security | Private vocabularies provide obscurity. Actual encryption, key management, and password storage claims are excluded. |
 | Main use cases | The implemented type matrix; generic string encoding is excluded. |
 | Browser delivery | Static local conversion through pinned Pyodide 0.29.3 in a worker, with the same bundled Python core. |
@@ -721,7 +706,7 @@ human answer to use the delivered library, CLI, or static browser build.
 | Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
 | Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
 | Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
-| Additional identifiers and composites | ISBN and UPC have checked compact codecs. Typed lists provide composition. |
+| Additional identifiers | ISBN and UPC have checked compact codecs. Collections are not supported. |
 | Vocabulary policy | NFC plus case folding by default; optional case sensitivity and active word count. Word order, normalization, and count participate in identity. Existing default order retained. |
 | Vocabulary exchange | File import, paste, normalized export, and full SHA-256 identity. No automatic persistence or shuffling. |
 | Typo handling | Strict canonical rejection and explicit result verification. No checksum overhead or silent correction. |
@@ -734,7 +719,7 @@ human answer to use the delivered library, CLI, or static browser build.
 1. Added Tyro/Pydantic in a dedicated dependency commit and established the baseline.
 2. Replaced the truename core, category allocation, numeric models, word validation,
    and CLI; removed the broken old codec implementations.
-3. Added everyday codecs, legal chess enumeration, and typed lists.
+3. Added everyday codecs and legal chess enumeration.
 4. Added the static browser build, worker bridge, vocabulary UI, and WebAssembly
    checks. Improved very-large-integer handling.
 5. Added permanent cross-runtime fixtures, current CI, installed-artifact checks,
@@ -744,20 +729,16 @@ human answer to use the delivered library, CLI, or static browser build.
 7. Removed the public Text type and its browser choice. Its former slot was
    unassigned; other types retain their truenames. Shared digit ranking remains for
    compact codecs.
-8. Removed Record and its field-name encoding. Lists retain their slot, canonical
-   truenames, nesting, order, and work limits; the former Record slot is unassigned.
-9. Moved List to root slot 4, removed `meta`, and limited the last-slot exception
-   to the unnamed, non-nestable root. Updated routing fixtures for the shorter path.
+8. Removed Record and its field-name encoding.
+9. Removed List and the former `meta` category. All categories, including the root,
+   now use four-way routing and reserve their last slot for categories.
 10. Replaced repeated pairing with direct sum-layer tuple enumeration. For total
     `S` and arity `n`, the rank is `comb(S+n-1, n) + rank(tail)` with the one-part
     rank equal to its value. Unranking uses exact binomial comparisons and integer
     binary search, ending with the existing exact two-part inverse. Removed the
-    forward/backward nested-pairing option and the separate balanced list tree.
-    SemVer packs all five integer components directly; lists pack all item indices
-    directly with a length header. Lists now encode length minus two and exclude
-    empty and single-item values.
-    Two-part ranks and fraction truenames remain unchanged. SemVer and longer-list
-    fixtures deliberately adopt the new mapping; no legacy decoder is retained.
+    forward/backward nested-pairing option. SemVer packs all five integer
+    components directly. Two-part ranks and fraction truenames remain unchanged;
+    SemVer fixtures deliberately adopt the new mapping without a legacy decoder.
     Balance is by component sum, not by bit length, so individual truenames can grow.
 
 ### Verification and limits
@@ -803,7 +784,7 @@ For a nonempty string of length `n`, let `p` be the shared `Packer(count=n)`
 diagonal rank of its character indices. Its string index is
 `((2*p + 1) << n) - 1`. The empty string has index zero. Decoding reads `n` from
 the trailing zero bits of `index + 1`, then unpacks the remaining tuple rank.
-This is the existing List-style length tag, and distinguishes `a`, `aa`, and
+This is the trailing-binary length tag, and distinguishes `a`, `aa`, and
 `aaa`, whose character tuples all rank zero. Strict decoding rejects invalid
 character indices and noncanonical empty-string aliases; browsing wraps invalid
 character indices modulo the alphabet size and maps empty-string aliases to empty.

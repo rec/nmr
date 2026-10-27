@@ -152,9 +152,7 @@ async function swap() {
   clearTimeout(timer);
   if (ready) await recognize();
   if (revision !== version) return;
-  // List input keeps explicit types even though its result displays plain values.
-  const value = mode === "description" ? currentTruename : currentObject && (
-    currentObject.type === "list" ? `list: ${currentObject.value}` : describeObject(currentObject));
+  const value = mode === "description" ? currentTruename : currentObject && describeObject(currentObject);
   if (mode === "description") {
     if (!nameEditor) return;
     if (!nameEditor.load(value || "")) { player?.tick(presentation.root); return; }

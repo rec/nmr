@@ -3,7 +3,6 @@ import pytest
 from nmr.category import Category, label, route
 from nmr.nmr import Nmr
 from nmr.registry import ROOT
-from nmr.types.collections import List
 from nmr.types.floating import Float
 from nmr.types.fraction import Frac
 from nmr.types.integer import Int
@@ -28,17 +27,12 @@ def test_lookup_accepts_omitted_parent_categories(path: str) -> None:
     assert ROOT.lookup(path) == ROOT.lookup("play:game:chess")
 
 
-def test_named_categories_reject_last_slot_leaves() -> None:
-    with pytest.raises(ValueError, match="last slot"):
-        Category("bad", Int, Float, Frac, Uuid, Int)
-
-
 def test_growth_preserves_old_allocations() -> None:
-    old = Category("root", Int, Float, Frac, Uuid)
+    old = Category("root", Int, Float, Frac)
     new = Category("root", *old.children, Category("extra", Int))
     for i in range(100):
         assert old.resolve(route([0], i)) == new.resolve(route([0], i)) == (Int, i)
-        assert new.resolve(route([4, 0], i)) == (Int, i)
+        assert new.resolve(route([3, 0], i)) == (Int, i)
 
 
 def test_root_order_and_unassigned_slots() -> None:
@@ -47,17 +41,21 @@ def test_root_order_and_unassigned_slots() -> None:
         "real",
         "data",
         "play",
-        "list",
     ]
     with pytest.raises(ValueError, match="unassigned"):
         ROOT.resolve(route([0, 3], 0))
     assert ROOT.resolve(route([0, 3], 0), browse=True)[0] is Int
 
 
-def test_only_the_root_can_have_a_leaf_in_the_last_slot() -> None:
-    assert ROOT.resolve(route([4], 123)) == (List, 123)
+@pytest.mark.parametrize("name", ["", "nested"])
+def test_last_slot_is_reserved_for_categories_at_every_level(name: str) -> None:
     with pytest.raises(ValueError, match="last slot"):
-        Category("nested", *ROOT.children)
+        Category(name, Int, Float, Frac, Uuid)
+    node = Category(name, Int, Float, Frac, Category("extra", Uuid))
+    assert node.resolve(route([3, 0], 123)) == (Uuid, 123)
+
+
+def test_unnamed_root_cannot_be_nested() -> None:
     with pytest.raises(ValueError, match="cannot be nested"):
         Category("nested", ROOT)
 
@@ -82,7 +80,7 @@ def test_categories_reject_invalid_children() -> None:
     with pytest.raises(ValueError, match="out of range"):
         Category("empty")
     with pytest.raises(ValueError, match="out of range"):
-        Category("too many", Int, Int, Int, Int, Int, Int)
+        Category("too many", Int, Int, Int, Int, Int)
     with pytest.raises(ValueError):
         Category("null", None)
     with pytest.raises(ValueError):
@@ -118,3 +116,22 @@ def test_data_types_use_their_requested_categories(type_name: str, path: str) ->
 def test_removed_data_categories_are_not_available(category: str) -> None:
     with pytest.raises(ValueError, match="Unknown"):
         ROOT.lookup(category)
+
+
+def test_routes_use_four_slots_at_every_depth() -> None:
+    assert route([1, 2, 3], 7) == 1 + 4 * (2 + 4 * (3 + 4 * 7))
+    assert len(ROOT.children) == 4
+    assert all(
+        len(n.children) <= 4 for _, _, n in ROOT.nodes() if isinstance(n, Category)
+    )
+
+
+@pytest.mark.parametrize("type_name", ["list", "record"])
+def test_collection_types_are_not_registered(type_name: str) -> None:
+    engine = Nmr()
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.find_type(type_name)
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.encode("[]", type_name)
+    with pytest.raises(ValueError, match="Unknown"):
+        engine.decode(type_name + ":the")

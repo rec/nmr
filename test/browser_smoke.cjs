@@ -200,17 +200,6 @@ const { chromium } = require("playwright");
     await page.reload();
     assert.equal(await page.locator("#value").inputValue(), "");
 
-    const listUrl = new URL(page.url());
-    listUrl.search = new URLSearchParams({name: "list:the"}).toString();
-    await page.goto(listUrl.href);
-    await page.waitForSelector('#name-editor[data-ready="true"]', { timeout: 120000 });
-    await page.waitForFunction(() => document.querySelector("#truename").textContent === "list: [0, 0]");
-    await checkCopy();
-    await page.locator("#swap").click();
-    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "description");
-    assert.equal(await page.locator("#value").inputValue(),
-      'list: [{"type":"int","value":"0"},{"type":"int","value":"0"}]');
-
     const axisUrl = new URL(page.url());
     axisUrl.search = new URLSearchParams({name: "ax"}).toString();
     await page.goto(axisUrl.href);

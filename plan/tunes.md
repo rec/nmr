@@ -320,7 +320,7 @@ Small fixtures to verify independently during implementation:
 Use `tune:` in printed truenames, with internal path `play:music:tune`: add the
 `music` category at unused `play` slot 1 and the `tune` leaf at its slot 0.
 Parent categories are optional in input and never printed. Existing game paths remain unchanged. The full
-prefix removes type-routing cost; shorter scopes use the existing five-way tree.
+prefix removes type-routing cost; shorter scopes use the four-way tree.
 There is no separate public rhythm-only type in this work.
 
 Use the same Python codec in the CLI and WebAssembly worker. Add a note/rest

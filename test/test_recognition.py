@@ -34,7 +34,6 @@ from nmr.web import bridge
         ("@1 2@1", "tune"),
         ("9x9:D4 E4", "go"),
         ("e4 e5 Nf3", "chess"),
-        ('[{"type":"int","value":"1"},{"type":"int","value":"0"}]', "list"),
     ],
 )
 def test_details_are_encoded_without_type_prefixes(value: str, kind: str) -> None:
@@ -59,7 +58,6 @@ def test_slash_pair_is_a_fraction_and_iso_date_is_required() -> None:
         "",
         "+",
         "@",
-        "[",
         "1.",
         "1/",
         "1e-",
@@ -242,7 +240,7 @@ def test_truename_input_returns_its_browsed_object(value: str) -> None:
 
 def test_truename_input_browses_unassigned_slots_instead_of_rejecting_them() -> None:
     engine = Nmr()
-    value = "name:" + " ".join(engine.to_truename(15))
+    value = "name:" + " ".join(engine.to_truename(4))
     result = json.loads(
         bridge.recognize(json.dumps({"value": value, "mode": "truename"}))
     )
@@ -279,3 +277,11 @@ def test_explicit_time_description_selects_the_type_instead_of_the_category() ->
     assert result.kind == "time"
     assert engine.decode(result.truename).value == "12:34:00"
     assert result.truename.count(":") == 1
+
+
+@pytest.mark.parametrize("value", ["[", "[]", '[{"type":"int","value":"1"}]'])
+def test_bracketed_text_is_a_string_after_list_removal(value: str) -> None:
+    engine = Nmr()
+    result = describe_input(value, engine)
+    assert result.kind == "string"
+    assert engine.decode(result.truename).value == value

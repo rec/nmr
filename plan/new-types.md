@@ -27,7 +27,7 @@ Prefer candidates with these qualities:
 
 This is a candidate list, not authorization to implement everything or reserve
 type slots. The proposed homes are conceptual; final allocation needs its own
-review against the five-way tree and the root-only last-slot exception.
+review against the four-way tree and the last-slot restriction at every level.
 
 Additional work beyond the prompt: None.
 

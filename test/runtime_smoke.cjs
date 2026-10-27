@@ -25,7 +25,7 @@ const { loadPyodide } = require("pyodide");
   assert.ok("data:id:string" in info.types);
   assert.equal("meta:record" in info.types, false);
   assert.equal("meta:list" in info.types, false);
-  assert.ok("list" in info.types);
+  assert.equal("list" in info.types, false);
   const qualified = JSON.parse(convert(JSON.stringify({
     operation: "decode", value: ":play:game:chess:in also",
   })));
@@ -33,8 +33,8 @@ const { loadPyodide } = require("pyodide");
   assert.equal(qualified.type, "chess");
   assert.equal(qualified.canonical, true);
   assert.equal(JSON.parse(convert(JSON.stringify({
-    operation: "decode", value: "play:game:was hope",
-  }))).truename, "game:was hope");
+    operation: "decode", value: "play:game:your land",
+  }))).truename, "game:your land");
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(

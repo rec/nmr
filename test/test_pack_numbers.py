@@ -63,7 +63,7 @@ def test_unbalanced_tuples_share_the_same_sum_layer() -> None:
         assert packer.unpack(rank) == list(values)
 
 
-def test_maximum_list_length_can_pack_zeroes_and_single_units() -> None:
+def test_large_tuples_can_pack_zeroes_and_single_units() -> None:
     packer = Packer(count=256)
     assert packer.pack(*([0] * 256)) == 0
     assert packer.unpack(0) == [0] * 256
