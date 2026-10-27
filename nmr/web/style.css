@@ -55,6 +55,8 @@ input:focus, #name-editor:focus { border-color: #245d50; }
   color: #245d50;
   background: transparent;
   cursor: pointer;
+  user-select: text;
+  -webkit-user-select: text;
 }
 .truename:not(:disabled):hover { text-decoration: underline; text-underline-offset: 5px; }
 .truename:disabled { color: #69766d; cursor: default; }

@@ -20,6 +20,29 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#full-truename").isVisible(), false);
     const requests = [];
     page.on("request", (request) => requests.push(request.url()));
+    const checkResultCopy = async () => {
+      const result = await page.evaluate(() => {
+        const button = document.querySelector("#truename");
+        const range = document.createRange();
+        range.selectNodeContents(button);
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        const text = selection.toString();
+        const shortcut = button.dispatchEvent(new KeyboardEvent("keydown", {
+          key: "c", metaKey: true, bubbles: true, cancelable: true,
+        }));
+        const copy = button.dispatchEvent(new ClipboardEvent("copy", {
+          clipboardData: new DataTransfer(), bubbles: true, cancelable: true,
+        }));
+        selection.removeAllRanges();
+        return { text, shortcut, copy, expected: button.textContent };
+      });
+      assert.ok(result.text);
+      assert.equal(result.text, result.expected);
+      assert.equal(result.shortcut, true, "Copy shortcut must reach the browser");
+      assert.equal(result.copy, true, "Native copy must retain the selected result");
+    };
     const enter = async (value, prefix) => {
       await page.keyboard.press("Escape");
       await page.keyboard.type(value);
@@ -41,6 +64,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), "Tom R");
     await page.waitForFunction(() => !document.querySelector("#truename").hidden && document.querySelector("#truename").textContent.startsWith("string: "));
     await enter("xyzzy!", "string:");
+    await checkResultCopy();
     assert.equal(await page.locator("#full-truename").isVisible(), true);
     await page.keyboard.press("Escape");
     await page.keyboard.type("th");
@@ -100,6 +124,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#name-editor").isVisible(), true);
     assert.equal(await page.locator("#value").isVisible(), false);
     await page.waitForFunction(() => document.querySelector("#truename").textContent === "date: 2000-02-29");
+    await checkResultCopy();
     const originalTyped = await page.locator("#typed").textContent();
     const nextGuess = await page.locator("#guessed").textContent();
     assert.ok(nextGuess);
