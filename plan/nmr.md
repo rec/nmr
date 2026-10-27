@@ -558,6 +558,9 @@ Description output offers a prefix-relative truename and a `name:`-marked full
 root truename. True Name output offers the browsed object's description. Typed
 descriptions such as `upc: 036000291452` and `string: "123"` preserve types on
 swapping; String values use JSON quoting to preserve exact whitespace and quotes.
+Displayed lists use their items' canonical values, such as `[0/0, 10.0.0.1]`,
+with nested brackets and quoted strings. Typed JSON stays internal to conversion
+and is restored when swapping a list into Description mode.
 
 In Description mode, typing, deletion, paste, native click placement, drag
 selection, and double-click word selection remain supported. Recognition never

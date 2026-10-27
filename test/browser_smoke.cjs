@@ -192,6 +192,17 @@ const { chromium } = require("playwright");
     await page.reload();
     assert.equal(await page.locator("#value").inputValue(), "");
 
+    const listUrl = new URL(page.url());
+    listUrl.search = new URLSearchParams({name: "list:the"}).toString();
+    await page.goto(listUrl.href);
+    await page.waitForSelector('#name-editor[data-ready="true"]', { timeout: 120000 });
+    await page.waitForFunction(() => document.querySelector("#truename").textContent === "list: [0, 0]");
+    await checkResultCopy();
+    await page.locator("#swap").click();
+    await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
+    assert.equal(await page.locator("#value").inputValue(),
+      'list: [{"type":"int","value":"0"},{"type":"int","value":"0"}]');
+
     await page.setViewportSize({ width: 375, height: 812 });
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
     console.log("Two-pane conversion, swapping, mouse selection, editing, playback, and local-only conversion passed");

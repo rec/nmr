@@ -342,7 +342,10 @@ Lists use explicit typed values rather than vocabulary-dependent truenames:
 
 Encode that JSON with type `list`. Type names normalize to full paths; scalar
 values must be strings. Nested lists use JSON arrays, not JSON encoded inside
-strings. Lists preserve order and require at least two items. Limits are 256 items per list and eight nesting
+strings. Browser results show the values directly, for example
+`list: [0/0, 10.0.0.1]`, with nested brackets and quoted strings. Swapping back to
+Description retains typed JSON input so every item keeps its type.
+Lists preserve order and require at least two items. Limits are 256 items per list and eight nesting
 levels; arbitrary browsing can encounter these work limits and is not promised
 to succeed for every list index.
 

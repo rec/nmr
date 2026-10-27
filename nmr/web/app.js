@@ -1,3 +1,4 @@
+import { describeObject } from "./description.mjs";
 import { TruenameEditor } from "./truename-editor.mjs";
 import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
@@ -110,9 +111,6 @@ function changed() {
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
 }
-function describeObject(object) {
-  return `${object.type}: ${object.type === "string" ? JSON.stringify(object.value) : object.value}`;
-}
 function captions() {
   sourceHeading.textContent = mode === "description" ? "Description" : "True Name";
   targetHeading.textContent = mode === "description" ? "True Name" : "Description";
@@ -144,7 +142,9 @@ async function swap() {
   clearTimeout(timer);
   if (ready) await recognize();
   if (revision !== version) return;
-  const value = mode === "description" ? currentTruename : currentObject && describeObject(currentObject);
+  // List input keeps explicit types even though its result displays plain values.
+  const value = mode === "description" ? currentTruename : currentObject && (
+    currentObject.type === "list" ? `list: ${currentObject.value}` : describeObject(currentObject));
   if (mode === "description") {
     if (!nameEditor) return;
     if (!nameEditor.load(value || "")) { player?.tick(presentation.root); return; }
