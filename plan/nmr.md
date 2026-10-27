@@ -535,24 +535,38 @@ The browser has Description and True Name panes side by side, beneath a centered
 `nmr` heading and the subtitle "true names of canonical things". The left pane
 always contains the editable field; the right contains clickable results. On small
 screens the panes stack. Swap exchanges captions and puts the first converted
-result into the editor. If no conversion is available, it keeps the text.
+result into the editor. Without a conversion, swapping starts with an empty
+editor so Description text cannot violate the True Name vocabulary rules.
 
 Description mode recognizes unprefixed details by shape and otherwise encodes
-literal String text, including vocabulary words. True Name mode exclusively uses
-`decode(..., browse=True)` and displays the found object's type and value, or a
-browsing error. Matching ignores case, while input preserves its original spelling.
+literal String text, including vocabulary words. True Name mode uses a controlled
+typed/guessed editor. All completed words are
+unique vocabulary entries; the final fragment must start an unused word. Guessed
+continuations are grey and selected randomly. Lowercase letters and Space enter
+text; impossible letters and other editing keys produce a 20 ms tick at the
+presentation root. Space accepts the suggestion. Right accepts at least one
+character, continuing through forced characters until a branch or completion.
+Completion adds a space and suggests an unused next word. Left and Backspace
+return one letter to guessed text, also removing an automatic space at a boundary.
+Up/Down cycle matching continuations or eligible next words. The cursor stays at
+the typed/guessed boundary; clicking and selection cannot move it. Tab and focused
+buttons retain keyboard accessibility. Type prefixes supplied by swaps or links
+stay fixed outside word editing; loaded words normalize to lowercase.
+`decode(..., browse=True)` previews the selected completion of a partial word,
+while a suggested next word is excluded until accepted.
 Description output offers a prefix-relative truename and a `name:`-marked full
 root truename. True Name output offers the browsed object's description. Typed
 descriptions such as `upc: 036000291452` and `string: "123"` preserve types on
 swapping; String values use JSON quoting to preserve exact whitespace and quotes.
 
-Typing, deletion, paste, native click placement, drag selection, and double-click
-word selection remain supported. Recognition never resets cursor or selection.
+In Description mode, typing, deletion, paste, native click placement, drag
+selection, and double-click word selection remain supported. Recognition never
+resets cursor or selection.
 Right-hand results play their tunes at F3 and 180 BPM. Clicking the playing result
-stops it; clicking another switches playback. Enter plays the first result unless
-the second has focus. Phone input rejects typed letters with a quiet tick.
+stops it; clicking another switches playback. In Description mode, Enter plays
+the first result unless the second has focus. Phone input rejects typed letters with a quiet tick.
 The opening sound is `tune:the`, deferred to the first interaction if autoplay is
-blocked. Escape clears the editor and stops sound.
+blocked. In Description mode, Escape clears the editor and stops sound.
 
 Conversion and tune arithmetic run locally through the shared Python core in a
 Pyodide worker. The URL always contains one parameter: `desc` for Description

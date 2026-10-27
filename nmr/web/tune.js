@@ -26,17 +26,18 @@ export class TunePlayer {
   get playing() {
     return this.voices.size > 0;
   }
-  tick() {
+  tick(pitch = 53) {
     const voice = this.context.createOscillator();
     const gain = this.context.createGain();
     const start = this.context.currentTime;
-    voice.frequency.value = 2000;
+    voice.type = "triangle";
+    voice.frequency.value = 440 * 2 ** ((pitch - 69) / 12);
     gain.gain.setValueAtTime(0.025 * outputGain, start);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.020);
     voice.connect(gain).connect(this.context.destination);
     voice.onended = () => { voice.disconnect(); gain.disconnect(); };
     voice.start(start);
-    voice.stop(start + 0.012);
+    voice.stop(start + 0.020);
   }
   stop() {
     for (const voice of this.voices) voice.stop();

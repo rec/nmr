@@ -254,7 +254,7 @@ URL is opened or reloaded. The app does not save the input in local storage.
 
 The page has two panes beneath the `nmr` heading: Description and True Name.
 The left pane is always editable. Swap exchanges the captions and moves the first
-converted result into the editor. With no result, it keeps the current text.
+converted result into the editor. With no result, it starts with an empty editor.
 URLs contain exactly one parameter: `desc` for Description mode or `name` for
 True Name mode, including when the field is empty. Opening a link restores both
 the text and direction. A URL without either starts with an empty Description.
@@ -269,18 +269,29 @@ remain errors. Type labels can make a description explicit, such as
 `upc: 036000291452` or `string: "123"`. Strings in typed descriptions use JSON
 quoting so swapping preserves their type, quotes, and whitespace.
 
-In True Name mode, the entire input is decoded using browsing, with optional
-category/type prefixes and case-insensitive word matching. The right pane shows
-the found object's type and value. Failed decoding shows an error instead of
-switching to String. The field's original spelling is never rewritten.
+In True Name mode, accepted text is followed by a grey suggested continuation.
+Completed words must be distinct vocabulary words; the current fragment must
+match an unused word's beginning. Suggestions are chosen randomly. Only lowercase
+letters and Space enter text; impossible letters and other editing keys make a
+quiet 20 ms F3 tick instead. Space accepts the selected suggestion. Right accepts
+at least one letter, continuing through unambiguous characters. Completing the
+selected word inserts a space and suggests an unused next word. Left and Backspace
+move one letter back into the guess, removing an automatic space when needed.
+Up/Down cycle through matching continuations or eligible next words. Clicking and
+selection cannot move this cursor. Tab still navigates the page controls.
+
+The right pane uses browsing to preview a partially typed word's selected
+completion. A guessed next word does not affect decoding until accepted. Type
+prefixes from swaps and bookmarks stay fixed before the controlled word sequence.
+Swapping or loading a bookmark accepts complete words and normalizes their case.
 
 Click a result on the right to play its tune. Description mode offers both the
 prefix-relative truename and the full root truename, marked `name:`. True Name
 mode offers the browsed object's description and plays its prefix-relative tune.
-Click the playing result to stop, or another result to switch. Enter plays the
-first result unless the second has focus.
+Click the playing result to stop, or another result to switch. In Description
+mode, Enter plays the first result unless the second has focus.
 
-Type anywhere on the page; click the field to position its cursor, drag to select,
+In Description mode, type anywhere on the page; click the field to position its cursor, drag to select,
 or double-click to select a word. Arrow keys, Home/End, Shift selection,
 copy/cut/paste, and insertion in the middle work normally. Escape clears the field
 and stops playback. Phone input containing `+` and digits rejects typed letters

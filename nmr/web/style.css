@@ -25,7 +25,7 @@ h2 {
   font-weight: 400;
   text-align: center;
 }
-input {
+input, #name-editor {
   display: block;
   width: 100%;
   min-width: 0;
@@ -40,7 +40,7 @@ input {
   caret-color: #245d50;
   background: transparent;
 }
-input:focus { border-color: #245d50; }
+input:focus, #name-editor:focus { border-color: #245d50; }
 .truename {
   display: block;
   max-width: 100%;
@@ -72,3 +72,10 @@ h3 { margin: 0 0 12px; font-size: 16px; font-weight: 500; }
   .panes { grid-template-columns: minmax(0, 1fr); gap: 12px; }
   .pane { min-height: 150px; }
 }
+
+#name-editor { white-space: pre-wrap; overflow-wrap: anywhere; user-select: none; -webkit-user-select: none; cursor: default; }
+#guessed { color: #657269; }
+.name-caret { display: inline-block; position: relative; width: 0; height: 1em; vertical-align: -0.1em; }
+#name-editor:focus .name-caret::after { content: ""; position: absolute; height: 100%; border-left: 2px solid #245d50; animation: caret-blink 1s step-end infinite; }
+@keyframes caret-blink { 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { #name-editor:focus .name-caret::after { animation: none; } }

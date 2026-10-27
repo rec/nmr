@@ -1,7 +1,12 @@
+import { TruenameEditor } from "./truename-editor.mjs";
 import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
 
 const field = document.querySelector("#value");
+const nameField = document.querySelector("#name-editor");
+const typed = document.querySelector("#typed");
+const guessed = document.querySelector("#guessed");
+let nameEditor;
 const truenameButton = document.querySelector("#truename");
 const fullTruenameButton = document.querySelector("#full-truename");
 const swapButton = document.querySelector("#swap");
@@ -56,18 +61,28 @@ worker.onerror = () => {
   pending.clear();
 };
 
+function inputText() {
+  return mode === "truename" && nameEditor ? nameEditor.text : editor.text;
+}
 function render() {
+  field.hidden = mode === "truename";
+  nameField.hidden = mode !== "truename";
+  if (mode === "truename") {
+    typed.textContent = nameEditor?.text || "";
+    guessed.textContent = nameEditor?.guessed || "";
+    return;
+  }
   field.value = editor.text;
   field.setSelectionRange(Math.min(editor.anchor, editor.cursor), Math.max(editor.anchor, editor.cursor),
     editor.cursor < editor.anchor ? "backward" : "forward");
 }
 function focus() {
   readSelection();
-  field.focus({ preventScroll: true });
+  (mode === "truename" ? nameField : field).focus({ preventScroll: true });
   render();
 }
 function readSelection() {
-  if (composing || field.value !== editor.text) return;
+  if (mode === "truename" || composing || field.value !== editor.text) return;
   const backward = field.selectionDirection === "backward";
   editor.anchor = backward ? field.selectionEnd : field.selectionStart;
   editor.cursor = backward ? field.selectionStart : field.selectionEnd;
@@ -80,7 +95,7 @@ function unlock() {
 function changed() {
   const url = new URL(window.location.href);
   url.search = "";
-  url.searchParams.set(mode === "truename" ? "name" : "desc", editor.text);
+  url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
   window.history.replaceState(window.history.state, "", url);
   version++;
   playVersion++;
@@ -104,7 +119,7 @@ function captions() {
 async function recognize() {
   const revision = version;
   try {
-    const result = await request("recognize", { value: editor.text, mode });
+    const result = await request("recognize", { value: mode === "truename" ? nameEditor?.completion || "" : editor.text, mode });
     if (revision !== version) return;
     currentTruename = result.truename;
     currentObject = result.browsed || null;
@@ -129,8 +144,15 @@ async function swap() {
   if (ready) await recognize();
   if (revision !== version) return;
   const value = mode === "description" ? currentTruename : currentObject && describeObject(currentObject);
-  mode = mode === "description" ? "truename" : "description";
-  if (value) { editor.selectAll(); editor.replace(value); }
+  if (mode === "description") {
+    if (!nameEditor) return;
+    if (!nameEditor.load(value || "")) { player?.tick(presentation.root); return; }
+    mode = "truename";
+  } else {
+    mode = "description";
+    editor.selectAll();
+    editor.replace(value || "");
+  }
   captions();
   changed();
   focus();
@@ -170,11 +192,27 @@ async function playTruename(absolute = false) {
   }
 }
 
+function nameKey(key) {
+  if (!nameEditor) return;
+  const accepted = key === "ArrowRight" ? nameEditor.right()
+    : key === "ArrowLeft" || key === "Backspace" ? nameEditor.left()
+    : key === "ArrowUp" || key === "ArrowDown" ? nameEditor.cycle(key === "ArrowUp" ? -1 : 1)
+    : nameEditor.type(key);
+  if (accepted) changed();
+  else { player?.tick(presentation.root); render(); }
+}
 function insert(text) {
+  if (mode === "truename") { player?.tick(presentation.root); return; }
   if (editor.replace(text)) changed();
   else { player?.tick(); render(); }
 }
 
+nameField.addEventListener("pointerdown", (event) => { event.preventDefault(); focus(); });
+nameField.addEventListener("selectstart", (event) => event.preventDefault());
+nameField.addEventListener("beforeinput", (event) => {
+  event.preventDefault();
+  nameKey(event.inputType === "deleteContentBackward" ? "Backspace" : event.data || "");
+});
 field.addEventListener("select", readSelection);
 document.addEventListener("selectionchange", () => {
   if (document.activeElement === field) readSelection();
@@ -185,6 +223,13 @@ truenameButton.addEventListener("click", () => playTruename());
 fullTruenameButton.addEventListener("click", () => playTruename(true));
 document.addEventListener("keydown", (event) => {
   unlock();
+  if (mode === "truename") {
+    if (event.key === "Tab" || ([swapButton, truenameButton, fullTruenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
+    event.preventDefault();
+    focus();
+    nameKey(event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ? "" : event.key);
+    return;
+  }
   if (event.isComposing || event.key === "Tab") return;
   if (document.activeElement === swapButton && ["Enter", " "].includes(event.key)) return;
   const command = event.ctrlKey || event.metaKey;
@@ -220,6 +265,7 @@ document.addEventListener("paste", (event) => {
   insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
+  if (mode === "truename") { event.preventDefault(); player?.tick(presentation.root); return; }
   readSelection();
   event.preventDefault();
   event.clipboardData.setData("text/plain", editor.selection());
@@ -243,9 +289,15 @@ field.addEventListener("input", () => { if (!composing) render(); });
 
 async function start() {
   try {
-    await request("configure", {});
+    const info = await request("configure", {});
+    nameEditor = new TruenameEditor(info.words);
+    if (mode === "truename" && !nameEditor.load(editor.text)) player?.tick(presentation.root);
+    render();
     ready = true;
     field.dataset.ready = "true";
+    nameField.dataset.ready = "true";
+    changed();
+    clearTimeout(timer);
     await recognize();
     // tune:the is the one-beat zeroth tune, independently of its root routing.
     const intro = await request("preview", { value: "@1", ...presentation });
