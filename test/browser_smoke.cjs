@@ -20,9 +20,9 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#full-truename").isVisible(), false);
     const requests = [];
     page.on("request", (request) => requests.push(request.url()));
-    const checkResultCopy = async () => {
-      const result = await page.evaluate(() => {
-        const button = document.querySelector("#truename");
+    const checkCopy = async (selector = "#truename") => {
+      const result = await page.evaluate((selector) => {
+        const button = document.querySelector(selector);
         const range = document.createRange();
         range.selectNodeContents(button);
         const selection = window.getSelection();
@@ -37,7 +37,7 @@ const { chromium } = require("playwright");
         }));
         selection.removeAllRanges();
         return { text, shortcut, copy, expected: button.textContent };
-      });
+      }, selector);
       assert.ok(result.text);
       assert.equal(result.text, result.expected);
       assert.equal(result.shortcut, true, "Copy shortcut must reach the browser");
@@ -64,7 +64,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), "Tom R");
     await page.waitForFunction(() => !document.querySelector("#truename").hidden && document.querySelector("#truename").textContent.startsWith("string: "));
     await enter("xyzzy!", "string:");
-    await checkResultCopy();
+    await checkCopy();
     assert.equal(await page.locator("#full-truename").isVisible(), true);
     await page.keyboard.press("Escape");
     await page.keyboard.type("th");
@@ -124,7 +124,8 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#name-editor").isVisible(), true);
     assert.equal(await page.locator("#value").isVisible(), false);
     await page.waitForFunction(() => document.querySelector("#truename").textContent === "date: 2000-02-29");
-    await checkResultCopy();
+    await checkCopy();
+    await checkCopy("#typed");
     const description = await page.locator("#truename").textContent();
     await page.keyboard.type("z");
     assert.equal(await page.locator("#truename").isVisible(), true);
@@ -204,7 +205,7 @@ const { chromium } = require("playwright");
     await page.goto(listUrl.href);
     await page.waitForSelector('#name-editor[data-ready="true"]', { timeout: 120000 });
     await page.waitForFunction(() => document.querySelector("#truename").textContent === "list: [0, 0]");
-    await checkResultCopy();
+    await checkCopy();
     await page.locator("#swap").click();
     await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "Description");
     assert.equal(await page.locator("#value").inputValue(),

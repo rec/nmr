@@ -217,13 +217,11 @@ function insert(text) {
   if (editor.replace(text)) changed();
   else { player?.tick(); render(); }
 }
-function resultSelected() {
+function selectedWithin(element) {
   const selection = window.getSelection();
-  return selection && !selection.isCollapsed && resultPane.contains(selection.anchorNode) && resultPane.contains(selection.focusNode);
+  return selection && !selection.isCollapsed && element.contains(selection.anchorNode) && element.contains(selection.focusNode);
 }
 
-nameField.addEventListener("pointerdown", (event) => { event.preventDefault(); focus(); });
-nameField.addEventListener("selectstart", (event) => event.preventDefault());
 nameField.addEventListener("beforeinput", (event) => {
   event.preventDefault();
   nameKey(event.inputType === "deleteContentBackward" ? "Backspace" : event.data || "");
@@ -234,11 +232,11 @@ document.addEventListener("selectionchange", () => {
 });
 document.addEventListener("pointerdown", unlock, true);
 swapButton.addEventListener("click", swap);
-truenameButton.addEventListener("click", () => { if (!resultSelected()) playTruename(); });
-fullTruenameButton.addEventListener("click", () => { if (!resultSelected()) playTruename(true); });
+truenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(); });
+fullTruenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(true); });
 document.addEventListener("keydown", (event) => {
   unlock();
-  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && resultSelected()) return;
+  if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") {
     if (event.key === "Tab" || ([swapButton, truenameButton, fullTruenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
     event.preventDefault();
@@ -281,7 +279,7 @@ document.addEventListener("paste", (event) => {
   insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
-  if (action === "copy" && resultSelected()) return;
+  if (action === "copy" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") { event.preventDefault(); player?.tick(presentation.root); return; }
   readSelection();
   event.preventDefault();

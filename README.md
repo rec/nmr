@@ -279,7 +279,8 @@ selected word inserts a space and suggests an unused next word. Left and Backspa
 move back to the previous character choice, skipping forced stretches and removing
 an automatic space when needed. For example, `axis ` returns to `a`.
 Up/Down cycle through matching continuations or eligible next words. Clicking and
-selection cannot move this cursor. Tab still navigates the page controls.
+selection cannot move this cursor. Text remains selectable and copyable with the
+mouse and the usual copy shortcut or context menu. Tab still navigates the page controls.
 
 The right pane uses browsing to decode completed, accepted words only. Partial
 words and guesses do not change or hide the description. Completing a word accepts

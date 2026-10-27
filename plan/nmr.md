@@ -550,7 +550,8 @@ Completion adds a space and suggests an unused next word. Left and Backspace
 return to the previous character choice, skipping forced stretches and removing
 an automatic space at a word boundary. For example, Left takes `axis ` back to `a`.
 Up/Down cycle matching continuations or eligible next words. The cursor stays at
-the typed/guessed boundary; clicking and selection cannot move it. Tab and focused
+the typed/guessed boundary; text can be selected and copied without moving that
+editing position. Tab and focused
 buttons retain keyboard accessibility. Type prefixes supplied by swaps or links
 stay fixed outside word editing; loaded words normalize to lowercase.
 `decode(..., browse=True)` receives completed, accepted words only. Neither a

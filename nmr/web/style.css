@@ -75,7 +75,7 @@ h3 { margin: 0 0 12px; font-size: 16px; font-weight: 500; }
   .pane { min-height: 150px; }
 }
 
-#name-editor { white-space: pre-wrap; overflow-wrap: anywhere; user-select: none; -webkit-user-select: none; cursor: default; }
+#name-editor { white-space: pre-wrap; overflow-wrap: anywhere; user-select: text; -webkit-user-select: text; cursor: text; }
 #guessed { color: #a2aaa3; }
 .name-caret { display: inline-block; position: relative; width: 0; height: 1em; vertical-align: -0.1em; }
 #name-editor:focus .name-caret::after { content: ""; position: absolute; height: 100%; border-left: 2px solid #245d50; animation: caret-blink 1s step-end infinite; }
