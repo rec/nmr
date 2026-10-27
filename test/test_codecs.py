@@ -93,14 +93,14 @@ def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> No
     assert engine.decode(result.truename).value == result.value
 
 
-def test_string_uses_the_former_text_slot_without_a_text_alias() -> None:
+def test_string_uses_the_id_category_without_a_text_alias() -> None:
     engine = Nmr()
     assert "data:text" not in engine.types()
     with pytest.raises(ValueError, match="Unknown"):
         engine.encode("hello", "text")
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("data:text:the")
-    result = engine.decode("data:" + " ".join(engine.to_truename(3)))
+    result = engine.decode("id:" + " ".join(engine.to_truename(2)))
     assert result.type == "string"
     assert result.value == ""
 

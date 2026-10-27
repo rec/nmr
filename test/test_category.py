@@ -107,6 +107,7 @@ def test_bare_time_selects_the_leaf_and_real_time_selects_the_category() -> None
         ("upc", "data:register:upc"),
         ("uuid", "data:id:uuid"),
         ("semver", "data:id:semver"),
+        ("string", "data:id:string"),
     ],
 )
 def test_data_types_use_their_requested_categories(type_name: str, path: str) -> None:

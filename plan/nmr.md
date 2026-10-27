@@ -163,10 +163,10 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `pure:math` | 0: `int`, 1: `frac`, 2: `float`. |
 | `real` | 0: `time` (category), 1: `latlong`. |
 | `real:time` | 0: `date`, 1: `time` (Time type), 2: `duration`. |
-| `data` | 0: `address`, 1: `register`, 2: `id` (categories), 3: `string`. |
+| `data` | 0: `address`, 1: `register`, 2: `id` (categories). |
 | `data:address` | 0: `ip`, 1: `phone`. |
 | `data:register` | 0: `isbn`, 1: `upc`; values backed by an external registry. |
-| `data:id` | 0: `uuid`, 1: `semver`. |
+| `data:id` | 0: `uuid`, 1: `semver`, 2: `string`. |
 | `play` | 0: `game`, 1: `music` (categories). |
 | `play:game` | 0: `chess`, 1: `go`. |
 | `play:music` | 0: `tune`. |
@@ -792,7 +792,7 @@ buildable installation-free decoder, but no public URL or PyPI release was creat
 
 ### String fallback
 
-`data:string` occupies slot 3 under `data`. It preserves case, allowed whitespace,
+`data:id:string` occupies slot 2 under `data:id`. It preserves case, allowed whitespace,
 and Unicode composition exactly, including the empty string. It excludes
 U+0000–001F, U+007F–009F (including DELETE), and surrogate code points U+D800–DFFF.
 The character order is `a`–`z` (0–25), `A`–`Z` (26–51), the remaining allowed

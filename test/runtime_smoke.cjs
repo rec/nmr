@@ -22,7 +22,7 @@ const { loadPyodide } = require("pyodide");
   assert.equal(info.count, 1628);
   assert.equal(info.identifier, fixture.vocabulary);
   assert.equal("data:text" in info.types, false);
-  assert.ok("data:string" in info.types);
+  assert.ok("data:id:string" in info.types);
   assert.equal("meta:record" in info.types, false);
   assert.equal("meta:list" in info.types, false);
   assert.ok("list" in info.types);
