@@ -226,7 +226,7 @@ Use a unique category or type name followed by a colon and a word payload.
 All category and type labels must be globally unique, including across levels;
 a registry unit test enforces this. Parent categories may be supplied on input,
 including an optional leading colon, but output always prints only the final
-category or type name. Thus `:play:game:chess:in get` prints as `chess:in get`.
+category or type name. Thus `:play:game:chess:in also` prints as `chess:in also`.
 
 * No prefix: words encode the global integer.
 * `name:`: a convenience marker with no category, slot, or radix cost. It is

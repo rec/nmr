@@ -38,3 +38,21 @@ def test_vocabulary_identity_covers_order_case_policy_and_unicode() -> None:
     assert first.identifier != Words(["a", "é"]).identifier
     assert first.identifier != Words(["é", "a"], ignore_case=False).identifier
     assert Words(first.export().splitlines()).identifier == first.identifier
+
+
+@pytest.mark.parametrize(
+    "before,word,after",
+    [
+        ("for", "is", "on"),
+        ("at", "as", "your"),
+        ("what", "news", "out"),
+        ("some", "its", "like"),
+        ("plan", "yes", "hot"),
+    ],
+)
+def test_restored_words_keep_their_original_positions(
+    before: str, word: str, after: str
+) -> None:
+    words = Words().words
+    position = words.index(word)
+    assert words[position - 1 : position + 2] == (before, word, after)

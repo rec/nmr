@@ -1,117 +1,117 @@
 {
-  "vocabulary": "8018fee950b51a77dd05943d584034ff03bf4a446ff8670b19d23a64e6b28239",
+  "vocabulary": "643a015f51785101f7796f1bf398be8fd8f333da0994db335b4e6c596ffaeb18",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:both angle join human"
+      "truename": "tune:open lease sale point"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sons entry joan luis"
+      "truename": "music:lie among tile epic"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:of cape mouse cross same"
+      "truename": "play:of lady tried river file"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "this lamb lady henry orgy"
+      "truename": "by sofa rare spent toe"
     },
     {
       "type": "int",
       "input": "42",
       "value": "42",
       "scope": null,
-      "truename": "int:year"
+      "truename": "int:list"
     },
     {
       "type": "int",
       "input": "42",
       "value": "42",
       "scope": "",
-      "truename": "in dish"
+      "truename": "in bowl"
     },
     {
       "type": "frac",
       "input": "2/4",
       "value": "2/4",
       "scope": null,
-      "truename": "frac:now"
+      "truename": "frac:who"
     },
     {
       "type": "date",
       "input": "2000-02-29",
       "value": "2000-02-29",
       "scope": null,
-      "truename": "date:nor lung"
+      "truename": "date:mass soup"
     },
     {
       "type": "phone",
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:then eden happy ian"
+      "truename": "phone:city dame cause dust"
     },
     {
       "type": "latlong",
       "input": "48.8566,2.3522",
       "value": "48.8566,2.3522",
       "scope": null,
-      "truename": "latlong:to plot ruth wise tend echo"
+      "truename": "latlong:to echo bias mill wake chip"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": null,
-      "truename": "chess:in get"
+      "truename": "chess:in also"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play:game",
-      "truename": "game:will gas"
+      "truename": "game:was hope"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:both pride"
+      "truename": "play:open beast"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "sons paint"
+      "truename": "lie genre"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:up trade real"
+      "truename": "go:site radio map"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "and added civil drag"
+      "truename": "and major break cab"
     },
     {
       "type": "go",
@@ -125,7 +125,7 @@
       "input": "13x13:J10",
       "value": "13x13:J10",
       "scope": null,
-      "truename": "go:rest"
+      "truename": "go:mary"
     },
     {
       "type": "frac",
@@ -139,35 +139,35 @@
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "truename": "float:sing crop doubt lynn hey run"
+      "truename": "float:surf goto tower todd dan star"
     },
     {
       "type": "float",
       "input": "bits:7ff8000000000042",
       "value": "bits:7ff8000000000042",
       "scope": null,
-      "truename": "float:sue fix turn lane sin rug"
+      "truename": "float:hook iron bit bell grey mild"
     },
     {
       "type": "clock",
       "input": "23:59:59.999999",
       "value": "23:59:59.999999",
       "scope": null,
-      "truename": "clock:from add even user"
+      "truename": "clock:are them want read"
     },
     {
       "type": "local",
       "input": "2000-02-29T12:30",
       "value": "2000-02-29T12:30:00",
       "scope": null,
-      "truename": "local:a tile wish roof exam she"
+      "truename": "local:a ruth mind kent pull well"
     },
     {
       "type": "instant",
       "input": "2000-01-01T00:30:00+01:00",
       "value": "1999-12-31T23:30:00Z",
       "scope": null,
-      "truename": "instant:a jeep mill ebony hash live"
+      "truename": "instant:a swim gulf yield eden team"
     },
     {
       "type": "duration",
@@ -181,63 +181,63 @@
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ipv4:lion jet night"
+      "truename": "ipv4:shut belt quote"
     },
     {
       "type": "ipv6",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ipv6:act world leon lady main wood soft nice upper serve kay mid"
+      "truename": "ipv6:less first buys rare form pack miss zip patch labor trio wild"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:mail worth silk link track of oops tight pig find hold beat"
+      "truename": "uuid:many steel sons even share of sap opera oval some idea moon"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:with meant third hans joint prior yarn bolt table orgy gate treat list jump key sit way end fog pub chat onto spin tom act"
+      "truename": "semver:this asset sound hawk count brown neon foul learn toe seed shift date diet park dont mail both mess holy none nine slip mike less"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:wood main owen"
+      "truename": "isbn:pack form ant"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:motor baby box"
+      "truename": "upc:label yet west"
     },
     {
       "type": "list",
       "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
       "value": "[{\"type\":\"int\",\"value\":\"1\"}]",
       "scope": null,
-      "truename": "list:zoom"
+      "truename": "list:lack"
     },
     {
       "type": "list",
       "input": "[{\"type\":\"int\",\"value\":\"1\"}]",
       "value": "[{\"type\":\"int\",\"value\":\"1\"}]",
       "scope": "",
-      "truename": "the joke"
+      "truename": "the drag"
     },
     {
       "type": "list",
       "input": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "value": "[{\"type\":\"int\",\"value\":\"1\"},{\"type\":\"int\",\"value\":\"0\"},{\"type\":\"int\",\"value\":\"0\"}]",
       "scope": null,
-      "truename": "list:of your par"
+      "truename": "list:of at rob"
     }
   ]
 }

@@ -141,7 +141,7 @@ def test_truename_playback_defaults_to_relative_with_explicit_absolute_option() 
 
 def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
     result = json.loads(
-        bridge.preview_truename('{"value":"tune:such like","root":53,"bpm":180}')
+        bridge.preview_truename('{"value":"tune:post were","root":53,"bpm":180}')
     )
     assert result["value"] == "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1"
     assert len(result["playback"]) == 8
@@ -233,7 +233,7 @@ def test_name_marker_preserves_an_existing_type_prefix() -> None:
     assert result["browsed"]["value"] == "@1"
 
 
-@pytest.mark.parametrize("value", ["date:nor lung", "tune:such like", "Tom"])
+@pytest.mark.parametrize("value", ["date:mass soup", "tune:post were", "Tom"])
 def test_truename_input_returns_its_browsed_object(value: str) -> None:
     result = json.loads(
         bridge.recognize(json.dumps({"value": value, "mode": "truename"}))

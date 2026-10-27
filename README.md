@@ -7,7 +7,7 @@ then let a friend recover it with the same vocabulary.
 A truename contains a readable type prefix and a payload without repeated words:
 
 ```text
-date:nor lung
+date:mass soup
 ```
 
 That truename means `2000-02-29`. Canonical decoding is the default. Browsing is an
@@ -23,7 +23,7 @@ git clone git@github.com:rec/nmr.git
 cd nmr
 uv sync --frozen
 uv run --frozen nmr --operation encode --type date --value 2000-02-29
-uv run --frozen nmr --value 'date:nor lung'
+uv run --frozen nmr --value 'date:mass soup'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
@@ -37,17 +37,17 @@ dependencies.
 ```sh
 # Preserve the actual fraction pair, including zero denominators.
 nmr --operation encode --type frac --value '2/4'
-# frac:now
-nmr --value 'frac:now'
+# frac:who
+nmr --value 'frac:who'
 # 2/4
 
 # The scope controls how much type information stays in the word payload.
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
-# chess:in get
+# chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:both pride
+# play:open beast
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
-# sons paint
+# lie genre
 
 # Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
@@ -72,10 +72,10 @@ to encode a full root truename with the marker. For ordinary typed objects, the
 browser's second True Name result shows `name:` followed by the full root word sequence.
 
 Every category and type name is unique throughout the tree. Parent categories
-are optional in input: `chess:in get`, `game:chess:in get`, and
-`:play:game:chess:in get` all read identically and print as `chess:in get`.
-Category scopes behave the same way: `play:game:will gas` prints as
-`game:will gas`, with the same payload. Results and typed-list entries also use
+are optional in input: `chess:in also`, `game:chess:in also`, and
+`:play:game:chess:in also` all read identically and print as `chess:in also`.
+Category scopes behave the same way: `play:game:was hope` prints as
+`game:was hope`, with the same payload. Results and typed-list entries also use
 short type labels. Internal tree paths still determine routing; shortening a
 prefix never changes its scope or the encoded number.
 
@@ -148,14 +148,14 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
-`go:up trade real` with the default vocabulary.
+`go:site radio map` with the default vocabulary.
 
 Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:both angle join human
-nmr --value 'tune:both angle join human'
+# tune:open lease sale point
+nmr --value 'tune:open lease sale point'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -303,7 +303,7 @@ from nmr.types.fraction import Frac
 
 engine = Nmr()
 encoded = engine.encode("2/4", "frac")
-assert encoded.truename == "frac:now"
+assert encoded.truename == "frac:who"
 assert engine.decode(encoded.truename).value == "2/4"
 
 explored = engine.decode("pure:to", browse=True)
