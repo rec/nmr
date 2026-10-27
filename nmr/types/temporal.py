@@ -3,12 +3,12 @@
 import re
 from datetime import date, time
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 from .bounded import bounded, scaled_integer, scaled_string
 from .integer import signed_index, signed_value
 
 
-class Date(TypeTruenamer):
+class Date(TypeNamer):
     label = "date"
     description = "Gregorian date YYYY-MM-DD, years 0001 through 9999"
 
@@ -23,7 +23,7 @@ class Date(TypeTruenamer):
         return date.fromordinal(1 + bounded(index, DAYS, browse)).isoformat()
 
 
-class Time(TypeTruenamer):
+class Time(TypeNamer):
     label = "time"
     description = "Time of day HH:MM[:SS[.ffffff]], without a timezone"
 
@@ -47,7 +47,7 @@ class Time(TypeTruenamer):
         return time(hours, minutes, seconds, micros).isoformat()
 
 
-class Duration(TypeTruenamer):
+class Duration(TypeNamer):
     label = "duration"
     description = (
         "Signed elapsed decimal seconds, with optional s suffix; microsecond precision"

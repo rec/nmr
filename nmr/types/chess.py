@@ -6,10 +6,10 @@ import re
 import chess
 import chess.pgn
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 
 
-class Chess(TypeTruenamer):
+class Chess(TypeNamer):
     label = "chess"
     description = "Legal standard-chess move sequence: SAN, UCI, or PGN main line"
 

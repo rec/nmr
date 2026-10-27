@@ -58,7 +58,7 @@ This is the historical assessment that informed the repair work. These paths and
 defects describe the starting point, not the current implementation.
 
 `Words` ranks and unranks sequences without repeated words using a configurable,
-ordered vocabulary. `TypeTruenamer` maps values to nonnegative integers, and
+ordered vocabulary. `TypeNamer` maps values to nonnegative integers, and
 `category.py` packs group and subtype identifiers into a global integer. `Nmr`
 joins these operations. There are useful round-trip and word-stability tests.
 
@@ -184,7 +184,7 @@ the implemented combined melody/rhythm profile, transposition equivalence, and
 centered playback presentation.
 
 Represent the hierarchy with `Category(truename, *children)`, storing children as
-`tuple[Category | type[TypeTruenamer], ...]`. Tuple order assigns slots without an
+`tuple[Category | type[TypeNamer], ...]`. Tuple order assigns slots without an
 integer-keyed dictionary. Every category has one to five children; entries cannot
 be `None`, and unused slots follow the final child. This representation preserves
 the numbered ordering of its children.

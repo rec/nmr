@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from ..category import Category, route
 from ..pack_numbers import Packer
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 
 
 class Item(BaseModel, frozen=True):
@@ -16,7 +16,7 @@ class Item(BaseModel, frozen=True):
     model_config = ConfigDict(extra="forbid", strict=True)
 
 
-class List(TypeTruenamer):
+class List(TypeNamer):
     label = "list"
     description = 'Two or more ordered typed values: [{"type":"int","value":"42"}, ...]'
 

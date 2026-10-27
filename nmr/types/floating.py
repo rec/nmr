@@ -4,10 +4,10 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 
 
-class Float(BaseModel, TypeTruenamer, frozen=True):
+class Float(BaseModel, TypeNamer, frozen=True):
     """An IEEE 754 binary64 truename; NaN payloads remain distinct."""
 
     bits: int = Field(ge=0, lt=2**64)

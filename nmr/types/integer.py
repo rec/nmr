@@ -4,10 +4,10 @@ from typing import ClassVar
 
 from pydantic import BaseModel, ConfigDict
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 
 
-class Int(BaseModel, TypeTruenamer, frozen=True):
+class Int(BaseModel, TypeNamer, frozen=True):
     value: int
     label: ClassVar[str] = "int"
     description: ClassVar[str] = "Signed integer"

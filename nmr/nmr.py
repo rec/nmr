@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from .category import Category, route
 from .registry import ROOT
-from .type_truenamer import TypeTruenamer
+from .type_name import TypeNamer
 from .types.tune import Tune
 from .words import Words
 
@@ -68,7 +68,7 @@ class Nmr(Words):
         prefix = prefix.casefold()
         node, _ = self.root.lookup(prefix)
         index = self.from_truename(payload.split())
-        codec: type[TypeTruenamer]
+        codec: type[TypeNamer]
         if isinstance(node, Category):
             codec, value_index = node.resolve(index, browse)
         else:
@@ -91,7 +91,7 @@ class Nmr(Words):
             }
         )
 
-    def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeTruenamer]]:
+    def find_type(self, type_name: str) -> tuple[str, list[int], type[TypeNamer]]:
         name = type_name.casefold().strip(":")
         node, slots = self.root.lookup(name)
         if isinstance(node, Category):

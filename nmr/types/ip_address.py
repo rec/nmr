@@ -1,10 +1,10 @@
 import ipaddress
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 from .bounded import bounded
 
 
-class IPv4(TypeTruenamer):
+class IPv4(TypeNamer):
     label = "ipv4"
     description = "IPv4 address"
 
@@ -17,7 +17,7 @@ class IPv4(TypeTruenamer):
         return str(ipaddress.IPv4Address(bounded(index, 2**32, browse)))
 
 
-class IPv6(TypeTruenamer):
+class IPv6(TypeNamer):
     label = "ipv6"
     description = "IPv6 address without an interface scope"
 

@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 
-class TypeTruenamer(ABC):
+class TypeNamer(ABC):
     label: ClassVar[str]
     description: ClassVar[str]
 

@@ -1,10 +1,10 @@
 from uuid import UUID
 
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 from .bounded import bounded
 
 
-class Uuid(TypeTruenamer):
+class Uuid(TypeNamer):
     label = "uuid"
     description = "UUID preserving all 128 bits"
 

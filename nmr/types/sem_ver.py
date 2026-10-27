@@ -1,10 +1,10 @@
 from semver import Version
 
 from ..pack_numbers import Packer, rank_digits, unrank_digits
-from ..type_truenamer import TypeTruenamer
+from ..type_name import TypeNamer
 
 
-class Semver(TypeTruenamer):
+class Semver(TypeNamer):
     label = "semver"
     description = "Semantic version, including prerelease and build metadata"
 

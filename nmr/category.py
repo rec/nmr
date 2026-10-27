@@ -6,16 +6,16 @@ from collections.abc import Iterator
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-from .type_truenamer import TypeTruenamer
+from .type_name import TypeNamer
 
 RADIX = 5
 
 
 class Category(BaseModel, frozen=True):
     name: str
-    children: tuple[Category | type[TypeTruenamer], ...]
+    children: tuple[Category | type[TypeNamer], ...]
 
-    def __init__(self, name: str, *children: Category | type[TypeTruenamer]) -> None:
+    def __init__(self, name: str, *children: Category | type[TypeNamer]) -> None:
         super().__init__(name=name, children=children)
 
     @model_validator(mode="after")
@@ -37,14 +37,14 @@ class Category(BaseModel, frozen=True):
 
     def leaves(
         self, prefix: str = ""
-    ) -> Iterator[tuple[str, list[int], type[TypeTruenamer]]]:
+    ) -> Iterator[tuple[str, list[int], type[TypeNamer]]]:
         for path, slots, node in self.nodes(prefix):
             if not isinstance(node, Category):
                 yield path, slots, node
 
     def nodes(
         self, prefix: str = ""
-    ) -> Iterator[tuple[str, list[int], Category | type[TypeTruenamer]]]:
+    ) -> Iterator[tuple[str, list[int], Category | type[TypeNamer]]]:
         for slot, child in enumerate(self.children):
             path = f"{prefix}{label(child)}"
             yield path, [slot], child
@@ -52,7 +52,7 @@ class Category(BaseModel, frozen=True):
                 for name, slots, node in child.nodes(path + ":"):
                     yield name, [slot, *slots], node
 
-    def lookup(self, path: str) -> tuple[Category | type[TypeTruenamer], list[int]]:
+    def lookup(self, path: str) -> tuple[Category | type[TypeNamer], list[int]]:
         if not path:
             return self, []
         path = path.removeprefix(":")
@@ -67,12 +67,10 @@ class Category(BaseModel, frozen=True):
         node, slots = matches[0]
         return node, slots
 
-    def resolve(
-        self, index: int, browse: bool = False
-    ) -> tuple[type[TypeTruenamer], int]:
+    def resolve(self, index: int, browse: bool = False) -> tuple[type[TypeNamer], int]:
         if index < 0:
             raise ValueError("Expected a nonnegative index")
-        node: Category | type[TypeTruenamer] = self
+        node: Category | type[TypeNamer] = self
         while isinstance(node, Category):
             index, slot = divmod(index, RADIX)
             if slot >= len(node.children):
@@ -85,7 +83,7 @@ class Category(BaseModel, frozen=True):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-def label(node: Category | type[TypeTruenamer]) -> str:
+def label(node: Category | type[TypeNamer]) -> str:
     return node.name if isinstance(node, Category) else node.label
 
 
