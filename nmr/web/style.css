@@ -17,10 +17,10 @@ body { margin: 0; }
 footer { margin-top: 32px; text-align: center; }
 footer a { color: #245d50; text-underline-offset: 4px; }
 #count-value { font-size: clamp(36px, 7vw, 72px); font-variant-numeric: tabular-nums; }
-.count-results { display: grid; gap: 16px; margin-top: 24px; }
-.count-results .pane { min-height: 120px; }
+.count-results { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 24px; }
+.count-results .pane { height: 180px; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
 #count-object { overflow-wrap: anywhere; }
-#count-message { color: #8b3328; }
+#count-message { height: 3em; margin: 12px 0; overflow: auto; color: #8b3328; }
 .count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 24px; }
 .count-controls label { display: flex; align-items: center; gap: 10px; }
 #count-run { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
