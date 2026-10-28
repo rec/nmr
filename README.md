@@ -323,7 +323,7 @@ truename every second. Sound starts off and is enabled with **On**. Choose
 on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 seconds,
 or the top of each hour for 60 minutes. Changing the interval waits for the next
 matching boundary. Tunes continue playing while muted; the On checkbox fades
-the output in or out over 500 ms without restarting the tune. It uses the same time
+the output in or out over 200 ms without restarting the tune. It uses the same time
 codec and prefix-relative tune as the main page, with F3 at 180 BPM.
 
 The WebAssembly bridge is tested in Node. Live browser interaction and visual
