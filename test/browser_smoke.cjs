@@ -222,7 +222,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#main-view").isVisible(), false);
     assert.equal(await page.locator("#clock-view").isVisible(), true);
     assert.equal(await page.locator("#clock-on").isChecked(), false);
-    assert.equal((await page.locator("label:has(#clock-on)").textContent()).trim(), "Play");
+    assert.equal((await page.locator("label:has(#clock-on)").textContent()).trim(), "Playing");
     assert.equal(await page.locator("#clock-playing").textContent(), "");
     assert.equal(await page.locator("#clock-interval").inputValue(), "5");
     assert.equal(await page.locator("#clock-time-only").isChecked(), false);

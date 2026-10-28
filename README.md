@@ -340,14 +340,14 @@ visible date and time from local time to UTC. Both start unchecked.
 Truenames and tunes always encode
 UTC, independently of the display setting, so synchronized clocks worldwide
 produce the same truename. No timezone suffix is displayed or encoded.
-Sound starts off and is enabled with **Play**. The name beneath Play identifies
+Sound starts off and is enabled with **Playing**. The name beneath Playing identifies
 the tune currently playing, remaining visible through rests and clearing when
-Play is off or the whole tune ends. Choose 5 seconds (the default), 10 seconds,
+Playing is off or the whole tune ends. Choose 5 seconds (the default), 10 seconds,
 1 minute, or 60 minutes.
 Playback starts on matching wall-clock boundaries, such as
 `:00`, `:10`, …, `:50` for 10 seconds,
 or the top of each UTC hour for 60 minutes. Changing the interval waits for the next
-matching boundary. Tunes continue playing while muted; the Play checkbox fades
+matching boundary. Tunes continue playing while muted; the Playing checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
 codec as the main view and displays the full root truename without any prefix.
 It plays the tune of that full name, with F3 at 180 BPM.
