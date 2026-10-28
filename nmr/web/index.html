@@ -37,10 +37,12 @@
     </main>
     <main id="clock-view" class="clock" hidden>
       <h1 tabindex="-1">Clock</h1>
-      <time id="clock-time" aria-label="Local time">00:00:00</time>
+      <time id="clock-time" aria-label="Date and time"><span id="clock-date"></span><span id="clock-hours">00:00:00</span></time>
       <p id="clock-truename">Loading truename…</p>
       <div class="clock-controls">
         <label><input id="clock-on" type="checkbox" /> On</label>
+        <label><input id="clock-time-only" type="checkbox" /> Time only</label>
+        <label><input id="clock-display-utc" type="checkbox" /> Display UTC</label>
         <select id="clock-interval" aria-label="Playback interval">
           <option value="5">5 seconds</option>
           <option value="10" selected>10 seconds</option>

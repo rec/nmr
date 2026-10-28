@@ -8,20 +8,58 @@ test("formats local time with leading zeros and handles midnight", () => {
   ]) {
     const date = new Date(2026, 9, 28, hour, minute, second, 999);
     const reading = clockReading(date, 10);
-    assert.equal(reading.value, expected);
+    assert.equal(reading.displayTime, expected);
     assert.equal(reading.second, Math.floor(date.getTime() / 1000));
   }
 });
 
-test("intervals use local wall-clock boundaries throughout the day", () => {
+test("intervals use UTC wall-clock boundaries throughout the day", () => {
   for (const interval of [5, 10, 60, 3600]) {
     for (const hour of [0, 9, 23]) {
       const due = [];
       for (let second = 0; second < 3600; second++) {
-        const reading = clockReading(new Date(2026, 9, 28, hour, 0, second), interval);
+        const reading = clockReading(new Date(Date.UTC(2026, 9, 28, hour, 0, second)), interval);
         if (reading.due) due.push(second);
       }
       assert.deepEqual(due, Array.from({ length: 3600 / interval }, (_, i) => i * interval));
     }
   }
+});
+
+test("default DateTime names use UTC while the display uses the local date and time", () => {
+  const date = new Date("2026-01-01T00:30:45.999Z");
+  Object.assign(date, {
+    getFullYear: () => 2025, getMonth: () => 11, getDate: () => 31,
+    getHours: () => 19, getMinutes: () => 30, getSeconds: () => 45,
+  });
+  const local = clockReading(date, 10);
+  assert.equal(local.type, "datetime");
+  assert.equal(local.value, "2026-01-01T00:30:45");
+  assert.equal(local.displayDate, "2025-12-31");
+  assert.equal(local.displayTime, "19:30:45");
+  const utc = clockReading(date, 10, false, true);
+  assert.equal(utc.value, local.value);
+  assert.equal(utc.displayDate, "2026-01-01");
+  assert.equal(utc.displayTime, "00:30:45");
+});
+
+test("Time only removes the date and keeps the named time in UTC", () => {
+  const date = new Date("2026-01-01T00:30:45.999Z");
+  Object.assign(date, { getHours: () => 6, getMinutes: () => 15, getSeconds: () => 45 });
+  const local = clockReading(date, 10, true);
+  const utc = clockReading(date, 10, true, true);
+  assert.equal(local.type, "time");
+  assert.equal(local.value, "00:30:45");
+  assert.equal(local.displayDate, "");
+  assert.equal(local.displayTime, "06:15:45");
+  assert.equal(utc.value, local.value);
+  assert.equal(utc.displayDate, "");
+  assert.equal(utc.displayTime, "00:30:45");
+});
+
+test("hourly playback follows UTC even in a fractional-offset local timezone", () => {
+  const date = new Date("2026-01-01T00:00:00Z");
+  Object.assign(date, { getHours: () => 5, getMinutes: () => 45, getSeconds: () => 0 });
+  assert.equal(clockReading(date, 3600).due, true);
+  assert.equal(clockReading(new Date("2026-01-01T00:15:00Z"), 3600).due, false);
 });

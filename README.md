@@ -320,11 +320,16 @@ code points.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 
-The Clock view at `/nmr?type=clock` shows local time as `HH:MM:SS` and updates its
-truename every second. Sound starts off and is enabled with **On**. Choose
+The Clock view at `/nmr?type=clock` shows the local date and time and updates its
+truename every second. **Time only** selects Time rather than the default
+DateTime and hides the date. **Display UTC** switches the visible date and time
+from local time to UTC. Both start unchecked. Truenames and tunes always encode
+UTC, independently of the display setting, so synchronized clocks worldwide
+produce the same truename. No timezone suffix is displayed or encoded.
+Sound starts off and is enabled with **On**. Choose
 5 seconds, 10 seconds (the default), 1 minute, or 60 minutes. Playback starts
 on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 seconds,
-or the top of each hour for 60 minutes. Changing the interval waits for the next
+or the top of each UTC hour for 60 minutes. Changing the interval waits for the next
 matching boundary. Tunes continue playing while muted; the On checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
 codec as the main view and displays the full root truename without any prefix.

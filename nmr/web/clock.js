@@ -3,9 +3,13 @@ import { clockReading } from "./clock-time.mjs";
 import { TunePlayer } from "./tune.js";
 
 const time = document.querySelector("#clock-time");
+const dateDisplay = document.querySelector("#clock-date");
+const hoursDisplay = document.querySelector("#clock-hours");
 const truename = document.querySelector("#clock-truename");
 const on = document.querySelector("#clock-on");
 const interval = document.querySelector("#clock-interval");
+const timeOnly = document.querySelector("#clock-time-only");
+const displayUTC = document.querySelector("#clock-display-utc");
 let revision = 0;
 let ready = false;
 let player;
@@ -18,8 +22,9 @@ try {
 }
 
 function showTruename(reading) {
-  request("convert", { operation: "encode", type_name: "time", value: reading.value, scope: "" }).then((result) => {
-    if (Math.floor(Date.now() / 1000) === reading.second) {
+  const currentRevision = revision;
+  request("convert", { operation: "encode", type_name: reading.type, value: reading.value, scope: "" }).then((result) => {
+    if (revision === currentRevision && Math.floor(Date.now() / 1000) === reading.second) {
       truename.textContent = result.truename;
     }
   }, (error) => {
@@ -29,7 +34,7 @@ function showTruename(reading) {
 function play(reading) {
   const currentRevision = revision;
   request("preview_item", {
-    operation: "encode", type_name: "time", value: reading.value, scope: "", root: 53, bpm: 180,
+    operation: "encode", type_name: reading.type, value: reading.value, scope: "", root: 53, bpm: 180,
   }).then((music) => {
     if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
     if (music.playback_error) throw new Error(music.playback_error);
@@ -38,14 +43,19 @@ function play(reading) {
     console.error("Could not play the current time.", error);
   });
 }
+function update() {
+  const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+  dateDisplay.textContent = reading.displayDate;
+  dateDisplay.hidden = !reading.displayDate;
+  hoursDisplay.textContent = reading.displayTime;
+  time.dateTime = reading.displayDate ? `${reading.displayDate}T${reading.displayTime}` : reading.displayTime;
+  time.setAttribute("aria-label", timeOnly.checked ? "Time" : "Date and time");
+  if (ready) showTruename(reading);
+  return reading;
+}
 function tick() {
-  const reading = clockReading(new Date(), Number(interval.value));
-  time.textContent = reading.value;
-  time.dateTime = reading.value;
-  if (ready) {
-    showTruename(reading);
-    if (player && reading.due) play(reading);
-  }
+  const reading = update();
+  if (ready && player && reading.due) play(reading);
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
 on.addEventListener("change", () => {
@@ -61,10 +71,17 @@ on.addEventListener("change", () => {
 interval.addEventListener("change", () => {
   revision++;
   player?.stop();
+  update();
 });
+timeOnly.addEventListener("change", () => {
+  revision++;
+  player?.stop();
+  update();
+});
+displayUTC.addEventListener("change", update);
 configured.then(() => {
   ready = true;
-  showTruename(clockReading(new Date(), Number(interval.value)));
+  update();
 }, (error) => {
   on.checked = false;
   on.disabled = true;
