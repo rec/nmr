@@ -1,33 +1,33 @@
 {
-  "vocabulary": "15295be6e5cd16adbbe6a05377bd77d14671e7545eda59c560ac84ef630f6d25",
+  "vocabulary": "9dc058b9fefeda3dd814944abaf08b3dedf1053de091e3acb2e98406ef3fc521",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:open proud sale large"
+      "truename": "tune:open giant sale table"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sam wrong ward empty"
+      "truename": "music:sam paris ian ideal"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the ion pink album trap"
+      "truename": "play:the doll pink build fool"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a opera link man acid"
+      "truename": "a asset link man acid"
     },
     {
       "type": "int",
@@ -55,21 +55,21 @@
       "input": "2000-02-29",
       "value": "2000-02-29",
       "scope": null,
-      "truename": "date:mass soup"
+      "truename": "date:mass nose"
     },
     {
       "type": "phone",
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city dame focus dust"
+      "truename": "phone:city herb voice kent"
     },
     {
       "type": "latlong",
       "input": "48.8566,2.3522",
       "value": "48.8566,2.3522",
       "scope": null,
-      "truename": "latlong:to echo bias mill wake chip"
+      "truename": "latlong:to grid tap burn drum res"
     },
     {
       "type": "chess",
@@ -90,28 +90,28 @@
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:most undo"
+      "truename": "play:most dana"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "rest bull"
+      "truename": "rest cole"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site until map"
+      "truename": "go:site color map"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the paint what henry"
+      "truename": "the delay what guess"
     },
     {
       "type": "go",
@@ -139,14 +139,14 @@
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "truename": "float:surf goto jason todd dan star"
+      "truename": "float:hook neil shell doug dan star"
     },
     {
       "type": "float",
       "input": "bits:7ff8000000000042",
       "value": "bits:7ff8000000000042",
       "scope": null,
-      "truename": "float:hook iron bit bell grey mild"
+      "truename": "float:crop iron bit bell bold fur"
     },
     {
       "type": "time",
@@ -167,42 +167,42 @@
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:plaza label kick"
+      "truename": "ip:quest scott meal"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:cat rear nor myth ok rio hung peer first phone wide jeep"
+      "truename": "ip:cat rear nor gig ok hero pit alex these forum wide hung"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:many fixed sons even added of sap asset oval some idea moon"
+      "truename": "uuid:many wrong leaf even radio of cave blank soma some idea moon"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this blank final hawk claim glass cope keno print toe seed simon date diet park dont mail both mess holy none nine slip mike less"
+      "truename": "semver:this humor adult lamb patch happy lime pose stock nova peer loved date diet park spy mail both rope holy none nine egg mike less"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:pack form ant"
+      "truename": "isbn:pack form gays"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:scott yet west"
+      "truename": "upc:waste yet west"
     }
   ]
 }

@@ -7,7 +7,7 @@ then let a friend recover it with the same vocabulary.
 A truename contains a readable type prefix and a payload without repeated words:
 
 ```text
-date:mass soup
+date:mass nose
 ```
 
 That truename means `2000-02-29`. Canonical decoding is the default. Browsing is an
@@ -23,7 +23,7 @@ git clone git@github.com:rec/nmr.git
 cd nmr
 uv sync --frozen
 uv run --frozen nmr --operation encode --type date --value 2000-02-29
-uv run --frozen nmr --value 'date:mass soup'
+uv run --frozen nmr --value 'date:mass nose'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
@@ -45,9 +45,9 @@ nmr --value 'frac:who'
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
 # chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:most undo
+# play:most dana
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
-# rest bull
+# rest cole
 
 # Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
@@ -148,14 +148,14 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
-`go:site until map` with the default vocabulary.
+`go:site color map` with the default vocabulary.
 
 Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:open proud sale large
-nmr --value 'tune:open proud sale large'
+# tune:open giant sale table
+nmr --value 'tune:open giant sale table'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 

@@ -118,7 +118,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), "+1");
     assert.deepEqual(requests, [], "description conversion must stay local");
     const nameUrl = new URL(page.url());
-    nameUrl.search = new URLSearchParams({name: "date:mass soup"}).toString();
+    nameUrl.search = new URLSearchParams({name: "date:mass nose"}).toString();
     await page.goto(nameUrl.href);
     await page.waitForSelector('#name-editor[data-ready="true"]', { timeout: 120000 });
     assert.equal(await page.locator("#name-editor").isVisible(), true);

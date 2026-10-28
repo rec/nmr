@@ -853,7 +853,6 @@ slot
 gray
 demo
 
-hate
 rice
 loop
 gary
