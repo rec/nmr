@@ -11,6 +11,13 @@ let serial = 0;
 let revision = 0;
 let ready = false;
 let player;
+try {
+  player = new TunePlayer();
+  player.setVolume(0, 0);
+} catch (error) {
+  on.disabled = true;
+  console.error("Audio is unavailable in this browser.", error);
+}
 
 function request(action, payload) {
   return new Promise((resolve, reject) => {
@@ -50,7 +57,7 @@ function play(reading) {
   request("preview_item", {
     operation: "encode", type_name: "time", value: reading.value, root: 53, bpm: 180,
   }).then((music) => {
-    if (!on.checked || revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
+    if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
     if (music.playback_error) throw new Error(music.playback_error);
     player.play(music.playback);
   }).catch((error) => {
@@ -63,25 +70,18 @@ function tick() {
   time.dateTime = reading.value;
   if (ready) {
     showTruename(reading);
-    if (on.checked && reading.due) play(reading);
+    if (player && reading.due) play(reading);
   }
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
 on.addEventListener("change", () => {
-  revision++;
-  if (!on.checked) {
-    player?.stop(0.2);
-    return;
-  }
-  try {
-    player ||= new TunePlayer();
+  player.setVolume(on.checked ? 1 : 0, 0.5);
+  if (on.checked) {
     player.unlock().catch((error) => {
       on.checked = false;
+      player.setVolume(0, 0.5);
       console.error("Could not enable clock audio.", error);
     });
-  } catch (error) {
-    on.checked = false;
-    console.error("Audio is unavailable in this browser.", error);
   }
 });
 interval.addEventListener("change", () => {

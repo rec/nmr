@@ -5,7 +5,9 @@ export class TunePlayer {
   constructor(onEnded = () => {}) {
     this.onEnded = onEnded;
     this.context = new AudioContext();
-    this.voices = new Map();
+    this.output = this.context.createGain();
+    this.output.connect(this.context.destination);
+    this.voices = new Set();
     this.intro = null;
     this.introPlayed = false;
     this.context.addEventListener("statechange", () => this.startIntro());
@@ -23,6 +25,13 @@ export class TunePlayer {
   unlock() {
     return this.context.resume();
   }
+  setVolume(volume, seconds) {
+    const now = this.context.currentTime;
+    const level = this.output.gain.value;
+    this.output.gain.cancelScheduledValues(now);
+    this.output.gain.setValueAtTime(level, now);
+    this.output.gain.linearRampToValueAtTime(volume, now + seconds);
+  }
   get playing() {
     return this.voices.size > 0;
   }
@@ -34,22 +43,13 @@ export class TunePlayer {
     voice.frequency.value = 440 * 2 ** ((pitch - 69) / 12);
     gain.gain.setValueAtTime(0.025 * outputGain, start);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.020);
-    voice.connect(gain).connect(this.context.destination);
+    voice.connect(gain).connect(this.output);
     voice.onended = () => { voice.disconnect(); gain.disconnect(); };
     voice.start(start);
     voice.stop(start + 0.020);
   }
-  stop(fadeSeconds = 0) {
-    const now = this.context.currentTime;
-    for (const [voice, gain] of this.voices) {
-      if (fadeSeconds > 0) {
-        const level = gain.gain.value;
-        gain.gain.cancelScheduledValues(now);
-        gain.gain.setValueAtTime(level, now);
-        gain.gain.linearRampToValueAtTime(0, now + fadeSeconds);
-        voice.stop(now + fadeSeconds);
-      } else voice.stop();
-    }
+  stop() {
+    for (const voice of this.voices) voice.stop();
     this.voices.clear();
     this.onEnded();
   }
@@ -69,7 +69,7 @@ export class TunePlayer {
       gain.gain.linearRampToValueAtTime(0.15 * outputGain, onset + edge);
       gain.gain.setValueAtTime(0.15 * outputGain, end - edge);
       gain.gain.linearRampToValueAtTime(0, end);
-      voice.connect(gain).connect(this.context.destination);
+      voice.connect(gain).connect(this.output);
       voice.onended = () => {
         voice.disconnect();
         gain.disconnect();
@@ -78,7 +78,7 @@ export class TunePlayer {
       };
       voice.start(onset);
       voice.stop(end);
-      this.voices.set(voice, gain);
+      this.voices.add(voice);
     }
   }
 }
