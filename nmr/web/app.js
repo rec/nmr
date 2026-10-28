@@ -9,7 +9,6 @@ const typed = document.querySelector("#typed");
 const guessed = document.querySelector("#guessed");
 let nameEditor;
 const truenameButton = document.querySelector("#truename");
-const fullTruenameButton = document.querySelector("#full-truename");
 const swapButton = document.querySelector("#swap");
 const copyLinkButton = document.querySelector("#copy-link");
 const sourceHeading = document.querySelector("#source-heading");
@@ -37,7 +36,6 @@ let player;
 try {
   player = new TunePlayer(() => {
     truenameButton.setAttribute("aria-pressed", "false");
-    fullTruenameButton.setAttribute("aria-pressed", "false");
     playingButton = null;
   });
 } catch (error) {
@@ -118,7 +116,6 @@ function changed() {
   currentTruename = null;
   currentObject = null;
   truenameButton.hidden = true;
-  fullTruenameButton.hidden = true;
   clearTimeout(timer);
   if (ready) timer = setTimeout(recognize, 120);
 }
@@ -132,19 +129,16 @@ async function recognize() {
   try {
     const result = await request("recognize", { value, mode: direction });
     if (value !== recognitionValue() || direction !== mode) return;
-    currentTruename = result.truename;
+    currentTruename = mode === "description" ? result.full_truename : result.truename;
     currentObject = result.browsed || null;
     const browsing = mode === "truename";
     truenameButton.textContent = browsing
       ? (currentObject ? describeObject(currentObject) : result.browse_error || "")
-      : (result.truename || result.message || "").replace(":", ": ");
+      : result.full_truename || result.message || "";
     truenameButton.hidden = !truenameButton.textContent;
-    truenameButton.disabled = browsing ? !currentObject : !result.truename;
+    truenameButton.disabled = browsing ? !currentObject : !currentTruename;
     truenameButton.setAttribute("aria-label", browsing
-      ? "Play or stop the described object's tune" : "Play or stop the prefix-relative tune");
-    fullTruenameButton.textContent = (result.full_truename || "").replace(":", ": ");
-    fullTruenameButton.hidden = browsing || !result.full_truename;
-    fullTruenameButton.disabled = false;
+      ? "Play or stop the described object's tune" : "Play or stop the full-truename tune");
   } catch (error) {
     if (value === recognitionValue() && direction === mode) console.error(error);
   }
@@ -168,8 +162,8 @@ async function swap() {
   changed();
   focus();
 }
-async function playTruename(absolute = false) {
-  const button = absolute ? fullTruenameButton : truenameButton;
+async function playTruename() {
+  const button = truenameButton;
   if (!player || !currentTruename) return;
   if (playingButton === button && (previewPending || player.playing)) {
     playVersion++;
@@ -187,7 +181,7 @@ async function playTruename(absolute = false) {
   try {
     const music = object
       ? await request("preview_item", { operation: "encode", type_name: object.type, value: object.value, ...presentation })
-      : await request("preview_truename", { value: truename, absolute, ...presentation });
+      : await request("preview_truename", { value: truename, absolute: true, ...presentation });
     if (revision !== playVersion || currentTruename !== truename) return;
     if (music.playback_error) throw new Error(music.playback_error);
     previewPending = false;
@@ -242,12 +236,11 @@ copyLinkButton.addEventListener("click", () => {
   });
 });
 truenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(); });
-fullTruenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(true); });
 document.addEventListener("keydown", (event) => {
   unlock();
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") {
-    if (event.key === "Tab" || ([swapButton, copyLinkButton, truenameButton, fullTruenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
+    if (event.key === "Tab" || ([swapButton, copyLinkButton, truenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
     event.preventDefault();
     focus();
     nameKey(event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ? "" : event.key);
@@ -260,9 +253,9 @@ document.addEventListener("keydown", (event) => {
     event.preventDefault(); focus(); editor.selectAll(); render(); return;
   }
   if (command && ["c", "x", "v"].includes(event.key.toLowerCase())) { focus(); return; }
-  if (event.key === "Enter") { event.preventDefault(); playTruename(document.activeElement === fullTruenameButton); return; }
+  if (event.key === "Enter") { event.preventDefault(); playTruename(); return; }
   if (event.key === "Escape") { event.preventDefault(); editor.clear(); changed(); focus(); return; }
-  if (event.key === " " && [truenameButton, fullTruenameButton].includes(document.activeElement)) return;
+  if (event.key === " " && document.activeElement === truenameButton) return;
   if (["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) {
     event.preventDefault(); focus();
     const left = event.key === "ArrowLeft";

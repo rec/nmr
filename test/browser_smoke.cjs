@@ -17,7 +17,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("input").count(), 1);
     assert.equal(await page.locator("#value").inputValue(), "");
     assert.equal(await page.locator("#truename").isVisible(), false);
-    assert.equal(await page.locator("#full-truename").isVisible(), false);
+    assert.equal(await page.locator("#full-truename").count(), 0);
     const requests = [];
     page.on("request", (request) => requests.push(request.url()));
     const checkCopy = async (selector = "#truename") => {
@@ -43,32 +43,32 @@ const { chromium } = require("playwright");
       assert.equal(result.shortcut, true, "Copy shortcut must reach the browser");
       assert.equal(result.copy, true, "Native copy must retain the selected result");
     };
-    const enter = async (value, prefix) => {
+    const enter = async (value) => {
       await page.keyboard.press("Escape");
       await page.keyboard.type(value);
-      await page.waitForFunction((prefix) => {
+      await page.waitForFunction(() => {
         const button = document.querySelector("#truename");
-        return !button.hidden && button.textContent.startsWith(prefix.replace(":", ": "));
-      }, prefix);
+        return !button.hidden && /^[a-z]+(?: [a-z]+)*$/.test(button.textContent);
+      });
     };
     for (const value of ["asdf", "asdfasdf", "Hello!", "dfasdfasdf", "iPhone"]) {
       await enter(value, "string:");
       assert.equal(await page.locator("#value").inputValue(), value);
-      assert.equal(await page.locator("#full-truename").isVisible(), true);
+      assert.equal(await page.locator("#full-truename").count(), 0);
     }
     await page.keyboard.press("Escape");
     for (const character of "Tom R") {
       await page.keyboard.type(character);
-      await page.waitForFunction(() => !document.querySelector("#truename").hidden && !document.querySelector("#full-truename").hidden);
+      await page.waitForFunction(() => !document.querySelector("#truename").hidden);
     }
     assert.equal(await page.locator("#value").inputValue(), "Tom R");
-    await page.waitForFunction(() => !document.querySelector("#truename").hidden && document.querySelector("#truename").textContent.startsWith("string: "));
+    await page.waitForFunction(() => !document.querySelector("#truename").hidden && /^[a-z]+(?: [a-z]+)*$/.test(document.querySelector("#truename").textContent));
     await enter("xyzzy!", "string:");
     await checkCopy();
-    assert.equal(await page.locator("#full-truename").isVisible(), true);
+    assert.equal(await page.locator("#full-truename").count(), 0);
     await page.keyboard.press("Escape");
     await page.keyboard.type("th");
-    await page.waitForFunction(() => !document.querySelector("#truename").hidden && document.querySelector("#truename").textContent.startsWith("string: "));
+    await page.waitForFunction(() => !document.querySelector("#truename").hidden && /^[a-z]+(?: [a-z]+)*$/.test(document.querySelector("#truename").textContent));
     await enter("42", "int:");
     await page.keyboard.press("End");
     await page.locator("#value").click({ position: { x: 1, y: 15 } });
@@ -99,7 +99,7 @@ const { chromium } = require("playwright");
     await page.locator("#swap").click();
     await page.waitForFunction(() => document.querySelector("#source-heading").textContent === "true name" &&
       document.querySelector("#truename").textContent === 'string: "Tom Ritchford"');
-    assert.equal(await page.locator("#full-truename").isVisible(), false);
+    assert.equal(await page.locator("#full-truename").count(), 0);
     assert.deepEqual([...new URL(page.url()).searchParams.keys()], ["name"]);
     assert.equal(new URL(page.url()).searchParams.get("name"), await page.locator("#typed").textContent());
     await page.locator("#swap").click();
@@ -107,7 +107,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), 'string: "Tom Ritchford"');
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.type("0");
-    await page.waitForFunction(() => document.querySelector("#truename").textContent === "int: the");
+    await page.waitForFunction(() => document.querySelector("#truename").textContent === "the");
     await page.locator("#truename").click();
     await page.waitForFunction(() => document.querySelector("#truename").getAttribute("aria-pressed") === "true");
     await page.locator("#truename").click();
@@ -171,7 +171,7 @@ const { chromium } = require("playwright");
     await page.keyboard.press("Escape");
     assert.equal(await page.locator("#value").inputValue(), "");
     assert.equal(await page.locator("#truename").isVisible(), false);
-    assert.equal(await page.locator("#full-truename").isVisible(), false);
+    assert.equal(await page.locator("#full-truename").count(), 0);
     assert.deepEqual(errors, []);
     assert.deepEqual(requests, [], "Typing must not send details over the network");
     const historyLength = await page.evaluate(() => history.length);
@@ -194,7 +194,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#value").inputValue(), query);
     await page.waitForSelector('#value[data-ready="true"]', { timeout: 120000 });
     await page.waitForFunction(() => !document.querySelector("#truename").hidden &&
-      document.querySelector("#truename").textContent.startsWith("string: "));
+      /^[a-z]+(?: [a-z]+)*$/.test(document.querySelector("#truename").textContent));
     await page.keyboard.press("Escape");
     assert.equal(new URL(page.url()).searchParams.get("desc"), "");
     await page.reload();

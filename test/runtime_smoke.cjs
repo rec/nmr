@@ -114,7 +114,8 @@ const { loadPyodide } = require("pyodide");
     }
     assert.equal(editor.text, value, "String typing must preserve case");
     assert.equal(result.kind, "string", `Typing ${value} must reach String recognition`);
-    assert.ok(result.truename && result.full_truename, "Both truename lines need a value");
+    assert.ok(result.truename && result.full_truename, "Recognition must provide a full truename");
+    assert.ok(!result.full_truename.includes(":"), "Full truenames must be plain words");
     assert.equal(JSON.parse(convert(JSON.stringify({ operation: "decode", value: result.truename }))).value, value);
   }
 

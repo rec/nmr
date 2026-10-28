@@ -145,13 +145,12 @@ def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
 
 
 @pytest.mark.parametrize("value", ["42", "@1", "Tom R"])
-def test_full_truename_has_name_prefix_without_changing_the_absolute_number(
+def test_full_truename_has_no_prefix_and_preserves_the_absolute_number(
     value: str,
 ) -> None:
     engine = Nmr()
     result = json.loads(bridge.recognize(json.dumps({"value": value})))
-    assert result["full_truename"].startswith("name:")
-    assert result["full_truename"].count(":") == 1
+    assert ":" not in result["full_truename"]
     assert engine.truename_index(result["full_truename"]) == engine.truename_index(
         result["truename"]
     )

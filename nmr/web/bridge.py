@@ -127,7 +127,7 @@ def recognize(request_json: str) -> str:
         response = description.model_dump()
         response["full_truename"] = None
         if description.truename:
-            response["full_truename"] = "name:" + " ".join(
+            response["full_truename"] = " ".join(
                 _engine.to_truename(_engine.truename_index(description.truename))
             )
     return json.dumps(response)

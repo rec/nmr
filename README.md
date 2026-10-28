@@ -68,8 +68,8 @@ There is no implicit type guessing or country inference.
 The convenience marker `name:` explicitly identifies a truename. It adds no
 category or radix step: `name:the of` and `the of` have the same index, as do
 `name:tune:the` and `tune:the`. Matching the marker ignores case. Use `--scope name`
-to encode a full root truename with the marker. For ordinary typed objects, the
-browser's second true name result shows `name:` followed by the full root word sequence.
+to encode a full root truename with the marker. The browser shows only the full
+root word sequence, without a prefix.
 
 Category and type names are unique except for the `time` category and Time type.
 Bare `time:` selects the type; `real:time:` selects the category containing Date,
@@ -168,9 +168,8 @@ octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
 In the browser, type interval text directly into the single field to find a tune's
-truename. For typed notation, the first result plays its prefix-relative tune and
-the second plays its full root index. Entering a truename instead displays the
-entered truename above the browsed object. For a `tune:` truename, the object line
+truename. The result plays the tune of its full root index. Entering a truename
+instead displays the browsed object. For a `tune:` truename, the object line
 contains the interval notation and plays the original melody. The library's
 `Nmr.to_tune()` supports both prefix-relative and absolute interpretations.
 Browser playback runs at 180 BPM, centered on F3 (MIDI 53), rather than
@@ -298,11 +297,10 @@ it and updates the description. Type
 prefixes from swaps and bookmarks stay fixed before the controlled word sequence.
 Swapping or loading a bookmark accepts complete words and normalizes their case.
 
-Click a result on the right to play its tune. description mode offers both the
-prefix-relative truename and the full root truename, marked `name:`. true name
-mode offers the browsed object's description and plays its prefix-relative tune.
-Click the playing result to stop, or another result to switch. In description
-mode, Enter plays the first result unless the second has focus.
+Click the result on the right to play its tune. description mode shows the full
+root truename without a prefix and plays its full root tune. true name mode
+shows the browsed object's description and plays its prefix-relative tune.
+Click the playing result to stop. In description mode, Enter also plays the result.
 
 In description mode, type anywhere on the page; click the field to position its cursor, drag to select,
 or double-click to select a word. Arrow keys, Home/End, Shift selection,
