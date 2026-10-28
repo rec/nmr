@@ -1,33 +1,33 @@
 {
-  "vocabulary": "9dc058b9fefeda3dd814944abaf08b3dedf1053de091e3acb2e98406ef3fc521",
+  "vocabulary": "37dd040353073388d7458c0ba0adfc2f0d2f8d1ba3384b946c0253ea2230c53e",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:open giant sale table"
+      "truename": "tune:open alarm sale start"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sam paris ian ideal"
+      "truename": "music:sam fully ian specs"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the doll pink build fool"
+      "truename": "play:the doll pink apply fool"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a asset link man acid"
+      "truename": "a blank link man acid"
     },
     {
       "type": "int",
@@ -62,7 +62,7 @@
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city herb voice kent"
+      "truename": "phone:city ate brown kent"
     },
     {
       "type": "latlong",
@@ -104,14 +104,14 @@
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site color map"
+      "truename": "go:site track map"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the delay what guess"
+      "truename": "the pilot what ahead"
     },
     {
       "type": "go",
@@ -139,7 +139,7 @@
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "truename": "float:hook neil shell doug dan star"
+      "truename": "float:hook neil solar doug dan star"
     },
     {
       "type": "float",
@@ -160,35 +160,35 @@
       "input": "2000-02-29T12:34:56",
       "value": "2000-02-29T12:34:56",
       "scope": null,
-      "truename": "datetime:i dip daily poor"
+      "truename": "datetime:i reid beach poor"
     },
     {
       "type": "ip",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:quest scott meal"
+      "truename": "ip:trans waste meal"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:cat rear nor gig ok hero pit alex these forum wide hung"
+      "truename": "ip:cat rear nor gig ok hero pit alex click based wide hung"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:many wrong leaf even radio of cave blank soma some idea moon"
+      "truename": "uuid:many paris leaf even until of cave humor soma some idea moon"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this humor adult lamb patch happy lime pose stock nova peer loved date diet park spy mail both rope holy none nine egg mike less"
+      "truename": "semver:this lived thing lamb alone smith kirk goat point nova peer saved date diet park spy mail both rope holy none nine egg mike less"
     },
     {
       "type": "isbn",
@@ -202,7 +202,7 @@
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:waste yet west"
+      "truename": "upc:chair yet west"
     }
   ]
 }
