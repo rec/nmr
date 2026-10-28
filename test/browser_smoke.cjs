@@ -19,6 +19,8 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#truename").isVisible(), false);
     await page.locator("#volume-toggle").click();
     assert.equal(await page.locator("#volume-panel").isVisible(), true);
+    assert.equal(await page.locator("#volume-level").inputValue(), "100");
+    assert.equal(await page.locator("#volume-value").textContent(), "100 (-10 dB)");
     await page.locator("#volume-level").press("Home");
     assert.equal(await page.locator("#volume-level").inputValue(), "0");
     await page.locator("#volume-level").press("End");
