@@ -2,7 +2,7 @@ import pytest
 
 from nmr.nmr import Nmr
 from nmr.types import bounded, lat_long
-from nmr.types.temporal import DAY, DAYS, Date, Time
+from nmr.types.temporal import DAY, DAYS, Date, DateTime, Time
 
 CASES = [
     ("string", "  Mixed Case 🎵  ", "  Mixed Case 🎵  "),
@@ -21,7 +21,7 @@ CASES = [
     ("latlong", "10,180", "10,-180"),
     ("date", "2000-02-29", "2000-02-29"),
     ("time", "23:59:59.999999", "23:59:59.999999"),
-    ("duration", "-0.000001s", "-0.000001s"),
+    ("datetime", "2000-02-29 12:34", "2000-02-29T12:34:00"),
     ("isbn", "978-0-306-40615-7", "9780306406157"),
     ("isbn", "0-306-40615-2", "0306406152"),
     ("upc", "036000291452", "036000291452"),
@@ -80,7 +80,7 @@ def test_temporal_and_coordinate_boundaries() -> None:
 
 
 @pytest.mark.parametrize(
-    "kind", ["ip", "uuid", "date", "time", "latlong", "isbn", "upc"]
+    "kind", ["ip", "uuid", "date", "time", "datetime", "latlong", "isbn", "upc"]
 )
 def test_browsing_wraps_but_canonical_decoding_rejects_overflow(kind: str) -> None:
     engine = Nmr()
@@ -117,7 +117,7 @@ def test_semver_browsing_normalizes_invalid_metadata() -> None:
     assert Semver.index_to_str(Semver.str_to_index(value)) == value
 
 
-@pytest.mark.parametrize("kind", ["clock", "local", "instant"])
+@pytest.mark.parametrize("kind", ["clock", "local", "instant", "duration"])
 def test_removed_temporal_labels_are_not_available(kind: str) -> None:
     engine = Nmr()
     with pytest.raises(ValueError, match="Unknown"):
@@ -126,10 +126,35 @@ def test_removed_temporal_labels_are_not_available(kind: str) -> None:
         engine.decode(kind + ":the")
 
 
-def test_duration_is_part_of_the_time_category() -> None:
+def test_datetime_is_part_of_the_time_category() -> None:
     engine = Nmr()
-    assert engine.find_type("duration")[0] == "real:time:duration"
-    result = engine.encode("-0.000001s", "duration", scope="real:time")
+    assert engine.find_type("datetime")[0] == "real:time:datetime"
+    result = engine.encode("2000-02-29T12:34", "datetime", scope="real:time")
     assert result.truename.startswith("real:time:")
-    assert engine.decode(result.truename).type == "duration"
-    assert engine.decode(result.truename).value == "-0.000001s"
+    assert engine.decode(result.truename).type == "datetime"
+    assert engine.decode(result.truename).value == "2000-02-29T12:34:00"
+
+
+def test_datetime_counts_microseconds_before_advancing_the_date() -> None:
+    assert DateTime.index_to_str(0) == "0001-01-01T00:00:00"
+    assert DateTime.index_to_str(1) == "0001-01-01T00:00:00.000001"
+    assert DateTime.index_to_str(DAY - 1) == "0001-01-01T23:59:59.999999"
+    assert DateTime.index_to_str(DAY) == "0001-01-02T00:00:00"
+    assert DateTime.index_to_str(DAYS * DAY - 1) == "9999-12-31T23:59:59.999999"
+    for i in [0, 1, DAY - 1, DAY, DAYS * DAY - 1]:
+        assert DateTime.str_to_index(DateTime.index_to_str(i)) == i
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "2000-02-30T12:34",
+        "2000-02-29T24:00",
+        "2000-02-29T12:34Z",
+        "2000-02-29T12:34+01:00",
+        "2000-02-29T12:34:56.1234567",
+    ],
+)
+def test_datetime_rejects_invalid_components_and_timezones(value: str) -> None:
+    with pytest.raises(ValueError):
+        DateTime.str_to_index(value)

@@ -4,8 +4,7 @@ import re
 from datetime import date, time
 
 from ..type_name import TypeNamer
-from .bounded import bounded, scaled_integer, scaled_string
-from .integer import signed_index, signed_value
+from .bounded import bounded
 
 
 class Date(TypeNamer):
@@ -47,19 +46,22 @@ class Time(TypeNamer):
         return time(hours, minutes, seconds, micros).isoformat()
 
 
-class Duration(TypeNamer):
-    label = "duration"
+class DateTime(TypeNamer):
+    label = "datetime"
     description = (
-        "Signed elapsed decimal seconds, with optional s suffix; microsecond precision"
+        "Gregorian date and time YYYY-MM-DDTHH:MM[:SS[.ffffff]], without a timezone"
     )
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        return signed_index(scaled_integer(value.removesuffix("s"), SECOND))
+        if not (match := re.fullmatch(r"([0-9]{4}-[0-9]{2}-[0-9]{2})[T ](.+)", value)):
+            raise ValueError("Use YYYY-MM-DDTHH:MM[:SS[.ffffff]], without a timezone")
+        return Date.str_to_index(match[1]) * DAY + Time.str_to_index(match[2])
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
-        return scaled_string(signed_value(index), SECOND) + "s"
+        day, clock = divmod(bounded(index, DAYS * DAY, browse), DAY)
+        return Date.index_to_str(day) + "T" + Time.index_to_str(clock)
 
 
 TIME = r"(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9](?:\.[0-9]{1,6})?)?"

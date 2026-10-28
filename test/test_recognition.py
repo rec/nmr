@@ -27,7 +27,8 @@ from nmr.web import bridge
         ("192.168.1.1", "ip"),
         ("2001:db8::1", "ip"),
         ("1.2.3", "semver"),
-        ("12s", "duration"),
+        ("12s", "string"),
+        ("2000-02-29T12:34", "datetime"),
         ("1.25", "float"),
         ("1e10", "float"),
         ("978-0-306-40615-7", "isbn"),
@@ -262,8 +263,8 @@ def test_browsing_failures_are_reported_without_losing_truename_mode(
     assert "browsed" not in result
 
 
-@pytest.mark.parametrize("value", ["2000-02-29T12:34:56", "2000-02-29T12:34:56Z"])
-def test_datetime_text_is_a_string_after_removing_datetime_types(value: str) -> None:
+@pytest.mark.parametrize("value", ["2000-02-29T12:34:56Z", "2000-02-29T12:34:56+01:00"])
+def test_datetime_with_timezone_remains_a_string(value: str) -> None:
     engine = Nmr()
     result = describe_input(value, engine)
     assert result.kind == "string"

@@ -129,7 +129,8 @@ def test_time_paths_read_as_the_type_and_print_one_time_prefix(prefix: str) -> N
 
 
 @pytest.mark.parametrize(
-    "kind,value", [("date", "2000-02-29"), ("time", "12:34"), ("duration", "1s")]
+    "kind,value",
+    [("date", "2000-02-29"), ("time", "12:34"), ("datetime", "2000-02-29T12:34")],
 )
 def test_time_category_scope_stays_distinct_from_the_type(
     kind: str, value: str
@@ -144,6 +145,6 @@ def test_time_category_scope_stays_distinct_from_the_type(
     )
 
 
-def test_time_short_prefix_cannot_be_used_as_a_duration_category_scope() -> None:
+def test_time_short_prefix_cannot_be_used_as_a_datetime_category_scope() -> None:
     with pytest.raises(ValueError, match="does not contain"):
-        Nmr().encode("1s", "duration", scope="time")
+        Nmr().encode("2000-02-29T12:34", "datetime", scope="time")
