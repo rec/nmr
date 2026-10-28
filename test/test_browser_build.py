@@ -35,7 +35,10 @@ def test_browser_bundles_the_actual_core_and_pure_python_dependencies(
 def test_browser_supports_a_deployment_asset_base(tmp_path: Path) -> None:
     page = build_browser(tmp_path / "web", base_path="/nmr/")
     assert '<base href="/nmr/"' in page.read_text()
-    assert '<base href="./"' in build_browser(tmp_path / "local").read_text()
+    assert '<base href="/nmr/"' in (page.parent / "clock/index.html").read_text()
+    local = build_browser(tmp_path / "local")
+    assert '<base href="./"' in local.read_text()
+    assert '<base href="../"' in (local.parent / "clock/index.html").read_text()
 
 
 def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
@@ -51,6 +54,14 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     worker = page.with_name("worker.js").read_text()
     assert f"python.zip?v={revision}" in worker
     assert f"bridge.py?v={revision}" in worker
+    clock = (page.parent / "clock/index.html").read_text()
+    assert f"clock.js?v={revision}" in clock
+    assert f"clock.css?v={revision}" in clock
+    assert f"style.css?v={revision}" in clock
+    clock_script = page.with_name("clock.js").read_text()
+    assert f"clock-time.mjs?v={revision}" in clock_script
+    assert f"tune.js?v={revision}" in clock_script
+    assert f"worker.js?v={revision}" in clock_script
 
 
 def test_changing_a_shipped_editor_changes_its_build_url(

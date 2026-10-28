@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="referrer" content="no-referrer" />
+    <meta name="description" content="Hear the true names of the passing hours." />
+    <title>Clock · nmr</title>
+    <base href="./" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="clock.css" />
+    <script type="module" src="clock.js"></script>
+  </head>
+  <body>
+    <main class="clock">
+      <h1>Clock</h1>
+      <time id="clock-time" aria-label="Local time">00:00:00</time>
+      <p id="clock-truename">Loading truename…</p>
+      <div class="clock-controls">
+        <label><input id="clock-on" type="checkbox" /> On</label>
+        <select id="clock-interval" aria-label="Playback interval">
+          <option value="5">5 seconds</option>
+          <option value="10" selected>10 seconds</option>
+          <option value="60">1 minute</option>
+          <option value="3600">60 minutes</option>
+        </select>
+      </div>
+      <footer><a href="./">nmr</a></footer>
+    </main>
+  </body>
+</html>

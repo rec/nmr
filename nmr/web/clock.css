@@ -1,0 +1,10 @@
+main.clock { margin: 0 auto; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 48px 20px; }
+.clock h1 { font-size: clamp(40px, 8vw, 72px); margin-bottom: 36px; }
+#clock-time { display: block; font-size: clamp(52px, 13vw, 152px); font-weight: 500; line-height: 1.2; font-variant-numeric: tabular-nums; letter-spacing: -0.04em; }
+#clock-truename { width: 100%; min-height: 2em; margin: 24px 0; text-align: center; overflow-wrap: anywhere; font-size: clamp(18px, 3vw, 26px); color: #245d50; }
+.clock-controls { display: flex; align-items: center; justify-content: center; gap: 28px; }
+.clock-controls label { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.clock-controls input { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
+.clock-controls select { border: 1px solid #9aac9d; border-radius: 8px; padding: 8px 12px; font: inherit; color: inherit; background: #f6f4ed; }
+.clock-controls :focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+.clock footer { margin-top: 48px; }

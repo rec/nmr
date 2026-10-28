@@ -317,6 +317,14 @@ code points.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 
+The Clock page at `/nmr/clock` shows local time as `HH:MM:SS` and updates its
+truename every second. Sound starts off and is enabled with **On**. Choose
+5 seconds, 10 seconds (the default), 1 minute, or 60 minutes. Playback starts
+on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 seconds,
+or the top of each hour for 60 minutes. Changing the interval waits for the next
+matching boundary; switching sound off stops playback. It uses the same time
+codec and prefix-relative tune as the main page, with F3 at 180 BPM.
+
 The WebAssembly bridge is tested in Node. Live browser interaction and visual
 verification were blocked by the local browser approval gate during development;
 `test/browser_smoke.cjs` and a manual CI job provide interaction checks to run where
