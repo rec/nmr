@@ -9,12 +9,17 @@ export function clockReading(date, interval, timeOnly = false, displayUTC = fals
     ? utc.slice(11)
     : [date.getHours(), date.getMinutes(), date.getSeconds()]
       .map((i) => String(i).padStart(2, "0")).join(":");
+  const offset = displayUTC ? 0 : -date.getTimezoneOffset();
+  const hours = String(Math.floor(Math.abs(offset) / 60)).padStart(2, "0");
+  const minutes = Math.abs(offset) % 60;
+  const zone = (offset < 0 ? "-" : "+") + hours
+    + (minutes ? ":" + String(minutes).padStart(2, "0") : "");
   const second = Math.floor(date.getTime() / 1000);
   return {
     type: timeOnly ? "time" : "datetime",
     value: timeOnly ? utc.slice(11) : utc,
     displayDate: displayedDate,
-    displayTime: displayedTime,
+    displayTime: displayedTime + zone,
     second,
     due: second % interval === 0,
   };
