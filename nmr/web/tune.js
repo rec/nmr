@@ -5,7 +5,7 @@ export class TunePlayer {
   constructor(onEnded = () => {}) {
     this.onEnded = onEnded;
     this.context = new AudioContext();
-    this.voices = new Set();
+    this.voices = new Map();
     this.intro = null;
     this.introPlayed = false;
     this.context.addEventListener("statechange", () => this.startIntro());
@@ -39,8 +39,17 @@ export class TunePlayer {
     voice.start(start);
     voice.stop(start + 0.020);
   }
-  stop() {
-    for (const voice of this.voices) voice.stop();
+  stop(fadeSeconds = 0) {
+    const now = this.context.currentTime;
+    for (const [voice, gain] of this.voices) {
+      if (fadeSeconds > 0) {
+        const level = gain.gain.value;
+        gain.gain.cancelScheduledValues(now);
+        gain.gain.setValueAtTime(level, now);
+        gain.gain.linearRampToValueAtTime(0, now + fadeSeconds);
+        voice.stop(now + fadeSeconds);
+      } else voice.stop();
+    }
     this.voices.clear();
     this.onEnded();
   }
@@ -69,7 +78,7 @@ export class TunePlayer {
       };
       voice.start(onset);
       voice.stop(end);
-      this.voices.add(voice);
+      this.voices.set(voice, gain);
     }
   }
 }

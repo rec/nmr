@@ -70,7 +70,7 @@ function tick() {
 on.addEventListener("change", () => {
   revision++;
   if (!on.checked) {
-    player?.stop();
+    player?.stop(0.2);
     return;
   }
   try {
