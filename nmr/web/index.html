@@ -12,6 +12,18 @@
     <script type="module" src="app.js"></script>
   </head>
   <body>
+    <header id="volume-controls">
+      <button id="volume-toggle" type="button" popovertarget="volume-panel" aria-label="Volume" title="Volume">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 4 6 8H3v8h3l5 4V4ZM15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" />
+        </svg>
+      </button>
+      <div id="volume-panel" popover>
+        <label for="volume-level">Volume</label>
+        <input id="volume-level" type="range" min="0" max="110" step="1" value="110" autofocus />
+        <output id="volume-value" for="volume-level">110 (0 dB)</output>
+      </div>
+    </header>
     <main id="main-view" hidden>
       <h1 tabindex="-1">nmr</h1>
       <h2>true names of canonical things</h2>

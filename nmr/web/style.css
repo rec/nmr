@@ -6,6 +6,14 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
+#volume-controls { position: fixed; top: 16px; right: 20px; z-index: 10; }
+#volume-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
+#volume-toggle:hover { background: #e5eadf; }
+#volume-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#volume-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
+#volume-panel label { font-size: 16px; }
+#volume-level { width: 100%; margin: 16px 0; padding: 0; border: 0; accent-color: #245d50; }
+#volume-value { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }
 footer { margin-top: 32px; text-align: center; }
 footer a { color: #245d50; text-underline-offset: 4px; }
 main {

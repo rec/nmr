@@ -1,12 +1,29 @@
 /* Exact pitches and times come from the shared Python core. */
 const outputGain = 10 ** (6 / 20);
+const masterOutputs = new Map();
+let masterGain = 1;
+
+export function setMasterVolume(level) {
+  masterGain = level === 0 ? 0 : 10 ** ((level - 110) / 20);
+  for (const [context, output] of masterOutputs) {
+    const now = context.currentTime;
+    const current = output.gain.value;
+    output.gain.cancelScheduledValues(now);
+    output.gain.setValueAtTime(current, now);
+    output.gain.linearRampToValueAtTime(masterGain, now + 0.02);
+  }
+}
 
 export class TunePlayer {
   constructor(onEnded = () => {}) {
     this.onEnded = onEnded;
     this.context = new AudioContext();
+    const master = this.context.createGain();
+    master.gain.value = masterGain;
+    master.connect(this.context.destination);
+    masterOutputs.set(this.context, master);
     this.output = this.context.createGain();
-    this.output.connect(this.context.destination);
+    this.output.connect(master);
     this.voices = new Set();
     this.intro = null;
     this.introPlayed = false;
