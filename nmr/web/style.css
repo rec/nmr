@@ -17,14 +17,15 @@ body { margin: 0; }
 footer { margin-top: 32px; text-align: center; }
 footer a { color: #245d50; text-underline-offset: 4px; }
 #count-value { font-size: clamp(36px, 7vw, 72px); font-variant-numeric: tabular-nums; }
-.count-results { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 24px; }
-.count-results .pane { height: 180px; min-height: 0; overflow: auto; scrollbar-gutter: stable; }
-#count-object { overflow-wrap: anywhere; }
-#count-message { height: 3em; margin: 12px 0; overflow: auto; color: #8b3328; }
-.count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 24px; }
+.count-results { display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; margin-top: 16px; }
+.count-results .pane { display: grid; grid-template-columns: 100px minmax(0, 1fr); align-items: center; gap: 16px; height: 64px; min-height: 0; padding: 12px 16px; overflow: hidden; }
+.count-results h3 { margin: 0; }
+#count-truename, #count-object { min-width: 0; max-height: 100%; margin: 0; overflow: auto; white-space: nowrap; }
+#count-message { height: 1.5em; margin: 4px 0; overflow: auto; color: #8b3328; }
+.count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
 .count-controls label { display: flex; align-items: center; gap: 10px; }
 #count-run { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
-#count-increment { width: 12ch; }
+#count-increment { width: 9ch; }
 main {
   width: min(100%, 1160px);
   margin: 16vh auto 0;
