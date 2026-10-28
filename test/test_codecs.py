@@ -20,7 +20,7 @@ CASES = [
     ("latlong", "90,100", "90,0"),
     ("latlong", "10,180", "10,-180"),
     ("date", "2000-02-29", "2000-02-29"),
-    ("time", "23:59:59.999999", "23:59:59.999999"),
+    ("time", "23:59:59", "23:59:59"),
     ("datetime", "2000-02-29 12:34", "2000-02-29T12:34:00"),
     ("isbn", "978-0-306-40615-7", "9780306406157"),
     ("isbn", "0-306-40615-2", "0306406152"),
@@ -70,7 +70,7 @@ def test_invalid_details_are_not_silently_changed(kind: str, value: str) -> None
 
 def test_temporal_and_coordinate_boundaries() -> None:
     assert Date.index_to_str(DAYS - 1) == "9999-12-31"
-    assert Time.index_to_str(DAY - 1) == "23:59:59.999999"
+    assert Time.index_to_str(DAY - 1) == "23:59:59"
     for index in [0, 1, lat_long.SIZE - 2, lat_long.SIZE - 1]:
         assert (
             lat_long.LatLong.str_to_index(lat_long.LatLong.index_to_str(index)) == index
@@ -135,12 +135,12 @@ def test_datetime_is_part_of_the_time_category() -> None:
     assert engine.decode(result.truename).value == "2000-02-29T12:34:00"
 
 
-def test_datetime_counts_microseconds_before_advancing_the_date() -> None:
+def test_datetime_counts_seconds_before_advancing_the_date() -> None:
     assert DateTime.index_to_str(0) == "0001-01-01T00:00:00"
-    assert DateTime.index_to_str(1) == "0001-01-01T00:00:00.000001"
-    assert DateTime.index_to_str(DAY - 1) == "0001-01-01T23:59:59.999999"
+    assert DateTime.index_to_str(1) == "0001-01-01T00:00:01"
+    assert DateTime.index_to_str(DAY - 1) == "0001-01-01T23:59:59"
     assert DateTime.index_to_str(DAY) == "0001-01-02T00:00:00"
-    assert DateTime.index_to_str(DAYS * DAY - 1) == "9999-12-31T23:59:59.999999"
+    assert DateTime.index_to_str(DAYS * DAY - 1) == "9999-12-31T23:59:59"
     for i in [0, 1, DAY - 1, DAY, DAYS * DAY - 1]:
         assert DateTime.str_to_index(DateTime.index_to_str(i)) == i
 
@@ -158,3 +158,14 @@ def test_datetime_counts_microseconds_before_advancing_the_date() -> None:
 def test_datetime_rejects_invalid_components_and_timezones(value: str) -> None:
     with pytest.raises(ValueError):
         DateTime.str_to_index(value)
+
+
+@pytest.mark.parametrize("fraction", ["0", "1", "123456"])
+@pytest.mark.parametrize(
+    "kind,value", [("time", "12:34:56"), ("datetime", "2000-02-29T12:34:56")]
+)
+def test_temporal_types_reject_fractional_seconds(
+    kind: str, value: str, fraction: str
+) -> None:
+    with pytest.raises(ValueError):
+        Nmr().encode(value + "." + fraction, kind)

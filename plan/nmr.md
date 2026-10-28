@@ -339,8 +339,8 @@ chosen permanent expansion mechanism.
 | `Frac` | Ordered pairs of arbitrary signed integers, including zero denominators; preserve the pair exactly. | Every payload index through exact signed-integer encoding and pairing. |
 | `Float` | Exact Python binary64 bits, including signed zero, infinity, NaN signs and payloads. `bits:HEX` supplies an exact pattern. | Full 64-bit domain; higher indices wrap only when browsing. |
 | Dates | Gregorian calendar dates, including birthdays; recommend years 1 through 9999 initially. | Dense day enumeration; browsing redirects beyond the finite range. |
-| Time | Time of day without a date or timezone, at microsecond resolution. | Dense microseconds within a day; browsing wraps beyond the domain. |
-| DateTime | Date and Time combined as `date_index * 86_400_000_000 + time_index`, without a timezone. Time is the least significant component. Canonical text uses `YYYY-MM-DDTHH:MM:SS[.ffffff]`. | Dense microseconds across years 0001 through 9999; browsing wraps beyond the domain. |
+| Time | Time of day without a date or timezone, at whole-second resolution. | Dense seconds within a day; browsing wraps beyond the domain. |
+| DateTime | Date and Time combined as `date_index * 86_400 + time_index`, without a timezone. Time is the least significant component. Canonical text uses `YYYY-MM-DDTHH:MM:SS`. | Dense seconds across years 0001 through 9999; browsing wraps beyond the domain. |
 | Phone numbers | International numbers with explicit country calling code and optional extension. Normalize formatted input with `phonenumberslite` to E.164 digits and `;ext=digits`; retain significant zeroes. Already canonical digits remain literal and metadata-independent. No implicit regional parsing. | No assignment or reachability check; decoded identities do not depend on numbering-plan metadata. |
 | Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
 | IP addresses | One IP class with a `use_ip6` boolean; canonical standard spelling. The index is twice the address integer plus its family flag. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
@@ -702,7 +702,7 @@ human answer to use the delivered library, CLI, or static browser build.
 | Repetition | Repeated words are invalid in both modes. |
 | Practical lengths | Generated examples show birthday: 2 words, international phone: 4, coordinate: 6, three-ply chess: 2. No universal shortness claim. |
 | Prefixes | Full leaf paths by default. CLI/API can select an ancestor scope or no prefix. Paths are independent of vocabulary. |
-| Temporal scope | Gregorian years 1–9999, exact microseconds, explicit offsets for instants, UTC canonical output. No partial dates, named timezones, leap seconds, or calendar-month durations. |
+| Temporal scope | Gregorian years 1–9999, whole seconds, without timezones. No partial dates, named timezones, leap seconds, or calendar-month durations. |
 | Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
 | Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
 | Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |

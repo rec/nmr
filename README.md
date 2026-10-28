@@ -74,8 +74,8 @@ root word sequence, without a prefix.
 Category and type names are unique except for the `time` category and Time type.
 Bare `time:` selects the type; `real:time:` selects the category containing Date,
 Time, and DateTime. DateTime combines the date index and time index as
-`date_index * 86_400_000_000 + time_index`, at microsecond precision without a
-timezone. It accepts `YYYY-MM-DDTHH:MM[:SS[.ffffff]]` (or a space in place of `T`)
+`date_index * 86_400 + time_index`, at whole-second precision without a
+timezone. It accepts `YYYY-MM-DDTHH:MM[:SS]` (or a space in place of `T`)
 and prints the canonical form with `T`. Outputs use a single `time:` for the type and keep `real:time:`
 when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
@@ -99,8 +99,8 @@ expands; save the canonical output instead.
 | `frac` | Signed numerator/denominator pair; `1/2`, `2/4`, `0/2`, `0/0`, and `1/0` are distinct objects. |
 | `float` | Python binary64 float. Signed zero is preserved; `bits:7ff8000000000042` specifies an exact NaN payload. |
 | `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
-| `time` | `HH:MM[:SS[.ffffff]]`, no timezone, hours 00 through 23. |
-| `duration` | Signed decimal elapsed seconds, optional `s`, exact to a microsecond. |
+| `time` | `HH:MM[:SS]`, no timezone, hours 00 through 23. |
+| `datetime` | Gregorian date and time `YYYY-MM-DDTHH:MM[:SS]`, no timezone; a space may replace `T`. |
 | `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
 | `ip` | IPv4 or IPv6 addresses, with a `use_ip6` family flag; interface scopes are unsupported. |
@@ -120,7 +120,7 @@ is encoded with a trailing-binary length tag. For example,
 `dfasdfasdf` is `string:she dump stan learn river`. Browsing wraps character
 indices outside the alphabet and repairs noncanonical empty-string indices.
 
-Time of day and durations use microseconds. Excess precision is
+Time and DateTime use whole seconds. Fractional-second input is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
 ignore longitude at either pole. Phone and retail-code validity is structural;
 no assignment, ownership, or reachability checks are made.

@@ -150,17 +150,17 @@
     },
     {
       "type": "time",
-      "input": "23:59:59.999999",
-      "value": "23:59:59.999999",
+      "input": "23:59:59",
+      "value": "23:59:59",
       "scope": null,
-      "truename": "time:are them want read"
+      "truename": "time:news read"
     },
     {
       "type": "datetime",
-      "input": "2000-02-29T12:34:56.123456",
-      "value": "2000-02-29T12:34:56.123456",
+      "input": "2000-02-29T12:34:56",
+      "value": "2000-02-29T12:34:56",
       "scope": null,
-      "truename": "datetime:a pray mind jury tour off"
+      "truename": "datetime:i dip daily poor"
     },
     {
       "type": "ip",
