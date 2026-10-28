@@ -72,8 +72,16 @@
       <h1 tabindex="-1">Count</h1>
       <label for="count-value">Count</label>
       <input id="count-value" type="text" inputmode="numeric" pattern="[0-9]+" value="0" autocomplete="off" spellcheck="false" />
-      <button id="count-truename" class="truename" type="button" hidden aria-label="Play the count's tune" aria-pressed="false"></button>
-      <p id="count-object" aria-live="polite"></p>
+      <div class="count-results">
+        <section class="pane" aria-labelledby="count-name-heading">
+          <h3 id="count-name-heading">true name</h3>
+          <button id="count-truename" class="truename" type="button" hidden aria-label="Play the count's tune" aria-pressed="false"></button>
+        </section>
+        <section class="pane" aria-labelledby="count-object-heading">
+          <h3 id="count-object-heading">description</h3>
+          <p id="count-object" aria-live="polite"></p>
+        </section>
+      </div>
       <p id="count-message" role="status"></p>
       <div class="count-controls">
         <label><input id="count-run" type="checkbox" disabled /> Run</label>

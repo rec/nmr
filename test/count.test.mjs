@@ -2,9 +2,9 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
-import { CountRunner } from "../nmr/web/count-runner.mjs";
 
 const source = fs.readFileSync(new URL("../nmr/web/count.js", import.meta.url), "utf8").replace(/^import .*;\n/gm, "");
+const runnerSource = fs.readFileSync(new URL("../nmr/web/count-runner.mjs", import.meta.url), "utf8").replace("export class", "class");
 const flush = () => new Promise(setImmediate);
 
 function page(address) {
@@ -22,14 +22,16 @@ function page(address) {
     calls.push({ action, payload });
     return Promise.resolve({ truename: "the", browsed: { type: "int", value: payload.value } });
   };
-  vm.runInNewContext(source, {
+  vm.runInNewContext(runnerSource + "\n" + source, {
     document: { querySelector: (i) => elements[i] },
     window: {
       location: { get href() { return url.href; } },
       history: { replaceState(state, title, next) { url = new URL(next); } },
       addEventListener: (event, callback) => { listeners[event] = callback; },
     },
-    URL, URLSearchParams, CountRunner, configured: Promise.resolve(), request,
+    URL, URLSearchParams, configured: Promise.resolve(), request,
+    setTimeout() { assert.equal(this, undefined, "Browser timers cannot be called on CountRunner"); },
+    clearTimeout() { assert.equal(this, undefined, "Browser timers cannot be called on CountRunner"); },
     describeObject: (i) => `${i.type}: ${i.value}`,
     TunePlayer: class {}, console,
   });
@@ -60,6 +62,9 @@ test("Count loads URL values exactly and defaults invalid increments to one", ()
 
 test("Count names the exact index, displays its object, and only accepts digits", () => {
   const app = page("https://ax.to/nmr?count=0&inc=3");
+  assert.equal(app.elements["#count-truename"].hidden, false);
+  assert.equal(app.elements["#count-truename"].textContent, "Loading truename…");
+  assert.equal(app.elements["#count-truename"].disabled, true);
   return flush().then(() => {
     assert.equal(app.elements["#count-truename"].textContent, "the");
     assert.equal(app.elements["#count-object"].textContent, "int: 0");

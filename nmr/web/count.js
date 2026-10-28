@@ -46,7 +46,9 @@ function writeURL() {
 function refresh() {
   const current = ++revision;
   named = null;
-  truename.hidden = true;
+  truename.hidden = !field.value;
+  truename.disabled = true;
+  truename.textContent = field.value ? "Loading truename…" : "";
   object.textContent = "";
   message.textContent = "";
   run.disabled = !player || !field.value || !increment.value || !increment.validity.valid;
@@ -65,6 +67,7 @@ function refresh() {
     if (revision !== current) return;
     pause();
     run.disabled = true;
+    truename.hidden = true;
     message.textContent = error.message;
   });
   return result;

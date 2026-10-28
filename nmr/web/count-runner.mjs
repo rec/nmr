@@ -1,6 +1,6 @@
 /* A Run toggle controls future iterations, never an already playing tune. */
 export class CountRunner {
-  constructor(play, advance, onError, schedule = setTimeout, cancel = clearTimeout) {
+  constructor(play, advance, onError, schedule = (callback, delay) => setTimeout(callback, delay), cancel = (timer) => clearTimeout(timer)) {
     this.play = play;
     this.advance = advance;
     this.onError = onError;
