@@ -343,8 +343,9 @@ The Clock view at `/nmr?type=clock` shows the local date and time and updates it
 truename every second. **Time only** selects Time rather than the default
 DateTime; the date remains visible in both modes. **Display UTC** switches the
 visible date and time from local time to UTC. Both start unchecked.
-Times show a signed UTC offset: `10:30:05+01` for whole-hour offsets,
-`10:30:05+01:30` otherwise, and `+00` for UTC.
+The clock's `show_timezone` configuration in `nmr/web/clock.js` defaults to
+`false`. When enabled, times show a signed UTC offset: `10:30:05+01` for
+whole-hour offsets, `10:30:05+01:30` otherwise, and `+00` for UTC.
 Truenames and tunes always encode
 UTC, independently of the display setting, so synchronized clocks worldwide
 produce the same truename. No timezone suffix is displayed or encoded.

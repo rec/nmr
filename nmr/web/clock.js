@@ -2,6 +2,8 @@ import { configured, request } from "./runtime.js";
 import { clockReading } from "./clock-time.mjs";
 import { TunePlayer } from "./tune.js";
 
+const config = { show_timezone: false };
+
 const time = document.querySelector("#clock-time");
 const dateDisplay = document.querySelector("#clock-date");
 const hoursDisplay = document.querySelector("#clock-hours");
@@ -53,7 +55,7 @@ function play(reading) {
   });
 }
 function update() {
-  const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+  const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked, config.show_timezone);
   dateDisplay.textContent = reading.displayDate;
   hoursDisplay.textContent = reading.displayTime;
   time.dateTime = `${reading.displayDate}T${reading.displayTime}`;

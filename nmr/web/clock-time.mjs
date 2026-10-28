@@ -1,5 +1,5 @@
 /* Names and playback boundaries use UTC; presentation can use local time. */
-export function clockReading(date, interval, timeOnly = false, displayUTC = false) {
+export function clockReading(date, interval, timeOnly = false, displayUTC = false, show_timezone = false) {
   const utc = date.toISOString().slice(0, 19);
   const displayedDate = displayUTC
     ? utc.slice(0, 10)
@@ -19,7 +19,7 @@ export function clockReading(date, interval, timeOnly = false, displayUTC = fals
     type: timeOnly ? "time" : "datetime",
     value: timeOnly ? utc.slice(11) : utc,
     displayDate: displayedDate,
-    displayTime: displayedTime + zone,
+    displayTime: displayedTime + (show_timezone ? zone : ""),
     second,
     due: second % interval === 0,
   };
