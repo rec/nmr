@@ -223,7 +223,7 @@ const { chromium } = require("playwright");
     assert.equal(await page.locator("#clock-view").isVisible(), true);
     assert.equal(await page.locator("#clock-on").isChecked(), false);
     await page.locator("#clock-interval").selectOption("60");
-    await page.waitForFunction(() => document.querySelector("#clock-truename").textContent.startsWith("time: "));
+    await page.waitForFunction(() => /^[a-z]+(?: [a-z]+)*$/.test(document.querySelector("#clock-truename").textContent));
     await page.locator("#main-link").click();
     assert.equal(await page.locator("#typed").textContent(), accepted);
     assert.equal(await page.locator("#clock-interval").inputValue(), "60");

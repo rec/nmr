@@ -327,7 +327,8 @@ on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 secon
 or the top of each hour for 60 minutes. Changing the interval waits for the next
 matching boundary. Tunes continue playing while muted; the On checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
-codec and prefix-relative tune as the main view, with F3 at 180 BPM.
+codec as the main view and displays the full root truename without any prefix.
+It plays the tune of that full name, with F3 at 180 BPM.
 Both views share one page and Python worker. Their links switch views without
 reloading; browser Back and Forward also work. Editor contents and clock settings
 stay in memory, without cookies or local storage. An enabled clock keeps sounding

@@ -18,9 +18,9 @@ try {
 }
 
 function showTruename(reading) {
-  request("convert", { operation: "encode", type_name: "time", value: reading.value }).then((result) => {
+  request("convert", { operation: "encode", type_name: "time", value: reading.value, scope: "" }).then((result) => {
     if (Math.floor(Date.now() / 1000) === reading.second) {
-      truename.textContent = result.truename.replace(":", ": ");
+      truename.textContent = result.truename;
     }
   }, (error) => {
     console.error("Could not name the current time.", error);
@@ -29,7 +29,7 @@ function showTruename(reading) {
 function play(reading) {
   const currentRevision = revision;
   request("preview_item", {
-    operation: "encode", type_name: "time", value: reading.value, root: 53, bpm: 180,
+    operation: "encode", type_name: "time", value: reading.value, scope: "", root: 53, bpm: 180,
   }).then((music) => {
     if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
     if (music.playback_error) throw new Error(music.playback_error);
