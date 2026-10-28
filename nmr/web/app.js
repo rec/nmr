@@ -1,8 +1,12 @@
+import "./navigation.js";
+import "./clock.js";
+import { configured, request } from "./runtime.js";
 import { describeObject } from "./description.mjs";
 import { TruenameEditor } from "./truename-editor.mjs";
 import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
 
+const mainView = document.querySelector("#main-view");
 const field = document.querySelector("#value");
 const nameField = document.querySelector("#name-editor");
 const typed = document.querySelector("#typed");
@@ -18,9 +22,6 @@ const parameters = new URL(window.location.href).searchParams;
 let mode = parameters.has("name") ? "truename" : "description";
 const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
-const worker = new Worker("worker.js");
-const pending = new Map();
-let serial = 0;
 let version = 0;
 let playVersion = 0;
 let timer;
@@ -41,28 +42,6 @@ try {
 } catch (error) {
   console.error("Audio is unavailable in this browser.", error);
 }
-
-function request(action, payload) {
-  return new Promise((resolve, reject) => {
-    const id = ++serial;
-    pending.set(id, { resolve, reject });
-    worker.postMessage({ id, action, payload });
-  });
-}
-worker.onmessage = ({ data }) => {
-  const task = pending.get(data.id);
-  if (!task) return;
-  pending.delete(data.id);
-  if (data.error) task.reject(new Error(data.error));
-  else task.resolve(data.result);
-};
-worker.onerror = () => {
-  ready = false;
-  const error = new Error("Could not start the local truename engine. Reload to try again.");
-  console.error(error);
-  for (const task of pending.values()) task.reject(error);
-  pending.clear();
-};
 
 function inputText() {
   return mode === "truename" && nameEditor ? nameEditor.text : editor.text;
@@ -94,16 +73,19 @@ function readSelection() {
   editor.cursor = backward ? field.selectionStart : field.selectionEnd;
 }
 function unlock() {
+  if (mainView.hidden) return;
   player?.unlock().catch(() => {
     console.error("Sound needs permission from your browser.");
   });
 }
 function changed() {
-  const url = new URL(window.location.href);
-  if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/$/, "");
-  url.search = "";
-  url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
-  window.history.replaceState(window.history.state, "", url);
+  if (!mainView.hidden) {
+    const url = new URL(window.location.href);
+    if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/$/, "");
+    url.search = "";
+    url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
+    window.history.replaceState(window.history.state, "", url);
+  }
   copyLinkButton.textContent = "Copy link";
   version++;
   render();
@@ -118,7 +100,7 @@ function changed() {
   currentObject = null;
   truenameButton.hidden = true;
   clearTimeout(timer);
-  if (ready) timer = setTimeout(recognize, 120);
+  if (ready && !mainView.hidden) timer = setTimeout(recognize, 120);
 }
 function captions() {
   sourceHeading.textContent = mode === "description" ? "description" : "true name";
@@ -129,7 +111,7 @@ async function recognize() {
   const direction = mode;
   try {
     const result = await request("recognize", { value, mode: direction });
-    if (value !== recognitionValue() || direction !== mode) return;
+    if (mainView.hidden || value !== recognitionValue() || direction !== mode) return;
     currentTruename = mode === "description" ? result.full_truename : result.truename;
     currentObject = result.browsed || null;
     const browsing = mode === "truename";
@@ -183,7 +165,7 @@ async function playTruename() {
     const music = object
       ? await request("preview_item", { operation: "encode", type_name: object.type, value: object.value, ...presentation })
       : await request("preview_truename", { value: truename, absolute: true, ...presentation });
-    if (revision !== playVersion || currentTruename !== truename) return;
+    if (mainView.hidden || revision !== playVersion || currentTruename !== truename) return;
     if (music.playback_error) throw new Error(music.playback_error);
     previewPending = false;
     player.play(music.playback);
@@ -238,6 +220,7 @@ copyLinkButton.addEventListener("click", () => {
 });
 truenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(); });
 document.addEventListener("keydown", (event) => {
+  if (mainView.hidden || (event.target.closest("a") && ["Enter", " "].includes(event.key))) return;
   unlock();
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") {
@@ -278,10 +261,12 @@ document.addEventListener("keydown", (event) => {
   }
 }, true);
 document.addEventListener("paste", (event) => {
+  if (mainView.hidden) return;
   event.preventDefault(); focus();
   insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
+  if (mainView.hidden) return;
   if (action === "copy" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") { event.preventDefault(); player?.tick(presentation.root); return; }
   readSelection();
@@ -307,7 +292,7 @@ field.addEventListener("input", () => { if (!composing) render(); });
 
 async function start() {
   try {
-    const info = await request("configure", {});
+    const info = await configured;
     nameEditor = new TruenameEditor(info.words);
     if (mode === "truename" && !nameEditor.load(editor.text)) player?.tick(presentation.root);
     render();
@@ -316,17 +301,39 @@ async function start() {
     nameField.dataset.ready = "true";
     changed();
     clearTimeout(timer);
+    if (mainView.hidden) return;
     await recognize();
     // tune:the is the one-beat zeroth tune, independently of its root routing.
     const intro = await request("preview", { value: "@1", ...presentation });
-    player?.setIntro(intro.playback);
+    if (!mainView.hidden) player?.setIntro(intro.playback);
   } catch (error) {
     console.error(error);
   }
 }
 const query = parameters.get(mode === "truename" ? "name" : "desc");
 if (query !== null) editor.replace(query);
+window.addEventListener("viewchange", () => {
+  if (mainView.hidden) {
+    playVersion++;
+    previewPending = false;
+    player?.stop();
+    clearTimeout(timer);
+    return;
+  }
+  const parameters = new URL(window.location.href).searchParams;
+  const nextMode = parameters.has("name") ? "truename" : "description";
+  const value = parameters.get(nextMode === "truename" ? "name" : "desc") || "";
+  if (mode !== nextMode || inputText() !== value) {
+    mode = nextMode;
+    if (mode === "truename" && nameEditor) nameEditor.load(value);
+    else { editor.selectAll(); editor.replace(value); }
+  }
+  previousValue = undefined;
+  captions();
+  changed();
+  focus();
+});
 captions();
 changed();
-focus();
+if (!mainView.hidden) focus();
 start();

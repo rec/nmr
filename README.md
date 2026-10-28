@@ -73,7 +73,10 @@ root word sequence, without a prefix.
 
 Category and type names are unique except for the `time` category and Time type.
 Bare `time:` selects the type; `real:time:` selects the category containing Date,
-Time, and Duration. Outputs use a single `time:` for the type and keep `real:time:`
+Time, and DateTime. DateTime combines the date index and time index as
+`date_index * 86_400_000_000 + time_index`, at microsecond precision without a
+timezone. It accepts `YYYY-MM-DDTHH:MM[:SS[.ffffff]]` (or a space in place of `T`)
+and prints the canonical form with `T`. Outputs use a single `time:` for the type and keep `real:time:`
 when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
 `:play:game:chess:in also` all read identically and print as `chess:in also`.
@@ -317,14 +320,18 @@ code points.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 
-The Clock page at `/nmr/clock` shows local time as `HH:MM:SS` and updates its
+The Clock view at `/nmr?type=clock` shows local time as `HH:MM:SS` and updates its
 truename every second. Sound starts off and is enabled with **On**. Choose
 5 seconds, 10 seconds (the default), 1 minute, or 60 minutes. Playback starts
 on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 seconds,
 or the top of each hour for 60 minutes. Changing the interval waits for the next
 matching boundary. Tunes continue playing while muted; the On checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
-codec and prefix-relative tune as the main page, with F3 at 180 BPM.
+codec and prefix-relative tune as the main view, with F3 at 180 BPM.
+Both views share one page and Python worker. Their links switch views without
+reloading; browser Back and Forward also work. Editor contents and clock settings
+stay in memory, without cookies or local storage. An enabled clock keeps sounding
+while the main view is open.
 
 The WebAssembly bridge is tested in Node. Live browser interaction and visual
 verification were blocked by the local browser approval gate during development;

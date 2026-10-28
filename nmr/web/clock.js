@@ -1,3 +1,4 @@
+import { configured, request } from "./runtime.js";
 import { clockReading } from "./clock-time.mjs";
 import { TunePlayer } from "./tune.js";
 
@@ -5,9 +6,6 @@ const time = document.querySelector("#clock-time");
 const truename = document.querySelector("#clock-truename");
 const on = document.querySelector("#clock-on");
 const interval = document.querySelector("#clock-interval");
-const worker = new Worker("worker.js");
-const pending = new Map();
-let serial = 0;
 let revision = 0;
 let ready = false;
 let player;
@@ -18,30 +16,6 @@ try {
   on.disabled = true;
   console.error("Audio is unavailable in this browser.", error);
 }
-
-function request(action, payload) {
-  return new Promise((resolve, reject) => {
-    const id = ++serial;
-    pending.set(id, { resolve, reject });
-    worker.postMessage({ id, action, payload });
-  });
-}
-worker.onmessage = ({ data }) => {
-  const task = pending.get(data.id);
-  if (!task) return;
-  pending.delete(data.id);
-  if (data.error) task.reject(new Error(data.error));
-  else task.resolve(data.result);
-};
-worker.onerror = () => {
-  ready = false;
-  on.checked = false;
-  on.disabled = true;
-  player?.stop();
-  truename.textContent = "Could not load the time engine. Reload to try again.";
-  for (const task of pending.values()) task.reject(new Error("Clock worker failed"));
-  pending.clear();
-};
 
 function showTruename(reading) {
   request("convert", { operation: "encode", type_name: "time", value: reading.value }).then((result) => {
@@ -88,7 +62,7 @@ interval.addEventListener("change", () => {
   revision++;
   player?.stop();
 });
-request("configure", {}).then(() => {
+configured.then(() => {
   ready = true;
   showTruename(clockReading(new Date(), Number(interval.value)));
 }, (error) => {

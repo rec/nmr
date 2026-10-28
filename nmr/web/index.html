@@ -8,11 +8,12 @@
     <title>nmr</title>
     <base href="./" />
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="clock.css" />
     <script type="module" src="app.js"></script>
   </head>
   <body>
-    <main>
-      <h1>nmr</h1>
+    <main id="main-view" hidden>
+      <h1 tabindex="-1">nmr</h1>
       <h2>true names of canonical things</h2>
       <button id="swap" type="button" aria-label="Swap description and true name" title="Swap description and true name">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -32,7 +33,22 @@
         </section>
       </div>
       <button id="copy-link" type="button" aria-live="polite">Copy link</button>
-      <footer><a href="clock">Clock</a></footer>
+      <footer><a id="clock-link" href="?type=clock">Clock</a></footer>
+    </main>
+    <main id="clock-view" class="clock" hidden>
+      <h1 tabindex="-1">Clock</h1>
+      <time id="clock-time" aria-label="Local time">00:00:00</time>
+      <p id="clock-truename">Loading truename…</p>
+      <div class="clock-controls">
+        <label><input id="clock-on" type="checkbox" /> On</label>
+        <select id="clock-interval" aria-label="Playback interval">
+          <option value="5">5 seconds</option>
+          <option value="10" selected>10 seconds</option>
+          <option value="60">1 minute</option>
+          <option value="3600">60 minutes</option>
+        </select>
+      </div>
+      <footer><a id="main-link" href="?desc=">nmr</a></footer>
     </main>
   </body>
 </html>

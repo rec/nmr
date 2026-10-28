@@ -8,4 +8,3 @@ RewriteCond %{THE_REQUEST} "\s/+nmr/[?\s]"
 RewriteRule ^$ /nmr [R=301,L]
 
 RewriteRule ^$ /nmr/index.html [END]
-RewriteRule ^clock/?$ /nmr/clock/index.html [END]
