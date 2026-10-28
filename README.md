@@ -359,7 +359,10 @@ or the top of each UTC hour for 60 minutes. Changing the interval waits for the 
 matching boundary. Tunes continue playing while muted; the Playing checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
 codec as the main view and displays the full root truename without any prefix.
-It plays the tune of that full name, with F3 at 180 BPM.
+It plays the tune of that full name, with F3 at 180 BPM. **Short name** starts
+unchecked. When checked, it uses the Time or DateTime payload index as a Tune
+index, displays its `tune:` truename, and plays that tune. Switching the option
+updates the displayed name immediately and waits for the next playback boundary.
 Both views share one page and Python worker. Their links switch views without
 reloading; browser Back and Forward also work. Editor contents and clock settings
 stay in memory, without cookies or local storage. An enabled clock keeps sounding

@@ -12,6 +12,7 @@ const playingName = document.querySelector("#clock-playing");
 const on = document.querySelector("#clock-on");
 const interval = document.querySelector("#clock-interval");
 const timeOnly = document.querySelector("#clock-time-only");
+const shortName = document.querySelector("#clock-short-name");
 const displayUTC = document.querySelector("#clock-display-utc");
 let revision = 0;
 let ready = false;
@@ -28,11 +29,18 @@ try {
   console.error("Audio is unavailable in this browser.", error);
 }
 
+function clockTruename(reading) {
+  const short = shortName.checked;
+  return request("convert", {
+    operation: "encode", type_name: reading.type, value: reading.value,
+    scope: short ? reading.type : "",
+  }).then((result) => short ? result.truename.replace(/^[^:]+:/, "tune:") : result.truename);
+}
 function showTruename(reading) {
   const currentRevision = revision;
-  request("convert", { operation: "encode", type_name: reading.type, value: reading.value, scope: "" }).then((result) => {
+  clockTruename(reading).then((name) => {
     if (revision === currentRevision && Math.floor(Date.now() / 1000) === reading.second) {
-      truename.textContent = result.truename;
+      truename.textContent = name.replace(":", ": ");
     }
   }, (error) => {
     console.error("Could not name the current time.", error);
@@ -40,16 +48,15 @@ function showTruename(reading) {
 }
 function play(reading) {
   const currentRevision = revision;
-  const item = { operation: "encode", type_name: reading.type, value: reading.value, scope: "" };
-  Promise.all([
-    request("convert", item),
-    request("preview_item", { ...item, root: 53, bpm: 180 }),
-  ]).then(([named, music]) => {
-    if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
-    if (music.playback_error) throw new Error(music.playback_error);
-    player.play(music.playback);
-    playingTruename = named.truename;
-    showPlayingName();
+  clockTruename(reading).then((name) => {
+    if (revision !== currentRevision) return;
+    return request("preview_truename", { value: name, root: 53, bpm: 180 }).then((music) => {
+      if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
+      if (music.playback_error) throw new Error(music.playback_error);
+      player.play(music.playback);
+      playingTruename = name.replace(":", ": ");
+      showPlayingName();
+    });
   }).catch((error) => {
     console.error("Could not play the current time.", error);
   });
@@ -89,6 +96,11 @@ interval.addEventListener("change", () => {
   update();
 });
 timeOnly.addEventListener("change", () => {
+  revision++;
+  player?.stop();
+  update();
+});
+shortName.addEventListener("change", () => {
   revision++;
   player?.stop();
   update();
