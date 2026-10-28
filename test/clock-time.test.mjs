@@ -43,17 +43,20 @@ test("default DateTime names use UTC while the display uses the local date and t
   assert.equal(utc.displayTime, "00:30:45");
 });
 
-test("Time only removes the date and keeps the named time in UTC", () => {
+test("Time only keeps the displayed date and names only the UTC time", () => {
   const date = new Date("2026-01-01T00:30:45.999Z");
-  Object.assign(date, { getHours: () => 6, getMinutes: () => 15, getSeconds: () => 45 });
+  Object.assign(date, {
+    getFullYear: () => 2026, getMonth: () => 0, getDate: () => 1,
+    getHours: () => 6, getMinutes: () => 15, getSeconds: () => 45,
+  });
   const local = clockReading(date, 10, true);
   const utc = clockReading(date, 10, true, true);
   assert.equal(local.type, "time");
   assert.equal(local.value, "00:30:45");
-  assert.equal(local.displayDate, "");
+  assert.equal(local.displayDate, "2026-01-01");
   assert.equal(local.displayTime, "06:15:45");
   assert.equal(utc.value, local.value);
-  assert.equal(utc.displayDate, "");
+  assert.equal(utc.displayDate, "2026-01-01");
   assert.equal(utc.displayTime, "00:30:45");
 });
 

@@ -6,15 +6,20 @@ const time = document.querySelector("#clock-time");
 const dateDisplay = document.querySelector("#clock-date");
 const hoursDisplay = document.querySelector("#clock-hours");
 const truename = document.querySelector("#clock-truename");
+const playingName = document.querySelector("#clock-playing");
 const on = document.querySelector("#clock-on");
 const interval = document.querySelector("#clock-interval");
 const timeOnly = document.querySelector("#clock-time-only");
 const displayUTC = document.querySelector("#clock-display-utc");
 let revision = 0;
 let ready = false;
+let playingTruename = "";
 let player;
 try {
-  player = new TunePlayer();
+  player = new TunePlayer(() => {
+    playingTruename = "";
+    playingName.textContent = "";
+  });
   player.setVolume(0, 0);
 } catch (error) {
   on.disabled = true;
@@ -33,12 +38,15 @@ function showTruename(reading) {
 }
 function play(reading) {
   const currentRevision = revision;
-  request("preview_item", {
-    operation: "encode", type_name: reading.type, value: reading.value, scope: "", root: 53, bpm: 180,
-  }).then((music) => {
+  const item = { operation: "encode", type_name: reading.type, value: reading.value, scope: "" };
+  Promise.all([
+    request("convert", item),
+    request("preview_item", { ...item, root: 53, bpm: 180 }),
+  ]).then(([named, music]) => {
     if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
     if (music.playback_error) throw new Error(music.playback_error);
     player.play(music.playback);
+    playingTruename = named.truename;
   }).catch((error) => {
     console.error("Could not play the current time.", error);
   });
@@ -46,10 +54,8 @@ function play(reading) {
 function update() {
   const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
   dateDisplay.textContent = reading.displayDate;
-  dateDisplay.hidden = !reading.displayDate;
   hoursDisplay.textContent = reading.displayTime;
-  time.dateTime = reading.displayDate ? `${reading.displayDate}T${reading.displayTime}` : reading.displayTime;
-  time.setAttribute("aria-label", timeOnly.checked ? "Time" : "Date and time");
+  time.dateTime = `${reading.displayDate}T${reading.displayTime}`;
   if (ready) showTruename(reading);
   return reading;
 }
@@ -57,6 +63,11 @@ function tick() {
   const reading = update();
   if (ready && player && reading.due) play(reading);
   setTimeout(tick, 1000 - Date.now() % 1000);
+}
+function showPlayingName() {
+  const value = player?.audible ? playingTruename : "";
+  if (playingName.textContent !== value) playingName.textContent = value;
+  requestAnimationFrame(showPlayingName);
 }
 on.addEventListener("change", () => {
   player.setVolume(on.checked ? 1 : 0, 0.1);
@@ -89,3 +100,4 @@ configured.then(() => {
   console.error(error);
 });
 tick();
+showPlayingName();

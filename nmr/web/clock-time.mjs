@@ -13,7 +13,7 @@ export function clockReading(date, interval, timeOnly = false, displayUTC = fals
   return {
     type: timeOnly ? "time" : "datetime",
     value: timeOnly ? utc.slice(11) : utc,
-    displayDate: timeOnly ? "" : displayedDate,
+    displayDate: displayedDate,
     displayTime: displayedTime,
     second,
     due: second % interval === 0,

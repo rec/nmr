@@ -40,12 +40,15 @@
       <time id="clock-time" aria-label="Date and time"><span id="clock-date"></span><span id="clock-hours">00:00:00</span></time>
       <p id="clock-truename">Loading truename…</p>
       <div class="clock-controls">
-        <label><input id="clock-on" type="checkbox" /> On</label>
+        <div class="clock-play">
+          <label><input id="clock-on" type="checkbox" /> Play</label>
+          <p id="clock-playing"></p>
+        </div>
         <label><input id="clock-time-only" type="checkbox" /> Time only</label>
         <label><input id="clock-display-utc" type="checkbox" /> Display UTC</label>
         <select id="clock-interval" aria-label="Playback interval">
-          <option value="5">5 seconds</option>
-          <option value="10" selected>10 seconds</option>
+          <option value="5" selected>5 seconds</option>
+          <option value="10">10 seconds</option>
           <option value="60">1 minute</option>
           <option value="3600">60 minutes</option>
         </select>

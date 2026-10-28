@@ -335,15 +335,18 @@ will play it on the first interaction instead. Work and playback limits still ap
 
 The Clock view at `/nmr?type=clock` shows the local date and time and updates its
 truename every second. **Time only** selects Time rather than the default
-DateTime and hides the date. **Display UTC** switches the visible date and time
-from local time to UTC. Both start unchecked. Truenames and tunes always encode
+DateTime; the date remains visible in both modes. **Display UTC** switches the
+visible date and time from local time to UTC. Both start unchecked.
+Truenames and tunes always encode
 UTC, independently of the display setting, so synchronized clocks worldwide
 produce the same truename. No timezone suffix is displayed or encoded.
-Sound starts off and is enabled with **On**. Choose
-5 seconds, 10 seconds (the default), 1 minute, or 60 minutes. Playback starts
-on matching wall-clock boundaries, such as `:00`, `:10`, …, `:50` for 10 seconds,
+Sound starts off and is enabled with **Play**. The name beneath Play identifies
+the tune currently audible, staying blank when muted, during rests, and after
+the tune ends. Choose 5 seconds (the default), 10 seconds, 1 minute, or 60 minutes.
+Playback starts on matching wall-clock boundaries, such as
+`:00`, `:10`, …, `:50` for 10 seconds,
 or the top of each UTC hour for 60 minutes. Changing the interval waits for the next
-matching boundary. Tunes continue playing while muted; the On checkbox fades
+matching boundary. Tunes continue playing while muted; the Play checkbox fades
 the output in or out over 100 ms without restarting the tune. It uses the same time
 codec as the main view and displays the full root truename without any prefix.
 It plays the tune of that full name, with F3 at 180 BPM.
