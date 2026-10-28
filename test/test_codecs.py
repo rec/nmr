@@ -69,7 +69,7 @@ def test_invalid_details_are_not_silently_changed(kind: str, value: str) -> None
 
 
 def test_temporal_and_coordinate_boundaries() -> None:
-    assert Date.index_to_str(DAYS - 1) == "9999-12-31"
+    assert Date.index_to_str(DAYS - 1, center_on_zoot=False) == "9999-12-31"
     assert Time.index_to_str(DAY - 1) == "23:59:59"
     for index in [0, 1, lat_long.SIZE - 2, lat_long.SIZE - 1]:
         assert (
@@ -135,14 +135,22 @@ def test_datetime_is_part_of_the_time_category() -> None:
     assert engine.decode(result.truename).value == "2000-02-29T12:34:00"
 
 
-def test_datetime_counts_seconds_before_advancing_the_date() -> None:
-    assert DateTime.index_to_str(0) == "0001-01-01T00:00:00"
-    assert DateTime.index_to_str(1) == "0001-01-01T00:00:01"
-    assert DateTime.index_to_str(DAY - 1) == "0001-01-01T23:59:59"
-    assert DateTime.index_to_str(DAY) == "0001-01-02T00:00:00"
-    assert DateTime.index_to_str(DAYS * DAY - 1) == "9999-12-31T23:59:59"
+def test_uncentered_datetime_counts_seconds_before_advancing_the_date() -> None:
+    assert DateTime.index_to_str(0, center_on_zoot=False) == "0001-01-01T00:00:00"
+    assert DateTime.index_to_str(1, center_on_zoot=False) == "0001-01-01T00:00:01"
+    assert DateTime.index_to_str(DAY - 1, center_on_zoot=False) == "0001-01-01T23:59:59"
+    assert DateTime.index_to_str(DAY, center_on_zoot=False) == "0001-01-02T00:00:00"
+    assert (
+        DateTime.index_to_str(DAYS * DAY - 1, center_on_zoot=False)
+        == "9999-12-31T23:59:59"
+    )
     for i in [0, 1, DAY - 1, DAY, DAYS * DAY - 1]:
-        assert DateTime.str_to_index(DateTime.index_to_str(i)) == i
+        assert (
+            DateTime.str_to_index(
+                DateTime.index_to_str(i, center_on_zoot=False), center_on_zoot=False
+            )
+            == i
+        )
 
 
 @pytest.mark.parametrize(

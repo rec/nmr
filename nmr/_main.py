@@ -24,6 +24,8 @@ class Main(BaseModel, frozen=True):
     word_file: Path | None = None
     word_count: int | None = Field(default=None, ge=1)
     case_sensitive: bool = False
+    center_on_zoot: bool = True
+    """Center Date and DateTime on 2027-01-01 00:00:00 UTC."""
     expect_vocabulary: str | None = None
     json_output: bool = False
     list_types: bool = False
@@ -38,7 +40,12 @@ class Main(BaseModel, frozen=True):
 
             print(build_browser(self.destination), file=output)
             return 0
-        engine = Nmr(self.word_file, self.word_count, not self.case_sensitive)
+        engine = Nmr(
+            self.word_file,
+            self.word_count,
+            not self.case_sensitive,
+            center_on_zoot=self.center_on_zoot,
+        )
         if self.list_types:
             for path, description in engine.types().items():
                 print(f"{path.rsplit(':', 1)[-1]}\t{description}", file=output)

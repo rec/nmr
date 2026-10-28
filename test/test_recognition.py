@@ -229,7 +229,7 @@ def test_name_marker_preserves_an_existing_type_prefix() -> None:
     assert result["browsed"]["value"] == "@1"
 
 
-@pytest.mark.parametrize("value", ["date:mass nose", "tune:post were", "Tom"])
+@pytest.mark.parametrize("value", ["date:this been", "tune:post were", "Tom"])
 def test_truename_input_returns_its_browsed_object(value: str) -> None:
     result = json.loads(
         bridge.recognize(json.dumps({"value": value, "mode": "truename"}))

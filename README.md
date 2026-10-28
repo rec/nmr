@@ -7,7 +7,7 @@ then let a friend recover it with the same vocabulary.
 A truename contains a readable type prefix and a payload without repeated words:
 
 ```text
-date:mass nose
+date:this been
 ```
 
 That truename means `2000-02-29`. Canonical decoding is the default. Browsing is an
@@ -23,7 +23,7 @@ git clone git@github.com:rec/nmr.git
 cd nmr
 uv sync --frozen
 uv run --frozen nmr --operation encode --type date --value 2000-02-29
-uv run --frozen nmr --value 'date:mass nose'
+uv run --frozen nmr --value 'date:this been'
 ```
 
 To install the CLI outside the checkout, run `uv tool install .`.
@@ -73,9 +73,9 @@ root word sequence, without a prefix.
 
 Category and type names are unique except for the `time` category and Time type.
 Bare `time:` selects the type; `real:time:` selects the category containing Date,
-Time, and DateTime. DateTime combines the date index and time index as
-`date_index * 86_400 + time_index`, at whole-second precision without a
-timezone. It accepts `YYYY-MM-DDTHH:MM[:SS]` (or a space in place of `T`)
+Time, and DateTime. DateTime combines calendar days and whole seconds before
+centering the result on zoot, without a timezone in its input text.
+It accepts `YYYY-MM-DDTHH:MM[:SS]` (or a space in place of `T`)
 and prints the canonical form with `T`. Outputs use a single `time:` for the type and keep `real:time:`
 when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
@@ -124,6 +124,19 @@ Time and DateTime use whole seconds. Fractional-second input is
 rejected, not rounded. Coordinates identify the two antimeridian spellings and
 ignore longitude at either pole. Phone and retail-code validity is structural;
 no assignment, ownership, or reachability checks are made.
+
+Date and DateTime default to `center_on_zoot=True`. Zoot is **2027-01-01
+00:00:00 UTC**: Date counts days from that date, and DateTime counts seconds
+from that instant. The existing signed mapping orders them as zoot, one unit
+after, one unit before, two after, two before. DateTime applies this mapping
+once to the combined offset. This gives nearby values small indices and earlier
+tunes in the musical-complexity enumeration. Time is unchanged.
+
+Use `Nmr(center_on_zoot=False)` or the CLI flag `--no-center-on-zoot` to retain
+the enumeration from `0001-01-01`. The browser bridge accepts the same boolean
+in its configuration; the browser app uses the default. Encoding and decoding
+must use the same setting. Years remain limited to 0001–9999; canonical decoding
+rejects centered indices outside that range, while browsing wraps calendar values.
 
 Formatted phone input is normalized with `phonenumberslite`, using international
 E.164 digits plus our `;ext=digits` suffix. For example,

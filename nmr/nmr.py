@@ -8,6 +8,7 @@ from pydantic import BaseModel
 from .category import Category, route
 from .registry import ROOT
 from .type_name import TypeNamer
+from .types.temporal import Date, DateTime
 from .types.tune import Tune
 from .words import Words
 
@@ -27,17 +28,25 @@ class Nmr(Words):
         count: int | None = None,
         ignore_case: bool = True,
         root: Category = ROOT,
+        center_on_zoot: bool = True,
     ) -> None:
         super().__init__(words, count, ignore_case)
         self.root = root
+        self.center_on_zoot = center_on_zoot
 
     def types(self) -> dict[str, str]:
         return {p: c.description for p, _, c in self.root.leaves()}
 
     def encode(self, value: str, type_name: str, scope: str | None = None) -> Result:
         path, slots, codec = self.find_type(type_name)
-        index = codec.str_to_index(value)
-        canonical_value = codec.index_to_str(index)
+        if issubclass(codec, (Date, DateTime)):
+            index = codec.str_to_index(value, center_on_zoot=self.center_on_zoot)
+            canonical_value = codec.index_to_str(
+                index, center_on_zoot=self.center_on_zoot
+            )
+        else:
+            index = codec.str_to_index(value)
+            canonical_value = codec.index_to_str(index)
         prefix = path if scope is None else scope.casefold().strip(":")
         _, prefix_slots = self.root.lookup("" if prefix == "name" else prefix)
         if slots[: len(prefix_slots)] != prefix_slots:
@@ -73,7 +82,11 @@ class Nmr(Words):
             codec, value_index = node.resolve(index, browse)
         else:
             codec, value_index = node, index
-        value = codec.index_to_str(value_index, browse)
+        value = (
+            codec.index_to_str(value_index, browse, center_on_zoot=self.center_on_zoot)
+            if issubclass(codec, (Date, DateTime))
+            else codec.index_to_str(value_index, browse)
+        )
         path = next(p for p, _, c in self.root.leaves() if c is codec)
         result = self.encode(value, path, prefix)
         normalized = " ".join(self.normalize(i) for i in payload.split())

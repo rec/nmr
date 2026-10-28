@@ -71,7 +71,7 @@ def test_json_pipeline_exposes_canonical_value_and_type() -> None:
     assert result["value"] == "2000-02-29"
     assert result["type"] == "date"
     assert result["canonical"] is True
-    assert result["truename"] == "date:mass nose"
+    assert result["truename"] == "date:this been"
     assert "name" not in result
 
 

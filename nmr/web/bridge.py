@@ -14,6 +14,7 @@ class Settings(BaseModel, frozen=True):
     words: list[str] | None = None
     count: int | None = None
     case_sensitive: bool = False
+    center_on_zoot: bool = True
 
 
 class Request(BaseModel, frozen=True):
@@ -52,7 +53,12 @@ _engine = Nmr()
 def configure(settings_json: str) -> str:
     global _engine
     settings = Settings.model_validate_json(settings_json)
-    engine = Nmr(settings.words, settings.count, not settings.case_sensitive)
+    engine = Nmr(
+        settings.words,
+        settings.count,
+        not settings.case_sensitive,
+        center_on_zoot=settings.center_on_zoot,
+    )
     info = {
         "types": engine.types(),
         "identifier": engine.identifier,
