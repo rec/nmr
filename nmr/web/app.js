@@ -11,6 +11,7 @@ let nameEditor;
 const truenameButton = document.querySelector("#truename");
 const fullTruenameButton = document.querySelector("#full-truename");
 const swapButton = document.querySelector("#swap");
+const copyLinkButton = document.querySelector("#copy-link");
 const sourceHeading = document.querySelector("#source-heading");
 const targetHeading = document.querySelector("#target-heading");
 const resultPane = document.querySelector("#result-pane");
@@ -104,6 +105,7 @@ function changed() {
   url.search = "";
   url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
   window.history.replaceState(window.history.state, "", url);
+  copyLinkButton.textContent = "Copy link";
   version++;
   render();
   const value = recognitionValue();
@@ -230,20 +232,29 @@ document.addEventListener("selectionchange", () => {
 });
 document.addEventListener("pointerdown", unlock, true);
 swapButton.addEventListener("click", swap);
+copyLinkButton.addEventListener("click", () => {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    if (window.location.href === url) copyLinkButton.textContent = "Copied";
+  }, (error) => {
+    if (window.location.href === url) copyLinkButton.textContent = "Could not copy link";
+    console.error("Could not copy the page URL.", error);
+  });
+});
 truenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(); });
 fullTruenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(true); });
 document.addEventListener("keydown", (event) => {
   unlock();
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") {
-    if (event.key === "Tab" || ([swapButton, truenameButton, fullTruenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
+    if (event.key === "Tab" || ([swapButton, copyLinkButton, truenameButton, fullTruenameButton].includes(document.activeElement) && ["Enter", " "].includes(event.key))) return;
     event.preventDefault();
     focus();
     nameKey(event.isComposing || event.ctrlKey || event.metaKey || event.altKey || event.shiftKey ? "" : event.key);
     return;
   }
   if (event.isComposing || event.key === "Tab") return;
-  if (document.activeElement === swapButton && ["Enter", " "].includes(event.key)) return;
+  if ([swapButton, copyLinkButton].includes(document.activeElement) && ["Enter", " "].includes(event.key)) return;
   const command = event.ctrlKey || event.metaKey;
   if (command && event.key.toLowerCase() === "a") {
     event.preventDefault(); focus(); editor.selectAll(); render(); return;

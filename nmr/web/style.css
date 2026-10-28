@@ -68,6 +68,9 @@ h3 { margin: 0 0 12px; font-size: 16px; font-weight: 500; }
 #swap { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; margin: 0 auto 16px; border: 1px solid #9aac9d; border-radius: 50%; padding: 0; color: inherit; background: transparent; cursor: pointer; }
 #swap:hover { background: #e5eadf; }
 #swap:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#copy-link { display: block; margin: 20px auto 0; border: 1px solid #9aac9d; border-radius: 20px; padding: 8px 18px; font: inherit; font-size: 15px; color: inherit; background: transparent; cursor: pointer; }
+#copy-link:hover { background: #e5eadf; }
+#copy-link:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
 .truename:first-of-type { margin-top: 20px; }
 @media (max-width: 700px) {
   main { margin-top: 8vh; }
