@@ -240,6 +240,16 @@ Open `http://127.0.0.1:8765` locally, or host those files on an ordinary static
 HTTPS server for friends. Direct `file:` loading does not support the worker and
 asset loading used here. No conversion server or account is needed.
 
+To build and deploy to `https://ax.to/nmr/`, run from the checkout:
+
+```sh
+uv run --frozen python script/deploy.py
+```
+
+This uses your SSH keys for `root@ax.to`, uploads changed files with rsync to
+`/home/ax/public_html/nmr/`, and sets the deployed directory and all its contents
+to owner `ax` and group `ax`. Files already on the server are not deleted.
+
 The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
 requires a connection and a WebAssembly-capable modern browser. The project,
 chess library, and semantic-version library are bundled from the same installation
