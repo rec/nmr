@@ -342,7 +342,7 @@ chosen permanent expansion mechanism.
 | Time | Time of day without a date or timezone, at whole-second resolution. | Dense seconds within a day; browsing wraps beyond the domain. |
 | DateTime | Calendar date and whole-second time, without a timezone in its text. Canonical text uses `YYYY-MM-DDTHH:MM:SS`. | Signed second offsets from zoot (2027-01-01 00:00:00 UTC), applying the existing signed mapping once after combining date and time. `center_on_zoot=False` restores seconds from 0001-01-01. Years remain 0001–9999; browsing wraps beyond the calendar range. |
 | Phone numbers | International numbers with explicit country calling code and optional extension. Normalize formatted input with `phonenumberslite` to E.164 digits and `;ext=digits`; retain significant zeroes. Already canonical digits remain literal and metadata-independent. No implicit regional parsing. | No assignment or reachability check; decoded identities do not depend on numbering-plan metadata. |
-| Coordinates | Latitude/longitude at a declared fixed resolution, with poles and antimeridian equivalence specified. | Every canonical grid point; browsing redirects under documented rules. |
+| Coordinates | Latitude/longitude converted to a progressive six-face cube grid with 24 dyadic levels per axis. Quantization error on WGS84 is less than 0.63 m, including nine-decimal output formatting. | Every canonical grid point; browsing wraps beyond `6 * (2**24 - 1)**2` positions. |
 | IP addresses | One IP class with a `use_ip6` boolean; canonical standard spelling. The index is twice the address integer plus its family flag. Scoped IPv6 is unsupported. | Full address domains, including non-routable addresses. |
 | UUIDs | Preserve all 128 bits; do not invent UUID-version constraints. | Full 128-bit domain. |
 | Semantic versions | Major, minor, patch, prerelease, and build metadata. | Browsing repairs empty metadata identifiers and numeric prerelease leading zeroes; canonical decoding rejects invalid indices. Capacity still applies to the repaired output. |
@@ -353,6 +353,34 @@ chosen permanent expansion mechanism.
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
+
+The coordinate format projects the six cube faces onto directions labelled by
+geodetic latitude and longitude. Face order is +X, +Y, -X, -Y, +Z, -Z. On each
+face, the two remaining Cartesian components, in X/Y/Z order, are divided by the
+absolute dominant component. Dominant-axis ties use X before Y before Z;
+components within `1e-15` of the maximum are treated as tied to absorb numerical
+noise at exact seams. Face interiors have unique directions; seams round inward.
+
+Each face coordinate enumerates dyadic midpoints breadth first:
+`0; -1/2, 1/2; -3/4, -1/4, 1/4, 3/4; ...`, through 24 levels. There are
+`2**24 - 1` coordinates per axis. Input rounds to the nearest interior point on
+the final grid, with half-grid ties toward the positive coordinate. The two ranks
+`a,b` use square shells: `a*a+b` when `a >= b`, otherwise `b*b+b+1+a`.
+The final index is `6*pair_rank+face`. Integer square root and bit lengths invert
+this enumeration directly. Canonical output uses up to nine decimal places,
+normalizes negative zero, and uses longitude -180 rather than +180.
+
+Error verification uses the [NGA WGS84 ellipsoid parameters](https://earth-info.nga.mil/index.php?action=wgs84&dir=wgs84):
+both principal radii of curvature are bounded by `a/(1-f) < 6,400,000 m`.
+For face coordinates `u,v`, the unit-direction derivative has norm at most
+`1/sqrt(1+u*u+v*v)`. Let `h=2/2**24`. Interior rounding moves each component by
+at most `h/2`. Face-edge clipping can move one or both by `h`, where the larger
+denominator reduces the error. Bounding the interior, edge, and corner cases,
+and allowing for text formatting and floating-point arithmetic, gives a global
+WGS84 surface-distance bound of **0.62304 m**. This is quantization error;
+the mapping does not add height or reinterpret the input datum.
+Tests also measure a conservative ellipsoidal distance bound across 24,939
+global and face-boundary samples; the observed maximum is **0.53948 m**.
 
 Measure realistic output lengths for every proposed use case. If common details
 produce impractically long truenames, revise the release scope or representation
@@ -706,7 +734,7 @@ human answer to use the delivered library, CLI, or static browser build.
 | Temporal scope | Gregorian years 1–9999, whole seconds, without timezones. No partial dates, named timezones, leap seconds, or calendar-month durations. |
 | Float and fraction conversion | Exact binary64 bits, including all NaNs and signed zero. Frac finite overflow raises; zero denominators convert to signed infinity or NaN. |
 | Phones | International numbers up to 15 digits plus digit extensions; no regional inference, short codes, or vanity-number conversion. |
-| Coordinates | Decimal degrees to six places, rejecting extra precision. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
+| Coordinates | Progressive cube-face positions with 24 dyadic levels per axis and less than 0.63 m WGS84 quantization error. Decimal-degree input rounds to the supported grid; nine-place output recovers the same index. Pole longitudes collapse to zero; +180 and -180 longitude are equivalent. |
 | Additional identifiers | ISBN and UPC have checked compact codecs. Collections are not supported. |
 | Vocabulary policy | NFC plus case folding by default; optional case sensitivity and active word count. Word order, normalization, and count participate in identity. Existing default order retained. |
 | Vocabulary exchange | File import, paste, normalized export, and full SHA-256 identity. No automatic persistence or shuffling. |

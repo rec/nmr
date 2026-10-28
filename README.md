@@ -101,7 +101,7 @@ expands; save the canonical output instead.
 | `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
 | `time` | `HH:MM[:SS]`, no timezone, hours 00 through 23. |
 | `datetime` | Gregorian date and time `YYYY-MM-DDTHH:MM[:SS]`, no timezone; a space may replace `T`. |
-| `latlong` | `latitude,longitude` in decimal degrees, exact to 0.000001 degree. |
+| `latlong` | `latitude,longitude` in decimal degrees, rounded to a globe-wide cube grid with less than 0.63 m of quantization error on WGS84. |
 | `phone` | International `+` number of up to 15 digits, optional `;ext=004`; extension zeroes are preserved. |
 | `ip` | IPv4 or IPv6 addresses, with a `use_ip6` family flag; interface scopes are unsupported. |
 | `uuid` | All 128 bits, without imposing version restrictions. |
@@ -122,8 +122,12 @@ is encoded with a trailing-binary length tag. For example,
 indices outside the alphabet and repairs noncanonical empty-string indices.
 
 Time and DateTime use whole seconds. Fractional-second input is
-rejected, not rounded. Coordinates identify the two antimeridian spellings and
-ignore longitude at either pole. Phone and retail-code validity is structural;
+rejected, not rounded. Coordinates select a cube face, round each projected
+coordinate to its nearest grid value, and print up to nine decimal places to recover the
+same index. The first six positions are `0,0`, `0,90`, `0,-180`, `0,-90`,
+`90,0`, and `-90,0`; later positions progressively fill gaps across all six faces.
+The two antimeridian spellings and longitudes at either pole share one identity.
+Phone and retail-code validity is structural;
 no assignment, ownership, or reachability checks are made.
 
 Date and DateTime default to `center_on_zoot=True`. Zoot is **2027-01-01
