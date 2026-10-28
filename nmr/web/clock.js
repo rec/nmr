@@ -47,6 +47,7 @@ function play(reading) {
     if (music.playback_error) throw new Error(music.playback_error);
     player.play(music.playback);
     playingTruename = named.truename;
+    showPlayingName();
   }).catch((error) => {
     console.error("Could not play the current time.", error);
   });
@@ -65,16 +66,17 @@ function tick() {
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
 function showPlayingName() {
-  const value = player?.audible ? playingTruename : "";
+  const value = on.checked && player?.playing ? playingTruename : "";
   if (playingName.textContent !== value) playingName.textContent = value;
-  requestAnimationFrame(showPlayingName);
 }
 on.addEventListener("change", () => {
   player.setVolume(on.checked ? 1 : 0, 0.1);
+  showPlayingName();
   if (on.checked) {
     player.unlock().catch((error) => {
       on.checked = false;
       player.setVolume(0, 0.1);
+      showPlayingName();
       console.error("Could not enable clock audio.", error);
     });
   }

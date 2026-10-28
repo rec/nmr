@@ -7,7 +7,7 @@ export class TunePlayer {
     this.context = new AudioContext();
     this.output = this.context.createGain();
     this.output.connect(this.context.destination);
-    this.voices = new Map();
+    this.voices = new Set();
     this.intro = null;
     this.introPlayed = false;
     this.context.addEventListener("statechange", () => this.startIntro());
@@ -35,14 +35,6 @@ export class TunePlayer {
   get playing() {
     return this.voices.size > 0;
   }
-  get audible() {
-    if (this.context.state !== "running" || this.output.gain.value <= 0) return false;
-    const now = this.context.currentTime;
-    for (const { onset, end } of this.voices.values()) {
-      if (now > onset && now < end) return true;
-    }
-    return false;
-  }
   tick(pitch = 53) {
     const voice = this.context.createOscillator();
     const gain = this.context.createGain();
@@ -57,7 +49,7 @@ export class TunePlayer {
     voice.stop(start + 0.020);
   }
   stop() {
-    for (const voice of this.voices.keys()) voice.stop();
+    for (const voice of this.voices) voice.stop();
     this.voices.clear();
     this.onEnded();
   }
@@ -86,7 +78,7 @@ export class TunePlayer {
       };
       voice.start(onset);
       voice.stop(end);
-      this.voices.set(voice, { onset, end });
+      this.voices.add(voice);
     }
   }
 }
