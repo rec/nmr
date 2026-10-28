@@ -75,11 +75,11 @@ function tick() {
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
 on.addEventListener("change", () => {
-  player.setVolume(on.checked ? 1 : 0, 0.2);
+  player.setVolume(on.checked ? 1 : 0, 0.1);
   if (on.checked) {
     player.unlock().catch((error) => {
       on.checked = false;
-      player.setVolume(0, 0.2);
+      player.setVolume(0, 0.1);
       console.error("Could not enable clock audio.", error);
     });
   }
