@@ -363,6 +363,13 @@ It starts at 100 (−10 dB). Values 1–110 give
 The setting stays in memory while navigating between views, without cookies or
 local storage. Click outside the popup or press Escape to close it.
 
+All three views also share **Root** and **Position** selectors. Root offers C
+through B, including sharps, in octave 3; it defaults to F3. Position defaults to
+**middle**, the current rounded mean of the tune's cumulative pitches. **start**
+places its first note on the root, and **end** places its last note there.
+Selections apply to subsequent playbacks and stay selected when switching views.
+They change presentation only, preserving truenames, intervals, rhythm, and tempo.
+
 The Count view at `/nmr?count=0&inc=1` explores the full truename index directly.
 Edit the large count field to see its truename and, where browsing can construct
 one, the corresponding object. Click the truename to play its full-index tune.

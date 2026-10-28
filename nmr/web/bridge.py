@@ -31,12 +31,14 @@ class Preview(BaseModel, frozen=True):
     root: int = 60
     bpm: int = 120
     tie: int | None = None
+    position: Literal["start", "middle", "end"] = "middle"
 
 
 class ItemPreview(Request, frozen=True):
     absolute: bool = False
     root: int = 60
     bpm: int = 120
+    position: Literal["start", "middle", "end"] = "middle"
 
 
 class TruenamePreview(Preview, frozen=True):
@@ -101,7 +103,7 @@ def preview(request_json: str) -> str:
     tune = Tune.from_text(request.value)
     if request.tie is not None:
         tune = tune.tie(request.tie)
-    return render_tune(tune, request.root, request.bpm)
+    return render_tune(tune, request.root, request.bpm, request.position)
 
 
 def preview_item(request_json: str) -> str:
@@ -114,20 +116,27 @@ def preview_item(request_json: str) -> str:
         else request.value
     )
     tune = _engine.to_tune(truename, request.absolute, request.operation == "browse")
-    return render_tune(tune, request.root, request.bpm)
+    return render_tune(tune, request.root, request.bpm, request.position)
 
 
-def render_tune(tune: Tune, root: int, bpm: int) -> str:
+def render_tune(
+    tune: Tune,
+    root: int,
+    bpm: int,
+    position: Literal["start", "middle", "end"] = "middle",
+) -> str:
     result: dict[str, object] = {
         "value": tune.text(),
         "notes": [
             {"step": str(i.step), "duration": str(i.duration), "gap": str(i.gap)}
             for i in tune.notes
         ],
-        "events": [{k: str(v) for k, v in i.items()} for i in tune.events(root)],
+        "events": [
+            {k: str(v) for k, v in i.items()} for i in tune.events(root, position)
+        ],
     }
     try:
-        result["playback"] = tune.playback(root, bpm)
+        result["playback"] = tune.playback(root, bpm, position)
     except ValueError as error:
         result["playback_error"] = str(error)
     return json.dumps(result)
@@ -158,4 +167,4 @@ def recognize(request_json: str) -> str:
 def preview_truename(request_json: str) -> str:
     request = TruenamePreview.model_validate_json(request_json)
     tune = Tune.from_index(_engine.truename_index(request.value, request.absolute))
-    return render_tune(tune, request.root, request.bpm)
+    return render_tune(tune, request.root, request.bpm, request.position)

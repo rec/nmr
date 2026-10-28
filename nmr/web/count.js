@@ -2,6 +2,7 @@ import { configured, request } from "./runtime.js";
 import { describeObject } from "./description.mjs";
 import { CountRunner } from "./count-runner.mjs";
 import { TunePlayer } from "./tune.js";
+import { presentation } from "./presentation.mjs";
 
 const view = document.querySelector("#count-view");
 const field = document.querySelector("#count-value");
@@ -78,7 +79,7 @@ function play() {
   const unlocked = player.unlock();
   playingValue = field.value;
   playback = Promise.all([named, unlocked]).then(([result]) => request("preview_truename", {
-    value: result.truename, absolute: true, root: 53, bpm: 180,
+    value: result.truename, absolute: true, ...presentation,
   })).then((music) => {
     if (music.playback_error) throw new Error(music.playback_error);
     return new Promise((resolve) => {

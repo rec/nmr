@@ -1,6 +1,7 @@
 import { configured, request } from "./runtime.js";
 import { clockReading } from "./clock-time.mjs";
 import { TunePlayer } from "./tune.js";
+import { presentation } from "./presentation.mjs";
 
 const config = { show_timezone: false };
 
@@ -50,7 +51,7 @@ function play(reading) {
   const currentRevision = revision;
   clockTruename(reading).then((name) => {
     if (revision !== currentRevision) return;
-    return request("preview_truename", { value: name, root: 53, bpm: 180 }).then((music) => {
+    return request("preview_truename", { value: name, ...presentation }).then((music) => {
       if (revision !== currentRevision || Math.floor(Date.now() / 1000) !== reading.second) return;
       if (music.playback_error) throw new Error(music.playback_error);
       player.play(music.playback);

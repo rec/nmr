@@ -5,7 +5,7 @@ from __future__ import annotations
 import re
 from bisect import bisect_right
 from fractions import Fraction
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from pydantic import BaseModel, Field, ValidationInfo, field_validator, model_validator
 
@@ -196,17 +196,26 @@ class Tune(BaseModel, TypeNamer, frozen=True):
         assert rank == 0
         return cls(notes=notes)
 
-    def events(self, root: int = 60) -> list[dict[str, int | str]]:
-        """Exact onsets, durations and centered MIDI pitches, before device limits."""
+    def events(
+        self, root: int = 60, position: Literal["start", "middle", "end"] = "middle"
+    ) -> list[dict[str, int | str]]:
+        """Exact onsets, durations and positioned MIDI pitches, before device limits."""
         pitches = []
         pitch = 0
         for note in self.notes:
             pitch += note.step
             pitches.append(pitch)
-        total = sum(pitches)
-        center = (2 * abs(total) + len(pitches)) // (2 * len(pitches))
-        if total < 0:
-            center = -center
+        if position == "start":
+            center = pitches[0]
+        elif position == "end":
+            center = pitches[-1]
+        elif position == "middle":
+            total = sum(pitches)
+            center = (2 * abs(total) + len(pitches)) // (2 * len(pitches))
+            if total < 0:
+                center = -center
+        else:
+            raise ValueError("Position must be start, middle, or end")
         onset = Fraction(0)
         events = []
         for note, pitch in zip(self.notes, pitches, strict=True):
@@ -221,11 +230,16 @@ class Tune(BaseModel, TypeNamer, frozen=True):
             onset += note.duration
         return events
 
-    def playback(self, root: int = 60, bpm: int = 120) -> list[dict[str, float | int]]:
+    def playback(
+        self,
+        root: int = 60,
+        bpm: int = 120,
+        position: Literal["start", "middle", "end"] = "middle",
+    ) -> list[dict[str, float | int]]:
         """Convert exact events only after checking the browser's preview limits."""
         if not 20 <= bpm <= 400:
             raise ValueError("Playback tempo must be between 20 and 400 BPM")
-        events = self.events(root)
+        events = self.events(root, position)
         result = []
         for event in events:
             pitch = int(event["pitch"])
@@ -233,7 +247,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
             duration = Fraction(str(event["duration"])) * 60 / bpm
             if not 0 <= pitch <= 127:
                 raise ValueError(
-                    "Playback requires all centered pitches in MIDI range 0..127"
+                    "Playback requires all positioned pitches in MIDI range 0..127"
                 )
             if onset + duration > 120 or duration < Fraction(1, 100):
                 raise ValueError(

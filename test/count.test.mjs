@@ -30,6 +30,7 @@ function page(address) {
       addEventListener: (event, callback) => { listeners[event] = callback; },
     },
     URL, URLSearchParams, configured: Promise.resolve(), request,
+    presentation: { root: 53, bpm: 180, position: "middle" },
     setTimeout() { assert.equal(this, undefined, "Browser timers cannot be called on CountRunner"); },
     clearTimeout() { assert.equal(this, undefined, "Browser timers cannot be called on CountRunner"); },
     describeObject: (i) => `${i.type}: ${i.value}`,

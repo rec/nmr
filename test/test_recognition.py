@@ -10,6 +10,28 @@ from nmr.types.tune import Tune
 from nmr.web import bridge
 
 
+@pytest.mark.parametrize("position,anchor", [("start", 0), ("middle", 1), ("end", -1)])
+def test_every_browser_preview_respects_the_selected_pitch_position(
+    position: str, anchor: int
+) -> None:
+    text = "@1 2@1 2@1"
+    settings = {"root": 53, "bpm": 180, "position": position}
+    truename = Nmr().encode(text, "tune").truename
+    results = [
+        bridge.preview(json.dumps({"value": text, **settings})),
+        bridge.preview_truename(json.dumps({"value": truename, **settings})),
+        bridge.preview_item(
+            json.dumps(
+                {"operation": "encode", "type_name": "tune", "value": text, **settings}
+            )
+        ),
+    ]
+    for result in results:
+        rendered = json.loads(result)
+        assert rendered["playback"][anchor]["pitch"] == 53
+        assert int(rendered["events"][anchor]["pitch"]) == 53
+
+
 @pytest.mark.parametrize(
     "value,kind",
     [

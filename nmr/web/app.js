@@ -7,9 +7,11 @@ import { describeObject } from "./description.mjs";
 import { TruenameEditor } from "./truename-editor.mjs";
 import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
+import { presentation } from "./presentation.mjs";
 
 const mainView = document.querySelector("#main-view");
 const volumeControls = document.querySelector("#volume-controls");
+const tuneControls = document.querySelector("#tune-controls");
 const field = document.querySelector("#value");
 const nameField = document.querySelector("#name-editor");
 const typed = document.querySelector("#typed");
@@ -23,7 +25,6 @@ const targetHeading = document.querySelector("#target-heading");
 const resultPane = document.querySelector("#result-pane");
 const parameters = new URL(window.location.href).searchParams;
 let mode = parameters.has("name") ? "truename" : "description";
-const presentation = { root: 53, bpm: 180 };
 const editor = new Editor();
 let version = 0;
 let playVersion = 0;
@@ -223,7 +224,7 @@ copyLinkButton.addEventListener("click", () => {
 });
 truenameButton.addEventListener("click", () => { if (!selectedWithin(resultPane)) playTruename(); });
 document.addEventListener("keydown", (event) => {
-  if (mainView.hidden || volumeControls.contains(event.target) || (event.target.closest("a") && ["Enter", " "].includes(event.key))) return;
+  if (mainView.hidden || volumeControls.contains(event.target) || tuneControls.contains(event.target) || (event.target.closest("a") && ["Enter", " "].includes(event.key))) return;
   unlock();
   if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "c" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") {
@@ -264,12 +265,12 @@ document.addEventListener("keydown", (event) => {
   }
 }, true);
 document.addEventListener("paste", (event) => {
-  if (mainView.hidden || volumeControls.contains(event.target)) return;
+  if (mainView.hidden || volumeControls.contains(event.target) || tuneControls.contains(event.target)) return;
   event.preventDefault(); focus();
   insert(event.clipboardData.getData("text/plain"));
 });
 for (const action of ["copy", "cut"]) document.addEventListener(action, (event) => {
-  if (mainView.hidden || volumeControls.contains(event.target)) return;
+  if (mainView.hidden || volumeControls.contains(event.target) || tuneControls.contains(event.target)) return;
   if (action === "copy" && (selectedWithin(resultPane) || selectedWithin(nameField))) return;
   if (mode === "truename") { event.preventDefault(); player?.tick(presentation.root); return; }
   readSelection();

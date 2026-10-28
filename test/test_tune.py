@@ -137,6 +137,27 @@ def test_centering_uses_cumulative_pitches_and_exact_events() -> None:
         assert [i["pitch"] for i in Tune.from_text(f"@1 {step}@8").events()] == pitches
 
 
+@pytest.mark.parametrize("root", [48, 53, 59])
+@pytest.mark.parametrize(
+    "position,offsets",
+    [
+        ("start", [0, 2, 4, 3, 3]),
+        ("middle", [-2, 0, 2, 1, 1]),
+        ("end", [-3, -1, 1, 0, 0]),
+    ],
+)
+def test_tune_position_anchors_pitches_without_changing_rhythm(
+    root: int, position: str, offsets: list[int]
+) -> None:
+    tune = Tune.from_text("@1 2@1/2 2@1/2 r@1/3 -1@2/3 @1")
+    events = tune.events(root, position)
+    assert [i["pitch"] for i in events] == [root + i for i in offsets]
+    assert [i["onset"] for i in events] == ["0", "1", "3/2", "7/3", "3"]
+    assert [i["pitch"] for i in tune.playback(root, 180, position)] == [
+        i["pitch"] for i in events
+    ]
+
+
 @pytest.mark.parametrize("scope", ["", "play", "play:music", "play:music:tune"])
 def test_truenames_round_trip_in_all_scopes_and_vocabularies(scope: str) -> None:
     for engine in [Nmr(), Nmr([f"word{i}" for i in range(32)])]:
