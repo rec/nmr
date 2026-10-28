@@ -239,7 +239,7 @@ Open `http://127.0.0.1:8765` locally, or host those files on an ordinary static
 HTTPS server for friends. Direct `file:` loading does not support the worker and
 asset loading used here. No conversion server or account is needed.
 
-To build and deploy to `https://ax.to/nmr/`, run from the checkout:
+To build and deploy to `https://ax.to/nmr`, run from the checkout:
 
 ```sh
 uv run --frozen python script/deploy.py
@@ -248,6 +248,10 @@ uv run --frozen python script/deploy.py
 This uses your SSH keys for `root@ax.to`, uploads changed files with rsync to
 `/home/ax/public_html/nmr/`, and sets the deployed directory and all its contents
 to owner `ax` and group `ax`. Files already on the server are not deleted.
+The deployment sets the asset base to `/nmr/` and includes `.htaccess`: Apache
+serves `/nmr` directly and redirects `/nmr/` to `/nmr`, preserving the query.
+Apache 2.4 must enable `mod_rewrite` and allow the `FileInfo`, `Indexes`, and
+`Options` override classes for this directory. Local builds retain relative assets.
 
 The page downloads pinned Pyodide 0.29.3 and its Pydantic packages. First load
 requires a connection and a WebAssembly-capable modern browser. The project,

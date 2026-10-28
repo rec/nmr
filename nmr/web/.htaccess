@@ -1,0 +1,10 @@
+# Keep the public URL at /nmr while serving assets from /nmr/.
+Options -Indexes -MultiViews
+DirectorySlash Off
+RewriteEngine On
+
+# Preserve the query string and redirect only the directory URL.
+RewriteCond %{THE_REQUEST} "\s/+nmr/[?\s]"
+RewriteRule ^$ /nmr [R=301,L]
+
+RewriteRule ^$ /nmr/index.html [END]

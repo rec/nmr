@@ -1,4 +1,4 @@
-"""Build and publish nmr to https://ax.to/nmr/."""
+"""Build and publish nmr to https://ax.to/nmr."""
 
 from pathlib import Path
 from subprocess import run
@@ -17,14 +17,14 @@ class Deploy(BaseModel, frozen=True):
         host = "root@ax.to"
         remote = "/home/ax/public_html/nmr/"
         run(["ssh", host, "id ax >/dev/null"], check=True)
-        build_browser(destination)
+        build_browser(destination, base_path="/nmr/")
         run(["ssh", host, f"install -d -m 755 -o ax -g ax {remote}"], check=True)
         run(
             ["rsync", "-az", "--checksum", f"{destination}/", f"{host}:{remote}"],
             check=True,
         )
         run(["ssh", host, f"chown -R ax:ax {remote}"], check=True)
-        print("Deployed https://ax.to/nmr/")
+        print("Deployed https://ax.to/nmr")
 
 
 if __name__ == "__main__":

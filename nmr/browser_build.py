@@ -1,18 +1,23 @@
 """Build a static browser tool containing the same Python codecs as the CLI."""
 
 from hashlib import sha256
+from html import escape
 from importlib import metadata, util
 from pathlib import Path
 from shutil import copyfile
 from zipfile import ZIP_DEFLATED, ZipFile
 
 
-def build_browser(destination: Path) -> Path:
+def build_browser(destination: Path, base_path: str = "./") -> Path:
     destination.mkdir(parents=True, exist_ok=True)
     package = Path(__file__).parent
     sources = sorted(i for i in (package / "web").iterdir() if i.is_file())
     for source in sources:
         copyfile(source, destination / source.name)
+    page = destination / "index.html"
+    page.write_text(
+        page.read_text().replace('<base href="./"', f'<base href="{escape(base_path)}"')
+    )
     archive_path = destination / "python.zip"
     with ZipFile(archive_path, "w", compression=ZIP_DEFLATED) as archive:
         for name, distribution_name in [

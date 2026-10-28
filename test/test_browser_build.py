@@ -15,6 +15,10 @@ def test_browser_bundles_the_actual_core_and_pure_python_dependencies(
     assert page.is_file()
     assert page.with_name("worker.js").is_file()
     assert page.with_name("editor.mjs").is_file()
+    assert (
+        page.with_name(".htaccess").read_bytes()
+        == Path("nmr/web/.htaccess").read_bytes()
+    )
     with ZipFile(page.with_name("python.zip")) as archive:
         assert archive.read("nmr/nmr.py") == Path("nmr/nmr.py").read_bytes()
         assert archive.read("nmr/words.txt") == Path("nmr/words.txt").read_bytes()
@@ -26,6 +30,12 @@ def test_browser_bundles_the_actual_core_and_pure_python_dependencies(
             i.startswith("phonenumbers/geodata/") for i in archive.namelist()
         )
         assert "licenses/nmr/LICENSE" in archive.namelist()
+
+
+def test_browser_supports_a_deployment_asset_base(tmp_path: Path) -> None:
+    page = build_browser(tmp_path / "web", base_path="/nmr/")
+    assert '<base href="/nmr/"' in page.read_text()
+    assert '<base href="./"' in build_browser(tmp_path / "local").read_text()
 
 
 def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:

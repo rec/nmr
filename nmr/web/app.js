@@ -100,6 +100,7 @@ function unlock() {
 }
 function changed() {
   const url = new URL(window.location.href);
+  if (url.pathname !== "/") url.pathname = url.pathname.replace(/\/$/, "");
   url.search = "";
   url.searchParams.set(mode === "truename" ? "name" : "desc", inputText());
   window.history.replaceState(window.history.state, "", url);
