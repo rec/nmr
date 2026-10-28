@@ -51,6 +51,7 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert f"runtime.js?v={revision}" in app
     assert f"navigation.js?v={revision}" in app
     assert f"clock.js?v={revision}" in app
+    assert f"count.js?v={revision}" in app
     assert f"worker.js?v={revision}" in page.with_name("runtime.js").read_text()
     worker = page.with_name("worker.js").read_text()
     assert f"python.zip?v={revision}" in worker
@@ -62,6 +63,9 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert f"clock-time.mjs?v={revision}" in clock_script
     assert f"tune.js?v={revision}" in clock_script
     assert f"runtime.js?v={revision}" in clock_script
+    count_script = page.with_name("count.js").read_text()
+    assert f"count-runner.mjs?v={revision}" in count_script
+    assert f"runtime.js?v={revision}" in count_script
 
 
 def test_changing_a_shipped_editor_changes_its_build_url(

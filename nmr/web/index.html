@@ -45,7 +45,7 @@
         </section>
       </div>
       <button id="copy-link" type="button" aria-live="polite">Copy link</button>
-      <footer><a id="clock-link" href="?type=clock">Clock</a></footer>
+      <footer><a id="clock-link" href="?type=clock">Clock</a> · <a id="count-link" href="?count=0&amp;inc=1">Count</a></footer>
     </main>
     <main id="clock-view" class="clock" hidden>
       <h1 tabindex="-1">Clock</h1>
@@ -66,7 +66,21 @@
           <option value="3600">60 minutes</option>
         </select>
       </div>
-      <footer><a id="main-link" href="?desc=">nmr</a></footer>
+      <footer><a id="main-link" href="?desc=">nmr</a> · <a id="clock-count-link" href="?count=0&amp;inc=1">Count</a></footer>
+    </main>
+    <main id="count-view" hidden>
+      <h1 tabindex="-1">Count</h1>
+      <label for="count-value">Count</label>
+      <input id="count-value" type="text" inputmode="numeric" pattern="[0-9]+" value="0" autocomplete="off" spellcheck="false" />
+      <button id="count-truename" class="truename" type="button" hidden aria-label="Play the count's tune" aria-pressed="false"></button>
+      <p id="count-object" aria-live="polite"></p>
+      <p id="count-message" role="status"></p>
+      <div class="count-controls">
+        <label><input id="count-run" type="checkbox" disabled /> Run</label>
+        <label for="count-increment">Increment</label>
+        <input id="count-increment" type="text" inputmode="numeric" pattern="[0-9]+" value="1" autocomplete="off" spellcheck="false" />
+      </div>
+      <footer><a id="count-main-link" href="?desc=">nmr</a> · <a id="count-clock-link" href="?type=clock">Clock</a></footer>
     </main>
   </body>
 </html>

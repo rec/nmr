@@ -7,7 +7,7 @@ const source = fs.readFileSync(new URL("../nmr/web/navigation.js", import.meta.u
 
 function navigation(address) {
   let url = new URL(address);
-  const elements = Object.fromEntries(["#main-view", "#clock-view", "#main-link", "#clock-link"].map((i) => [i, {
+  const elements = Object.fromEntries(["#main-view", "#clock-view", "#count-view", "#main-link", "#clock-link", "#count-link", "#clock-count-link", "#count-main-link", "#count-clock-link"].map((i) => [i, {
     hidden: true,
     addEventListener(event, callback) { this[event] = callback; },
     querySelector() { return { focus() {} }; },
@@ -73,4 +73,25 @@ test("modified link clicks retain native browser behavior", () => {
     assert.equal(app.click("#clock-link", modifiers), false);
     assert.equal(app.url.search, "?desc=Tom");
   }
+});
+
+test("Count has a direct URL and links to both other views", () => {
+  const app = navigation("https://ax.to/nmr?count=0&inc=1");
+  assert.equal(app.elements["#count-view"].hidden, false);
+  assert.equal(app.elements["#main-view"].hidden, true);
+  assert.equal(app.elements["#clock-view"].hidden, true);
+  assert.equal(app.document.title, "Count · nmr");
+  app.edit("https://ax.to/nmr?count=12345678901234567890&inc=3");
+  app.click("#count-clock-link");
+  assert.equal(app.url.search, "?type=clock");
+  app.click("#clock-count-link");
+  assert.equal(app.url.search, "?count=12345678901234567890&inc=3");
+  app.click("#count-main-link");
+  assert.equal(app.url.search, "?desc=");
+  app.click("#count-link");
+  assert.equal(app.url.search, "?count=12345678901234567890&inc=3");
+  app.back();
+  assert.equal(app.elements["#main-view"].hidden, false);
+  app.forward();
+  assert.equal(app.elements["#count-view"].hidden, false);
 });

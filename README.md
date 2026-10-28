@@ -333,11 +333,24 @@ code points.
 The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
 will play it on the first interaction instead. Work and playback limits still apply.
 
-The volume icon in the top-right corner opens a slider shared by both views.
+The volume icon in the top-right corner opens a slider shared by all three views.
 It starts at 100 (−10 dB). Values 1–110 give
 −109 through 0 dB of master attenuation; 0 mutes all tunes and typing ticks.
 The setting stays in memory while navigating between views, without cookies or
 local storage. Click outside the popup or press Escape to close it.
+
+The Count view at `/nmr?count=0&inc=1` explores the full truename index directly.
+Edit the large count field to see its truename and, where browsing can construct
+one, the corresponding object. Click the truename to play its full-index tune.
+Both fields accept only decimal digits; the increment must be positive and
+defaults to 1. Negative or invalid increments in a URL are ignored. Counts and
+increments use exact integers, including values beyond JavaScript's number range.
+The URL follows edits so it can be shared or bookmarked.
+
+**Run** starts off. Enabling it plays the current tune, waits two seconds after
+it finishes, adds the increment, and repeats. Disabling Run lets the current
+tune finish and cancels future increments. Editing either field or leaving Count
+also disables Run. All three views link to each other without reloading the worker.
 
 The Clock view at `/nmr?type=clock` shows the local date and time and updates its
 truename every second. **Time only** selects Time rather than the default
@@ -363,7 +376,7 @@ It plays the tune of that full name, with F3 at 180 BPM. **Short name** starts
 unchecked. When checked, it uses the Time or DateTime payload index as a Tune
 index, displays its `tune:` truename, and plays that tune. Switching the option
 updates the displayed name immediately and waits for the next playback boundary.
-Both views share one page and Python worker. Their links switch views without
+All three views share one page and Python worker. Their links switch views without
 reloading; browser Back and Forward also work. Editor contents and clock settings
 stay in memory, without cookies or local storage. An enabled clock keeps sounding
 while the main view is open.

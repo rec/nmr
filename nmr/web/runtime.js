@@ -1,4 +1,4 @@
-/* Both views share one Python worker and vocabulary configuration. */
+/* All views share one Python worker and vocabulary configuration. */
 const worker = new Worker("worker.js");
 const pending = new Map();
 let serial = 0;

@@ -7,6 +7,7 @@ from pydantic import BaseModel
 
 from nmr import recognition
 from nmr.nmr import Nmr
+from nmr.types.integer import parse_integer
 from nmr.types.tune import Tune
 
 
@@ -47,6 +48,10 @@ class RecognitionRequest(BaseModel, frozen=True):
     mode: Literal["description", "truename"] = "description"
 
 
+class CountRequest(BaseModel, frozen=True):
+    value: str
+
+
 _engine = Nmr()
 
 
@@ -78,6 +83,17 @@ def convert(request_json: str) -> str:
             request.value, request.operation == "browse", request.vocabulary
         )
     return result.model_dump_json()
+
+
+def count(request_json: str) -> str:
+    request = CountRequest.model_validate_json(request_json)
+    truename = " ".join(_engine.to_truename(parse_integer(request.value)))
+    result: dict[str, object] = {"truename": truename}
+    try:
+        result["browsed"] = _engine.decode(truename, browse=True).model_dump()
+    except ValueError as error:
+        result["browse_error"] = str(error)
+    return json.dumps(result)
 
 
 def preview(request_json: str) -> str:

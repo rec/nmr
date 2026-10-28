@@ -1,6 +1,7 @@
 import "./navigation.js";
 import "./volume.js";
 import "./clock.js";
+import "./count.js";
 import { configured, request } from "./runtime.js";
 import { describeObject } from "./description.mjs";
 import { TruenameEditor } from "./truename-editor.mjs";
