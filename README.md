@@ -45,7 +45,7 @@ nmr --value 'frac:who'
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
 # chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:most halo
+# play:most ant
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
 # rest cole
 
@@ -164,14 +164,14 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
-`go:site least map` with the default vocabulary.
+`go:site trade map` with the default vocabulary.
 
 Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:open usual sale model
-nmr --value 'tune:open usual sale model'
+# tune:open angle sale human
+nmr --value 'tune:open angle sale human'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 

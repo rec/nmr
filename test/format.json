@@ -1,33 +1,33 @@
 {
-  "vocabulary": "d42a323b11636d2a3cd7fd336a989500023d3576b20d561259cefa4f9abd0326",
+  "vocabulary": "264a3607d36d2a844540b29934346070878bbe4457d07075b9553194b4c906ce",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:open usual sale model"
+      "truename": "tune:open angle sale human"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sam worth ian cream"
+      "truename": "music:sam peace ian boxes"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the doll pink asked fool"
+      "truename": "play:the doll pink cross karl"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a humor link man acid"
+      "truename": "a lived link man acid"
     },
     {
       "type": "int",
@@ -62,7 +62,7 @@
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city idle glass kent"
+      "truename": "phone:city cove happy kent"
     },
     {
       "type": "latlong",
@@ -90,7 +90,7 @@
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:most halo"
+      "truename": "play:most ant"
     },
     {
       "type": "chess",
@@ -104,14 +104,14 @@
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site least map"
+      "truename": "go:site trade map"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the novel what delta"
+      "truename": "the ultra what alpha"
     },
     {
       "type": "go",
@@ -139,14 +139,14 @@
       "input": "-0.0",
       "value": "-0.0",
       "scope": null,
-      "truename": "float:hook neil catch doug dan star"
+      "truename": "float:hook neil doubt doug dan star"
     },
     {
       "type": "float",
       "input": "bits:7ff8000000000042",
       "value": "bits:7ff8000000000042",
       "scope": null,
-      "truename": "float:crop iron bit bell bold fur"
+      "truename": "float:crop iron bit bell bold tar"
     },
     {
       "type": "time",
@@ -167,42 +167,42 @@
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:venue chair meal"
+      "truename": "ip:vital phase meal"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:cat rear nor weed ok hero pit alex price black wide hung"
+      "truename": "ip:cat rear nor dice ok hero pit alex state check wide hung"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:many fully leaf even color of cave lived soma some idea moon"
+      "truename": "uuid:many worth leaf even track of wool tight tier some idea moon"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this tight cheap junk saint thank wit pod large nova peer moore date diet park spy mail both rope holy none nine egg mike less"
+      "truename": "semver:this meant third wax joint prior yarn bolt table nova peer treat date diet park spy mail both dump holy none nine egg mike less"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:pack form gem"
+      "truename": "isbn:pack form maui"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:phase yet west"
+      "truename": "upc:motor yet west"
     }
   ]
 }
