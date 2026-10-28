@@ -203,6 +203,41 @@
       "value": "036000291452",
       "scope": null,
       "truename": "upc:motor yet west"
+    },
+    {
+      "type": "cards",
+      "input": "()",
+      "value": "()",
+      "scope": null,
+      "truename": "cards:the"
+    },
+    {
+      "type": "cards",
+      "input": "()",
+      "value": "()",
+      "scope": "",
+      "truename": "if"
+    },
+    {
+      "type": "cards",
+      "input": "(1 2)",
+      "value": "(1 2)",
+      "scope": null,
+      "truename": "cards:of"
+    },
+    {
+      "type": "cards",
+      "input": "(1 2)",
+      "value": "(1 2)",
+      "scope": "",
+      "truename": "post"
+    },
+    {
+      "type": "cards",
+      "input": "(1 2 3)",
+      "value": "(1 2 3)",
+      "scope": "",
+      "truename": "what cash"
     }
   ]
 }

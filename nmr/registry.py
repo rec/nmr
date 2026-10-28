@@ -1,6 +1,7 @@
 """Explicit public allocations; importing a codec never modifies this tree."""
 
 from .category import Category
+from .types.cards import Cards
 from .types.chess import Chess
 from .types.floating import Float
 from .types.fraction import Frac
@@ -30,5 +31,5 @@ ROOT = Category(
         Category("register", Isbn, Upc),
         Category("id", Uuid, Semver, String),
     ),
-    Category("play", Category("game", Chess, Go), Category("music", Tune)),
+    Category("play", Category("game", Chess, Go, Cards), Category("music", Tune)),
 )

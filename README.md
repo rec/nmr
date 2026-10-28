@@ -110,6 +110,7 @@ expands; save the canonical output instead.
 | `upc` | UPC-A, including the check digit and leading zeroes. |
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
+| `cards` | Every ordering of a 52-card deck, described by changed-position cycles; `()` is the ordered deck. |
 | `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
 | `string` | Unicode text, preserving case and allowed spaces; excludes U+0000–001F, U+007F–009F, and surrogates. The empty string is supported. No Unicode normalization is applied. |
 
@@ -165,6 +166,29 @@ Scoring, results, komi, handicap setups, SGF, and resumption after scoring are n
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
 `go:site trade map` with the default vocabulary.
+
+Cards use `play:game:cards`. The baseline deck is clubs, diamonds, hearts,
+then spades, each ordered A, 2, 3, …, 10, J, Q, K, without jokers. Positions
+are numbered 1–52. Only displaced cards are described:
+
+| Description | Meaning |
+| --- | --- |
+| `()` | The ordered deck. |
+| `(1 2)` | Swap the first two cards, the ace and two of clubs. |
+| `(1 2 3)` | Move the card originally at 1 to position 2, 2 to 3, and 3 to 1. |
+| `(1 2) (3 4)` | Two independent swaps. |
+
+Cycles must be disjoint and contain at least two positions. Canonical output
+starts each cycle at its smallest position and sorts cycles by that position.
+For example, `(4 3)(2 1)` normalizes to `(1 2) (3 4)`. The browser recognizes
+cycle descriptions directly, or they can be entered explicitly as `cards: (1 2)`.
+
+The enumeration first groups decks by displaced-card count. Within a group,
+displaced-position subsets are ordered lexicographically, then the destination
+positions of those cards, read in ascending original-position order, are ordered
+lexicographically. Index 0 is `()`, index 1 is `(1 2)`, and indices 1–1326
+cover all single swaps. All `52!` permutations occur exactly once. Canonical
+indices stop at `52! - 1`; browsing wraps modulo `52!`.
 
 Tunes use the `tune` prefix. For example:
 

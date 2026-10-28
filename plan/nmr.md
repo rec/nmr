@@ -165,7 +165,7 @@ assignments and structural leaves are now explicit in `nmr/registry.py`:
 | `data:register` | 0: `isbn`, 1: `upc`; values backed by an external registry. |
 | `data:id` | 0: `uuid`, 1: `semver`, 2: `string`. |
 | `play` | 0: `game`, 1: `music` (categories). |
-| `play:game` | 0: `chess`, 1: `go`. |
+| `play:game` | 0: `chess`, 1: `go`, 2: `cards`. |
 | `play:music` | 0: `tune`. |
 
 The category `real:time` and its Time leaf `real:time:time` deliberately share
@@ -349,6 +349,7 @@ chosen permanent expansion mechanism.
 | ISBN and UPC | Checked ISBN-10, ISBN-13 with 978/979 prefix, and UPC-A; no assignment claims. | Dense finite domains, with browsing-only wrapping. |
 | Chess | A legal move sequence from the standard initial position, including unfinished and empty games. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
 | Go | Alternating moves from an empty 19×19, 9×9, or 13×13 board, including empty and unfinished games. Captures, no suicide, situational superko; two passes end play. | Every payload index whose decoding stays within the 4096-ply work limit and whose canonical truename fits. |
+| Cards | All 52-card deck orders, grouped by displaced-card count, then lexicographic displaced subsets and destination sequences. Baseline: clubs, diamonds, hearts, spades, each A through K. Changed-position cycles omit fixed cards; `()` is ordered and `(1 2)` is the first swap. | Exactly `52!` canonical indices, with browsing-only modulo wrapping. |
 
 ISBN and UPC have compact checked codecs. There are no ownership, delivery,
 assignment, or account-existence checks.
