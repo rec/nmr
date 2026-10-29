@@ -3,6 +3,7 @@ import { describeObject } from "./description.mjs";
 import { CountRunner } from "./count-runner.mjs";
 import { TunePlayer } from "./tune.js";
 import { presentation } from "./presentation.mjs";
+import { ValueDisplay } from "./value-display.mjs";
 
 const view = document.querySelector("#count-view");
 const field = document.querySelector("#count-value");
@@ -11,6 +12,20 @@ const run = document.querySelector("#count-run");
 const truename = document.querySelector("#count-truename");
 const object = document.querySelector("#count-object");
 const message = document.querySelector("#count-message");
+const display = new ValueDisplay(document.querySelector("#count-value-display"), (action) => {
+  pause();
+  const current = revision;
+  display.container.inert = true;
+  request("count_action", { value: field.value, ...action }).then((result) => {
+    if (revision !== current || view.hidden) return;
+    const url = new URL(window.location.href);
+    url.searchParams.set("count", result.index);
+    window.history.pushState(null, "", url);
+    load();
+  }, (error) => {
+    if (revision === current) report(error);
+  }).finally(() => { if (revision === current) display.container.inert = false; });
+});
 let revision = 0;
 let named = null;
 let playback = null;
@@ -51,6 +66,7 @@ function refresh() {
   truename.disabled = true;
   truename.textContent = field.value ? "Loading truename…" : "";
   object.textContent = "";
+  display.clear();
   message.textContent = "";
   run.disabled = !player || !field.value || !increment.value || !increment.validity.valid;
   writeURL();
@@ -59,12 +75,13 @@ function refresh() {
   const result = configured.then(() => request("count", { value }));
   named = result;
   result.then((result) => {
-    if (revision !== current) return;
+    if (revision !== current || view.hidden) return;
     truename.textContent = result.truename;
     truename.hidden = false;
     truename.disabled = !player;
     object.textContent = result.browsed ? describeObject(result.browsed) : "";
-  }, (error) => {
+    display.show(result.display);
+  }).catch((error) => {
     if (revision !== current) return;
     pause();
     run.disabled = true;
@@ -95,6 +112,7 @@ const runner = new CountRunner(play, () => {
   field.value = String(BigInt(field.value) + BigInt(increment.value));
   refresh();
 }, report);
+display.container.addEventListener("click", pause);
 
 for (const input of [field, increment]) {
   let accepted = input.value;
@@ -121,7 +139,11 @@ truename.addEventListener("click", () => {
 });
 function load() {
   pause();
-  if (view.hidden) return;
+  if (view.hidden) {
+    revision++;
+    display.clear();
+    return;
+  }
   const parameters = new URL(window.location.href).searchParams;
   const count = parameters.get("count") || "0";
   const inc = parameters.get("inc") || "1";

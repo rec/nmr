@@ -387,6 +387,20 @@ it finishes, adds the increment, and repeats. Disabling Run lets the current
 tune finish and cancels future increments. Editing either field or leaving Count
 also disables Run. All three views link to each other without reloading the worker.
 
+Below Count's name and description rows, a fixed display area shows the value:
+chess and Go boards, a 52-card deck, a coordinate map, or text for other types.
+On a chess board, select a piece and a highlighted destination; promotions offer
+all four pieces. Go intersections offer the moves allowed by our existing rules,
+with Pass and Undo controls. Both boards support Undo. Select two cards to swap
+their positions. Board and card actions pause Run and navigate to the resulting
+object's canonical full index, preserving the increment and adding a browser
+history entry. Back returns to the previous count.
+
+Board rules stay in the shared Python codecs. The display does not introduce a
+second chess or Go engine. Maps load external content from OpenStreetMap; polar
+positions beyond its Mercator coverage use NASA GIBS Blue Marble geographic
+imagery. Other rendering and navigation run locally.
+
 The Clock view at `/nmr?type=clock` shows the local date and time and updates its
 truename every second. **Time only** selects Time rather than the default
 DateTime; the date remains visible in both modes. **Display UTC** switches the

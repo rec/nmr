@@ -1,6 +1,7 @@
 """Browser bridge. This file is evaluated by Pyodide, never a second codec."""
 
 import json
+from decimal import Decimal
 from typing import Literal
 
 from pydantic import BaseModel
@@ -9,6 +10,7 @@ from nmr import recognition
 from nmr.nmr import Nmr
 from nmr.types.integer import parse_integer
 from nmr.types.tune import Tune
+from nmr.web.value_display import ValueAction, change_value, display_value
 
 
 class Settings(BaseModel, frozen=True):
@@ -54,6 +56,10 @@ class CountRequest(BaseModel, frozen=True):
     value: str
 
 
+class CountActionRequest(ValueAction, frozen=True):
+    value: str
+
+
 _engine = Nmr()
 
 
@@ -90,12 +96,25 @@ def convert(request_json: str) -> str:
 def count(request_json: str) -> str:
     request = CountRequest.model_validate_json(request_json)
     truename = " ".join(_engine.to_truename(parse_integer(request.value)))
-    result: dict[str, object] = {"truename": truename}
+    result: dict[str, object] = {"truename": truename, "display": None}
     try:
-        result["browsed"] = _engine.decode(truename, browse=True).model_dump()
+        decoded = _engine.decode(truename, browse=True)
     except ValueError as error:
         result["browse_error"] = str(error)
+    else:
+        result["browsed"] = decoded.model_dump()
+        result["display"] = display_value(decoded.type, decoded.value)
     return json.dumps(result)
+
+
+def count_action(request_json: str) -> str:
+    request = CountActionRequest.model_validate_json(request_json)
+    truename = " ".join(_engine.to_truename(parse_integer(request.value)))
+    source = _engine.decode(truename, browse=True)
+    value = change_value(source.type, source.value, request)
+    result = _engine.encode(value, source.type, scope="")
+    index = _engine.truename_index(result.truename)
+    return json.dumps({"index": format(Decimal(index), "f")})
 
 
 def preview(request_json: str) -> str:

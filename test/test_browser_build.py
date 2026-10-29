@@ -68,6 +68,9 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert f"count-runner.mjs?v={revision}" in count_script
     assert f"runtime.js?v={revision}" in count_script
     assert f"presentation.mjs?v={revision}" in count_script
+    assert f"value-display.mjs?v={revision}" in count_script
+    with ZipFile(page.with_name("python.zip")) as archive:
+        assert "nmr/web/value_display.py" in archive.namelist()
     assert f"presentation.mjs?v={revision}" in clock_script
 
 

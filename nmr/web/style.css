@@ -30,6 +30,42 @@ footer a { color: #245d50; text-underline-offset: 4px; }
 .count-controls label { display: flex; align-items: center; gap: 10px; }
 #count-run { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
 #count-increment { width: 9ch; }
+#count-value-display { height: 400px; max-height: 50vh; min-height: 280px; margin-top: 16px; border: 1px solid #bdc9bc; border-radius: 12px; overflow: auto; display: flex; align-items: center; justify-content: center; container-type: size; }
+#count-value-display:empty::before { content: "Value display"; color: #69766d; }
+.value-text { width: 100%; max-height: 100%; margin: 0; padding: 20px; white-space: pre-wrap; overflow-wrap: anywhere; overflow: auto; font: inherit; }
+.value-board-layout { display: flex; flex-direction: column; align-items: center; gap: 8px; width: 100%; height: 100%; padding: 8px; }
+.chess-board, .go-board { width: min(100%, 340px, calc(100cqh - 56px)); aspect-ratio: 1; flex-shrink: 0; display: grid; }
+.chess-board { grid-template-columns: repeat(8, minmax(0, 1fr)); grid-template-rows: repeat(8, minmax(0, 1fr)); }
+.chess-square { min-width: 0; min-height: 0; border: 0; padding: 0; font: min(36px, 8cqh, 6vw)/1 "Arial Unicode MS", "DejaVu Sans", serif; color: #101b18; cursor: pointer; position: relative; }
+.chess-square.light { background: #f0dfbc; }
+.chess-square.dark { background: #91a88b; }
+.chess-square.selected { box-shadow: inset 0 0 0 3px #aa7216; }
+.chess-square.legal-target::after { content: ""; position: absolute; width: 25%; height: 25%; border-radius: 50%; background: #245d5080; inset: 37.5%; }
+.value-board-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; font-size: 14px; min-height: 32px; }
+.value-board-controls button { border: 1px solid #9aac9d; border-radius: 6px; padding: 4px 10px; font: inherit; color: inherit; background: transparent; cursor: pointer; }
+.go-board { position: relative; grid-template-columns: repeat(var(--size), 1fr); grid-template-rows: repeat(var(--size), 1fr); background: #dfbb7e; }
+.go-board svg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.go-board line { stroke: #443729; stroke-width: 0.035; }
+.go-board circle { fill: #443729; }
+.go-point { position: relative; border: 0; padding: 0; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.go-point:not(:disabled):hover::before { content: ""; position: absolute; inset: 10%; background: #245d5060; border-radius: 50%; }
+.go-stone { width: 86%; height: 86%; border-radius: 50%; box-shadow: 1px 1px 2px #0008; }
+.go-stone.black { background: #181a19; }
+.go-stone.white { background: #fafaf4; border: 1px solid #aaa; }
+.chess-square:disabled, .go-point:disabled { cursor: default; opacity: 1; }
+.card-layout { width: 100%; min-width: 0; max-height: 100%; padding: 16px; overflow: auto; }
+.card-layout p { height: 3em; margin: 0 0 12px; overflow: auto; font-size: 14px; }
+.card-deck { display: grid; grid-template-columns: repeat(13, minmax(32px, 1fr)); gap: 4px; min-width: 464px; }
+.deck-card { min-height: 48px; border: 1px solid #9aac9d; border-radius: 5px; padding: 4px; background: #fffdf6; font: 18px/1.2 system-ui, sans-serif; color: #183b3c; cursor: pointer; }
+.deck-card.red { color: #aa302e; }
+.deck-card[aria-pressed="true"] { outline: 3px solid #aa7216; outline-offset: -3px; }
+#count-value-display button:focus-visible { outline: 3px solid #245d50; outline-offset: -3px; }
+.value-map { width: 100%; height: 100%; border: 0; }
+.polar-map { position: relative; width: 100%; height: 100%; margin: 0; }
+.polar-map-image { position: relative; height: calc(100% - 24px); }
+.polar-map img { width: 100%; height: 100%; display: block; }
+.polar-map figcaption { height: 24px; font-size: 12px; text-align: center; }
+.map-marker { position: absolute; transform: translate(-50%, -50%); color: #d92323; text-shadow: 0 0 2px white; font-size: 20px; }
 main {
   width: min(100%, 1160px);
   margin: 16vh auto 0;
