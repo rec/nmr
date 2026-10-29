@@ -12,8 +12,8 @@ function page(address) {
   const listeners = {};
   const calls = [];
   let display;
-  const elements = Object.fromEntries(["#count-view", "#count-value", "#count-increment", "#count-run", "#count-truename", "#count-object", "#count-message", "#count-value-display"].map((i) => [i, {
-    value: i === "#count-increment" ? "1" : "0", hidden: false, checked: false,
+  const elements = Object.fromEntries(["#count-view", "#count-value", "#count-increment", "#count-run", "#count-truename", "#count-object", "#count-message", "#count-value-display", "#score-top", "#score-bottom", "#tune-root", "#tune-position"].map((i) => [i, {
+    value: i.startsWith("#score-") ? "4" : i === "#count-increment" ? "1" : "0", hidden: false, checked: false,
     validity: { valid: true },
     addEventListener(event, callback) { this[event] = callback; },
     setAttribute() {},
@@ -70,6 +70,29 @@ test("Count loads URL values exactly and defaults invalid increments to one", ()
     assert.equal(app.url.search, "?count=9007199254740993&inc=1");
   }
   return flush();
+});
+
+test("Count sends meter and pitch settings and refreshes notation when they change", () => {
+  const app = page("https://ax.to/nmr?count=72&inc=1");
+  return flush().then(() => {
+    const payload = app.calls.at(-1).payload;
+    assert.equal(payload.root, 53);
+    assert.equal(payload.position, "middle");
+    assert.equal(payload.time_signature.top, "4");
+    assert.equal(payload.time_signature.bottom, 4);
+    assert.equal(app.input("#score-top", "7x"), true);
+    app.input("#score-top", "7");
+    app.elements["#score-bottom"].value = "12";
+    app.elements["#score-bottom"].input();
+    return flush();
+  }).then(() => {
+    const payload = app.calls.at(-1).payload;
+    assert.equal(payload.time_signature.top, "7");
+    assert.equal(payload.time_signature.bottom, 12);
+    const before = app.calls.length;
+    app.elements["#tune-root"].change();
+    return flush().then(() => assert.equal(app.calls.length, before + 1));
+  });
 });
 
 test("value actions navigate to the canonical count without losing the increment", () => {

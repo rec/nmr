@@ -1,0 +1,6 @@
+VexFlow 5.0.0, vexflow-bravura.js (UMD build), distributed as vexflow.js.
+Source: https://registry.npmjs.org/vexflow/-/vexflow-5.0.0.tgz
+Upstream: https://github.com/vexflow/vexflow/tree/5.0.0
+VexFlow is MIT licensed: see vexflow-LICENSE.txt.
+Embedded Bravura and Academico fonts are licensed under the SIL Open Font
+License 1.1: see bravura-OFL.txt and academico-OFL.txt.

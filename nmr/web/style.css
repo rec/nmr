@@ -28,6 +28,10 @@ footer a { color: #245d50; text-underline-offset: 4px; }
 #count-message { height: 1.5em; margin: 4px 0; overflow: auto; color: #8b3328; }
 .count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
 .count-controls label { display: flex; align-items: center; gap: 10px; }
+#score-top { width: 5ch; padding: 8px; margin: 0; font-size: 16px; }
+#score-bottom { padding: 8px; font: inherit; font-size: 16px; }
+.music-score { width: 100%; max-height: 100%; overflow: auto; flex-shrink: 0; }
+.music-score svg { display: block; }
 #count-run { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
 #count-increment { width: 9ch; }
 #count-value-display { height: 400px; max-height: 50vh; min-height: 280px; margin-top: 16px; border: 1px solid #bdc9bc; border-radius: 12px; overflow: auto; display: flex; align-items: center; justify-content: center; container-type: size; }

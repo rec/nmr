@@ -10,6 +10,7 @@ from nmr import recognition
 from nmr.nmr import Nmr
 from nmr.types.integer import parse_integer
 from nmr.types.tune import Tune
+from nmr.web.music_notation import TimeSignature, score_plan
 from nmr.web.value_display import ValueAction, change_value, display_value
 
 
@@ -54,6 +55,9 @@ class RecognitionRequest(BaseModel, frozen=True):
 
 class CountRequest(BaseModel, frozen=True):
     value: str
+    root: int = 53
+    position: Literal["start", "middle", "end"] = "middle"
+    time_signature: TimeSignature = TimeSignature()
 
 
 class CountActionRequest(ValueAction, frozen=True):
@@ -104,6 +108,18 @@ def count(request_json: str) -> str:
     else:
         result["browsed"] = decoded.model_dump()
         result["display"] = display_value(decoded.type, decoded.value)
+        if decoded.type == "tune":
+            try:
+                score = score_plan(
+                    Tune.from_index(parse_integer(request.value)),
+                    request.root,
+                    request.position,
+                    request.time_signature,
+                )
+            except ValueError as error:
+                result["display"] = {"kind": "tune", "error": str(error)}
+            else:
+                result["display"] = {"kind": "tune", "score": score}
     return json.dumps(result)
 
 

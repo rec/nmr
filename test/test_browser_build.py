@@ -15,6 +15,15 @@ def test_browser_bundles_the_actual_core_and_pure_python_dependencies(
     assert page.is_file()
     assert page.with_name("worker.js").is_file()
     assert page.with_name("editor.mjs").is_file()
+    assert page.with_name("music-notation.mjs").is_file()
+    assert 'src="vexflow.js?v=' in page.read_text()
+    for name in [
+        "vexflow.js",
+        "vexflow-LICENSE.txt",
+        "bravura-OFL.txt",
+        "academico-OFL.txt",
+    ]:
+        assert page.with_name(name).read_bytes() == Path("nmr/web", name).read_bytes()
     assert (
         page.with_name(".htaccess").read_bytes()
         == Path("nmr/web/.htaccess").read_bytes()

@@ -12,6 +12,8 @@ const run = document.querySelector("#count-run");
 const truename = document.querySelector("#count-truename");
 const object = document.querySelector("#count-object");
 const message = document.querySelector("#count-message");
+const scoreTop = document.querySelector("#score-top");
+const scoreBottom = document.querySelector("#score-bottom");
 const display = new ValueDisplay(document.querySelector("#count-value-display"), (action) => {
   pause();
   const current = revision;
@@ -72,7 +74,10 @@ function refresh() {
   writeURL();
   if (!field.value) return Promise.resolve(null);
   const value = field.value;
-  const result = configured.then(() => request("count", { value }));
+  const result = configured.then(() => request("count", {
+    value, ...presentation,
+    time_signature: { top: scoreTop.validity.valid && scoreTop.value ? scoreTop.value : "4", bottom: Number(scoreBottom.value) },
+  }));
   named = result;
   result.then((result) => {
     if (revision !== current || view.hidden) return;
@@ -153,4 +158,13 @@ function load() {
   refresh();
 }
 window.addEventListener("viewchange", load);
+scoreTop.addEventListener("beforeinput", (event) => {
+  if (event.data && /[^0-9]/.test(event.data)) event.preventDefault();
+});
+for (const input of [scoreTop, scoreBottom]) input.addEventListener("input", () => {
+  if (scoreTop.value && scoreTop.validity.valid && !view.hidden) refresh();
+});
+for (const input of [document.querySelector("#tune-root"), document.querySelector("#tune-position")]) {
+  input.addEventListener("change", () => { if (!view.hidden) refresh(); });
+}
 load();

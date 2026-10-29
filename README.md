@@ -388,13 +388,30 @@ tune finish and cancels future increments. Editing either field or leaving Count
 also disables Run. All three views link to each other without reloading the worker.
 
 Below Count's name and description rows, a fixed display area shows the value:
-chess and Go boards, a 52-card deck, a coordinate map, or text for other types.
+chess and Go boards, a 52-card deck, a coordinate map, music notation for tunes,
+or text for other types.
 On a chess board, select a piece and a highlighted destination; promotions offer
 all four pieces. Go intersections offer the moves allowed by our existing rules,
 with Pass and Undo controls. Both boards support Undo. Select two cards to swap
 their positions. Board and card actions pause Run and navigate to the resulting
 object's canonical full index, preserving the increment and adding a browser
 history entry. Back returns to the previous count.
+
+When the decoded object is a tune, Count engraves the **full-index tune** played
+by its truename button. This can differ from the tune in the description, whose
+index is relative to the tune category. The score follows the selected root and
+start/middle/end anchoring, including exact rests and durations. One reference
+beat is a quarter note at the existing 180 BPM. Ties preserve notes across
+barlines; dots and explicit tuplets preserve fractional durations.
+
+Count's time-signature controls default to 4/4. The numerator accepts any positive
+integer; the denominator is one of 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48 or 64.
+Changing the meter changes barlines and engraving, without changing the tune or
+its playback. The last bar can be incomplete. Scores scroll within the fixed
+display area. An explicit message replaces scores beyond the existing playback
+limits or the notation limits of 512 bars, 4096 symbols or a tuplet ratio above
+1024. VexFlow 5.0.0 and its Bravura/Academico fonts are bundled locally, with their
+licenses, so engraving needs no external font or notation service.
 
 Board rules stay in the shared Python codecs. The display does not introduce a
 second chess or Go engine. The world map is a bundled, pre-rendered SVG using

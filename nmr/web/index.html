@@ -10,6 +10,7 @@
     <link rel="preload" as="image" href="world-map.svg" />
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="clock.css" />
+    <script src="vexflow.js"></script>
     <script type="module" src="app.js"></script>
   </head>
   <body>
@@ -108,6 +109,14 @@
         <label><input id="count-run" type="checkbox" disabled /> Run</label>
         <label for="count-increment">Increment</label>
         <input id="count-increment" type="text" inputmode="numeric" pattern="[0-9]+" value="1" autocomplete="off" spellcheck="false" />
+        <label for="score-top">Time signature</label>
+        <input id="score-top" type="text" inputmode="numeric" pattern="[0-9]*[1-9][0-9]*" value="4" aria-label="Time signature numerator" />
+        <span>/</span>
+        <select id="score-bottom" aria-label="Time signature denominator">
+          <option>1</option><option>2</option><option>3</option><option selected>4</option>
+          <option>6</option><option>8</option><option>12</option><option>16</option>
+          <option>24</option><option>32</option><option>48</option><option>64</option>
+        </select>
       </div>
       <footer><a id="count-main-link" href="?desc=">nmr</a> · <a id="count-clock-link" href="?type=clock">Clock</a></footer>
     </main>

@@ -1,4 +1,5 @@
 import { describeObject } from "./description.mjs";
+import { drawScore } from "./music-notation.mjs";
 
 export class ValueDisplay {
   constructor(container, onAction) {
@@ -23,6 +24,10 @@ export class ValueDisplay {
     if (value.kind === "chess") this.chess(value);
     else if (value.kind === "go") this.go(value);
     else if (value.kind === "cards") this.cards(value);
+    else if (value.kind === "tune") {
+      if (value.error) this.container.append(node("p", value.error));
+      else drawScore(this.container, value.score);
+    }
     else this.container.append(node("pre", describeObject(value), "value-text"));
   }
   controls(value) {
