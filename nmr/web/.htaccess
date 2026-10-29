@@ -2,9 +2,12 @@
 Options -Indexes -MultiViews
 DirectorySlash Off
 RewriteEngine On
+RewriteOptions AllowNoSlash
 
 # Preserve the query string and redirect only the directory URL.
 RewriteCond %{THE_REQUEST} "\s/+nmr/[?\s]"
 RewriteRule ^$ /nmr [R=301,L]
 
-RewriteRule ^$ /nmr/index.html [END]
+# Match the URL explicitly: without the slash Apache may retain the disk path.
+RewriteCond %{REQUEST_URI} ^/nmr$
+RewriteRule ^ /nmr/index.html [END]
