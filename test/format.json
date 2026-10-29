@@ -1,33 +1,33 @@
 {
-  "vocabulary": "264a3607d36d2a844540b29934346070878bbe4457d07075b9553194b4c906ce",
+  "vocabulary": "5b5923f551c52fa01eedce111915dcba9e7f3990270edcabe632d18807bfa102",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:open angle sale human"
+      "truename": "tune:case charm job brown"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:sam peace ian boxes"
+      "truename": "music:dear bonus meal spray"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the doll pink cross karl"
+      "truename": "play:the coin miss prime acne"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a lived link man acid"
+      "truename": "a steam open card lady"
     },
     {
       "type": "int",
@@ -41,7 +41,7 @@
       "input": "42",
       "value": "42",
       "scope": "",
-      "truename": "and jump"
+      "truename": "and met"
     },
     {
       "type": "frac",
@@ -62,14 +62,14 @@
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city cove happy kent"
+      "truename": "phone:city house faith rod"
     },
     {
       "type": "latlong",
       "input": "48.8566,2.3522",
       "value": "48.856599776,2.352196259",
       "scope": null,
-      "truename": "latlong:yet vote from how oak"
+      "truename": "latlong:sun bin from how aged"
     },
     {
       "type": "chess",
@@ -83,35 +83,35 @@
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play:game",
-      "truename": "game:your land"
+      "truename": "game:your ago"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:most ant"
+      "truename": "play:most video"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "rest cole"
+      "truename": "core knee"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site trade map"
+      "truename": "go:site steel life"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the ultra what alpha"
+      "truename": "the worry what prize"
     },
     {
       "type": "go",
@@ -125,7 +125,7 @@
       "input": "13x13:J10",
       "value": "13x13:J10",
       "scope": null,
-      "truename": "go:mary"
+      "truename": "go:fish"
     },
     {
       "type": "frac",
@@ -139,56 +139,56 @@
       "input": "23:59:59",
       "value": "23:59:59",
       "scope": null,
-      "truename": "time:news read"
+      "truename": "time:news sex"
     },
     {
       "type": "datetime",
       "input": "2000-02-29T12:34:56",
       "value": "2000-02-29T12:34:56",
       "scope": null,
-      "truename": "datetime:suit cry ride"
+      "truename": "datetime:leg bow cook"
     },
     {
       "type": "ip",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:vital phase meal"
+      "truename": "ip:trick trail sing"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:cat rear nor dice ok hero pit alex state check wide hung"
+      "truename": "ip:skip oak pick right mode jury hose joy space final step dump"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:many worth leaf even track of wool tight tier some idea moon"
+      "truename": "uuid:user alpha lion much block of dash acute idle some hold grow"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this meant third wax joint prior yarn bolt table nova peer treat date diet park spy mail both dump holy none nine egg mike less"
+      "truename": "semver:this stood royal bolt genre reach paper below cause arc sand rough date sold give busy full game yen bowl chat ink fame fan park"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:pack form maui"
+      "truename": "isbn:dark love group"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:motor yet west"
+      "truename": "upc:buddy sun look"
     },
     {
       "type": "cards",
@@ -223,7 +223,7 @@
       "input": "(1 2 3)",
       "value": "(1 2 3)",
       "scope": "",
-      "truename": "what cash"
+      "truename": "what bar"
     }
   ]
 }

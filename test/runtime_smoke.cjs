@@ -33,8 +33,8 @@ const { loadPyodide } = require("pyodide");
   assert.equal(qualified.type, "chess");
   assert.equal(qualified.canonical, true);
   assert.equal(JSON.parse(convert(JSON.stringify({
-    operation: "decode", value: "play:game:your land",
-  }))).truename, "game:your land");
+    operation: "decode", value: "play:game:your ago",
+  }))).truename, "game:your ago");
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(

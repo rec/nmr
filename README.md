@@ -45,9 +45,9 @@ nmr --value 'frac:who'
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
 # chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:most ant
+# play:most video
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
-# rest cole
+# core knee
 
 # Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
@@ -80,8 +80,8 @@ and prints the canonical form with `T`. Outputs use a single `time:` for the typ
 when that category scope is needed. Parent categories
 are optional in input: `chess:in also`, `game:chess:in also`, and
 `:play:game:chess:in also` all read identically and print as `chess:in also`.
-Category scopes behave the same way: `play:game:your land` prints as
-`game:your land`, with the same payload. Results also use
+Category scopes behave the same way: `play:game:your ago` prints as
+`game:your ago`, with the same payload. Results also use
 short type labels. Internal tree paths still determine routing; shortening a
 prefix never changes its scope or the encoded number.
 
@@ -168,7 +168,7 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
-`go:site trade map` with the default vocabulary.
+`go:site steel life` with the default vocabulary.
 
 Cards use `play:game:cards`. The baseline deck is clubs, diamonds, hearts,
 then spades, each ordered A, 2, 3, …, 10, J, Q, K, without jokers. Positions
@@ -197,8 +197,8 @@ Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:open angle sale human
-nmr --value 'tune:open angle sale human'
+# tune:case charm job brown
+nmr --value 'tune:case charm job brown'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
