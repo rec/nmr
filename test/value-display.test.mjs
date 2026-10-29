@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ValueDisplay, mapSpec } from "../nmr/web/value-display.mjs";
+import { ValueDisplay } from "../nmr/web/value-display.mjs";
 
 class Element {
   constructor(tag, namespaceURI = null) {
     this.tag = tag;
     this.namespaceURI = namespaceURI;
     this.children = [];
+    this.replacements = 0;
     this.attributes = {};
     this.events = {};
     this.style = { setProperty() {} };
@@ -18,7 +19,8 @@ class Element {
     } };
   }
   append(...children) { this.children.push(...children); }
-  replaceChildren(...children) { this.children = children; }
+  replaceChildren(...children) { this.children = children; this.replacements++; }
+  get firstElementChild() { return this.children[0] || null; }
   setAttribute(name, value) { this.attributes[name] = String(value); }
   addEventListener(name, callback) { this.events[name] = callback; }
   all() { return [this, ...this.children.flatMap((i) => i.all())]; }
@@ -90,29 +92,36 @@ test("text displays quote strings and disappear when there is no decoded object"
   assert.equal(root.children.length, 0);
 }));
 
-test("map bounds contain the exact location, including the antimeridian", () => {
-  for (const [latitude, longitude] of [[0, 0], [48.8566, 2.3522], [85, 180], [-85, -180]]) {
-    const spec = mapSpec(latitude, longitude);
-    const url = new URL(spec.url);
-    assert.equal(spec.kind, "iframe");
-    assert.equal(url.origin, "https://www.openstreetmap.org");
-    const [west, south, east, north] = url.searchParams.get("bbox").split(",").map(Number);
-    assert.ok(west <= longitude && longitude <= east);
-    assert.ok(south <= latitude && latitude <= north);
-    assert.ok(west >= -180 && east <= 180);
-    assert.equal(url.searchParams.get("marker"), `${latitude},${longitude}`);
+test("the bundled world map stays mounted while only the marker moves, including at poles", () => display((view, root) => {
+  view.show({ kind: "latlong", latitude: 0, longitude: 0 });
+  const map = root.firstElementChild;
+  const [image, marker] = map.children;
+  const replacements = root.replacements;
+  assert.equal(image.attributes.href, "world-map.svg");
+  for (const [latitude, longitude, x, y] of [
+    [0, 0, 180, 90], [90, 0, 180, 0], [-90, 0, 180, 180],
+    [0, -180, 0, 90], [0, 180, 360, 90], [45, 90, 270, 45],
+  ]) {
+    view.clear(true);
+    assert.equal(root.firstElementChild, map);
+    assert.equal(marker.attributes.visibility, "hidden");
+    view.show({ kind: "latlong", latitude, longitude });
+    assert.equal(root.firstElementChild, map);
+    assert.equal(root.replacements, replacements);
+    assert.equal(map.children[0], image);
+    assert.equal(marker.attributes.cx, String(x));
+    assert.equal(marker.attributes.cy, String(y));
+    assert.equal(marker.attributes.visibility, "visible");
   }
-});
+}));
 
-test("polar positions have a geographic map and a correctly positioned marker", () => {
-  for (const [latitude, longitude] of [[90, 0], [-90, 0], [88, 45], [-88, -180]]) {
-    const spec = mapSpec(latitude, longitude);
-    assert.equal(spec.kind, "image");
-    const url = new URL(spec.url);
-    assert.equal(url.searchParams.get("SRS"), "EPSG:4326");
-    const [west, south, east, north] = url.searchParams.get("BBOX").split(",").map(Number);
-    assert.ok(south <= latitude && latitude <= north);
-    assert.equal(spec.x, (longitude - west) / (east - west) * 100);
-    assert.equal(spec.y, (north - latitude) / (north - south) * 100);
-  }
-});
+test("the map and its image are reused after other value components", () => display((view, root) => {
+  view.show({ kind: "latlong", latitude: 0, longitude: 0 });
+  const map = root.firstElementChild;
+  const image = map.children[0];
+  view.show({ kind: "text", type: "int", value: "42" });
+  assert.notEqual(root.firstElementChild, map);
+  view.show({ kind: "latlong", latitude: 48.8566, longitude: 2.3522 });
+  assert.equal(root.firstElementChild, map);
+  assert.equal(map.children[0], image);
+}));

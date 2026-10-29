@@ -60,12 +60,8 @@ footer a { color: #245d50; text-underline-offset: 4px; }
 .deck-card.red { color: #aa302e; }
 .deck-card[aria-pressed="true"] { outline: 3px solid #aa7216; outline-offset: -3px; }
 #count-value-display button:focus-visible { outline: 3px solid #245d50; outline-offset: -3px; }
-.value-map { width: 100%; height: 100%; border: 0; }
-.polar-map { position: relative; width: 100%; height: 100%; margin: 0; }
-.polar-map-image { position: relative; height: calc(100% - 24px); }
-.polar-map img { width: 100%; height: 100%; display: block; }
-.polar-map figcaption { height: 24px; font-size: 12px; text-align: center; }
-.map-marker { position: absolute; transform: translate(-50%, -50%); color: #d92323; text-shadow: 0 0 2px white; font-size: 20px; }
+.world-map { width: 100%; height: 100%; }
+.world-map-marker { fill: #d43032; stroke: white; stroke-width: 1; vector-effect: non-scaling-stroke; }
 main {
   width: min(100%, 1160px);
   margin: 16vh auto 0;

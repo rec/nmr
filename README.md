@@ -397,9 +397,14 @@ object's canonical full index, preserving the increment and adding a browser
 history entry. Back returns to the previous count.
 
 Board rules stay in the shared Python codecs. The display does not introduce a
-second chess or Go engine. Maps load external content from OpenStreetMap; polar
-positions beyond its Mercator coverage use NASA GIBS Blue Marble geographic
-imagery. Other rendering and navigation run locally.
+second chess or Go engine. The world map is a bundled, pre-rendered SVG using
+[Natural Earth's public-domain land data](https://www.naturalearthdata.com/about/terms-of-use/).
+Its latitude/longitude projection covers the whole globe, including both poles.
+The page preloads the approximately 70 KB asset and reuses the same map and marker
+elements across position changes. Updates move the marker locally, without map
+services or tile downloads. The pinned source revision and source-data SHA256
+are recorded in `nmr/web/world-map.svg`. At world scale, nearby positions may
+share a pixel; the description row retains their precise coordinates.
 
 The Clock view at `/nmr?type=clock` shows the local date and time and updates its
 truename every second. **Time only** selects Time rather than the default

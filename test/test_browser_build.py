@@ -45,6 +45,11 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert match is not None
     revision = match.group(1)
     assert f"style.css?v={revision}" in page.read_text()
+    assert f'preload" as="image" href="world-map.svg?v={revision}' in page.read_text()
+    assert (
+        page.with_name("world-map.svg").read_bytes()
+        == Path("nmr/web/world-map.svg").read_bytes()
+    )
     app = page.with_name("app.js").read_text()
     assert f"./editor.mjs?v={revision}" in app
     assert f"./tune.js?v={revision}" in app
@@ -69,6 +74,8 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert f"runtime.js?v={revision}" in count_script
     assert f"presentation.mjs?v={revision}" in count_script
     assert f"value-display.mjs?v={revision}" in count_script
+    display = page.with_name("value-display.mjs").read_text()
+    assert f"world-map.svg?v={revision}" in display
     with ZipFile(page.with_name("python.zip")) as archive:
         assert "nmr/web/value_display.py" in archive.namelist()
     assert f"presentation.mjs?v={revision}" in clock_script

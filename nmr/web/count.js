@@ -66,7 +66,7 @@ function refresh() {
   truename.disabled = true;
   truename.textContent = field.value ? "Loading truename…" : "";
   object.textContent = "";
-  display.clear();
+  display.clear(true);
   message.textContent = "";
   run.disabled = !player || !field.value || !increment.value || !increment.validity.valid;
   writeURL();

@@ -4,18 +4,25 @@ export class ValueDisplay {
   constructor(container, onAction) {
     this.container = container;
     this.onAction = onAction;
+    this.worldMap = null;
+    this.marker = null;
   }
-  clear() {
-    this.container.replaceChildren();
+  clear(keepMap = false) {
+    if (keepMap && this.worldMap && this.container.firstElementChild === this.worldMap) {
+      this.marker.setAttribute("visibility", "hidden");
+    } else this.container.replaceChildren();
     this.container.inert = false;
   }
   show(value) {
+    if (value?.kind === "latlong") {
+      this.map(value);
+      return;
+    }
     this.clear();
     if (!value) return;
     if (value.kind === "chess") this.chess(value);
     else if (value.kind === "go") this.go(value);
     else if (value.kind === "cards") this.cards(value);
-    else if (value.kind === "latlong") this.map(value);
     else this.container.append(node("pre", describeObject(value), "value-text"));
   }
   controls(value) {
@@ -138,44 +145,28 @@ export class ValueDisplay {
     layout.scrollTop = top;
   }
   map(value) {
-    const spec = mapSpec(value.latitude, value.longitude);
-    if (spec.kind === "iframe") {
-      const frame = node("iframe", "", "value-map");
-      frame.src = spec.url;
-      frame.title = `Map at ${value.latitude}, ${value.longitude}`;
-      frame.loading = "lazy";
-      frame.referrerPolicy = "no-referrer";
-      this.container.append(frame);
-    } else {
-      const figure = node("figure", "", "polar-map");
-      const map = node("div", "", "polar-map-image");
-      const image = node("img");
-      image.src = spec.url;
-      image.alt = "Polar map, NASA GIBS Blue Marble imagery";
-      image.referrerPolicy = "no-referrer";
-      const marker = node("span", "●", "map-marker");
-      marker.style.left = `${spec.x}%`;
-      marker.style.top = `${spec.y}%`;
-      marker.setAttribute("aria-label", `Position ${value.latitude}, ${value.longitude}`);
-      map.append(image, marker);
-      figure.append(map, node("figcaption", "NASA GIBS · geographic polar map"));
-      this.container.append(figure);
+    if (!this.worldMap) {
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute("viewBox", "-4 -4 368 188");
+      svg.setAttribute("class", "world-map");
+      svg.setAttribute("role", "img");
+      const image = document.createElementNS(svg.namespaceURI, "image");
+      image.setAttribute("href", "world-map.svg");
+      image.setAttribute("width", "360");
+      image.setAttribute("height", "180");
+      this.marker = document.createElementNS(svg.namespaceURI, "circle");
+      this.marker.setAttribute("class", "world-map-marker");
+      this.marker.setAttribute("r", "2.5");
+      svg.append(image, this.marker);
+      this.worldMap = svg;
     }
+    this.marker.setAttribute("cx", value.longitude + 180);
+    this.marker.setAttribute("cy", 90 - value.latitude);
+    this.marker.setAttribute("visibility", "visible");
+    this.worldMap.setAttribute("aria-label", `World map: ${value.latitude}, ${value.longitude}`);
+    this.container.inert = false;
+    if (this.container.firstElementChild !== this.worldMap) this.container.replaceChildren(this.worldMap);
   }
-}
-
-export function mapSpec(latitude, longitude) {
-  if (Math.abs(latitude) <= 85) {
-    const west = Math.max(-180, Math.min(179.99, longitude - 0.005));
-    const url = new URL("https://www.openstreetmap.org/export/embed.html");
-    url.search = new URLSearchParams({ bbox: [west, latitude - 0.005, west + 0.01, latitude + 0.005].join(","), layer: "mapnik", marker: `${latitude},${longitude}` });
-    return { kind: "iframe", url: url.href };
-  }
-  const south = latitude > 0 ? 80 : -90;
-  const north = south + 10;
-  const url = new URL("https://gibs.earthdata.nasa.gov/wms/epsg4326/best/wms.cgi");
-  url.search = new URLSearchParams({ SERVICE: "WMS", VERSION: "1.1.1", REQUEST: "GetMap", LAYERS: "BlueMarble_NextGeneration", STYLES: "", FORMAT: "image/jpeg", SRS: "EPSG:4326", BBOX: `-180,${south},180,${north}`, WIDTH: "960", HEIGHT: "320" });
-  return { kind: "image", url: url.href, x: (longitude + 180) / 3.6, y: (north - latitude) * 10 };
 }
 
 function node(tag, text = "", className = "") {
