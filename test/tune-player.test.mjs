@@ -47,3 +47,33 @@ test("playback positions follow the audio clock through rests and clear on stop 
   assert.equal(positions.at(-1), null);
   assert.equal(frames.size, 0);
 });
+
+test("volume uses decibel spacing with unity at 120 and tune envelopes reach full amplitude", () => {
+  const gains = [];
+  class AudioContext {
+    currentTime = 0;
+    addEventListener() {}
+    createGain() {
+      const gain = { value: 0, cancelScheduledValues() {}, setValueAtTime(value) { this.value = value; }, linearRampToValueAtTime(value) { this.value = value; } };
+      gains.push(gain);
+      return { gain, connect() {}, disconnect() {} };
+    }
+    createOscillator() { return { frequency: {}, connect: (gain) => gain, start() {}, stop() {} }; }
+  }
+  const context = vm.createContext({ AudioContext, cancelAnimationFrame() {} });
+  const player = vm.runInContext(source + "\nnew TunePlayer();", context);
+  assert.ok(Math.abs(gains[0].value - 10 ** (-30 / 20)) < 1e-12, "Default is 90, or -30 dB");
+  for (const level of [0, 90, 100, 120]) {
+    vm.runInContext(`setMasterVolume(${level});`, context);
+    assert.equal(gains[0].value, level === 0 ? 0 : 10 ** ((level - 120) / 20));
+  }
+  const peaks = [];
+  const createGain = player.context.createGain.bind(player.context);
+  player.context.createGain = () => {
+    const node = createGain();
+    node.gain.linearRampToValueAtTime = (value) => peaks.push(value);
+    return node;
+  };
+  player.play([{ pitch: 53, onset: 0, duration: 1 }]);
+  assert.deepEqual(peaks, [1, 0]);
+});

@@ -1,10 +1,9 @@
 /* Exact pitches and times come from the shared Python core. */
-const outputGain = 10 ** (6 / 20);
 const masterOutputs = new Map();
-let masterGain = 10 ** (-10 / 20);
+let masterGain = 10 ** (-30 / 20);
 
 export function setMasterVolume(level) {
-  masterGain = level === 0 ? 0 : 10 ** ((level - 110) / 20);
+  masterGain = level === 0 ? 0 : 10 ** ((level - 120) / 20);
   for (const [context, output] of masterOutputs) {
     const now = context.currentTime;
     const current = output.gain.value;
@@ -60,7 +59,7 @@ export class TunePlayer {
     const start = this.context.currentTime;
     voice.type = "triangle";
     voice.frequency.value = 440 * 2 ** ((pitch - 69) / 12);
-    gain.gain.setValueAtTime(0.025 * outputGain, start);
+    gain.gain.setValueAtTime(0.05, start);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.020);
     voice.connect(gain).connect(this.output);
     voice.onended = () => { voice.disconnect(); gain.disconnect(); };
@@ -94,8 +93,8 @@ export class TunePlayer {
       voice.type = "triangle";
       voice.frequency.value = 440 * 2 ** ((event.pitch - 69) / 12);
       gain.gain.setValueAtTime(0, onset);
-      gain.gain.linearRampToValueAtTime(0.15 * outputGain, onset + edge);
-      gain.gain.setValueAtTime(0.15 * outputGain, end - edge);
+      gain.gain.linearRampToValueAtTime(1, onset + edge);
+      gain.gain.setValueAtTime(1, end - edge);
       gain.gain.linearRampToValueAtTime(0, end);
       voice.connect(gain).connect(this.output);
       voice.onended = () => {

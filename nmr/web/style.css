@@ -24,6 +24,8 @@ body { margin: 0; }
 #help-panel > :last-child { margin-bottom: 0; }
 #help-panel a { color: #245d50; text-underline-offset: 3px; }
 #volume-panel label { font-size: 16px; }
+.volume-slider { position: relative; padding-bottom: 4px; }
+.volume-reference { position: absolute; left: 83.333%; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: #245d50; transform: translateX(-50%); }
 #volume-level { width: 100%; margin: 16px 0; padding: 0; border: 0; accent-color: #245d50; }
 #volume-value { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }
 footer { margin-top: 32px; text-align: center; }
