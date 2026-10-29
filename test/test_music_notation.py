@@ -1,4 +1,4 @@
-"""Scores preserve the exact events used by audio, regardless of bar layout."""
+"""Scores preserve audio timing and attacks, with pitches displayed one octave up."""
 
 import json
 from fractions import Fraction
@@ -21,6 +21,7 @@ def test_scores_preserve_attacks_pitches_rests_and_exact_timing(
     tune = Tune.from_text("@5 2@3/2 r@1/3 -1@2/3 @1/16 4@1/32")
     meter = TimeSignature(top=3, bottom=bottom)
     score = score_plan(tune, 53, position, meter)
+    assert score["clef"] == "treble"
     cursor = Fraction(0)
     attacks = []
     for measure in score["measures"]:
@@ -50,7 +51,7 @@ def test_scores_preserve_attacks_pitches_rests_and_exact_timing(
         assert length <= Fraction(4 * meter.top, bottom)
     expected = [
         dict(
-            pitch=i["pitch"],
+            pitch=i["pitch"] + 12,
             onset=Fraction(i["onset"]),
             duration=Fraction(i["duration"]),
         )
@@ -59,7 +60,7 @@ def test_scores_preserve_attacks_pitches_rests_and_exact_timing(
     assert attacks == expected
     playback = tune.playback(53, 180, position)
     for actual, audio in zip(attacks, playback, strict=True):
-        assert actual["pitch"] == audio["pitch"]
+        assert actual["pitch"] == audio["pitch"] + 12
         assert float(actual["onset"] / 3) == pytest.approx(audio["onset"])
         assert float(actual["duration"] / 3) == pytest.approx(audio["duration"])
 

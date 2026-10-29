@@ -19,7 +19,7 @@ def score_plan(
     position: Literal["start", "middle", "end"],
     meter: TimeSignature,
 ) -> dict[str, object]:
-    """Split exact events into bars and supported glyphs without adding attacks.
+    """Engrave playback events one octave higher without changing their timing.
 
     Preview limits bound the number of SVG elements, not the accepted meter.
     Unusually tiny durations use an explicit tuplet rather than rounding.
@@ -67,7 +67,7 @@ def score_plan(
                         )
                 measures[-1].append(
                     {
-                        "pitch": pitch,
+                        "pitch": int(pitch) + 12 if pitch is not None else None,
                         "duration": str(actual),
                         "glyph": glyph,
                         "dots": dots,
@@ -84,9 +84,7 @@ def score_plan(
     return {
         "top": str(meter.top),
         "bottom": meter.bottom,
-        "clef": "bass"
-        if sum(int(i["pitch"]) for i in events) / len(events) < 60
-        else "treble",
+        "clef": "treble",
         "measures": measures,
     }
 

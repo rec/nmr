@@ -400,7 +400,8 @@ history entry. Back returns to the previous count.
 When the decoded object is a tune, Count engraves the **full-index tune** played
 by its truename button. This can differ from the tune in the description, whose
 index is relative to the tune category. The score follows the selected root and
-start/middle/end anchoring, including exact rests and durations. One reference
+start/middle/end anchoring, displayed one octave higher in treble clef while
+playback stays at its original pitch. Rests and durations stay exact. One reference
 beat is a quarter note at the existing 180 BPM. Ties preserve notes across
 barlines; dots and explicit tuplets preserve fractional durations.
 
