@@ -1,33 +1,33 @@
 {
-  "vocabulary": "5b5923f551c52fa01eedce111915dcba9e7f3990270edcabe632d18807bfa102",
+  "vocabulary": "b476f3298c78f34d0feefe999d198d035e8f92ea34803bc3b062eb7c275a1f53",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:case charm job brown"
+      "truename": "tune:case bunch job thank"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:dear bonus meal spray"
+      "truename": "music:dear spend pot radar"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the coin miss prime acne"
+      "truename": "play:the cure miss urban ant"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a steam open card lady"
+      "truename": "a stack open card lady"
     },
     {
       "type": "int",
@@ -62,7 +62,7 @@
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city house faith rod"
+      "truename": "phone:city while sorry silk"
     },
     {
       "type": "latlong",
@@ -90,28 +90,28 @@
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:most video"
+      "truename": "play:most group"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "core knee"
+      "truename": "core cow"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site steel life"
+      "truename": "go:site worth life"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the worry what prize"
+      "truename": "the fluid what ridge"
     },
     {
       "type": "go",
@@ -146,49 +146,49 @@
       "input": "2000-02-29T12:34:56",
       "value": "2000-02-29T12:34:56",
       "scope": null,
-      "truename": "datetime:leg bow cook"
+      "truename": "datetime:leg dale cook"
     },
     {
       "type": "ip",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:trick trail sing"
+      "truename": "ip:tribe mouth sue"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:skip oak pick right mode jury hose joy space final step dump"
+      "truename": "ip:skip oak pick using mode lawn mild joy added third step fog"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:user alpha lion much block of dash acute idle some hold grow"
+      "truename": "uuid:user layer goto much wrong of ping curve flex some hold grow"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this stood royal bolt genre reach paper below cause arc sand rough date sold give busy full game yen bowl chat ink fame fan park"
+      "truename": "semver:this amber sheet neon storm owned issue above glass dawn sand crowd date sold give busy full game deaf bowl chat ink ruby fan park"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:dark love group"
+      "truename": "isbn:dark love great"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:buddy sun look"
+      "truename": "upc:meter sun look"
     },
     {
       "type": "cards",

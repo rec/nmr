@@ -45,9 +45,9 @@ nmr --value 'frac:who'
 nmr --operation encode --type chess --value 'e4 e5 Nf3'
 # chess:in also
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope play
-# play:most video
+# play:most group
 nmr --operation encode --type chess --value 'e4 e5 Nf3' --scope ''
-# core knee
+# core cow
 
 # Explore a noncanonical truename. The stable truename is printed to stderr.
 nmr --operation browse --value 'pure:to'
@@ -168,7 +168,7 @@ legality conventions follow the [AGA rules](https://www.usgo-archive.org/files/p
 Scoring, results, komi, handicap setups, SGF, and resumption after scoring are not
 part of this format. Empty and unfinished sequences are supported, with a
 4096-ply work limit. For example, `9x9:D4 E4 pass pass` has the truename
-`go:site steel life` with the default vocabulary.
+`go:site worth life` with the default vocabulary.
 
 Cards use `play:game:cards`. The baseline deck is clubs, diamonds, hearts,
 then spades, each ordered A, 2, 3, …, 10, J, Q, K, without jokers. Positions
@@ -197,8 +197,8 @@ Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:case charm job brown
-nmr --value 'tune:case charm job brown'
+# tune:case bunch job thank
+nmr --value 'tune:case bunch job thank'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
