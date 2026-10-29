@@ -6,15 +6,23 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
-#volume-controls { position: fixed; top: 16px; right: 20px; z-index: 10; }
+#volume-controls { position: fixed; top: 16px; right: 20px; z-index: 10; display: flex; gap: 8px; }
 #tune-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 16px 24px 32px; font-size: 14px; }
 #tune-controls label { display: flex; align-items: center; gap: 6px; }
 #tune-controls select { border: 1px solid #9aac9d; border-radius: 6px; padding: 6px; font: inherit; color: inherit; background: #f6f4ed; }
 #tune-controls select:focus-visible { outline: 2px solid #245d50; outline-offset: 3px; }
-#volume-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
-#volume-toggle:hover { background: #e5eadf; }
-#volume-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
-#volume-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
+#volume-toggle, #help-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
+#volume-toggle:hover, #help-toggle:hover { background: #e5eadf; }
+#volume-toggle:focus-visible, #help-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#volume-panel, #help-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
+#volume-panel { right: 72px; width: min(260px, calc(100vw - 92px)); }
+#help-panel { width: min(560px, calc(100vw - 40px)); max-height: calc(100dvh - 88px); overflow: auto; font-size: 16px; }
+#help-panel h1, #help-panel h2 { margin: 20px 0 12px; font-size: 24px; line-height: 1.25; letter-spacing: normal; font-weight: 650; text-align: left; }
+#help-panel h2 { font-size: 20px; }
+#help-panel p { margin: 0 0 16px; }
+#help-panel > :first-child { margin-top: 0; }
+#help-panel > :last-child { margin-bottom: 0; }
+#help-panel a { color: #245d50; text-underline-offset: 3px; }
 #volume-panel label { font-size: 16px; }
 #volume-level { width: 100%; margin: 16px 0; padding: 0; border: 0; accent-color: #245d50; }
 #volume-value { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }

@@ -1,5 +1,6 @@
 import "./navigation.js";
 import "./volume.js";
+import "./help.js";
 import "./clock.js";
 import "./count.js";
 import { configured, request } from "./runtime.js";
