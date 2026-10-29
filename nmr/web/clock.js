@@ -5,6 +5,7 @@ import { presentation } from "./presentation.mjs";
 
 const config = { show_timezone: false };
 
+const view = document.querySelector("#clock-view");
 const time = document.querySelector("#clock-time");
 const dateDisplay = document.querySelector("#clock-date");
 const hoursDisplay = document.querySelector("#clock-hours");
@@ -71,8 +72,10 @@ function update() {
   return reading;
 }
 function tick() {
-  const reading = update();
-  if (ready && player && reading.due) play(reading);
+  if (!view.hidden) {
+    const reading = update();
+    if (ready && player && reading.due) play(reading);
+  }
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
 function showPlayingName() {
@@ -107,9 +110,14 @@ shortName.addEventListener("change", () => {
   update();
 });
 displayUTC.addEventListener("change", update);
+window.addEventListener("viewchange", () => {
+  revision++;
+  player?.stop();
+  if (!view.hidden && ready) update();
+});
 configured.then(() => {
   ready = true;
-  update();
+  if (!view.hidden) update();
 }, (error) => {
   on.checked = false;
   on.disabled = true;
