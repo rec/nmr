@@ -11,6 +11,6 @@ test("string descriptions preserve whitespace and quote their contents", () => {
 test("scalar descriptions retain their type label and canonical formatting", () => {
   assert.equal(describeObject({type: "string", value: "Tom"}), 'string: "Tom"');
   assert.equal(describeObject({type: "chess", value: ""}), 'chess: ');
-  assert.equal(describeObject({type: "float", value: "-0.0"}), 'float: -0.0');
+  assert.equal(describeObject({type: "frac", value: "-1/2"}), 'frac: -1/2');
   assert.equal(describeObject({type: "time", value: "12:34:00"}), 'time: 12:34:00');
 });

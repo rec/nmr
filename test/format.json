@@ -135,20 +135,6 @@
       "truename": "frac:the"
     },
     {
-      "type": "float",
-      "input": "-0.0",
-      "value": "-0.0",
-      "scope": null,
-      "truename": "float:hook neil doubt doug dan star"
-    },
-    {
-      "type": "float",
-      "input": "bits:7ff8000000000042",
-      "value": "bits:7ff8000000000042",
-      "scope": null,
-      "truename": "float:crop iron bit bell bold tar"
-    },
-    {
       "type": "time",
       "input": "23:59:59",
       "value": "23:59:59",

@@ -97,7 +97,6 @@ expands; save the canonical output instead.
 | --- | --- |
 | `int` | Signed decimal integer, including very large integers within vocabulary capacity. |
 | `frac` | Signed numerator/denominator pair; `1/2`, `2/4`, `0/2`, `0/0`, and `1/0` are distinct objects. |
-| `float` | Python binary64 float. Signed zero is preserved; `bits:7ff8000000000042` specifies an exact NaN payload. |
 | `date` | Gregorian `YYYY-MM-DD`, years 0001 through 9999. |
 | `time` | `HH:MM[:SS]`, no timezone, hours 00 through 23. |
 | `datetime` | Gregorian date and time `YYYY-MM-DDTHH:MM[:SS]`, no timezone; a space may replace `T`. |
@@ -482,8 +481,7 @@ stored pair. `.float()` returns infinities or NaN for zero denominators, and
 otherwise delegates to the standard rational conversion; finite overflow raises
 `OverflowError`. `.fraction()` returns `fractions.Fraction` and raises
 `ZeroDivisionError` for zero denominators. Neither method changes the pair.
-`Int` lives in `nmr.types.integer`; `Float` in `nmr.types.floating` stores exact
-binary64 bits and exposes `.float()`.
+`Int` lives in `nmr.types.integer`.
 
 Integer tuples are ranked directly by total sum. For `n` nonnegative integers
 with total `S`, preceding sum layers contain `comb(S + n - 1, n)` tuples; the

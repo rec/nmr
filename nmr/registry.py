@@ -3,7 +3,6 @@
 from .category import Category
 from .types.cards import Cards
 from .types.chess import Chess
-from .types.floating import Float
 from .types.fraction import Frac
 from .types.go import Go
 from .types.identifiers import Isbn, Upc
@@ -19,7 +18,7 @@ from .types.uuid import Uuid
 
 ROOT = Category(
     "",
-    Category("pure", Category("math", Int, Frac, Float)),
+    Category("pure", Category("math", Int, Frac)),
     Category(
         "real",
         Category("time", Date, Time, DateTime),

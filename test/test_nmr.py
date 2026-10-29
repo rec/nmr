@@ -4,7 +4,7 @@ from nmr.nmr import Nmr
 
 
 @pytest.mark.parametrize(
-    "kind,value", [("int", "-42"), ("frac", "2/4"), ("frac", "0/0"), ("float", "-0.0")]
+    "kind,value", [("int", "-42"), ("frac", "2/4"), ("frac", "0/0")]
 )
 def test_prefix_scopes_decode_the_same_value(kind: str, value: str) -> None:
     engine = Nmr()

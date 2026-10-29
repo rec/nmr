@@ -3,7 +3,6 @@ import pytest
 from nmr.category import Category, label, route
 from nmr.nmr import Nmr
 from nmr.registry import ROOT
-from nmr.types.floating import Float
 from nmr.types.fraction import Frac
 from nmr.types.integer import Int
 from nmr.types.temporal import Time
@@ -28,7 +27,7 @@ def test_lookup_accepts_omitted_parent_categories(path: str) -> None:
 
 
 def test_growth_preserves_old_allocations() -> None:
-    old = Category("root", Int, Float, Frac)
+    old = Category("root", Int, Time, Frac)
     new = Category("root", *old.children, Category("extra", Int))
     for i in range(100):
         assert old.resolve(route([0], i)) == new.resolve(route([0], i)) == (Int, i)
@@ -50,8 +49,8 @@ def test_root_order_and_unassigned_slots() -> None:
 @pytest.mark.parametrize("name", ["", "nested"])
 def test_last_slot_is_reserved_for_categories_at_every_level(name: str) -> None:
     with pytest.raises(ValueError, match="last slot"):
-        Category(name, Int, Float, Frac, Uuid)
-    node = Category(name, Int, Float, Frac, Category("extra", Uuid))
+        Category(name, Int, Time, Frac, Uuid)
+    node = Category(name, Int, Time, Frac, Category("extra", Uuid))
     assert node.resolve(route([3, 0], 123)) == (Uuid, 123)
 
 
@@ -61,19 +60,19 @@ def test_unnamed_root_cannot_be_nested() -> None:
 
 
 def test_browsing_unassigned_slots_uses_child_order() -> None:
-    category = Category("root", Int, Float)
-    assert category.resolve(3, browse=True) == (Float, 0)
+    category = Category("root", Int, Time)
+    assert category.resolve(3, browse=True) == (Time, 0)
 
 
 def test_categories_store_immutable_ordered_children() -> None:
-    category = Category("root", Int, Category("nested", Float))
+    category = Category("root", Int, Category("nested", Time))
     assert isinstance(category.children, tuple)
     assert list(category.leaves()) == [
         ("int", [0], Int),
-        ("nested:float", [1, 0], Float),
+        ("nested:time", [1, 0], Time),
     ]
     with pytest.raises(ValueError, match="frozen"):
-        category.children = (Float,)
+        category.children = (Time,)
 
 
 def test_categories_reject_invalid_children() -> None:
@@ -126,8 +125,8 @@ def test_routes_use_four_slots_at_every_depth() -> None:
     )
 
 
-@pytest.mark.parametrize("type_name", ["list", "record"])
-def test_collection_types_are_not_registered(type_name: str) -> None:
+@pytest.mark.parametrize("type_name", ["list", "record", "float"])
+def test_removed_types_are_not_registered(type_name: str) -> None:
     engine = Nmr()
     with pytest.raises(ValueError, match="Unknown"):
         engine.find_type(type_name)

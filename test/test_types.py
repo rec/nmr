@@ -3,7 +3,6 @@ import math
 
 import pytest
 
-from nmr.types.floating import Float
 from nmr.types.fraction import Frac
 from nmr.types.integer import Int
 
@@ -26,23 +25,6 @@ def test_fraction_conversions_delegate_without_changing_identity() -> None:
         Frac(numerator=0, denominator=0).fraction()
     with pytest.raises(TypeError):
         float(value)
-
-
-@pytest.mark.parametrize(
-    "value",
-    [
-        "0.0",
-        "-0.0",
-        "1.5",
-        "inf",
-        "-inf",
-        "bits:7ff8000000000042",
-        "bits:fff8000000000001",
-    ],
-)
-def test_float_preserves_all_bits(value: str) -> None:
-    index = Float.str_to_index(value)
-    assert Float.str_to_index(Float.index_to_str(index)) == index
 
 
 def test_signed_integers() -> None:
