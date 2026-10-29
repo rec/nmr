@@ -14,25 +14,6 @@
     <script type="module" src="app.js"></script>
   </head>
   <body>
-    <div id="tune-controls" role="group" aria-label="Tune rendering">
-      <label>Root
-        <select id="tune-root">
-          <option value="48">C</option><option value="49">C#</option>
-          <option value="50">D</option><option value="51">D#</option>
-          <option value="52">E</option><option value="53" selected>F</option>
-          <option value="54">F#</option><option value="55">G</option>
-          <option value="56">G#</option><option value="57">A</option>
-          <option value="58">A#</option><option value="59">B</option>
-        </select>
-      </label>
-      <label>Position
-        <select id="tune-position">
-          <option value="start">start</option>
-          <option value="middle" selected>middle</option>
-          <option value="end">end</option>
-        </select>
-      </label>
-    </div>
     <header id="volume-controls">
       <button id="volume-toggle" type="button" popovertarget="volume-panel" aria-label="Volume" title="Volume">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -120,5 +101,24 @@
       </div>
       <footer><a id="count-main-link" href="?desc=">nmr</a> · <a id="count-clock-link" href="?type=clock">Clock</a></footer>
     </main>
+    <div id="tune-controls" role="group" aria-label="Tune rendering">
+      <label>Root
+        <select id="tune-root">
+          <option value="48">C</option><option value="49">C#</option>
+          <option value="50">D</option><option value="51">D#</option>
+          <option value="52">E</option><option value="53" selected>F</option>
+          <option value="54">F#</option><option value="55">G</option>
+          <option value="56">G#</option><option value="57">A</option>
+          <option value="58">A#</option><option value="59">B</option>
+        </select>
+      </label>
+      <label>Position
+        <select id="tune-position">
+          <option value="start">start</option>
+          <option value="middle" selected>middle</option>
+          <option value="end">end</option>
+        </select>
+      </label>
+    </div>
   </body>
 </html>

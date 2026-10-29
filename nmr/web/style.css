@@ -7,7 +7,7 @@
 * { box-sizing: border-box; }
 body { margin: 0; }
 #volume-controls { position: fixed; top: 16px; right: 20px; z-index: 10; }
-#tune-controls { position: fixed; top: 20px; left: 20px; z-index: 10; display: flex; gap: 12px; font-size: 14px; }
+#tune-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 16px 24px 32px; font-size: 14px; }
 #tune-controls label { display: flex; align-items: center; gap: 6px; }
 #tune-controls select { border: 1px solid #9aac9d; border-radius: 6px; padding: 6px; font: inherit; color: inherit; background: #f6f4ed; }
 #tune-controls select:focus-visible { outline: 2px solid #245d50; outline-offset: 3px; }
