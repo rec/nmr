@@ -1,3 +1,16 @@
+const timelines = new WeakMap();
+
+export function highlightScore(container, seconds, bpm = 180) {
+  const timeline = timelines.get(container.firstElementChild);
+  if (!timeline) return;
+  const beat = seconds === null ? -1 : seconds * bpm / 60;
+  const current = timeline.symbols.find((i) => beat >= i.start && beat < i.end)?.element;
+  if (current === timeline.active) return;
+  timeline.active?.classList.toggle("playing-symbol", false);
+  current?.classList.toggle("playing-symbol", true);
+  timeline.active = current;
+}
+
 /* VexFlow 5.0.0, locally bundled with Bravura and Academico. */
 export function drawScore(container, score) {
   const frame = document.createElement("div");
@@ -16,6 +29,9 @@ export function drawScore(container, score) {
     const below = Math.max(0, bottomLine - Math.min(...pitches)) * 5;
     renderer.resize(widths.reduce((a, b) => a + b, 20), 200 + above + below);
     const context = renderer.getContext();
+    const timeline = [];
+    timelines.set(frame, { symbols: timeline, active: null });
+    let beat = 0;
     const ties = [];
     const previous = new Map();
     let x = 10;
@@ -44,6 +60,12 @@ export function drawScore(container, score) {
       vf.Accidental.applyAccidentals([voice], "C");
       new vf.Formatter().joinVoices([voice]).formatToStave([voice], stave);
       voice.draw(context, stave);
+      for (const [index, note] of notes.entries()) {
+        const [numerator, denominator = 1] = measure[index].duration.split("/").map(Number);
+        const end = beat + numerator / denominator;
+        timeline.push({ element: note.getSVGElement(), start: beat, end });
+        beat = end;
+      }
       for (const tuplet of tuplets) tuplet.setContext(context).draw();
       x += widths[index];
     }

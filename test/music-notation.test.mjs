@@ -1,13 +1,13 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { createRequire } from "node:module";
-import { drawScore } from "../nmr/web/music-notation.mjs";
+import { drawScore, highlightScore } from "../nmr/web/music-notation.mjs";
 
 const require = createRequire(import.meta.url);
 
 // A minimal SVG document exercises the real engraving API without a browser.
 class Element {
-  constructor(tag) { this.tag = tag; this.children = []; this.attributes = {}; this.style = {}; this.ownerDocument = document; }
+  constructor(tag) { this.tag = tag; this.children = []; this.attributes = {}; this.style = {}; this.ownerDocument = document; elements.push(this); this.classList = { toggle: (name, enabled) => { this.attributes[name] = enabled; } }; }
   setAttribute(name, value) { this.attributes[name] = String(value); }
   setAttributeNS(ns, name, value) { this.setAttribute(name, value); }
   getAttribute(name) { return this.attributes[name] || null; }
@@ -18,7 +18,9 @@ class Element {
   get lastChild() { return this.children.at(-1); }
   getContext() { return { measureText: (text) => ({ width: String(text).length * 8, actualBoundingBoxAscent: 10, actualBoundingBoxDescent: 3 }), save() {}, restore() {} }; }
 }
+const elements = [];
 const document = {
+  getElementById: (id) => elements.find((i) => i.getAttribute("id") === id),
   createElement: (tag) => new Element(tag),
   createElementNS: (ns, tag) => new Element(tag),
   createTextNode: (text) => ({ textContent: text }),
@@ -30,7 +32,7 @@ test("VexFlow engraves dotted durations, triplets, rests, accidentals and cross-
   const oldFlow = globalThis.VexFlow;
   globalThis.document = document;
   globalThis.VexFlow = require("../nmr/web/vexflow.js");
-  const symbol = (pitch, glyph, dots = 0, ratio = [1, 1], attack = 0, tie = false) => ({ pitch, glyph, dots, ratio, attack, tie });
+  const symbol = (pitch, glyph, dots = 0, ratio = [1, 1], attack = 0, tie = false) => ({ pitch, glyph, dots, ratio, attack, tie, duration: String(4 / Number(glyph) * (2 - 2 ** -dots) * ratio[1] / ratio[0]) });
   try {
     for (const bottom of [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64]) {
       const container = new Element("div");
@@ -40,6 +42,22 @@ test("VexFlow engraves dotted durations, triplets, rests, accidentals and cross-
       ] });
       assert.equal(container.firstElementChild.firstElementChild.tag, "svg");
       assert.equal(container.firstElementChild.textContent, undefined, "An engraving failure must not be swallowed by this test");
+      const active = () => elements.filter((i) => i.attributes["playing-symbol"]);
+      highlightScore(container, 0);
+      assert.equal(active().length, 1);
+      const first = active()[0];
+      highlightScore(container, -0.01);
+      assert.equal(active().length, 0, "No highlight before scheduled audio starts");
+      highlightScore(container, 0.65);
+      assert.equal(active().length, 1, "The rest between triplet notes is highlighted");
+      assert.equal(active()[0].getAttribute("class").includes("stavenote"), true);
+      const rest = active()[0];
+      highlightScore(container, 1); // Tied continuation in the second bar.
+      assert.equal(rest.attributes["playing-symbol"], false);
+      assert.equal(first.attributes["playing-symbol"], false);
+      assert.equal(active().length, 1);
+      highlightScore(container, null);
+      assert.equal(active().length, 0);
     }
     const vf = globalThis.VexFlow;
     const dotted = new vf.StaveNote({ keys: ["f/3"], duration: "4d" });

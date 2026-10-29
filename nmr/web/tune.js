@@ -15,7 +15,9 @@ export function setMasterVolume(level) {
 }
 
 export class TunePlayer {
-  constructor(onEnded = () => {}) {
+  constructor(onEnded = () => {}, onPosition = null) {
+    this.onPosition = onPosition;
+    this.animation = null;
     this.onEnded = onEnded;
     this.context = new AudioContext();
     const master = this.context.createGain();
@@ -66,6 +68,8 @@ export class TunePlayer {
     voice.stop(start + 0.020);
   }
   stop() {
+    cancelAnimationFrame(this.animation);
+    this.onPosition?.(null);
     for (const voice of this.voices) voice.stop();
     this.voices.clear();
     this.onEnded();
@@ -74,6 +78,13 @@ export class TunePlayer {
     this.introPlayed = true;
     this.stop();
     const start = this.context.currentTime + 0.05;
+    if (this.onPosition && events.length) {
+      const update = () => {
+        this.onPosition(this.context.currentTime - start);
+        this.animation = requestAnimationFrame(update);
+      };
+      this.animation = requestAnimationFrame(update);
+    }
     for (const event of events) {
       const voice = this.context.createOscillator();
       const gain = this.context.createGain();
@@ -91,7 +102,11 @@ export class TunePlayer {
         voice.disconnect();
         gain.disconnect();
         this.voices.delete(voice);
-        if (!this.playing) this.onEnded();
+        if (!this.playing) {
+          cancelAnimationFrame(this.animation);
+          this.onPosition?.(null);
+          this.onEnded();
+        }
       };
       voice.start(onset);
       voice.stop(end);

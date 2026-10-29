@@ -12,6 +12,8 @@ const run = document.querySelector("#count-run");
 const truename = document.querySelector("#count-truename");
 const object = document.querySelector("#count-object");
 const message = document.querySelector("#count-message");
+const highlight = document.querySelector("#score-highlight");
+const highlightColor = document.querySelector("#score-highlight-color");
 const scoreTop = document.querySelector("#score-top");
 const scoreBottom = document.querySelector("#score-bottom");
 const display = new ValueDisplay(document.querySelector("#count-value-display"), (action) => {
@@ -32,6 +34,7 @@ let revision = 0;
 let named = null;
 let playback = null;
 let playingValue = null;
+let playingRevision = null;
 let finished = null;
 let player;
 try {
@@ -40,7 +43,7 @@ try {
     const resolve = finished;
     finished = null;
     resolve?.();
-  });
+  }, (seconds) => display.highlight(highlight.checked && playingRevision === revision ? seconds : null, presentation.bpm));
 } catch (error) {
   console.error("Audio is unavailable in this browser.", error);
 }
@@ -100,6 +103,7 @@ function play() {
   if (!player || !named) return Promise.reject(new Error("Enter a count to play."));
   const unlocked = player.unlock();
   playingValue = field.value;
+  playingRevision = revision;
   playback = Promise.all([named, unlocked]).then(([result]) => request("preview_truename", {
     value: result.truename, absolute: true, ...presentation,
   })).then((music) => {
@@ -168,3 +172,10 @@ for (const input of [document.querySelector("#tune-root"), document.querySelecto
   input.addEventListener("change", () => { if (!view.hidden) refresh(); });
 }
 load();
+
+highlight.addEventListener("change", () => {
+  if (!highlight.checked) display.highlight(null, presentation.bpm);
+});
+highlightColor.addEventListener("input", () => {
+  display.container.style.setProperty("--playing-note-color", highlightColor.value);
+});

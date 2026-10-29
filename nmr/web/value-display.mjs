@@ -1,5 +1,5 @@
 import { describeObject } from "./description.mjs";
-import { drawScore } from "./music-notation.mjs";
+import { drawScore, highlightScore } from "./music-notation.mjs";
 
 export class ValueDisplay {
   constructor(container, onAction) {
@@ -29,6 +29,9 @@ export class ValueDisplay {
       else drawScore(this.container, value.score);
     }
     else this.container.append(node("pre", describeObject(value), "value-text"));
+  }
+  highlight(seconds, bpm) {
+    highlightScore(this.container, seconds, bpm);
   }
   controls(value) {
     const controls = node("div", "", "value-board-controls");
