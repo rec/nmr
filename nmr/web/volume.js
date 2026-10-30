@@ -6,7 +6,7 @@ const value = document.querySelector("#volume-value");
 function updateVolume() {
   const setting = Number(level.value);
   setMasterVolume(setting);
-  value.textContent = setting === 0 ? "0 (muted)" : `${setting} (${setting - 120} dB)`;
+  value.textContent = setting === 0 ? "0 (muted)" : String(setting);
   level.setAttribute("aria-valuetext", value.textContent);
 }
 level.addEventListener("input", updateVolume);

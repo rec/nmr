@@ -62,7 +62,7 @@ test("volume uses decibel spacing with unity at 120 and tune envelopes reach ful
   }
   const context = vm.createContext({ AudioContext, cancelAnimationFrame() {} });
   const player = vm.runInContext(source + "\nnew TunePlayer();", context);
-  assert.ok(Math.abs(gains[0].value - 10 ** (-30 / 20)) < 1e-12, "Default is 90, or -30 dB");
+  assert.ok(Math.abs(gains[0].value - 10 ** (-20 / 20)) < 1e-12, "Default volume is 100");
   for (const level of [0, 90, 100, 120]) {
     vm.runInContext(`setMasterVolume(${level});`, context);
     assert.equal(gains[0].value, level === 0 ? 0 : 10 ** ((level - 120) / 20));

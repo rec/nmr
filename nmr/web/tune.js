@@ -1,6 +1,6 @@
 /* Exact pitches and times come from the shared Python core. */
 const masterOutputs = new Map();
-let masterGain = 10 ** (-30 / 20);
+let masterGain = 10 ** (-20 / 20);
 
 export function setMasterVolume(level) {
   masterGain = level === 0 ? 0 : 10 ** ((level - 120) / 20);

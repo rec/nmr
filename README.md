@@ -361,8 +361,7 @@ The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that 
 will play it on the first interaction instead. Work and playback limits still apply.
 
 The volume icon in the top-right corner opens a slider shared by all three views.
-It starts at 100 (−10 dB). Values 1–110 give
-−109 through 0 dB of master attenuation; 0 mutes all tunes and typing ticks.
+It starts at 100 and ranges from 0 to 120; 0 mutes all tunes and typing ticks.
 The setting stays in memory while navigating between views, without cookies or
 local storage. Click outside the popup or press Escape to close it.
 
