@@ -1,117 +1,117 @@
 {
-  "vocabulary": "b476f3298c78f34d0feefe999d198d035e8f92ea34803bc3b062eb7c275a1f53",
+  "vocabulary": "7783cf8c993d580c62d62e98df575dbd09cda273e2246015f42068262024e0e2",
   "cases": [
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": null,
-      "truename": "tune:case bunch job thank"
+      "truename": "tune:must whale file rugby"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play:music",
-      "truename": "music:dear spend pot radar"
+      "truename": "music:worth tan sorry deny"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "play",
-      "truename": "play:the cure miss urban ant"
+      "truename": "play:the bytes drug stood lodge"
     },
     {
       "type": "tune",
       "input": "@1 2@1/2 r@1/3 -1@2/3",
       "value": "@1 2@1/2 r@1/3 -1@2/3",
       "scope": "",
-      "truename": "a stack open card lady"
+      "truename": "a doom item women hold"
     },
     {
       "type": "int",
       "input": "42",
       "value": "42",
       "scope": null,
-      "truename": "int:list"
+      "truename": "int:like"
     },
     {
       "type": "int",
       "input": "42",
       "value": "42",
       "scope": "",
-      "truename": "and met"
+      "truename": "and loss"
     },
     {
       "type": "frac",
       "input": "2/4",
       "value": "2/4",
       "scope": null,
-      "truename": "frac:who"
+      "truename": "frac:so"
     },
     {
       "type": "date",
       "input": "2000-02-29",
       "value": "2000-02-29",
       "scope": null,
-      "truename": "date:this been"
+      "truename": "date:this help"
     },
     {
       "type": "phone",
       "input": "+442079460958",
       "value": "+442079460958",
       "scope": null,
-      "truename": "phone:city while sorry silk"
+      "truename": "phone:used dial corn died"
     },
     {
       "type": "latlong",
       "input": "48.8566,2.3522",
       "value": "48.856599776,2.352196259",
       "scope": null,
-      "truename": "latlong:sun bin from how aged"
+      "truename": "latlong:shall past from get clean"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": null,
-      "truename": "chess:in also"
+      "truename": "chess:in when"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play:game",
-      "truename": "game:your ago"
+      "truename": "game:your note"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "play",
-      "truename": "play:most group"
+      "truename": "play:state neck"
     },
     {
       "type": "chess",
       "input": "e4 e5 Nf3",
       "value": "e2e4 e7e5 g1f3",
       "scope": "",
-      "truename": "core cow"
+      "truename": "cheap spend"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": null,
-      "truename": "go:site worth life"
+      "truename": "go:time intro each"
     },
     {
       "type": "go",
       "input": "9x9:D4 E4 pass pass",
       "value": "9x9:D4 E4 pass pass",
       "scope": "",
-      "truename": "the fluid what ridge"
+      "truename": "the acre up fool"
     },
     {
       "type": "go",
@@ -125,7 +125,7 @@
       "input": "13x13:J10",
       "value": "13x13:J10",
       "scope": null,
-      "truename": "go:fish"
+      "truename": "go:talk"
     },
     {
       "type": "frac",
@@ -139,56 +139,56 @@
       "input": "23:59:59",
       "value": "23:59:59",
       "scope": null,
-      "truename": "time:news sex"
+      "truename": "time:may after"
     },
     {
       "type": "datetime",
       "input": "2000-02-29T12:34:56",
       "value": "2000-02-29T12:34:56",
       "scope": null,
-      "truename": "datetime:leg dale cook"
+      "truename": "datetime:seven rise guest"
     },
     {
       "type": "ip",
       "input": "127.0.0.1",
       "value": "127.0.0.1",
       "scope": null,
-      "truename": "ip:tribe mouth sue"
+      "truename": "ip:foul ripe vice"
     },
     {
       "type": "ip",
       "input": "2001:db8::1",
       "value": "2001:db8::1",
       "scope": null,
-      "truename": "ip:skip oak pick using mode lawn mild joy added third step fog"
+      "truename": "ip:known poor bar lease run route trail cold pizza wake got mesh"
     },
     {
       "type": "uuid",
       "input": "123e4567-e89b-12d3-a456-426614174000",
       "value": "123e4567-e89b-12d3-a456-426614174000",
       "scope": null,
-      "truename": "uuid:user layer goto much wrong of ping curve flex some hold grow"
+      "truename": "uuid:good cargo alert could ban of novel myth beer am track boy"
     },
     {
       "type": "semver",
       "input": "1.2.3-rc.1+build.004",
       "value": "1.2.3-rc.1+build.004",
       "scope": null,
-      "truename": "semver:this amber sheet neon storm owned issue above glass dawn sand crowd date sold give busy full game deaf bowl chat ink ruby fan park"
+      "truename": "semver:this gig cry grey ash trek mayor okay fault named bus lap some fire art firm info line const rent above bin duty watch law"
     },
     {
       "type": "isbn",
       "input": "9780306406157",
       "value": "9780306406157",
       "scope": null,
-      "truename": "isbn:dark love great"
+      "truename": "isbn:third long tiny"
     },
     {
       "type": "upc",
       "input": "036000291452",
       "value": "036000291452",
       "scope": null,
-      "truename": "upc:meter sun look"
+      "truename": "upc:rely shall same"
     },
     {
       "type": "cards",
@@ -202,7 +202,7 @@
       "input": "()",
       "value": "()",
       "scope": "",
-      "truename": "if"
+      "truename": "about"
     },
     {
       "type": "cards",
@@ -216,14 +216,14 @@
       "input": "(1 2)",
       "value": "(1 2)",
       "scope": "",
-      "truename": "post"
+      "truename": "world"
     },
     {
       "type": "cards",
       "input": "(1 2 3)",
       "value": "(1 2 3)",
       "scope": "",
-      "truename": "what bar"
+      "truename": "up night"
     }
   ]
 }

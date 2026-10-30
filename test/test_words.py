@@ -45,12 +45,12 @@ def test_vocabulary_identity_covers_order_case_policy_and_unicode() -> None:
     [
         ("for", "is", "on"),
         ("at", "as", "your"),
-        ("what", "news", "out"),
-        ("some", "its", "like"),
-        ("plan", "yes", "hot"),
+        ("which", "news", "out"),
+        ("click", "its", "like"),
+        ("human", "yes", "hot"),
     ],
 )
-def test_restored_words_keep_their_original_positions(
+def test_restored_words_follow_google_frequency_order(
     before: str, word: str, after: str
 ) -> None:
     words = Words().words

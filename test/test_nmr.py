@@ -43,9 +43,9 @@ def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) ->
     engine = Nmr()
     result = engine.encode("e4 e5 Nf3", prefix)
     assert result.type == "chess"
-    assert result.truename == "chess:in also"
+    assert result.truename == "chess:in when"
     for browse in (False, True):
-        decoded = engine.decode(prefix + ":in also", browse=browse)
+        decoded = engine.decode(prefix + ":in when", browse=browse)
         assert decoded == result
 
 
@@ -53,13 +53,13 @@ def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) ->
 def test_category_scopes_are_shortened_without_changing_the_payload(scope: str) -> None:
     engine = Nmr()
     result = engine.encode("e4 e5 Nf3", "chess", scope)
-    assert result.truename == "game:your ago"
-    assert engine.decode(scope + ":your ago") == result
+    assert result.truename == "game:your note"
+    assert engine.decode(scope + ":your note") == result
 
 
 def test_wrong_parent_categories_are_rejected() -> None:
     with pytest.raises(ValueError, match="Unknown"):
-        Nmr().decode("data:chess:in also")
+        Nmr().decode("data:chess:in when")
 
 
 @pytest.mark.parametrize(
