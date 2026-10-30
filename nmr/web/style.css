@@ -6,16 +6,17 @@
 }
 * { box-sizing: border-box; }
 body { margin: 0; }
-#volume-controls { position: fixed; top: 16px; right: 20px; z-index: 10; display: flex; gap: 8px; }
-#tune-controls { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin: 16px 24px 32px; font-size: 14px; }
-#tune-controls label { display: flex; align-items: center; gap: 6px; }
-#tune-controls select { border: 1px solid #9aac9d; border-radius: 6px; padding: 6px; font: inherit; color: inherit; background: #f6f4ed; }
-#tune-controls select:focus-visible { outline: 2px solid #245d50; outline-offset: 3px; }
-#volume-toggle, #help-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
-#volume-toggle:hover, #help-toggle:hover { background: #e5eadf; }
-#volume-toggle:focus-visible, #help-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
-#volume-panel, #help-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
-#volume-panel { right: 72px; width: min(260px, calc(100vw - 92px)); }
+#settings-controls { position: fixed; top: 16px; right: 20px; z-index: 10; display: flex; gap: 8px; }
+#settings-panel select, #score-top { border: 1px solid #9aac9d; border-radius: 6px; padding: 4px 6px; font: inherit; color: inherit; background: #f6f4ed; }
+#settings-panel select:focus-visible, #score-top:focus-visible { outline: 2px solid #245d50; outline-offset: 3px; }
+#settings-toggle, #help-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
+#settings-toggle:hover, #help-toggle:hover { background: #e5eadf; }
+#settings-toggle:focus-visible, #help-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#settings-panel, #help-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
+#settings-panel { right: 72px; width: min(300px, calc(100vw - 92px)); max-height: calc(100dvh - 88px); overflow: auto; font-size: 14px; }
+#settings-panel h2 { margin: 0 0 16px; font-size: 18px; font-weight: 650; text-align: left; }
+.settings-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; margin-top: 16px; }
+.time-signature { display: flex; align-items: center; gap: 4px; }
 #help-panel { width: min(560px, calc(100vw - 40px)); max-height: calc(100dvh - 88px); overflow: auto; font-size: 16px; }
 #help-panel h1, #help-panel h2 { margin: 20px 0 12px; font-size: 24px; line-height: 1.25; letter-spacing: normal; font-weight: 650; text-align: left; }
 #help-panel h2 { font-size: 20px; }
@@ -23,7 +24,6 @@ body { margin: 0; }
 #help-panel > :first-child { margin-top: 0; }
 #help-panel > :last-child { margin-bottom: 0; }
 #help-panel a { color: #245d50; text-underline-offset: 3px; }
-#volume-panel label { font-size: 16px; }
 .volume-slider { position: relative; padding-bottom: 4px; }
 .volume-reference { position: absolute; left: 83.333%; bottom: 4px; width: 4px; height: 4px; border-radius: 50%; background: #245d50; transform: translateX(-50%); }
 #volume-level { width: 100%; margin: 16px 0; padding: 0; border: 0; accent-color: #245d50; }
@@ -39,8 +39,7 @@ footer a { color: #245d50; text-underline-offset: 4px; }
 #count-message { height: 1.5em; margin: 4px 0; overflow: auto; color: #8b3328; }
 .count-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 8px; }
 .count-controls label { display: flex; align-items: center; gap: 10px; }
-#score-top { width: 5ch; padding: 8px; margin: 0; font-size: 16px; }
-#score-bottom { padding: 8px; font: inherit; font-size: 16px; }
+#score-top { width: 4ch; margin: 0; text-align: center; }
 .music-score { width: 100%; max-height: 100%; overflow: auto; flex-shrink: 0; }
 .music-score svg { display: block; margin-inline: auto; }
 #count-run { width: 20px; height: 20px; padding: 0; accent-color: #245d50; }
