@@ -2,6 +2,7 @@
 
 from pathlib import Path
 from subprocess import run
+from urllib.request import urlopen
 
 import tyro
 from pydantic import BaseModel
@@ -24,6 +25,8 @@ class Deploy(BaseModel, frozen=True):
             check=True,
         )
         run(["ssh", host, f"chown -R ax:ax {remote}"], check=True)
+        with urlopen("https://ax.to/nmr", timeout=30):
+            pass
         print("Deployed https://ax.to/nmr")
 
 
