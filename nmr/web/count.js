@@ -12,7 +12,6 @@ const run = document.querySelector("#count-run");
 const truename = document.querySelector("#count-truename");
 const object = document.querySelector("#count-object");
 const message = document.querySelector("#count-message");
-const highlight = document.querySelector("#score-highlight");
 const highlightColor = document.querySelector("#score-highlight-color");
 const scoreTop = document.querySelector("#score-top");
 const scoreBottom = document.querySelector("#score-bottom");
@@ -43,7 +42,7 @@ try {
     const resolve = finished;
     finished = null;
     resolve?.();
-  }, (seconds) => display.highlight(highlight.checked && playingRevision === revision ? seconds : null, presentation.bpm));
+  }, (seconds) => display.highlight(playingRevision === revision ? seconds : null, presentation.bpm));
 } catch (error) {
   console.error("Audio is unavailable in this browser.", error);
 }
@@ -173,9 +172,6 @@ for (const input of [document.querySelector("#tune-root"), document.querySelecto
 }
 load();
 
-highlight.addEventListener("change", () => {
-  if (!highlight.checked) display.highlight(null, presentation.bpm);
-});
 highlightColor.addEventListener("input", () => {
   display.container.style.setProperty("--playing-note-color", highlightColor.value);
 });

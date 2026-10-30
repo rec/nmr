@@ -31,6 +31,10 @@
       <section id="help-panel" popover aria-label="Help">Loading help…</section>
       <div id="settings-panel" popover aria-label="Settings">
         <h2>Settings</h2>
+        <div class="settings-row">
+          <label for="count-increment">Increment</label>
+          <input id="count-increment" type="text" inputmode="numeric" pattern="[0-9]+" value="1" autocomplete="off" spellcheck="false" />
+        </div>
         <label for="volume-level">Volume</label>
         <div class="volume-slider">
           <input id="volume-level" type="range" min="0" max="120" step="1" value="100" autofocus />
@@ -131,9 +135,6 @@
       <p id="count-message" role="status"></p>
       <div class="count-controls">
         <label><input id="count-run" type="checkbox" disabled /> Run</label>
-        <label for="count-increment">Increment</label>
-        <input id="count-increment" type="text" inputmode="numeric" pattern="[0-9]+" value="1" autocomplete="off" spellcheck="false" />
-        <label><input id="score-highlight" type="checkbox" checked /> Highlight</label>
         <input id="score-highlight-color" type="color" value="#008000" aria-label="Playing note color" />
       </div>
       <footer><a id="count-main-link" href="?desc=">nmr</a> · <a id="count-clock-link" href="?type=clock">Clock</a></footer>

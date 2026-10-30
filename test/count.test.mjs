@@ -12,7 +12,7 @@ function page(address) {
   const listeners = {};
   const calls = [];
   let display;
-  const elements = Object.fromEntries(["#count-view", "#count-value", "#count-increment", "#count-run", "#count-truename", "#count-object", "#count-message", "#count-value-display", "#score-top", "#score-bottom", "#score-highlight", "#score-highlight-color", "#tune-root", "#tune-position"].map((i) => [i, {
+  const elements = Object.fromEntries(["#count-view", "#count-value", "#count-increment", "#count-run", "#count-truename", "#count-object", "#count-message", "#count-value-display", "#score-top", "#score-bottom", "#score-highlight-color", "#tune-root", "#tune-position"].map((i) => [i, {
     value: i.startsWith("#score-") ? "4" : i === "#count-increment" ? "1" : "0", hidden: false, checked: false,
     validity: { valid: true },
     addEventListener(event, callback) { this[event] = callback; },
