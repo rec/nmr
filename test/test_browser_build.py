@@ -63,31 +63,18 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
     assert f"./editor.mjs?v={revision}" in app
     assert f"./tune.js?v={revision}" in app
     assert f"runtime.js?v={revision}" in app
-    assert f"navigation.js?v={revision}" in app
-    assert f"clock.js?v={revision}" in app
-    assert f"count.js?v={revision}" in app
     assert f"presentation.mjs?v={revision}" in app
     assert f"worker.js?v={revision}" in page.with_name("runtime.js").read_text()
     worker = page.with_name("worker.js").read_text()
     assert f"python.zip?v={revision}" in worker
     assert f"bridge.py?v={revision}" in worker
-    assert 'id="clock-view"' in page.read_text()
-    assert f"clock.css?v={revision}" in page.read_text()
-    assert not (page.parent / "clock/index.html").exists()
-    clock_script = page.with_name("clock.js").read_text()
-    assert f"clock-time.mjs?v={revision}" in clock_script
-    assert f"tune.js?v={revision}" in clock_script
-    assert f"runtime.js?v={revision}" in clock_script
-    count_script = page.with_name("count.js").read_text()
-    assert f"count-runner.mjs?v={revision}" in count_script
-    assert f"runtime.js?v={revision}" in count_script
-    assert f"presentation.mjs?v={revision}" in count_script
-    assert f"value-display.mjs?v={revision}" in count_script
+    assert 'id="workspace"' in page.read_text()
+    for name in ["clock-time.mjs", "count-runner.mjs", "value-display.mjs"]:
+        assert f"{name}?v={revision}" in app
     display = page.with_name("value-display.mjs").read_text()
     assert f"world-map.svg?v={revision}" in display
     with ZipFile(page.with_name("python.zip")) as archive:
         assert "nmr/web/value_display.py" in archive.namelist()
-    assert f"presentation.mjs?v={revision}" in clock_script
 
 
 def test_changing_a_shipped_editor_changes_its_build_url(

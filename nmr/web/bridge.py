@@ -35,6 +35,7 @@ class Preview(BaseModel, frozen=True):
     bpm: int = 120
     tie: int | None = None
     position: Literal["start", "middle", "end"] = "middle"
+    time_signature: TimeSignature = TimeSignature()
 
 
 class ItemPreview(Request, frozen=True):
@@ -51,10 +52,14 @@ class TruenamePreview(Preview, frozen=True):
 class RecognitionRequest(BaseModel, frozen=True):
     value: str
     mode: Literal["description", "truename"] = "description"
+    type_name: str = ""
 
 
 class CountRequest(BaseModel, frozen=True):
     value: str
+    type_name: str = ""
+    source_type: str = ""
+    source_value: str = ""
     root: int = 53
     position: Literal["start", "middle", "end"] = "middle"
     time_signature: TimeSignature = TimeSignature()
@@ -62,6 +67,13 @@ class CountRequest(BaseModel, frozen=True):
 
 class CountActionRequest(ValueAction, frozen=True):
     value: str
+    type_name: str = ""
+
+
+class ItemActionRequest(ValueAction, frozen=True):
+    value: str
+    type_name: str
+    scope: str = ""
 
 
 _engine = Nmr()
@@ -99,8 +111,22 @@ def convert(request_json: str) -> str:
 
 def count(request_json: str) -> str:
     request = CountRequest.model_validate_json(request_json)
-    truename = " ".join(_engine.to_truename(parse_integer(request.value)))
-    result: dict[str, object] = {"truename": truename, "display": None}
+    index = (
+        _engine.truename_index(
+            _engine.encode(request.source_value, request.source_type).truename, False
+        )
+        if request.source_type
+        else parse_integer(request.value)
+    )
+    truename = " ".join(_engine.to_truename(index))
+    if request.type_name:
+        path, _, _ = _engine.find_type(request.type_name)
+        truename = path + ":" + truename
+    result: dict[str, object] = {
+        "index": format(Decimal(index), "f"),
+        "truename": truename,
+        "display": None,
+    }
     try:
         decoded = _engine.decode(truename, browse=True)
     except ValueError as error:
@@ -111,7 +137,7 @@ def count(request_json: str) -> str:
         if decoded.type == "tune":
             try:
                 score = score_plan(
-                    Tune.from_index(parse_integer(request.value)),
+                    Tune.from_index(index),
                     request.root,
                     request.position,
                     request.time_signature,
@@ -126,11 +152,20 @@ def count(request_json: str) -> str:
 def count_action(request_json: str) -> str:
     request = CountActionRequest.model_validate_json(request_json)
     truename = " ".join(_engine.to_truename(parse_integer(request.value)))
+    if request.type_name:
+        path, _, _ = _engine.find_type(request.type_name)
+        truename = path + ":" + truename
     source = _engine.decode(truename, browse=True)
     value = change_value(source.type, source.value, request)
-    result = _engine.encode(value, source.type, scope="")
-    index = _engine.truename_index(result.truename)
+    result = _engine.encode(value, source.type, scope=request.type_name or "")
+    index = _engine.truename_index(result.truename, not bool(request.type_name))
     return json.dumps({"index": format(Decimal(index), "f")})
+
+
+def value_action(request_json: str) -> str:
+    request = ItemActionRequest.model_validate_json(request_json)
+    value = change_value(request.type_name, request.value, request)
+    return _engine.encode(value, request.type_name, request.scope).model_dump_json()
 
 
 def preview(request_json: str) -> str:
@@ -179,13 +214,28 @@ def render_tune(
 
 def recognize(request_json: str) -> str:
     request = RecognitionRequest.model_validate_json(request_json)
+    if request.type_name and request.mode == "description":
+        result = _engine.encode(request.value, request.type_name, request.type_name)
+        return json.dumps(
+            {
+                "truename": result.truename,
+                "full_truename": result.truename,
+                "browsed": result.model_dump(),
+                "display": display_value(result.type, result.value),
+            }
+        )
     if request.mode == "truename":
         response: dict[str, object] = {"kind": "truename", "truename": None}
         if request.value.strip():
             try:
-                result = _engine.decode(request.value, browse=True)
+                value = request.value
+                if request.type_name:
+                    path, _, _ = _engine.find_type(request.type_name)
+                    value = path + ":" + value.rsplit(":", 1)[-1]
+                result = _engine.decode(value, browse=True)
                 response["browsed"] = result.model_dump()
-                response["truename"] = request.value
+                response["display"] = display_value(result.type, result.value)
+                response["truename"] = value
             except ValueError as error:
                 response["browse_error"] = str(error)
     else:
@@ -196,10 +246,20 @@ def recognize(request_json: str) -> str:
             response["full_truename"] = " ".join(
                 _engine.to_truename(_engine.truename_index(description.truename))
             )
+            result = _engine.decode(str(response["full_truename"]), browse=True)
+            response["browsed"] = result.model_dump()
+            response["display"] = display_value(result.type, result.value)
     return json.dumps(response)
 
 
 def preview_truename(request_json: str) -> str:
     request = TruenamePreview.model_validate_json(request_json)
     tune = Tune.from_index(_engine.truename_index(request.value, request.absolute))
-    return render_tune(tune, request.root, request.bpm, request.position)
+    result = json.loads(render_tune(tune, request.root, request.bpm, request.position))
+    try:
+        result["score"] = score_plan(
+            tune, request.root, request.position, request.time_signature
+        )
+    except ValueError as error:
+        result["score_error"] = str(error)
+    return json.dumps(result)

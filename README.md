@@ -309,152 +309,54 @@ The query is part of the shared URL and is sent to the hosting server when that
 URL is opened or reloaded. The app does not save the input in local storage.
 
 The page has two panes beneath the `nmr` heading: description and true name.
-The left pane is always editable. Swap exchanges the captions and moves the first
-converted result into the editor. With no result, it starts with an empty editor.
-URLs contain exactly one parameter: `desc` for description mode or `name` for
-true name mode, including when the field is empty. Opening a link restores both
-the text and direction. A URL without either starts with an empty description.
+The page has three modes selected by radio buttons: **Name**, **Count**, and
+**Clock**. Its source, description, object, controls, and playback regions keep
+fixed dimensions. Long content scrolls within its region. Only the description
+editor disappears outside Name mode, leaving its space reserved.
 
-In description mode, the engine recognizes integers, explicit `+` phone numbers,
-fractions, ISO dates and times, coordinates, IP addresses, UUIDs, versions,
-durations, chess/Go moves, and tune notation. Pure digits mean an
-integer; slash pairs mean fractions. Use `YYYY-MM-DD` for dates. Other text,
-including vocabulary words such as `Tom`, becomes a String with its original case
-and spaces. Incomplete type syntax waits for more input; invalid typed values
-remain errors. Type labels can make a description explicit, such as
-`upc: 036000291452` or `string: "123"`. Strings in typed descriptions use JSON
-quoting so swapping preserves their type, quotes, and whitespace.
+In Name mode, both the true name and description are editable; editing either
+updates the other. The name editor retains vocabulary completion with Space,
+Left/Right, and Up/Down. There is no Swap control. Select a Type to edit a short
+name and restrict description conversion to that type, or select All types for
+full names and automatic description recognition.
 
-In true name mode, accepted text is followed by a grey suggested continuation.
-Completed words must be distinct vocabulary words; the current fragment must
-match an unused word's beginning. Suggestions are chosen randomly. Only lowercase
-letters and Space enter text; impossible letters and other editing keys make a
-quiet 20 ms F3 tick instead. Space accepts the selected suggestion. Right accepts
-at least one letter, continuing through unambiguous characters. Completing the
-selected word inserts a space and suggests an unused next word. Left and Backspace
-move back to the previous character choice, skipping forced stretches and removing
-an automatic space when needed. For example, `axis ` returns to `a`.
-Up/Down cycle through matching continuations or eligible next words. Clicking and
-selection cannot move this cursor. Text remains selectable and copyable with the
-mouse and the usual copy shortcut or context menu. Tab still navigates the page controls.
+Count iterates an exact nonnegative integer. Automatic plays the current index,
+waits two seconds after the tune finishes, increments, and plays again. Increment
+is a compact positive-integer setting in Settings. Changing Type preserves the
+index and decodes it in the selected type. Finite types wrap using the codecs'
+existing browsing rules; the source index is preserved.
 
-The right pane uses browsing to decode completed, accepted words only. Partial
-words and guesses do not change or hide the description. Completing a word accepts
-it and updates the description. Type
-prefixes from swaps and bookmarks stay fixed before the controlled word sequence.
-Swapping or loading a bookmark accepts complete words and normalizes their case.
+Clock derives an index relative to Time or DateTime, controlled by Time only in
+Settings. It decodes that index globally under All types or within the selected
+Type otherwise, including non-temporal types. Display UTC affects presentation;
+the source uses UTC. Clock interval controls playback boundaries.
 
-Click the result on the right to play its tune. description mode shows the full
-root truename without a prefix and plays its full root tune. true name mode
-shows the browsed object's description and plays its prefix-relative tune.
-Click the playing result to stop. In description mode, Enter also plays the result.
+The current object's bounded display supports chess moves and promotions, Go
+moves, Pass and Undo, card interchanges, and the bundled world map. Interactive
+changes work in Name and Count modes. Clock's object display is read-only.
 
-In description mode, type anywhere on the page; click the field to position its cursor, drag to select,
-or double-click to select a word. Arrow keys, Home/End, Shift selection,
-copy/cut/paste, and insertion in the middle work normally. Escape clears the field
-and stops playback. Phone input containing `+` and digits rejects typed letters
-with a quiet tick. Clear or replace the whole field to enter a different detail.
-The String codec rejects control ranges U+0000–001F, U+007F–009F, and surrogate
-code points.
+The always-visible Playing area shows the name and notation for the exact tune
+that plays. Selected types play short names; All types plays full names.
+Notation and green highlighting follow the same audio and rendering settings.
+The current tune finishes when mode or Type changes. Count and Clock remember
+whether Automatic was enabled and resume when revisited, without overlapping
+audio. Keep last played music in Settings is enabled by default; disabling it
+clears the name and score at playback end while reserving their space.
 
-The opening sound is `tune:the` itself, a one-beat F3 at 180 BPM. Browsers that block autoplay
-will play it on the first interaction instead. Work and playback limits still apply.
+Settings also contains volume, root, position, time signature, and playing-note
+color. Existing playback, notation, and codec work limits still apply and are
+reported in the status region. VexFlow and its licensed fonts are bundled locally.
 
-The volume icon in the top-right corner opens a slider shared by all three views.
-It starts at 100 and ranges from 0 to 120; 0 mutes all tunes and typing ticks.
-The setting stays in memory while navigating between views, without cookies or
-local storage. Click outside the popup or press Escape to close it.
+New share links use separate mode and type parameters, an index and increment,
+and Name editing direction/value when applicable. Back and Forward restore the
+new link state. Previous URL formats are not supported. Settings and automatic
+playback preferences are kept in memory for the current page session.
 
-All three views also share **Root** and **Position** selectors. Root offers C
-through B, including sharps, in octave 3; it defaults to F3. Position defaults to
-**middle**, the current rounded mean of the tune's cumulative pitches. **start**
-places its first note on the root, and **end** places its last note there.
-Selections apply to subsequent playbacks and stay selected when switching views.
-They change presentation only, preserving truenames, intervals, rhythm, and tempo.
-
-The Count view at `/nmr?count=0&inc=1` explores the full truename index directly.
-Edit the large count field to see its truename and, where browsing can construct
-one, the corresponding object. Click the truename to play its full-index tune.
-Both fields accept only decimal digits; the increment must be positive and
-defaults to 1. Negative or invalid increments in a URL are ignored. Counts and
-increments use exact integers, including values beyond JavaScript's number range.
-The URL follows edits so it can be shared or bookmarked.
-
-**Run** starts off. Enabling it plays the current tune, waits two seconds after
-it finishes, adds the increment, and repeats. Disabling Run lets the current
-tune finish and cancels future increments. Editing either field or leaving Count
-also disables Run. All three views link to each other without reloading the worker.
-
-Below Count's name and description rows, a fixed display area shows the value:
-chess and Go boards, a 52-card deck, a coordinate map, music notation for tunes,
-or text for other types.
-On a chess board, select a piece and a highlighted destination; promotions offer
-all four pieces. Go intersections offer the moves allowed by our existing rules,
-with Pass and Undo controls. Both boards support Undo. Select two cards to swap
-their positions. Board and card actions pause Run and navigate to the resulting
-object's canonical full index, preserving the increment and adding a browser
-history entry. Back returns to the previous count.
-
-When the decoded object is a tune, Count engraves the **full-index tune** played
-by its truename button. This can differ from the tune in the description, whose
-index is relative to the tune category. The score follows the selected root and
-start/middle/end anchoring, displayed one octave higher in treble clef while
-playback stays at its original pitch. Rests and durations stay exact. One reference
-beat is a quarter note at the existing 180 BPM. Ties preserve notes across
-barlines; dots and explicit tuplets preserve fractional durations.
-
-Count's time-signature controls default to 4/4. The numerator accepts any positive
-integer; the denominator is one of 1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48 or 64.
-Changing the meter changes barlines and engraving, without changing the tune or
-its playback. The last bar can be incomplete. Scores scroll within the fixed
-display area. An explicit message replaces scores beyond the existing playback
-limits or the notation limits of 512 bars, 4096 symbols or a tuplet ratio above
-1024. VexFlow 5.0.0 and its Bravura/Academico fonts are bundled locally, with their
-licenses, so engraving needs no external font or notation service.
-
-Board rules stay in the shared Python codecs. The display does not introduce a
-second chess or Go engine. The world map is a bundled, pre-rendered SVG using
-[Natural Earth's public-domain land data](https://www.naturalearthdata.com/about/terms-of-use/).
-Its latitude/longitude projection covers the whole globe, including both poles.
-The page preloads the approximately 70 KB asset and reuses the same map and marker
-elements across position changes. Updates move the marker locally, without map
-services or tile downloads. The pinned source revision and source-data SHA256
-are recorded in `nmr/web/world-map.svg`. At world scale, nearby positions may
-share a pixel; the description row retains their precise coordinates.
-
-The Clock view at `/nmr?type=clock` shows the local date and time and updates its
-truename every second. **Time only** selects Time rather than the default
-DateTime; the date remains visible in both modes. **Display UTC** switches the
-visible date and time from local time to UTC. Both start unchecked.
-The clock's `show_timezone` configuration in `nmr/web/clock.js` defaults to
-`false`. When enabled, times show a signed UTC offset: `10:30:05+01` for
-whole-hour offsets, `10:30:05+01:30` otherwise, and `+00` for UTC.
-Truenames and tunes always encode
-UTC, independently of the display setting, so synchronized clocks worldwide
-produce the same truename. No timezone suffix is displayed or encoded.
-Sound starts off and is enabled with **Playing**. The name beneath Playing identifies
-the tune currently playing, remaining visible through rests and clearing when
-Playing is off or the whole tune ends. Choose 5 seconds (the default), 10 seconds,
-1 minute, or 60 minutes.
-Playback starts on matching wall-clock boundaries, such as
-`:00`, `:10`, …, `:50` for 10 seconds,
-or the top of each UTC hour for 60 minutes. Changing the interval waits for the next
-matching boundary. Tunes continue playing while muted; the Playing checkbox fades
-the output in or out over 100 ms without restarting the tune. It uses the same time
-codec as the main view and displays the full root truename without any prefix.
-It plays the tune of that full name, with F3 at 180 BPM. **Short name** starts
-unchecked. When checked, it uses the Time or DateTime payload index as a Tune
-index, displays its `tune:` truename, and plays that tune. Switching the option
-updates the displayed name immediately and waits for the next playback boundary.
-All three views share one page and Python worker. Their links switch views without
-reloading; browser Back and Forward also work. Editor contents and clock settings
-stay in memory, without cookies or local storage. An enabled clock keeps sounding
-while the main view is open.
-
-The WebAssembly bridge is tested in Node. Live browser interaction and visual
-verification were blocked by the local browser approval gate during development;
-`test/browser_smoke.cjs` and a manual CI job provide interaction checks to run where
-browser access is available. No hosted deployment or PyPI publication was performed.
+Rebuild after source changes before testing the local site. Automated tests do
+not establish audible quality or live visual synchronization. The browser smoke
+check is separate: run test/browser_smoke.cjs against freshly built assets where
+Playwright is available. The deployment helper script/deploy.py builds and
+publishes to https://ax.to/nmr; a local rebuild does not deploy the hosted site.
 
 ## Python library
 
