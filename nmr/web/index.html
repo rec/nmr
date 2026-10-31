@@ -83,14 +83,7 @@
     </header>
     <main id="workspace" data-mode="name">
       <h1>nmr</h1>
-      <div class="mode-row">
-        <fieldset id="modes"><legend>Mode</legend>
-          <label><input type="radio" name="mode" value="name" checked /> Name</label>
-          <label><input type="radio" name="mode" value="count" /> Count</label>
-          <label><input type="radio" name="mode" value="clock" /> Clock</label>
-        </fieldset>
-        <label>Type <select id="type" aria-label="Type"><option value="">All types</option></select></label>
-      </div>
+      <div class="source-panels">
       <section id="source-region" aria-label="Current source">
         <div id="name-editor" role="textbox" tabindex="0" aria-label="True name" aria-autocomplete="inline"><span id="typed"></span><span class="name-caret" aria-hidden="true"></span><span id="guessed"></span></div>
         <input id="count-value" aria-label="Count" type="text" inputmode="numeric" pattern="[0-9]+" value="0" autocomplete="off" spellcheck="false" hidden />
@@ -99,19 +92,31 @@
       <section id="description-region"><label for="value">Description</label>
         <input id="value" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
       </section>
-      <p id="current-name" aria-label="Current true name"></p>
-      <section id="value-display" aria-label="Current object"></section>
-      <div id="playback-controls">
-        <button id="play" type="button" disabled>Play</button>
-        <label><input id="automatic" type="checkbox" disabled /> Automatic</label>
-        <button id="copy-link" type="button">Copy link</button>
       </div>
-      <p id="message" role="status"></p>
+      <div class="content-panels">
+      <section id="value-display" aria-label="Current object"></section>
       <section id="playback-area" aria-label="Playing music">
         <h3>Playing</h3>
         <p id="playing-name" aria-live="polite"></p>
         <div id="playing-score" aria-label="Playing music notation"></div>
       </section>
+      </div>
+      <p id="message" role="status"></p>
+      <footer id="page-controls">
+      <div class="mode-row">
+        <fieldset id="modes"><legend>Mode</legend>
+          <label><input type="radio" name="mode" value="name" checked /> Name</label>
+          <label><input type="radio" name="mode" value="count" /> Count</label>
+          <label><input type="radio" name="mode" value="clock" /> Clock</label>
+        </fieldset>
+        <label>Type <select id="type" aria-label="Type"><option value="">All types</option></select></label>
+      </div>
+      <div id="playback-controls">
+        <button id="play" type="button" disabled>Play</button>
+        <label><input id="automatic" type="checkbox" disabled /> Automatic</label>
+        <button id="copy-link" type="button">Copy link</button>
+      </div>
+      </footer>
     </main>
   </body>
 </html>

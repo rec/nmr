@@ -21,7 +21,6 @@ const nameField = document.querySelector("#name-editor");
 const typed = document.querySelector("#typed");
 const guessed = document.querySelector("#guessed");
 const time = document.querySelector("#clock-time");
-const currentName = document.querySelector("#current-name");
 const playButton = document.querySelector("#play");
 const automatic = document.querySelector("#automatic");
 const increment = document.querySelector("#count-increment");
@@ -113,7 +112,6 @@ function refresh(push = false) {
   automatic.disabled = !player || mode === "name" ||
     (mode === "count" && (!/^[0-9]+$/.test(field.value) || !increment.value || !increment.validity.valid));
   message.textContent = "";
-  currentName.textContent = "";
   display.clear(true);
   writeURL(push);
   if (!ready) return;
@@ -139,7 +137,6 @@ function refresh(push = false) {
     const name = result.full_truename || result.truename;
     if (!name) { message.textContent = result.message || result.browse_error || ""; return null; }
     current = { ...result, truename: name };
-    currentName.textContent = name;
     if (mode === "name") {
       if (direction === "description") { editor.load(name); renderName(); }
       else description.value = result.browsed ? (type.value ? result.browsed.value : describeObject(result.browsed)) : "";

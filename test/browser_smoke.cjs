@@ -9,10 +9,12 @@ const { chromium } = require("playwright");
     page.on("pageerror", (error) => errors.push(error.message));
     const origin = process.argv[2] || "http://127.0.0.1:8765";
     for (const width of [1200, 390]) {
-      await page.setViewportSize({ width, height: 1000 });
+      await page.setViewportSize({ width, height: width === 1200 ? 768 : 844 });
       await page.goto(origin + "/?mode=name&type=pure%3Amath%3Aint&edit=description&value=42");
       await page.waitForSelector('#value[data-ready="true"]', { timeout: 120000 });
-      await page.waitForFunction(() => document.querySelector("#current-name").textContent.includes(":"));
+      await page.waitForFunction(() => !document.querySelector("#play").disabled);
+      assert.equal(await page.locator("#current-name").count(), 0);
+      assert.ok(await page.locator("#page-controls").evaluate((i) => i.getBoundingClientRect().bottom <= innerHeight));
       assert.equal(await page.locator('[name="mode"]').count(), 3);
       assert.equal(await page.locator("#swap").count(), 0);
       const boxes = () => page.locator("#source-region, #description-region, #value-display, #playback-controls, #playback-area").evaluateAll((items) => items.map((i) => {
