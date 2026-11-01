@@ -15,6 +15,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
     if (!elements.has(id)) elements.set(id, {
       value: id === "#count-increment" ? "1" : id === "#score-top" || id === "#score-bottom" ? "4" : id === "#clock-interval" ? "5" : "",
       checked: id === "#retain-playback", textContent: "", dataset: {}, validity: { valid: true }, style: { setProperty() {} },
+      hidden: id === "#clock-count",
       attributes: {},
       addEventListener(event, fn) { this[event] = fn; }, setAttribute(name, value) { this.attributes[name] = String(value); },
       querySelector(selector) { return selector === ".value-text" ? null : element(id + " " + selector); },
@@ -51,7 +52,11 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
       if (hold === action) return new Promise((resolve) => { app.release = () => resolve(result); });
       return Promise.resolve(result);
     },
-    ValueDisplay: class { constructor(container) { this.container = container; } clear() {} show() {} },
+    ValueDisplay: class {
+      constructor(container) { this.container = container; }
+      clear() { this.container.textContent = ""; }
+      show(value) { this.container.textContent = value?.kind || ""; }
+    },
     TunePlayer: class {
       constructor(onEnded) { player = this; this.onEnded = onEnded; this.plays = 0; this.playing = false; this.context = { state: "suspended" }; }
       unlock() { this.context.state = "running"; return Promise.resolve(); }
@@ -130,4 +135,45 @@ test("Count advances before audio is unlocked and mute only changes the volume",
   assert.equal(app.player.volume, 0);
   assert.equal(app.element("#sound-toggle").attributes["aria-pressed"], "true");
   assert.equal(app.element("#count-value").value, "43");
+});
+
+test("entering Clock defaults to All types and toggles between date/time and its live count", async () => {
+  const app = page("http://localhost/?mode=count&type=int"); await flush();
+  app.switch("clock"); await flush();
+  assert.equal(app.element("#type").value, "");
+  assert.equal(app.calls.filter((i) => i.action === "count").at(-1).payload.type_name, "");
+  assert.equal(app.element("#count-value").hidden, true);
+  assert.equal(app.element("#clock-reading").hidden, false);
+  assert.equal(app.element("#count-value").value, "123");
+  assert.equal(app.element("#clock-count").textContent, "123");
+  assert.match(app.element("#clock-date").textContent, /^\d{4}-\d{2}-\d{2}$/);
+  assert.match(app.element("#clock-hours").textContent, /^\d{2}:\d{2}:\d{2}$/);
+  app.element("#clock-reading").click();
+  assert.equal(app.element("#clock-time").hidden, true);
+  assert.equal(app.element("#clock-count").hidden, false);
+  app.timers.find((i) => i.delay <= 1000).fn(); await flush();
+  assert.equal(app.element("#clock-count").hidden, false);
+  app.element("#clock-reading").click();
+  assert.equal(app.element("#clock-time").hidden, false);
+  assert.equal(app.element("#clock-count").hidden, true);
+  app.element("#type").value = "cards";
+  app.element("#type").change(); await flush();
+  assert.equal(app.calls.filter((i) => i.action === "count").at(-1).payload.type_name, "cards");
+  app.switch("count"); await flush();
+  assert.equal(app.element("#count-value").hidden, false);
+});
+
+test("a pending clock tick retains the complete previous reading", async () => {
+  const app = page("http://localhost/?mode=clock"); await flush();
+  const snapshot = () => [
+    app.element("#count-value").value,
+    ...["#clock-date", "#clock-hours", "#source-name", "#value-display"].map((i) => app.element(i).textContent),
+  ];
+  const before = snapshot();
+  assert.equal(before.at(-1), "text");
+  app.hold("count");
+  app.timers.find((i) => i.delay <= 1000).fn(); await flush();
+  assert.deepEqual(snapshot(), before);
+  app.release(); await flush();
+  assert.equal(app.element("#value-display").textContent, "text");
 });

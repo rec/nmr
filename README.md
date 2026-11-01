@@ -311,8 +311,11 @@ URL is opened or reloaded. The app does not save the input in local storage.
 The page has three modes selected by radio buttons: **Name**, **Count**, and
 **Clock**. The heading names the mode. Its centered source, object, playback,
 and controls stay vertically stacked with fixed dimensions across modes.
-Clock shows its date and time above the current name. Long content stays within
-its region, notation scales down to fit, and text values scale to fill their box.
+Clock starts with date and time on two lines above the current name. Click that
+area to alternate between date/time and its live count. Updates retain the
+previous reading until its replacement is ready. Long content stays within its
+region. Text values omit type prefixes and scale to fit below the heading's font
+size. Playback notation fills the space below its name while preserving its aspect ratio.
 
 In Name mode, edit the true name to display its object. The name editor retains
 vocabulary completion with Space, Left/Right, and Up/Down. Select a Type to edit
@@ -325,7 +328,8 @@ index and decodes it in the selected type. Finite types wrap using the codecs'
 existing browsing rules; the source index is preserved.
 
 Clock derives an index relative to Time or DateTime, controlled by Time only in
-Settings. It decodes that index globally under All types or within the selected
+Settings. Entering Clock selects All types by default. It decodes that index
+globally under All types or within the selected
 Type otherwise, including non-temporal types. Display UTC affects presentation;
 the source uses UTC. Clock interval controls playback boundaries.
 
@@ -333,7 +337,7 @@ The current object's bounded display supports chess moves and promotions, Go
 moves, Pass and Undo, card interchanges, and the bundled world map. Interactive
 changes work in Name and Count modes. Clock's object display is read-only.
 
-The always-visible Playing area shows the name and notation for the exact tune
+The always-visible playback area shows the name and notation for the exact tune
 that plays. Selected types play short names; All types plays full names.
 Notation and green highlighting follow the same audio and rendering settings.
 The current tune finishes when mode or Type changes. The speaker button starts

@@ -87,7 +87,7 @@ test("cards display all 52 labels and only swap after two distinct selections", 
 
 test("text displays quote strings and disappear when there is no decoded object", () => display((view, root) => {
   view.show({ kind: "text", type: "string", value: "" });
-  assert.equal(root.children[0].textContent, 'string: ""');
+  assert.equal(root.children[0].textContent, '""');
   view.show(null);
   assert.equal(root.children.length, 0);
 }));

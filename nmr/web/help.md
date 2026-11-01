@@ -20,11 +20,14 @@ Count uses an exact integer and the Increment in Settings. It plays, waits two
 seconds after completion, and increments continuously, including while muted. Clock generates its
 index from Time or DateTime and decodes it within the selected Type, or globally.
 Time only, Display UTC, and Clock interval are in Settings.
+Entering Clock selects All types. Date and time occupy two lines; click that area
+to show the live count, and click again to return to date/time. You can select a
+specific Type afterward.
 
 ## Playback
 
 The speaker button toggles mute and starts muted. Muting leaves progression
-running. The Playing area shows the tune's name and notation.
+running. The playback area shows the tune's name and notation.
 Changing mode or Type lets the current tune finish. Keep last played music in Settings controls
 whether the last name and score remain visible after playback.
 

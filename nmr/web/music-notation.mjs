@@ -27,18 +27,24 @@ export function drawScore(container, score) {
     const bottomLine = score.clef === "bass" ? 18 : 30;
     const above = Math.max(0, Math.max(...pitches) - bottomLine - 8) * 5;
     const below = Math.max(0, bottomLine - Math.min(...pitches)) * 5;
-    renderer.resize(widths.reduce((a, b) => a + b, 20), 200 + above + below);
+    const width = widths.reduce((a, b) => a + b, 20);
+    renderer.resize(width, 200 + above + below);
     const context = renderer.getContext();
     const timeline = [];
     timelines.set(frame, { symbols: timeline, active: null });
     let beat = 0;
     const ties = [];
     const previous = new Map();
+    const bounds = [];
+    let top = Infinity;
+    let bottom = -Infinity;
     let x = 10;
     for (const [index, measure] of score.measures.entries()) {
       const stave = new vf.Stave(x, 40 + above, widths[index]);
       if (!index) stave.addClef(score.clef).addTimeSignature(`${score.top}/${score.bottom}`);
       stave.setContext(context).draw();
+      top = Math.min(top, stave.getYForLine(0) - 20);
+      bottom = Math.max(bottom, stave.getYForLine(4) + 20);
       const notes = measure.map((i) => {
         const names = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"];
         const key = i.pitch === null ? (score.clef === "bass" ? "d/3" : "b/4") : `${names[i.pitch % 12]}/${Math.floor(i.pitch / 12) - 1}`;
@@ -60,6 +66,7 @@ export function drawScore(container, score) {
       vf.Accidental.applyAccidentals([voice], "C");
       new vf.Formatter().joinVoices([voice]).formatToStave([voice], stave);
       voice.draw(context, stave);
+      bounds.push(...notes.map((i) => i.getBoundingBox()));
       for (const [index, note] of notes.entries()) {
         const [numerator, denominator = 1] = measure[index].duration.split("/").map(Number);
         const end = beat + numerator / denominator;
@@ -70,6 +77,12 @@ export function drawScore(container, score) {
       x += widths[index];
     }
     for (const tie of ties) tie.setContext(context).draw();
+    const svg = frame.firstElementChild;
+    top = Math.min(top, ...bounds.map((i) => i.getY())) - 4;
+    bottom = Math.max(bottom, ...bounds.map((i) => i.getY() + i.getH())) + 4;
+    svg.setAttribute("viewBox", `0 ${top} ${width} ${bottom - top}`);
+    svg.setAttribute("width", width);
+    svg.setAttribute("height", bottom - top);
   }).catch((error) => {
     if (container.firstElementChild !== frame) return;
     frame.textContent = `Notation unavailable: ${error.message}`;

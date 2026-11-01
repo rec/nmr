@@ -18,6 +18,10 @@ const nameField = document.querySelector("#name-editor");
 const typed = document.querySelector("#typed");
 const guessed = document.querySelector("#guessed");
 const time = document.querySelector("#clock-time");
+const clockDate = document.querySelector("#clock-date");
+const clockHours = document.querySelector("#clock-hours");
+const clockReadingButton = document.querySelector("#clock-reading");
+const clockCount = document.querySelector("#clock-count");
 const sourceName = document.querySelector("#source-name");
 const sound = document.querySelector("#sound-toggle");
 const increment = document.querySelector("#count-increment");
@@ -82,7 +86,7 @@ function fitValueText() {
   const text = display.container.querySelector(".value-text");
   if (!text) return;
   let low = 8;
-  let high = Math.floor(Math.min(display.container.clientWidth, display.container.clientHeight));
+  let high = Math.floor(Math.min(display.container.clientWidth, display.container.clientHeight, parseFloat(getComputedStyle(heading).fontSize) * 0.8));
   const height = display.container.clientHeight;
   const width = display.container.clientWidth;
   while (low < high) {
@@ -104,18 +108,9 @@ function writeURL(push = false) {
   }
   window.history[push ? "pushState" : "replaceState"](null, "", url);
 }
-function clockSource() {
-  const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
-  time.textContent = `${reading.displayDate} ${reading.displayTime}`;
-  time.dateTime = reading.value;
-  return reading;
-}
-function refresh(push = false) {
+function refresh(push = false, reading = null) {
   const revision = ++version;
   current = null;
-  sourceName.textContent = "";
-  message.textContent = "";
-  display.clear(true);
   writeURL(push);
   if (!ready) return;
   let payload;
@@ -123,13 +118,13 @@ function refresh(push = false) {
   if (mode === "name") {
     renderName();
     payload = { mode: "truename", value: editor.accepted, type_name: type.value };
-    if (!payload.value) { loading = Promise.resolve(null); return; }
+    if (!payload.value) { display.clear(); sourceName.textContent = ""; message.textContent = ""; loading = Promise.resolve(null); return; }
     action = "recognize";
   } else {
-    if (!/^[0-9]+$/.test(field.value)) { loading = Promise.resolve(null); return; }
+    if (!/^[0-9]+$/.test(field.value)) { display.clear(); sourceName.textContent = ""; message.textContent = ""; loading = Promise.resolve(null); return; }
     payload = { value: field.value, type_name: type.value, ...settings() };
     if (mode === "clock") {
-      const reading = clockSource();
+      reading ||= clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
       payload.source_type = reading.type;
       payload.source_value = reading.value;
     }
@@ -141,9 +136,15 @@ function refresh(push = false) {
     if (!name) { message.textContent = result.message || result.browse_error || ""; return null; }
     current = { ...result, truename: name };
     sourceName.textContent = name;
-    if (mode === "clock") field.value = result.index;
+    if (mode === "clock") {
+      field.value = result.index;
+      clockCount.textContent = result.index;
+      clockDate.textContent = reading.displayDate;
+      clockHours.textContent = reading.displayTime;
+      time.dateTime = reading.value;
+    }
     display.show(result.display);
-    requestAnimationFrame(fitValueText);
+    fitValueText();
     if (mode === "clock") {
       for (const button of display.container.querySelectorAll("button")) button.disabled = true;
       writeURL();
@@ -196,7 +197,7 @@ function activate(push = false) {
   for (const radio of modes) radio.checked = radio.value === mode;
   nameField.hidden = mode !== "name";
   field.hidden = mode !== "count";
-  time.hidden = mode !== "clock";
+  clockReadingButton.hidden = mode !== "clock";
   sourceName.hidden = mode === "name";
   refresh(push);
   if (mode === "count" && ready && increment.value && increment.validity.valid) runner.start();
@@ -214,7 +215,16 @@ function readURL() {
   editor?.load(query.get("value") || "");
   activate();
 }
-for (const radio of modes) radio.addEventListener("change", () => { mode = radio.value; activate(true); });
+for (const radio of modes) radio.addEventListener("change", () => {
+  mode = radio.value;
+  if (mode === "clock") type.value = "";
+  activate(true);
+});
+clockReadingButton.addEventListener("click", () => {
+  time.hidden = !time.hidden;
+  clockCount.hidden = !time.hidden;
+  clockReadingButton.setAttribute("aria-label", time.hidden ? "Show date and time" : "Show count");
+});
 type.addEventListener("change", () => {
   if (mode === "name") {
     if (current) editor.load(current.truename);
@@ -269,8 +279,8 @@ for (const input of [document.querySelector("#tune-root"), document.querySelecto
 window.addEventListener("popstate", readURL);
 function tick() {
   if (mode === "clock" && ready) {
-    const reading = clockSource();
-    refresh();
+    const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+    refresh(false, reading);
     if (reading.due && !playback) playCurrent().catch(report);
   }
   setTimeout(tick, 1000 - Date.now() % 1000);
