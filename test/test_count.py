@@ -32,7 +32,15 @@ def test_count_rejects_invalid_indices(value: str) -> None:
 
 
 @pytest.mark.parametrize(
-    "type_name,index", [("time", 86401), ("cards", 42), ("int", 2**120)]
+    "type_name,index",
+    [
+        ("time", 86401),
+        ("cards", 42),
+        ("int", 2**120),
+        ("real:time:time", 86401),
+        ("play:game:cards", 42),
+        ("data:id:string", 42),
+    ],
 )
 def test_scoped_count_preserves_source_index_and_wraps_objects(
     type_name: str, index: int
@@ -43,8 +51,10 @@ def test_scoped_count_preserves_source_index_and_wraps_objects(
     engine = Nmr()
     assert result["index"] == str(index)
     assert engine.truename_index(result["truename"], False) == index
-    assert result["browsed"]["type"] == type_name
-    if type_name == "time":
+    label = type_name.rsplit(":", 1)[-1]
+    assert result["truename"].split(":") == [label, " ".join(engine.to_truename(index))]
+    assert result["browsed"]["type"] == label
+    if label == "time":
         assert result["browsed"]["value"] == "00:00:01"
 
 
@@ -72,9 +82,10 @@ def test_clock_index_is_relative_to_its_source_and_independent_of_target(
     )
 
 
-def test_scoped_name_fields_convert_in_both_directions() -> None:
+@pytest.mark.parametrize("type_name", ["int", "pure:math:int"])
+def test_scoped_name_fields_convert_in_both_directions(type_name: str) -> None:
     encoded = json.loads(
-        bridge.recognize(json.dumps({"value": "42", "type_name": "int"}))
+        bridge.recognize(json.dumps({"value": "42", "type_name": type_name}))
     )
     decoded = json.loads(
         bridge.recognize(
@@ -82,21 +93,24 @@ def test_scoped_name_fields_convert_in_both_directions() -> None:
                 {
                     "value": encoded["truename"],
                     "mode": "truename",
-                    "type_name": "int",
+                    "type_name": type_name,
                 }
             )
         )
     )
     assert decoded["browsed"]["value"] == "42"
+    assert encoded["truename"].startswith("int:")
+    assert decoded["truename"] == encoded["truename"]
 
 
-def test_scoped_card_action_returns_a_local_index() -> None:
+@pytest.mark.parametrize("type_name", ["cards", "play:game:cards"])
+def test_scoped_card_action_returns_a_local_index(type_name: str) -> None:
     result = json.loads(
         bridge.count_action(
             json.dumps(
                 {
                     "value": "0",
-                    "type_name": "cards",
+                    "type_name": type_name,
                     "action": "swap",
                     "first": 0,
                     "second": 1,

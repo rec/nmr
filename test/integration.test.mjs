@@ -114,6 +114,9 @@ test("Name accepts truenames and Back restores mode, type and exact index", asyn
   const recognition = app.calls.find((i) => i.action === "recognize");
   assert.equal(recognition.payload.mode, "truename");
   assert.equal(recognition.payload.type_name, "int");
+  app.element("#type").value = "play:game:cards";
+  app.element("#type").change(); await flush();
+  assert.ok(app.element("#typed").textContent.startsWith("cards: "));
   app.load("http://localhost/?mode=count&type=cards&index=999999999999999999999&inc=7"); await flush();
   assert.equal(app.element("#count-value").value, "999999999999999999999");
   assert.equal(app.element("#count-increment").value, "7");

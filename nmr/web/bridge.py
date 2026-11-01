@@ -120,8 +120,8 @@ def count(request_json: str) -> str:
     )
     truename = " ".join(_engine.to_truename(index))
     if request.type_name:
-        path, _, _ = _engine.find_type(request.type_name)
-        truename = path + ":" + truename
+        _, _, codec = _engine.find_type(request.type_name)
+        truename = codec.label + ":" + truename
     result: dict[str, object] = {
         "index": format(Decimal(index), "f"),
         "truename": truename,
@@ -153,8 +153,8 @@ def count_action(request_json: str) -> str:
     request = CountActionRequest.model_validate_json(request_json)
     truename = " ".join(_engine.to_truename(parse_integer(request.value)))
     if request.type_name:
-        path, _, _ = _engine.find_type(request.type_name)
-        truename = path + ":" + truename
+        _, _, codec = _engine.find_type(request.type_name)
+        truename = codec.label + ":" + truename
     source = _engine.decode(truename, browse=True)
     value = change_value(source.type, source.value, request)
     result = _engine.encode(value, source.type, scope=request.type_name or "")
@@ -230,8 +230,8 @@ def recognize(request_json: str) -> str:
             try:
                 value = request.value
                 if request.type_name:
-                    path, _, _ = _engine.find_type(request.type_name)
-                    value = path + ":" + value.rsplit(":", 1)[-1]
+                    _, _, codec = _engine.find_type(request.type_name)
+                    value = codec.label + ":" + value.rsplit(":", 1)[-1]
                 result = _engine.decode(value, browse=True)
                 response["browsed"] = result.model_dump()
                 response["display"] = display_value(result.type, result.value)

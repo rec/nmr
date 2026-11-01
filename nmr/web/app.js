@@ -228,7 +228,7 @@ clockReadingButton.addEventListener("click", () => {
 type.addEventListener("change", () => {
   if (mode === "name") {
     if (current) editor.load(current.truename);
-    editor.prefix = type.value ? type.value + ": " : "";
+    editor.prefix = type.value ? type.value.split(":").at(-1) + ": " : "";
   }
   activate(true);
 });
