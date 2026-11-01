@@ -308,19 +308,17 @@ characters are escaped. For example: `/nmr?desc=Tom+Ritchford`.
 The query is part of the shared URL and is sent to the hosting server when that
 URL is opened or reloaded. The app does not save the input in local storage.
 
-The page has two panes beneath the `nmr` heading: description and true name.
 The page has three modes selected by radio buttons: **Name**, **Count**, and
-**Clock**. Its source, description, object, controls, and playback regions keep
-fixed dimensions. Long content scrolls within its region. Only the description
-editor disappears outside Name mode, leaving its space reserved.
+**Clock**. The heading names the mode. Its centered source, object, playback,
+and controls stay vertically stacked with fixed dimensions across modes.
+Clock shows its date and time above the current name. Long content stays within
+its region, notation scales down to fit, and text values scale to fill their box.
 
-In Name mode, both the true name and description are editable; editing either
-updates the other. The name editor retains vocabulary completion with Space,
-Left/Right, and Up/Down. There is no Swap control. Select a Type to edit a short
-name and restrict description conversion to that type, or select All types for
-full names and automatic description recognition.
+In Name mode, edit the true name to display its object. The name editor retains
+vocabulary completion with Space, Left/Right, and Up/Down. Select a Type to edit
+a short name, or select All types for full names.
 
-Count iterates an exact nonnegative integer. Automatic plays the current index,
+Count continuously iterates an exact nonnegative integer. It plays the current index,
 waits two seconds after the tune finishes, increments, and plays again. Increment
 is a compact positive-integer setting in Settings. Changing Type preserves the
 index and decodes it in the selected type. Finite types wrap using the codecs'
@@ -338,9 +336,9 @@ changes work in Name and Count modes. Clock's object display is read-only.
 The always-visible Playing area shows the name and notation for the exact tune
 that plays. Selected types play short names; All types plays full names.
 Notation and green highlighting follow the same audio and rendering settings.
-The current tune finishes when mode or Type changes. Count and Clock remember
-whether Automatic was enabled and resume when revisited, without overlapping
-audio. Keep last played music in Settings is enabled by default; disabling it
+The current tune finishes when mode or Type changes. The speaker button starts
+muted and toggles sound without stopping Count or Clock progression.
+Keep last played music in Settings is enabled by default; disabling it
 clears the name and score at playback end while reserving their space.
 
 Settings also contains volume, root, position, time signature, and playing-note
@@ -348,9 +346,9 @@ color. Existing playback, notation, and codec work limits still apply and are
 reported in the status region. VexFlow and its licensed fonts are bundled locally.
 
 New share links use separate mode and type parameters, an index and increment,
-and Name editing direction/value when applicable. Back and Forward restore the
-new link state. Previous URL formats are not supported. Settings and automatic
-playback preferences are kept in memory for the current page session.
+and a Name value when applicable. Back and Forward restore the new link state.
+Previous URL formats are not supported. Settings are kept in memory for the
+current page session.
 
 Rebuild after source changes before testing the local site. Automated tests do
 not establish audible quality or live visual synchronization. The browser smoke

@@ -132,7 +132,6 @@ export class ValueDisplay {
     const top = previous?.scrollTop || 0;
     this.container.replaceChildren();
     const layout = node("div", "", "card-layout");
-    layout.append(node("p", selected === null ? "Select two cards to interchange them." : "Select the other card."));
     const cards = node("div", "", "card-deck");
     for (const [position, card] of value.cards.entries()) {
       const suit = Math.floor(card / 13);

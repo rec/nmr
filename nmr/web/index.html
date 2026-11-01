@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="referrer" content="no-referrer" />
-    <meta name="description" content="Type a detail. Find its truename. Hear it." />
+    <meta name="description" content="Type a true name. See its object. Hear it." />
     <title>nmr</title>
     <base href="./" />
     <link rel="preload" as="image" href="world-map.svg" />
@@ -14,6 +14,13 @@
   </head>
   <body>
     <header id="settings-controls">
+      <button id="sound-toggle" type="button" aria-label="Mute" title="Mute" aria-pressed="true" disabled>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M11 4 6 8H3v8h3l5 4V4Z" />
+          <path class="sound-on" d="M15 8a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14" />
+          <path class="sound-off" d="m16 9 6 6m0-6-6 6" />
+        </svg>
+      </button>
       <button id="settings-toggle" type="button" popovertarget="settings-panel" aria-label="Settings" title="Settings">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="m9.5 3-.5 2a8 8 0 0 0-1.5.9l-2-.6L3 9.6 4.5 11a8 8 0 0 0 0 2L3 14.4l2.5 4.3 2-.6A8 8 0 0 0 9 19l.5 2h5l.5-2a8 8 0 0 0 1.5-.9l2 .6 2.5-4.3-1.5-1.4a8 8 0 0 0 0-2L21 9.6l-2.5-4.3-2 .6A8 8 0 0 0 15 5l-.5-2Z" />
@@ -82,25 +89,19 @@
       </div>
     </header>
     <main id="workspace" data-mode="name">
-      <h1>nmr</h1>
-      <div class="source-panels">
+      <h1>Name</h1>
       <section id="source-region" aria-label="Current source">
+        <time id="clock-time" hidden></time>
         <div id="name-editor" role="textbox" tabindex="0" aria-label="True name" aria-autocomplete="inline"><span id="typed"></span><span class="name-caret" aria-hidden="true"></span><span id="guessed"></span></div>
         <input id="count-value" aria-label="Count" type="text" inputmode="numeric" pattern="[0-9]+" value="0" autocomplete="off" spellcheck="false" hidden />
-        <time id="clock-time" hidden></time>
+        <p id="source-name" hidden></p>
       </section>
-      <section id="description-region"><label for="value">Description</label>
-        <input id="value" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" />
-      </section>
-      </div>
-      <div class="content-panels">
       <section id="value-display" aria-label="Current object"></section>
       <section id="playback-area" aria-label="Playing music">
         <h3>Playing</h3>
         <p id="playing-name" aria-live="polite"></p>
         <div id="playing-score" aria-label="Playing music notation"></div>
       </section>
-      </div>
       <p id="message" role="status"></p>
       <footer id="page-controls">
       <div class="mode-row">
@@ -110,11 +111,6 @@
           <label><input type="radio" name="mode" value="clock" /> Clock</label>
         </fieldset>
         <label>Type <select id="type" aria-label="Type"><option value="">All types</option></select></label>
-      </div>
-      <div id="playback-controls">
-        <button id="play" type="button" disabled>Play</button>
-        <label><input id="automatic" type="checkbox" disabled /> Automatic</label>
-        <button id="copy-link" type="button">Copy link</button>
       </div>
       </footer>
     </main>

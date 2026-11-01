@@ -1,9 +1,7 @@
 import "./volume.js";
 import "./help.js";
 import { configured, request } from "./runtime.js";
-import { describeObject } from "./description.mjs";
 import { TruenameEditor } from "./truename-editor.mjs";
-import { Editor } from "./editor.mjs";
 import { TunePlayer } from "./tune.js";
 import { presentation } from "./presentation.mjs";
 import { CountRunner } from "./count-runner.mjs";
@@ -12,17 +10,16 @@ import { ValueDisplay } from "./value-display.mjs";
 import { drawScore, highlightScore } from "./music-notation.mjs";
 
 const workspace = document.querySelector("#workspace");
+const heading = workspace.querySelector("h1");
 const modes = document.querySelectorAll('[name="mode"]');
 const type = document.querySelector("#type");
 const field = document.querySelector("#count-value");
-const description = document.querySelector("#value");
-const descriptionRegion = document.querySelector("#description-region");
 const nameField = document.querySelector("#name-editor");
 const typed = document.querySelector("#typed");
 const guessed = document.querySelector("#guessed");
 const time = document.querySelector("#clock-time");
-const playButton = document.querySelector("#play");
-const automatic = document.querySelector("#automatic");
+const sourceName = document.querySelector("#source-name");
+const sound = document.querySelector("#sound-toggle");
 const increment = document.querySelector("#count-increment");
 const interval = document.querySelector("#clock-interval");
 const timeOnly = document.querySelector("#clock-time-only");
@@ -34,10 +31,8 @@ const scoreTop = document.querySelector("#score-top");
 const scoreBottom = document.querySelector("#score-bottom");
 const color = document.querySelector("#score-highlight-color");
 const message = document.querySelector("#message");
-const copy = document.querySelector("#copy-link");
-const enabled = { count: false, clock: false };
+let muted = true;
 let mode = "name";
-let direction = "description";
 let editor;
 let version = 0;
 let current = null;
@@ -46,9 +41,7 @@ let playback = null;
 let ended = null;
 let playingBpm = presentation.bpm;
 let ready = false;
-let timer;
 let player;
-const descriptionEditor = new Editor();
 try {
   player = new TunePlayer(() => {
     highlightScore(score, null, playingBpm);
@@ -70,22 +63,36 @@ const display = new ValueDisplay(document.querySelector("#value-display"), (acti
   pending.then((result) => {
     if (revision !== version) return;
     if (mode === "count") field.value = result.index;
-    else {
-      direction = "description";
-      description.value = type.value ? result.value : describeObject(result);
-    }
+    else editor.load(result.truename);
     refresh();
   }).catch(report);
 });
+new ResizeObserver(fitValueText).observe(display.container);
 const runner = new CountRunner(playCurrent, () => {
-  if (mode !== "count" || !enabled.count) return;
+  if (mode !== "count") return;
   field.value = String(BigInt(field.value) + BigInt(increment.value));
   refresh();
-}, (error) => { enabled.count = false; automatic.checked = false; report(error); });
+}, report);
+player?.setVolume(0, 0);
 
 function report(error) { message.textContent = error.message; console.error(error); }
 function clearPlayback() { playingName.textContent = ""; score.replaceChildren(); }
 function renderName() { typed.textContent = editor?.text || ""; guessed.textContent = editor?.guessed || ""; }
+function fitValueText() {
+  const text = display.container.querySelector(".value-text");
+  if (!text) return;
+  let low = 8;
+  let high = Math.floor(Math.min(display.container.clientWidth, display.container.clientHeight));
+  const height = display.container.clientHeight;
+  const width = display.container.clientWidth;
+  while (low < high) {
+    const size = Math.ceil((low + high) / 2);
+    text.style.fontSize = `${size}px`;
+    if (text.scrollHeight > height || text.scrollWidth > width) high = size - 1;
+    else low = size;
+  }
+  text.style.fontSize = `${low}px`;
+}
 function settings() {
   return { ...presentation, time_signature: { top: scoreTop.value || "4", bottom: Number(scoreBottom.value) } };
 }
@@ -93,11 +100,9 @@ function writeURL(push = false) {
   const url = new URL(window.location.href);
   url.search = new URLSearchParams({ mode, type: type.value, index: field.value || "0", inc: increment.value || "1" });
   if (mode === "name") {
-    url.searchParams.set("edit", direction);
-    url.searchParams.set("value", direction === "description" ? description.value : editor?.text || "");
+    url.searchParams.set("value", editor?.text || "");
   }
   window.history[push ? "pushState" : "replaceState"](null, "", url);
-  copy.textContent = "Copy link";
 }
 function clockSource() {
   const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
@@ -108,9 +113,7 @@ function clockSource() {
 function refresh(push = false) {
   const revision = ++version;
   current = null;
-  playButton.disabled = true;
-  automatic.disabled = !player || mode === "name" ||
-    (mode === "count" && (!/^[0-9]+$/.test(field.value) || !increment.value || !increment.validity.valid));
+  sourceName.textContent = "";
   message.textContent = "";
   display.clear(true);
   writeURL(push);
@@ -119,7 +122,7 @@ function refresh(push = false) {
   let action;
   if (mode === "name") {
     renderName();
-    payload = { mode: direction, value: direction === "description" ? description.value : editor.accepted, type_name: type.value };
+    payload = { mode: "truename", value: editor.accepted, type_name: type.value };
     if (!payload.value) { loading = Promise.resolve(null); return; }
     action = "recognize";
   } else {
@@ -137,16 +140,15 @@ function refresh(push = false) {
     const name = result.full_truename || result.truename;
     if (!name) { message.textContent = result.message || result.browse_error || ""; return null; }
     current = { ...result, truename: name };
-    if (mode === "name") {
-      if (direction === "description") { editor.load(name); renderName(); }
-      else description.value = result.browsed ? (type.value ? result.browsed.value : describeObject(result.browsed)) : "";
-    } else if (mode === "clock") field.value = result.index;
+    sourceName.textContent = name;
+    if (mode === "clock") field.value = result.index;
     display.show(result.display);
+    requestAnimationFrame(fitValueText);
     if (mode === "clock") {
       for (const button of display.container.querySelectorAll("button")) button.disabled = true;
       writeURL();
     }
-    playButton.disabled = !player;
+    if (mode === "name") playCurrent().catch(report);
     message.textContent = result.browse_error || "";
     return current;
   }).catch((error) => { if (revision === version) report(error); return null; });
@@ -154,7 +156,7 @@ function refresh(push = false) {
 function playCurrent() {
   const revision = version;
   if (!player) return Promise.reject(new Error("Audio is unavailable."));
-  const unlocked = player.unlock();
+  const unlocked = muted ? Promise.resolve() : player.unlock();
   if (playback) return playback.then(() => revision === version ? playCurrent() : undefined);
   const value = loading;
   const render = settings();
@@ -168,12 +170,20 @@ function playCurrent() {
     const { item, music } = result;
     if (music.playback_error) throw new Error(music.playback_error);
     // TunePlayer.play stops its previous voices before starting the new tune.
-    player.play(music.playback);
+    if (player.context.state === "running") player.play(music.playback);
     playingBpm = render.bpm;
     playingName.textContent = item.truename;
     score.replaceChildren();
     if (music.score) drawScore(score, music.score);
     else score.textContent = music.score_error || "";
+    // Browsers suspend audio before the first gesture; muted Count still advances.
+    if (player.context.state !== "running") {
+      const duration = Math.max(0, ...music.playback.map((i) => i.onset + i.duration));
+      return new Promise((resolve) => setTimeout(() => {
+        if (!retain.checked) clearPlayback();
+        resolve();
+      }, (duration + 0.05) * 1000));
+    }
     if (!player.playing) { if (!retain.checked) clearPlayback(); return; }
     return new Promise((resolve) => { ended = resolve; });
   }).finally(() => { playback = null; });
@@ -182,17 +192,15 @@ function playCurrent() {
 function activate(push = false) {
   runner.stop();
   workspace.dataset.mode = mode;
+  heading.textContent = mode[0].toUpperCase() + mode.slice(1);
   for (const radio of modes) radio.checked = radio.value === mode;
   nameField.hidden = mode !== "name";
   field.hidden = mode !== "count";
   time.hidden = mode !== "clock";
-  descriptionRegion.inert = mode !== "name";
-  descriptionRegion.setAttribute("aria-hidden", String(mode !== "name"));
-  automatic.disabled = mode === "name" || !player || !ready;
-  automatic.checked = enabled[mode] || false;
+  sourceName.hidden = mode === "name";
   refresh(push);
-  if (enabled.count && mode === "count" && ready && !automatic.disabled) runner.start();
-  if (enabled.clock && mode === "clock" && ready) playCurrent().catch(report);
+  if (mode === "count" && ready && increment.value && increment.validity.valid) runner.start();
+  if (mode === "clock" && ready) playCurrent().catch(report);
 }
 function readURL() {
   const query = new URL(window.location.href).searchParams;
@@ -203,9 +211,7 @@ function readURL() {
   const inc = query.get("inc") || "1";
   increment.value = /^[0-9]+$/.test(inc) && BigInt(inc) > 0n ? inc : "1";
   increment.setCustomValidity("");
-  direction = query.get("edit") === "truename" ? "truename" : "description";
-  if (direction === "truename") editor?.load(query.get("value") || "");
-  else description.value = query.get("value") || "";
+  editor?.load(query.get("value") || "");
   activate();
 }
 for (const radio of modes) radio.addEventListener("change", () => { mode = radio.value; activate(true); });
@@ -213,18 +219,15 @@ type.addEventListener("change", () => {
   if (mode === "name") {
     if (current) editor.load(current.truename);
     editor.prefix = type.value ? type.value + ": " : "";
-    direction = "truename";
   }
   activate(true);
 });
-automatic.addEventListener("change", () => {
-  enabled[mode] = automatic.checked;
-  if (mode === "count") {
-    if (automatic.checked && increment.validity.valid) runner.start();
-    else runner.stop();
-  } else if (mode === "clock" && automatic.checked) playCurrent().catch(report);
+sound.addEventListener("click", () => {
+  muted = !muted;
+  sound.setAttribute("aria-pressed", String(muted));
+  player.setVolume(muted ? 0 : 1, 0.02);
+  if (!muted) player.unlock().catch(report);
 });
-playButton.addEventListener("click", () => playCurrent().catch(report));
 retain.addEventListener("change", () => { if (!retain.checked && !player?.playing) clearPlayback(); });
 color.addEventListener("input", () => score.style.setProperty("--playing-note-color", color.value));
 for (const input of [field, increment]) {
@@ -234,25 +237,18 @@ for (const input of [field, increment]) {
     if (/[^0-9]/.test(input.value)) input.value = accepted;
     accepted = input.value;
     increment.setCustomValidity(!increment.value || BigInt(increment.value) === 0n ? "Increment must be positive." : "");
-    if (mode === "count") { runner.stop(); enabled.count = false; automatic.checked = false; }
+    if (mode === "count") runner.stop();
     refresh();
+    if (mode === "count" && increment.value && increment.validity.valid && /^[0-9]+$/.test(field.value)) runner.start();
   });
 }
-description.addEventListener("beforeinput", (event) => {
-  if (!event.data) return;
-  descriptionEditor.text = description.value;
-  descriptionEditor.anchor = description.selectionStart;
-  descriptionEditor.cursor = description.selectionEnd;
-  if (!descriptionEditor.replace(event.data)) event.preventDefault();
-});
-description.addEventListener("input", () => { direction = "description"; clearTimeout(timer); version++; timer = setTimeout(refresh, 120); });
 function nameKey(key) {
   if (!editor) return;
   const changed = key === "ArrowRight" ? editor.right()
     : ["ArrowLeft", "Backspace"].includes(key) ? editor.left()
     : ["ArrowUp", "ArrowDown"].includes(key) ? editor.cycle(key === "ArrowUp" ? -1 : 1)
     : editor.type(key);
-  if (changed) { direction = "truename"; refresh(); }
+  if (changed) refresh();
   else renderName();
 }
 nameField.addEventListener("keydown", (event) => {
@@ -264,19 +260,18 @@ nameField.addEventListener("keydown", (event) => {
 nameField.addEventListener("beforeinput", (event) => { event.preventDefault(); nameKey(event.inputType === "deleteContentBackward" ? "Backspace" : event.data || ""); });
 nameField.addEventListener("paste", (event) => {
   event.preventDefault();
-  if (editor?.load(event.clipboardData.getData("text/plain"))) { direction = "truename"; refresh(); }
+  if (editor?.load(event.clipboardData.getData("text/plain"))) refresh();
 });
 for (const input of [scoreTop, scoreBottom, timeOnly, displayUTC, interval]) input.addEventListener("change", () => {
   if (scoreTop.validity.valid) refresh();
 });
 for (const input of [document.querySelector("#tune-root"), document.querySelector("#tune-position")]) input.addEventListener("change", () => refresh());
-copy.addEventListener("click", () => navigator.clipboard.writeText(window.location.href).then(() => { copy.textContent = "Copied"; }).catch(report));
 window.addEventListener("popstate", readURL);
 function tick() {
   if (mode === "clock" && ready) {
     const reading = clockSource();
     refresh();
-    if (reading.due && enabled.clock && !playback) playCurrent().catch(report);
+    if (reading.due && !playback) playCurrent().catch(report);
   }
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
@@ -291,6 +286,7 @@ configured.then((info) => {
   editor = new TruenameEditor(info.words);
   ready = true;
   readURL();
-  description.dataset.ready = nameField.dataset.ready = "true";
+  nameField.dataset.ready = "true";
+  sound.disabled = !player;
 }).catch(report);
 tick();

@@ -60,7 +60,7 @@ def test_browser_assets_share_one_build_revision(tmp_path: Path) -> None:
         == Path("nmr/web/world-map.svg").read_bytes()
     )
     app = page.with_name("app.js").read_text()
-    assert f"./editor.mjs?v={revision}" in app
+    assert f"./truename-editor.mjs?v={revision}" in app
     assert f"./tune.js?v={revision}" in app
     assert f"runtime.js?v={revision}" in app
     assert f"presentation.mjs?v={revision}" in app
