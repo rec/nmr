@@ -67,6 +67,9 @@ const { chromium } = require("playwright");
       assert.equal(await page.getByRole("radio", { name: "Count", exact: true }).isChecked(), true);
       await page.getByRole("button", { name: "Settings", exact: true }).click();
       assert.equal(await page.locator("#retain-playback").isChecked(), true);
+      assert.equal(await page.locator("#evolve").isChecked(), true);
+      await page.locator("#evolve").uncheck();
+      await page.locator("#evolve").check();
       assert.equal(await page.locator("#settings-panel #count-increment").count(), 1);
     }
     assert.deepEqual(errors, []);

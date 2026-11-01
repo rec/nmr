@@ -349,6 +349,13 @@ Settings also contains volume, root, position, time signature, and playing-note
 color. Existing playback, notation, and codec work limits still apply and are
 reported in the status region. VexFlow and its licensed fonts are bundled locally.
 
+Evolve is enabled by default. Harmonic mixtures change with the audio clock;
+shared slow modulation varies brightness, stereo position, and a quiet 190 ms
+echo across tune boundaries. Note pitches, onsets, durations, and volume envelopes
+are unchanged. Echo tails can continue after a note ends; mute silences the
+effects as well as the notes. Disabling Evolve smoothly bypasses the effects and
+uses the plain triangle waveform for subsequent notes.
+
 New share links use separate mode and type parameters, an index and increment,
 and a Name value when applicable. Back and Forward restore the new link state.
 Previous URL formats are not supported. Settings are kept in memory for the

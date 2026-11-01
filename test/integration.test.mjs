@@ -14,7 +14,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
   const element = (id) => {
     if (!elements.has(id)) elements.set(id, {
       value: id === "#count-increment" ? "1" : id === "#score-top" || id === "#score-bottom" ? "4" : id === "#clock-interval" ? "5" : "",
-      checked: id === "#retain-playback", textContent: "", dataset: {}, validity: { valid: true }, style: { setProperty() {} },
+      checked: ["#retain-playback", "#evolve"].includes(id), textContent: "", dataset: {}, validity: { valid: true }, style: { setProperty() {} },
       hidden: id === "#clock-count",
       attributes: {},
       addEventListener(event, fn) { this[event] = fn; }, setAttribute(name, value) { this.attributes[name] = String(value); },
@@ -61,6 +61,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
       constructor(onEnded) { player = this; this.onEnded = onEnded; this.plays = 0; this.playing = false; this.context = { state: "suspended" }; }
       unlock() { this.context.state = "running"; return Promise.resolve(); }
       setVolume(value) { this.volume = value; }
+      setEvolution(value) { this.evolving = value; }
       play() { this.onEnded(); this.playing = true; this.plays++; }
       finish() { this.playing = false; this.onEnded(); }
     },
@@ -126,6 +127,11 @@ test("Name accepts truenames and Back restores mode, type and exact index", asyn
 
 test("Count advances before audio is unlocked and mute only changes the volume", async () => {
   const app = page(); await flush();
+  assert.equal(app.player.volume, 0);
+  assert.equal(app.player.evolving, true);
+  app.element("#evolve").checked = false;
+  app.element("#evolve").change();
+  assert.equal(app.player.evolving, false);
   assert.equal(app.player.volume, 0);
   assert.equal(app.player.plays, 0);
   app.timers.find((i) => Math.abs(i.delay - 150) < 1).fn(); await flush();

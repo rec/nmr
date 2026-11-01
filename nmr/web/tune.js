@@ -25,6 +25,36 @@ export class TunePlayer {
     masterOutputs.set(this.context, master);
     this.output = this.context.createGain();
     this.output.connect(master);
+    this.input = this.context.createGain();
+    this.dry = this.context.createGain();
+    this.evolved = this.context.createGain();
+    this.dry.gain.value = 0;
+    this.evolved.gain.value = 0.9;
+    this.input.connect(this.dry).connect(this.output);
+    const filter = this.context.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 5000;
+    filter.Q.value = 0.5;
+    const pan = this.context.createStereoPanner();
+    const delay = this.context.createDelay(1);
+    delay.delayTime.value = 0.19;
+    const echo = this.context.createGain();
+    echo.gain.value = 0.05;
+    const feedback = this.context.createGain();
+    feedback.gain.value = 0.12;
+    this.input.connect(filter).connect(pan).connect(this.evolved).connect(this.output);
+    pan.connect(delay).connect(echo).connect(this.evolved);
+    delay.connect(feedback).connect(delay);
+    // These audio-clock modulations run continuously across tune boundaries.
+    for (const [parameter, period, depth] of [[filter.frequency, 83, 2500], [pan.pan, 47, 0.2], [echo.gain, 173, 0.025]]) {
+      const oscillator = this.context.createOscillator();
+      const amount = this.context.createGain();
+      oscillator.frequency.value = 1 / period;
+      amount.gain.value = depth;
+      oscillator.connect(amount).connect(parameter);
+      oscillator.start();
+    }
+    this.evolving = true;
     this.voices = new Set();
     this.intro = null;
     this.introPlayed = false;
@@ -49,6 +79,16 @@ export class TunePlayer {
     this.output.gain.cancelScheduledValues(now);
     this.output.gain.setValueAtTime(level, now);
     this.output.gain.linearRampToValueAtTime(volume, now + seconds);
+  }
+  setEvolution(enabled) {
+    this.evolving = enabled;
+    const now = this.context.currentTime;
+    for (const [parameter, target] of [[this.dry.gain, enabled ? 0 : 1], [this.evolved.gain, enabled ? 0.9 : 0]]) {
+      const level = parameter.value;
+      parameter.cancelScheduledValues(now);
+      parameter.setValueAtTime(level, now);
+      parameter.linearRampToValueAtTime(target, now + 0.5);
+    }
   }
   get playing() {
     return this.voices.size > 0;
@@ -91,12 +131,20 @@ export class TunePlayer {
       const end = onset + event.duration;
       const edge = Math.min(0.005, event.duration / 4);
       voice.type = "triangle";
+      if (this.evolving) {
+        const phase = 2 * Math.PI * onset;
+        voice.setPeriodicWave(this.context.createPeriodicWave(
+          new Float32Array(6),
+          new Float32Array([0, 0.86, 0.06 + 0.02 * Math.sin(phase / 137), 0.03 + 0.01 * Math.sin(phase / 211), 0, 0.015 + 0.005 * Math.sin(phase / 97)]),
+          { disableNormalization: true },
+        ));
+      }
       voice.frequency.value = 440 * 2 ** ((event.pitch - 69) / 12);
       gain.gain.setValueAtTime(0, onset);
       gain.gain.linearRampToValueAtTime(1, onset + edge);
       gain.gain.setValueAtTime(1, end - edge);
       gain.gain.linearRampToValueAtTime(0, end);
-      voice.connect(gain).connect(this.output);
+      voice.connect(gain).connect(this.input);
       voice.onended = () => {
         voice.disconnect();
         gain.disconnect();

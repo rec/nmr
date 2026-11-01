@@ -29,6 +29,7 @@ const interval = document.querySelector("#clock-interval");
 const timeOnly = document.querySelector("#clock-time-only");
 const displayUTC = document.querySelector("#clock-display-utc");
 const retain = document.querySelector("#retain-playback");
+const evolve = document.querySelector("#evolve");
 const playingName = document.querySelector("#playing-name");
 const score = document.querySelector("#playing-score");
 const scoreTop = document.querySelector("#score-top");
@@ -78,6 +79,7 @@ const runner = new CountRunner(playCurrent, () => {
   refresh();
 }, report);
 player?.setVolume(0, 0);
+player?.setEvolution(evolve.checked);
 
 function report(error) { message.textContent = error.message; console.error(error); }
 function clearPlayback() { playingName.textContent = ""; score.replaceChildren(); }
@@ -239,6 +241,7 @@ sound.addEventListener("click", () => {
   if (!muted) player.unlock().catch(report);
 });
 retain.addEventListener("change", () => { if (!retain.checked && !player?.playing) clearPlayback(); });
+evolve.addEventListener("change", () => player?.setEvolution(evolve.checked));
 color.addEventListener("input", () => score.style.setProperty("--playing-note-color", color.value));
 for (const input of [field, increment]) {
   let accepted = input.value;

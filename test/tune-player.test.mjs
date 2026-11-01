@@ -5,27 +5,58 @@ import vm from "node:vm";
 
 const source = fs.readFileSync(new URL("../nmr/web/tune.js", import.meta.url), "utf8").replaceAll("export ", "");
 
-test("playback positions follow the audio clock through rests and clear on stop or completion", () => {
-  const frames = new Map();
-  const positions = [];
-  const oscillators = [];
-  let nextFrame = 0;
-  const parameter = () => ({ value: 0, setValueAtTime() {}, linearRampToValueAtTime() {} });
-  class AudioContext {
-    currentTime = 10;
-    createGain() { return { gain: parameter(), connect() {}, disconnect() {} }; }
-    createOscillator() {
-      const voice = { frequency: parameter(), connect: (gain) => gain, disconnect() {}, start() {}, stop() {} };
-      oscillators.push(voice);
-      return voice;
-    }
-    addEventListener() {}
+class Parameter {
+  constructor(value = 0) { this.value = value; this.events = []; }
+  cancelScheduledValues(time) { this.events.push(["cancel", time]); }
+  setValueAtTime(value, time) { this.value = value; this.events.push(["set", value, time]); }
+  linearRampToValueAtTime(value, time) { this.value = value; this.events.push(["ramp", value, time]); }
+}
+
+class AudioNode {
+  constructor(kind) { this.kind = kind; this.connections = []; }
+  connect(target) { this.connections.push(target); return target; }
+  disconnect() { this.connections = []; }
+}
+
+class AudioContext {
+  currentTime = 10;
+  nodes = [];
+  addEventListener() {}
+  node(kind) { const node = new AudioNode(kind); this.nodes.push(node); return node; }
+  createGain() { const node = this.node("gain"); node.gain = new Parameter(1); return node; }
+  createBiquadFilter() { const node = this.node("filter"); node.frequency = new Parameter(); node.Q = new Parameter(); return node; }
+  createStereoPanner() { const node = this.node("pan"); node.pan = new Parameter(); return node; }
+  createDelay() { const node = this.node("delay"); node.delayTime = new Parameter(); return node; }
+  createPeriodicWave(real, imag, options) { return { real, imag, options }; }
+  createOscillator() {
+    const node = this.node("oscillator");
+    node.frequency = new Parameter();
+    node.start = (time = 0) => { node.started = time; };
+    node.stop = (time) => { node.stopped = time; };
+    node.setPeriodicWave = (wave) => { node.wave = wave; };
+    return node;
   }
-  const player = vm.runInNewContext(source + "\nnew TunePlayer(() => {}, (seconds) => positions.push(seconds));", {
-    AudioContext, positions,
+}
+
+function synth(onPosition = null) {
+  const frames = new Map();
+  let nextFrame = 0;
+  const context = vm.createContext({
+    AudioContext, onPosition,
     requestAnimationFrame(callback) { frames.set(++nextFrame, callback); return nextFrame; },
     cancelAnimationFrame(id) { frames.delete(id); },
   });
+  const player = vm.runInContext(source + "\nnew TunePlayer(() => {}, onPosition);", context);
+  return { player, frames, context };
+}
+
+function voices(player) {
+  return player.context.nodes.filter((i) => i.kind === "oscillator" && i.frequency.value > 1);
+}
+
+test("playback positions follow the audio clock through rests and clear on stop or completion", () => {
+  const positions = [];
+  const { player, frames } = synth((seconds) => positions.push(seconds));
   const frame = () => {
     const [id, callback] = frames.entries().next().value;
     frames.delete(id);
@@ -37,9 +68,9 @@ test("playback positions follow the audio clock through rests and clear on stop 
   assert.ok(Math.abs(positions.at(-1) - 0.75) < 1e-9, "Position advances during the rest");
   frame();
   assert.ok(Math.abs(positions.at(-1) - 0.75) < 1e-9, "A paused audio clock does not advance the highlight");
-  oscillators[0].onended();
+  voices(player)[0].onended();
   assert.equal(frames.size, 1);
-  oscillators[1].onended();
+  voices(player)[1].onended();
   assert.equal(positions.at(-1), null);
   assert.equal(frames.size, 0);
   player.play([{ pitch: 53, onset: 0, duration: 1 }]);
@@ -49,31 +80,65 @@ test("playback positions follow the audio clock through rests and clear on stop 
 });
 
 test("volume uses decibel spacing with unity at 120 and tune envelopes reach full amplitude", () => {
-  const gains = [];
-  class AudioContext {
-    currentTime = 0;
-    addEventListener() {}
-    createGain() {
-      const gain = { value: 0, cancelScheduledValues() {}, setValueAtTime(value) { this.value = value; }, linearRampToValueAtTime(value) { this.value = value; } };
-      gains.push(gain);
-      return { gain, connect() {}, disconnect() {} };
-    }
-    createOscillator() { return { frequency: {}, connect: (gain) => gain, start() {}, stop() {} }; }
-  }
-  const context = vm.createContext({ AudioContext, cancelAnimationFrame() {} });
-  const player = vm.runInContext(source + "\nnew TunePlayer();", context);
-  assert.ok(Math.abs(gains[0].value - 10 ** (-20 / 20)) < 1e-12, "Default volume is 100");
+  const { player, context } = synth();
+  const master = player.context.nodes[0].gain;
+  assert.ok(Math.abs(master.value - 10 ** (-20 / 20)) < 1e-12, "Default volume is 100");
   for (const level of [0, 90, 100, 120]) {
     vm.runInContext(`setMasterVolume(${level});`, context);
-    assert.equal(gains[0].value, level === 0 ? 0 : 10 ** ((level - 120) / 20));
+    assert.equal(master.value, level === 0 ? 0 : 10 ** ((level - 120) / 20));
   }
-  const peaks = [];
-  const createGain = player.context.createGain.bind(player.context);
-  player.context.createGain = () => {
-    const node = createGain();
-    node.gain.linearRampToValueAtTime = (value) => peaks.push(value);
-    return node;
-  };
   player.play([{ pitch: 53, onset: 0, duration: 1 }]);
-  assert.deepEqual(peaks, [1, 0]);
+  const envelope = voices(player)[0].connections[0].gain;
+  assert.deepEqual(envelope.events.filter((i) => i[0] === "ramp").map((i) => i[1]), [1, 0]);
+});
+
+test("evolution changes harmonics across tunes while preserving note times and envelopes", () => {
+  const { player } = synth();
+  const event = { pitch: 60, onset: 0.25, duration: 1 };
+  player.play([event]);
+  const first = voices(player).at(-1);
+  assert.equal(first.started, 10.3);
+  assert.equal(first.stopped, 11.3);
+  assert.deepEqual(first.connections[0].gain.events, [
+    ["set", 0, 10.3], ["ramp", 1, 10.3 + 0.005],
+    ["set", 1, 11.295], ["ramp", 0, 11.3],
+  ]);
+  player.context.currentTime = 100;
+  player.play([event]);
+  const second = voices(player).at(-1);
+  assert.notDeepEqual(Array.from(second.wave.imag), Array.from(first.wave.imag));
+  assert.equal(second.stopped - second.started, 1);
+  assert.equal(second.frequency.value, first.frequency.value);
+  for (const voice of [first, second]) {
+    assert.equal(voice.wave.options.disableNormalization, true);
+    assert.ok(Array.from(voice.wave.imag).reduce((a, b) => a + Math.abs(b), 0) <= 1);
+  }
+});
+
+test("shared modulation survives tune boundaries and switching evolution does not unmute effects", () => {
+  const { player } = synth();
+  const shared = player.context.nodes.slice();
+  const modulators = shared.filter((i) => i.kind === "oscillator");
+  assert.equal(modulators.length, 3);
+  player.setVolume(0, 0);
+  player.play([{ pitch: 53, onset: 0, duration: 1 }]);
+  player.stop();
+  player.setEvolution(false);
+  assert.equal(player.output.gain.value, 0);
+  assert.equal(player.dry.gain.value, 1);
+  assert.equal(player.evolved.gain.value, 0);
+  assert.ok(modulators.every((i) => i.stopped === undefined));
+  player.play([{ pitch: 53, onset: 0, duration: 1 }]);
+  assert.equal(voices(player).at(-1).wave, undefined);
+  assert.equal(voices(player).at(-1).type, "triangle");
+  player.setEvolution(true);
+  assert.equal(player.output.gain.value, 0);
+  assert.equal(player.dry.gain.value, 0);
+  assert.equal(player.evolved.gain.value, 0.9);
+  assert.equal(player.context.nodes.filter((i) => i.kind === "delay").length, 1);
+  assert.equal(player.context.nodes.filter((i) => i.kind === "filter").length, 1);
+  assert.equal(player.context.nodes.filter((i) => i.kind === "pan").length, 1);
+  const echo = shared.find((i) => i.kind === "delay");
+  assert.equal(echo.delayTime.value, 0.19);
+  assert.ok(echo.connections.every((i) => i.gain.value < 1));
 });

@@ -32,4 +32,7 @@ Changing mode or Type lets the current tune finish. Keep last played music in Se
 whether the last name and score remain visible after playback.
 
 Settings also contains volume, root, position, time signature, and highlight color.
+Evolve is on by default. It slowly changes harmonics, brightness, stereo position,
+and a quiet short echo across tunes. Note timings and volume envelopes stay the
+same; the echo adds a short tail. Switch Evolve off for the plain triangle tone.
 The address bar contains a link to the current source, mode, type, index, and increment.
