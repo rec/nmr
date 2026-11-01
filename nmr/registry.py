@@ -21,14 +21,14 @@ ROOT = Category(
     Category("pure", Category("math", Int, Frac)),
     Category(
         "real",
-        Category("time", Date, Time, DateTime),
+        Category("time", DateTime, Date, Time),
         LatLong,
     ),
     Category(
         "data",
         Category("address", IP, Phone),
         Category("register", Isbn, Upc),
-        Category("id", Uuid, Semver, String),
+        Category("id", String, Uuid, Semver),
     ),
     Category("play", Category("game", Chess, Go, Cards), Category("music", Tune)),
 )

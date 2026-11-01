@@ -100,7 +100,7 @@ def test_string_uses_the_id_category_without_a_text_alias() -> None:
         engine.encode("hello", "text")
     with pytest.raises(ValueError, match="Unknown"):
         engine.decode("data:text:the")
-    result = engine.decode("id:" + " ".join(engine.to_truename(2)))
+    result = engine.decode("id:" + " ".join(engine.to_truename(0)))
     assert result.type == "string"
     assert result.value == ""
 

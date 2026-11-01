@@ -89,7 +89,7 @@ def test_categories_reject_invalid_children() -> None:
 
 
 def test_bare_time_selects_the_leaf_and_real_time_selects_the_category() -> None:
-    assert ROOT.lookup("time") == (Time, [1, 0, 1])
+    assert ROOT.lookup("time") == (Time, [1, 0, 2])
     node, slots = ROOT.lookup("real:time")
     assert isinstance(node, Category)
     assert slots == [1, 0]
