@@ -1,12 +1,13 @@
 import io
 import json
+from datetime import datetime, timedelta
 
 import pytest
 
 from nmr._main import Main
 from nmr.nmr import Nmr
+from nmr.registry import ROOT
 from nmr.types import temporal
-from nmr.types.integer import signed_index
 from nmr.web import bridge
 
 
@@ -15,23 +16,57 @@ from nmr.web import bridge
     [
         (temporal.Date, "2027-01-01", 0),
         (temporal.Date, "2027-01-02", 1),
-        (temporal.Date, "2026-12-31", 2),
-        (temporal.Date, "2027-01-03", 3),
-        (temporal.Date, "2026-12-30", 4),
+        (temporal.Date, "2027-01-03", 2),
+        (temporal.Date, "2026-12-31", 3),
+        (temporal.Date, "2027-01-04", 4),
+        (temporal.Date, "2027-01-05", 5),
+        (temporal.Date, "2026-12-30", 6),
+        (temporal.Date, "2027-01-06", 7),
+        (temporal.Date, "2027-01-07", 8),
+        (temporal.Date, "2026-12-29", 9),
         (temporal.DateTime, "2027-01-01T00:00:00", 0),
         (temporal.DateTime, "2027-01-01T00:00:01", 1),
-        (temporal.DateTime, "2026-12-31T23:59:59", 2),
-        (temporal.DateTime, "2027-01-01T00:00:02", 3),
-        (temporal.DateTime, "2026-12-31T23:59:58", 4),
-        (temporal.DateTime, "2027-01-02T00:00:00", 2 * temporal.DAY - 1),
-        (temporal.DateTime, "2026-12-31T00:00:00", 2 * temporal.DAY),
+        (temporal.DateTime, "2027-01-01T00:00:02", 2),
+        (temporal.DateTime, "2026-12-31T23:59:59", 3),
+        (temporal.DateTime, "2027-01-01T00:00:03", 4),
+        (temporal.DateTime, "2027-01-01T00:00:04", 5),
+        (temporal.DateTime, "2026-12-31T23:59:58", 6),
+        (temporal.DateTime, "2027-01-01T00:00:05", 7),
+        (temporal.DateTime, "2027-01-01T00:00:06", 8),
+        (temporal.DateTime, "2026-12-31T23:59:57", 9),
+        (temporal.DateTime, "2027-01-02T00:00:00", 3 * temporal.DAY // 2 - 1),
+        (temporal.DateTime, "2026-12-31T00:00:00", 3 * temporal.DAY),
     ],
 )
-def test_zoot_and_nearby_values_use_the_existing_signed_order(
+def test_zoot_and_nearby_values_use_factor_three_order(
     codec: type[temporal.Date] | type[temporal.DateTime], value: str, index: int
 ) -> None:
     assert codec.str_to_index(value) == index
     assert codec.index_to_str(index) == value
+
+
+@pytest.mark.parametrize("codec", [temporal.Date, temporal.DateTime])
+def test_centered_calendar_indices_round_trip_without_gaps(
+    codec: type[temporal.Date] | type[temporal.DateTime],
+) -> None:
+    for i in range(384):
+        assert codec.str_to_index(codec.index_to_str(i)) == i
+
+
+@pytest.mark.parametrize("start", ["2026-12-31T12:00:00", "2027-01-01T12:00:00"])
+@pytest.mark.parametrize("interval", [1, 5, 15])
+def test_clock_offsets_visit_every_registered_type(start: str, interval: int) -> None:
+    start_time = datetime.fromisoformat(start)
+    visited = {
+        ROOT.resolve(
+            temporal.DateTime.str_to_index(
+                (start_time + timedelta(seconds=i * interval)).isoformat()
+            ),
+            browse=True,
+        )[0].label
+        for i in range(128)
+    }
+    assert visited == {c.label for _, _, c in ROOT.leaves()}
 
 
 @pytest.mark.parametrize("center_on_zoot", [True, False])
@@ -62,8 +97,9 @@ def test_calendar_extremes_and_leap_days_round_trip_in_both_modes(
 def test_centered_calendar_overflow_is_rejected_or_browsed_into_range(
     codec: type[temporal.Date] | type[temporal.DateTime], scale: int
 ) -> None:
-    before = signed_index(-temporal.ZOOT * scale - 1)
-    after = signed_index((temporal.DAYS - temporal.ZOOT) * scale)
+    before = 3 * (temporal.ZOOT * scale + 1)
+    after_offset = (temporal.DAYS - temporal.ZOOT) * scale
+    after = after_offset + (after_offset - 1) // 2
     first = "0001-01-01" + ("T00:00:00" if scale > 1 else "")
     last = "9999-12-31" + ("T23:59:59" if scale > 1 else "")
     for index in [before, after, -1]:

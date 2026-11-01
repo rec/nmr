@@ -131,8 +131,8 @@ no assignment, ownership, or reachability checks are made.
 
 Date and DateTime default to `center_on_zoot=True`. Zoot is **2027-01-01
 00:00:00 UTC**: Date counts days from that date, and DateTime counts seconds
-from that instant. The existing signed mapping orders them as zoot, one unit
-after, one unit before, two after, two before. DateTime applies this mapping
+from that instant. Their factor-three mapping orders offsets as
+`0, 1, 2, -1, 3, 4, -2, 5, 6, -3, ...`. DateTime applies this mapping
 once to the combined offset. This gives nearby values small indices and earlier
 tunes in the musical-complexity enumeration. Time is unchanged.
 

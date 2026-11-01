@@ -5,7 +5,6 @@ from datetime import date, time
 
 from ..type_name import TypeNamer
 from .bounded import bounded
-from .integer import signed_index, signed_value
 
 
 class Date(TypeNamer):
@@ -17,14 +16,14 @@ class Date(TypeNamer):
         if not re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value):
             raise ValueError("Use an unambiguous YYYY-MM-DD date")
         index = date.fromisoformat(value).toordinal() - 1
-        return signed_index(index - ZOOT) if center_on_zoot else index
+        return _offset_index(index - ZOOT) if center_on_zoot else index
 
     @staticmethod
     def index_to_str(
         index: int, browse: bool = False, *, center_on_zoot: bool = True
     ) -> str:
         if center_on_zoot:
-            index = signed_value(index) + ZOOT
+            index = _offset_value(index) + ZOOT
             if browse:
                 index %= DAYS
         return date.fromordinal(1 + bounded(index, DAYS, browse)).isoformat()
@@ -59,14 +58,14 @@ class DateTime(TypeNamer):
             raise ValueError("Use YYYY-MM-DDTHH:MM[:SS], without a timezone")
         day = Date.str_to_index(match[1], center_on_zoot=False)
         index = day * DAY + Time.str_to_index(match[2])
-        return signed_index(index - ZOOT * DAY) if center_on_zoot else index
+        return _offset_index(index - ZOOT * DAY) if center_on_zoot else index
 
     @staticmethod
     def index_to_str(
         index: int, browse: bool = False, *, center_on_zoot: bool = True
     ) -> str:
         if center_on_zoot:
-            index = signed_value(index) + ZOOT * DAY
+            index = _offset_value(index) + ZOOT * DAY
             if browse:
                 index %= DAYS * DAY
         day, clock = divmod(bounded(index, DAYS * DAY, browse), DAY)
@@ -75,6 +74,18 @@ class DateTime(TypeNamer):
             + "T"
             + Time.index_to_str(clock)
         )
+
+
+def _offset_index(offset: int) -> int:
+    """Enumerate offsets as 0, 1, 2, -1, 3, 4, -2, ... ."""
+    return offset + (offset - 1) // 2 if offset > 0 else -3 * offset
+
+
+def _offset_value(index: int) -> int:
+    if index < 0:
+        raise ValueError("Expected a nonnegative index")
+    quotient, remainder = divmod(index, 3)
+    return 2 * quotient + remainder if remainder else -quotient
 
 
 TIME = r"(?:[01][0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?"
