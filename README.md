@@ -351,13 +351,14 @@ Settings also contains volume, root, position, time signature, and playing-note
 color. Existing playback, notation, and codec work limits still apply and are
 reported in the status region. VexFlow and its licensed fonts are bundled locally.
 
-Evolve is enabled by default. A level-compensated triangle-to-sawtooth blend
-changes timbre continuously over a 12-second cycle, including during held notes.
+Evolve is enabled by default. The fundamental and total harmonic energy stay
+steady while a 12-second cycle shifts the harmonic mix between odd and even
+harmonics, including during held notes.
 Slower native modulation varies stereo position and a quiet 190 ms echo across
 tune boundaries. Note pitches, onsets, durations, and volume envelopes
 are unchanged. Echo tails can continue after a note ends; mute silences the
 effects as well as the notes. Disabling Evolve smoothly bypasses the effects and
-uses the plain triangle waveform, including during the current note.
+returns to a fixed triangle-like tone, including during the current note.
 
 The play/pause icon to the left of mute starts in the running state. Pausing
 freezes Clock and Count and suspends the current audio. Resuming Clock catches

@@ -27,6 +27,7 @@ class AudioContext {
   createStereoPanner() { const node = this.node("pan"); node.pan = new Parameter(); return node; }
   createDelay() { const node = this.node("delay"); node.delayTime = new Parameter(); return node; }
   createWaveShaper() { return this.node("shape"); }
+  createConstantSource() { const node = this.node("constant"); node.offset = new Parameter(1); node.start = () => {}; return node; }
   createPeriodicWave(real, imag, options) { return { real, imag, options }; }
   createOscillator() {
     const node = this.node("oscillator");
@@ -92,12 +93,13 @@ test("volume uses decibel spacing with unity at 120 and tune envelopes reach ful
   assert.deepEqual(envelope.events.filter((i) => i[0] === "ramp").map((i) => i[1]), [1, 0]);
 });
 
-test("both timbres preserve note pitches, times and envelopes in either Evolve state", () => {
+test("fundamental and harmonic sources preserve note pitches, times and envelopes", () => {
   const { player } = synth();
   const event = { pitch: 60, onset: 0.25, duration: 1 };
   player.play([event]);
   const first = voices(player).slice();
-  assert.deepEqual(first.map(i => i.type), ["triangle", "sawtooth"]);
+  assert.equal(first.length, 3);
+  first.forEach((voice, index) => assert.equal(voice.wave, player.waves[index]));
   for (const voice of first) {
     assert.equal(voice.started, 10.3);
     assert.equal(voice.stopped, 11.3);
@@ -109,7 +111,7 @@ test("both timbres preserve note pitches, times and envelopes in either Evolve s
   player.setEvolution(false);
   player.context.currentTime = 100;
   player.play([event]);
-  for (const voice of voices(player).slice(-2)) {
+  for (const voice of voices(player).slice(-3)) {
     assert.equal(voice.stopped - voice.started, 1);
     assert.equal(voice.frequency.value, first[0].frequency.value);
   }
@@ -129,13 +131,16 @@ test("shared modulation survives tune boundaries and switching evolution does no
   assert.equal(player.evolved.gain.value, 0);
   assert.ok(modulators.every((i) => i.stopped === undefined));
   player.play([{ pitch: 53, onset: 0, duration: 1 }]);
-  assert.deepEqual(voices(player).slice(-2).map(i => i.type), ["triangle", "sawtooth"]);
-  const held = voices(player).slice(-2);
+  assert.equal(player.timbreAmount.gain.value, 0);
+  assert.equal(player.timbreOffset.offset.value, -1);
+  const held = voices(player).slice(-3);
   player.setEvolution(true);
   assert.equal(player.output.gain.value, 0);
   assert.equal(player.dry.gain.value, 0);
   assert.equal(player.evolved.gain.value, Math.SQRT2);
-  assert.deepEqual(voices(player).slice(-2), held);
+  assert.deepEqual(voices(player).slice(-3), held);
+  assert.equal(player.timbreAmount.gain.value, 1);
+  assert.equal(player.timbreOffset.offset.value, 0);
   assert.ok(held.every(i => i.stopped === 11.05));
   assert.equal(player.context.nodes.filter((i) => i.kind === "delay").length, 1);
   assert.equal(player.context.nodes.filter((i) => i.kind === "shape").length, 2);

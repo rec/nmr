@@ -35,9 +35,10 @@ Settings also contains volume, root, position, time signature, and highlight col
 The play/pause icon to the left of mute freezes Clock, Count, and their audio.
 It starts running. Resume catches Clock up to the current time and continues
 Count from its paused number. It is hidden in Name mode. Mute stays independent.
-Evolve is on by default. It blends between mellow and bright tones over a
-12-second cycle, even during held notes, with matched levels on and off.
+Evolve is on by default. It shifts the mix of odd and even harmonics over a
+12-second cycle, even during held notes. The fundamental and overall harmonic
+energy stay steady instead of fading the bright part of the sound in and out.
 Slower changes move the stereo position and a quiet short echo across tunes.
 Note timings and volume envelopes stay the
-same; the echo adds a short tail. Switch Evolve off for the plain triangle tone.
+same; the echo adds a short tail. Switch Evolve off for a fixed triangle-like tone.
 The address bar contains a link to the current source, mode, type, index, and increment.

@@ -26,14 +26,22 @@ export class TunePlayer {
     this.output = this.context.createGain();
     this.output.connect(master);
     this.input = this.context.createGain();
-    this.brightInput = this.context.createGain();
-    // Explicit coefficients avoid the native sawtooth's peak normalization,
-    // which otherwise makes it quieter than a triangle of the same RMS level.
-    this.brightWave = this.context.createPeriodicWave(
-      new Float32Array(2049),
-      Float32Array.from({ length: 2049 }, (_, n) => n ? 2 * (n % 2 ? 1 : -1) / (Math.PI * n) : 0),
-      { disableNormalization: true },
-    );
+    this.harmonicInputs = [this.context.createGain(), this.context.createGain()];
+    // Keep the triangle's fundamental and remaining harmonic power as fixed
+    // budgets; only redistribute the latter between disjoint harmonic sets.
+    const fundamental = 8 / Math.PI ** 2;
+    const harmonic = Math.sqrt(2 / 3 - fundamental ** 2);
+    const pure = new Float32Array(17);
+    pure[1] = fundamental;
+    const odd = Float32Array.from({ length: 17 }, (_, n) => n >= 3 && n % 2 ? (-1) ** ((n - 1) / 2) / n ** 2 : 0);
+    const even = Float32Array.from({ length: 17 }, (_, n) => n >= 2 && !(n % 2) ? 1 / n ** 2 : 0);
+    for (const coefficients of [odd, even]) {
+      const scale = harmonic / Math.hypot(...coefficients);
+      for (let n = 0; n < coefficients.length; n++) coefficients[n] *= scale;
+    }
+    this.waves = [pure, odd, even].map(coefficients => this.context.createPeriodicWave(
+      new Float32Array(17), coefficients, { disableNormalization: true },
+    ));
     this.dry = this.context.createGain();
     this.evolved = this.context.createGain();
     this.dry.gain.value = 0;
@@ -41,37 +49,40 @@ export class TunePlayer {
     // the plain mono path is copied at full level to each destination channel.
     this.evolved.gain.value = Math.SQRT2;
     this.input.connect(this.dry).connect(this.output);
-    const warm = this.context.createGain();
-    const bright = this.context.createGain();
-    warm.gain.value = 0;
-    bright.gain.value = 0;
     const timbre = this.context.createOscillator();
     timbre.frequency.value = 1 / 12;
-    // Triangle and sawtooth have equal RMS and a correlation of 3/4.
-    // Compensate their overlap so the blend keeps the plain tone's RMS level.
-    for (const [parameter, side] of [[warm.gain, 0], [bright.gain, 1]]) {
+    this.timbreAmount = this.context.createGain();
+    this.timbreOffset = this.context.createConstantSource();
+    this.timbreOffset.offset.value = 0;
+    timbre.connect(this.timbreAmount);
+    // Odd and even harmonic sets do not overlap. cos² + sin² keeps their
+    // combined energy constant, independently of the steady fundamental.
+    for (const [side, input] of this.harmonicInputs.entries()) {
+      const blend = this.context.createGain();
+      blend.gain.value = 0;
       const shape = this.context.createWaveShaper();
       shape.curve = Float32Array.from({ length: 1025 }, (_, i) => {
-        const mix = 0.05 + 0.9 * i / 1024;
-        const level = Math.sqrt((1 - mix) ** 2 + mix ** 2 + 1.5 * mix * (1 - mix));
-        return (side ? mix : 1 - mix) / level;
+        const angle = Math.PI / 2 * i / 1024;
+        return side ? Math.sin(angle) : Math.cos(angle);
       });
-      timbre.connect(shape).connect(parameter);
+      this.timbreAmount.connect(shape).connect(blend.gain);
+      this.timbreOffset.connect(shape);
+      input.connect(blend).connect(this.input);
     }
     timbre.start();
+    this.timbreOffset.start();
     const pan = this.context.createStereoPanner();
     const delay = this.context.createDelay(1);
     delay.delayTime.value = 0.19;
     const echo = this.context.createGain();
-    echo.gain.value = 0.05;
+    echo.gain.value = 0.025;
     const feedback = this.context.createGain();
     feedback.gain.value = 0.12;
-    this.input.connect(warm).connect(pan).connect(this.evolved).connect(this.output);
-    this.brightInput.connect(bright).connect(pan);
+    this.input.connect(pan).connect(this.evolved).connect(this.output);
     pan.connect(delay).connect(echo).connect(this.evolved);
     delay.connect(feedback).connect(delay);
     // These audio-clock modulations run continuously across tune boundaries.
-    for (const [parameter, period, depth] of [[pan.pan, 47, 0.2], [echo.gain, 173, 0.025]]) {
+    for (const [parameter, period, depth] of [[pan.pan, 47, 0.2], [echo.gain, 173, 0.0125]]) {
       const oscillator = this.context.createOscillator();
       const amount = this.context.createGain();
       oscillator.frequency.value = 1 / period;
@@ -106,7 +117,7 @@ export class TunePlayer {
   }
   setEvolution(enabled) {
     const now = this.context.currentTime;
-    for (const [parameter, target] of [[this.dry.gain, enabled ? 0 : 1], [this.evolved.gain, enabled ? Math.SQRT2 : 0]]) {
+    for (const [parameter, target] of [[this.dry.gain, enabled ? 0 : 1], [this.evolved.gain, enabled ? Math.SQRT2 : 0], [this.timbreAmount.gain, enabled ? 1 : 0], [this.timbreOffset.offset, enabled ? 0 : -1]]) {
       const level = parameter.value;
       parameter.cancelScheduledValues(now);
       parameter.setValueAtTime(level, now);
@@ -148,15 +159,14 @@ export class TunePlayer {
       this.animation = requestAnimationFrame(update);
     }
     for (const event of events) {
-      // Both sources keep running so Evolve also switches during held notes.
-      for (const [type, input] of [["triangle", this.input], ["sawtooth", this.brightInput]]) {
+      // All three sources share the original timing and amplitude envelope.
+      for (const [index, input] of [this.input, ...this.harmonicInputs].entries()) {
         const voice = this.context.createOscillator();
         const gain = this.context.createGain();
         const onset = start + event.onset;
         const end = onset + event.duration;
         const edge = Math.min(0.005, event.duration / 4);
-        voice.type = type;
-        if (type === "sawtooth") voice.setPeriodicWave(this.brightWave);
+        voice.setPeriodicWave(this.waves[index]);
         voice.frequency.value = 440 * 2 ** ((event.pitch - 69) / 12);
         gain.gain.setValueAtTime(0, onset);
         gain.gain.linearRampToValueAtTime(1, onset + edge);
