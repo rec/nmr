@@ -32,6 +32,9 @@ Changing mode or Type lets the current tune finish. Keep last played music in Se
 whether the last name and score remain visible after playback.
 
 Settings also contains volume, root, position, time signature, and highlight color.
+The play/pause icon to the left of mute freezes Clock, Count, and their audio.
+It starts running. Resume catches Clock up to the current time and continues
+Count from its paused number. It is hidden in Name mode. Mute stays independent.
 Evolve is on by default. It blends between mellow and bright tones over a
 12-second cycle, even during held notes, with matched levels on and off.
 Slower changes move the stereo position and a quiet short echo across tunes.

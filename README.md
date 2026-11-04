@@ -359,6 +359,11 @@ are unchanged. Echo tails can continue after a note ends; mute silences the
 effects as well as the notes. Disabling Evolve smoothly bypasses the effects and
 uses the plain triangle waveform, including during the current note.
 
+The play/pause icon to the left of mute starts in the running state. Pausing
+freezes Clock and Count and suspends the current audio. Resuming Clock catches
+up to the current time; Count continues from its paused number. The button is
+hidden in Name mode, which remains playable. Pause and mute are independent.
+
 New share links use separate mode and type parameters, an index and increment,
 and a Name value when applicable. Back and Forward restore the new link state.
 Previous URL formats are not supported. Settings are kept in memory for the

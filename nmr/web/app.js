@@ -24,6 +24,7 @@ const clockReadingButton = document.querySelector("#clock-reading");
 const clockCount = document.querySelector("#clock-count");
 const sourceName = document.querySelector("#source-name");
 const sound = document.querySelector("#sound-toggle");
+const pause = document.querySelector("#pause-toggle");
 const increment = document.querySelector("#count-increment");
 const interval = document.querySelector("#clock-interval");
 const timeOnly = document.querySelector("#clock-time-only");
@@ -37,6 +38,8 @@ const scoreBottom = document.querySelector("#score-bottom");
 const color = document.querySelector("#score-highlight-color");
 const message = document.querySelector("#message");
 let muted = true;
+let paused = false;
+let clockSnapshot = null;
 let mode = "name";
 let editor;
 let version = 0;
@@ -111,6 +114,7 @@ function writeURL(push = false) {
   window.history[push ? "pushState" : "replaceState"](null, "", url);
 }
 function refresh(push = false, reading = null) {
+  const pausedAtRequest = paused;
   const revision = ++version;
   current = null;
   writeURL(push);
@@ -126,7 +130,7 @@ function refresh(push = false, reading = null) {
     if (!/^[0-9]+$/.test(field.value)) { display.clear(); sourceName.textContent = ""; message.textContent = ""; loading = Promise.resolve(null); return; }
     payload = { value: field.value, type_name: type.value, ...settings() };
     if (mode === "clock") {
-      reading ||= clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+      reading ||= paused && clockSnapshot || clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
       payload.source_type = reading.type;
       payload.source_value = reading.value;
     }
@@ -134,11 +138,13 @@ function refresh(push = false, reading = null) {
   }
   loading = request(action, payload).then((result) => {
     if (revision !== version) return null;
+    if (mode === "clock" && paused && !pausedAtRequest) return null;
     const name = result.full_truename || result.truename;
     if (!name) { message.textContent = result.message || result.browse_error || ""; return null; }
     current = { ...result, truename: name };
     sourceName.textContent = name;
     if (mode === "clock") {
+      clockSnapshot = reading;
       field.value = result.index;
       clockCount.textContent = result.index;
       clockDate.textContent = reading.displayDate;
@@ -157,6 +163,7 @@ function refresh(push = false, reading = null) {
   }).catch((error) => { if (revision === version) report(error); return null; });
 }
 function playCurrent() {
+  if (paused && mode !== "name") return Promise.resolve();
   const revision = version;
   if (!player) return Promise.reject(new Error("Audio is unavailable."));
   const unlocked = muted ? Promise.resolve() : player.unlock();
@@ -173,14 +180,14 @@ function playCurrent() {
     const { item, music } = result;
     if (music.playback_error) throw new Error(music.playback_error);
     // TunePlayer.play stops its previous voices before starting the new tune.
-    if (player.context.state === "running") player.play(music.playback);
+    if (player.context.state === "running" || paused && mode !== "name") player.play(music.playback);
     playingBpm = render.bpm;
     playingName.textContent = item.truename;
     score.replaceChildren();
     if (music.score) drawScore(score, music.score);
     else score.textContent = music.score_error || "";
     // Browsers suspend audio before the first gesture; muted Count still advances.
-    if (player.context.state !== "running") {
+    if (player.context.state !== "running" && !(paused && mode !== "name")) {
       const duration = Math.max(0, ...music.playback.map((i) => i.onset + i.duration));
       return new Promise((resolve) => {
         const deadline = performance.now() + (duration + 0.05) * 1000;
@@ -211,9 +218,11 @@ function activate(push = false) {
   field.hidden = mode !== "count";
   clockReadingButton.hidden = mode !== "clock";
   sourceName.hidden = mode === "name";
+  pause.hidden = mode === "name";
+  if (player && paused) (mode === "name" ? player.unlock() : player.context.suspend()).catch(report);
   refresh(push);
-  if (mode === "count" && ready && increment.value && increment.validity.valid) runner.start();
-  if (mode === "clock" && ready) playCurrent().catch(report);
+  if (mode === "count" && ready && !paused && increment.value && increment.validity.valid) runner.start();
+  if (mode === "clock" && ready && !paused) playCurrent().catch(report);
 }
 function readURL() {
   const query = new URL(window.location.href).searchParams;
@@ -248,7 +257,26 @@ sound.addEventListener("click", () => {
   muted = !muted;
   sound.setAttribute("aria-pressed", String(muted));
   player.setVolume(muted ? 0 : 1, 0.02);
-  if (!muted) player.unlock().catch(report);
+  if (!muted && !(paused && mode !== "name")) player.unlock().catch(report);
+});
+pause.addEventListener("click", () => {
+  paused = !paused;
+  pause.setAttribute("aria-pressed", String(paused));
+  pause.setAttribute("aria-label", paused ? "Play" : "Pause");
+  pause.title = paused ? "Play" : "Pause";
+  if (paused) {
+    runner.pause();
+    player?.context.suspend().catch(report);
+  } else {
+    player?.unlock().catch(report);
+    if (mode === "clock") {
+      refresh();
+      if (!playback) playCurrent().catch(report);
+    } else if (mode === "count") {
+      if (runner.running) runner.resume();
+      else if (increment.value && increment.validity.valid && /^[0-9]+$/.test(field.value)) runner.start();
+    }
+  }
 });
 retain.addEventListener("change", () => { if (!retain.checked && !player?.playing) clearPlayback(); });
 evolve.addEventListener("change", () => player?.setEvolution(evolve.checked));
@@ -262,7 +290,7 @@ for (const input of [field, increment]) {
     increment.setCustomValidity(!increment.value || BigInt(increment.value) === 0n ? "Increment must be positive." : "");
     if (mode === "count") runner.stop();
     refresh();
-    if (mode === "count" && increment.value && increment.validity.valid && /^[0-9]+$/.test(field.value)) runner.start();
+    if (mode === "count" && !paused && increment.value && increment.validity.valid && /^[0-9]+$/.test(field.value)) runner.start();
   });
 }
 function nameKey(key) {
@@ -291,7 +319,7 @@ for (const input of [scoreTop, scoreBottom, timeOnly, displayUTC, interval]) inp
 for (const input of [document.querySelector("#tune-root"), document.querySelector("#tune-position")]) input.addEventListener("change", () => refresh());
 window.addEventListener("popstate", readURL);
 function tick() {
-  if (mode === "clock" && ready) {
+  if (mode === "clock" && ready && !paused) {
     const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
     refresh(false, reading);
     if (reading.due && !playback) playCurrent().catch(report);
@@ -311,5 +339,6 @@ configured.then((info) => {
   readURL();
   nameField.dataset.ready = "true";
   sound.disabled = !player;
+  pause.disabled = false;
 }).catch(report);
 tick();

@@ -9,9 +9,10 @@ body { margin: 0; }
 #settings-controls { position: fixed; top: 16px; right: 20px; z-index: 10; display: flex; gap: 8px; }
 #settings-panel select, #score-top, #count-increment { border: 1px solid #9aac9d; border-radius: 6px; padding: 4px 6px; font: inherit; color: inherit; background: #f6f4ed; }
 #settings-panel select:focus-visible, #score-top:focus-visible, #count-increment:focus-visible { outline: 2px solid #245d50; outline-offset: 3px; }
-#sound-toggle, #settings-toggle, #help-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
-#sound-toggle:hover, #settings-toggle:hover, #help-toggle:hover { background: #e5eadf; }
-#sound-toggle:focus-visible, #settings-toggle:focus-visible, #help-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#pause-toggle, #sound-toggle, #settings-toggle, #help-toggle { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; padding: 0; border: 0; border-radius: 50%; color: inherit; background: transparent; cursor: pointer; }
+#pause-toggle:hover, #sound-toggle:hover, #settings-toggle:hover, #help-toggle:hover { background: #e5eadf; }
+#pause-toggle:focus-visible, #sound-toggle:focus-visible, #settings-toggle:focus-visible, #help-toggle:focus-visible, #volume-level:focus-visible { outline: 2px solid #245d50; outline-offset: 4px; }
+#pause-toggle[hidden], #pause-toggle[aria-pressed="true"] .transport-playing, #pause-toggle[aria-pressed="false"] .transport-paused { display: none; }
 #sound-toggle[aria-pressed="true"] .sound-on, #sound-toggle[aria-pressed="false"] .sound-off { display: none; }
 #settings-panel, #help-panel { position: fixed; inset: 68px 20px auto auto; width: min(260px, calc(100vw - 40px)); margin: 0; padding: 20px; border: 1px solid #9aac9d; border-radius: 12px; color: inherit; background: #f6f4ed; box-shadow: 0 6px 24px #183b3c20; }
 #settings-panel { right: 72px; width: min(300px, calc(100vw - 92px)); max-height: calc(100dvh - 88px); overflow: auto; font-size: 14px; }
@@ -148,7 +149,7 @@ select { font: inherit; color: inherit; max-width: 100%; border: 1px solid #9aac
 @media (max-width: 700px) {
   main { padding: 0 12px 12px; }
   #settings-controls { top: 4px; right: 8px; gap: 0; }
-  #sound-toggle, #settings-toggle, #help-toggle { width: 32px; height: 32px; }
+  #pause-toggle, #sound-toggle, #settings-toggle, #help-toggle { width: 32px; height: 32px; }
   .mode-row { gap: 8px; }
   #modes { gap: 8px; }
   h1 { font-size: 81.6px; }

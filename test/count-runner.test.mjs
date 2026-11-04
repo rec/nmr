@@ -103,3 +103,27 @@ test("a playback failure stops Run and reports the error", () => {
     assert.deepEqual(errors, [error]);
   });
 });
+
+test("transport pause retains the next increment instead of replaying the same count", async () => {
+  const app = counting();
+  app.runner.start(); await flush();
+  app.runner.pause();
+  app.finish(); await flush();
+  app.timer(); await flush();
+  assert.deepEqual(app.played, [0n]);
+  app.runner.resume(); await flush();
+  assert.deepEqual(app.played, [0n, 3n]);
+  app.runner.stop(); app.finish();
+});
+
+test("resuming a paused playing tune does not restart it", async () => {
+  const app = counting();
+  app.runner.start(); await flush();
+  app.runner.pause();
+  app.runner.resume(); await flush();
+  assert.deepEqual(app.played, [0n]);
+  app.finish(); await flush();
+  app.timer(); await flush();
+  assert.deepEqual(app.played, [0n, 3n]);
+  app.runner.stop(); app.finish();
+});

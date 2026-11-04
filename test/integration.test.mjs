@@ -26,12 +26,19 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
   const calls = [];
   const timers = [];
   let now = 0;
+  let wallTime = Date.now();
+  class ClockDate extends Date {
+    constructor(...args) { super(...(args.length ? args : [wallTime])); }
+    static now() { return wallTime; }
+  }
   const listeners = {};
   let player;
   let hold;
   const app = { element, calls, radios, timers, listeners,
     get player() { return player; },
     get url() { return url; },
+    elapse(milliseconds) { wallTime += milliseconds; },
+    get date() { return new Date(wallTime); },
     switch(mode) { radios.find((i) => i.value === mode).change(); },
     hold(action) { hold = action; },
     load(address) { url = new URL(address); listeners.popstate(); },
@@ -41,7 +48,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
     window: { location: { get href() { return url.href; } }, history: {
       replaceState(a, b, next) { url = new URL(next); }, pushState(a, b, next) { url = new URL(next); },
     }, addEventListener(event, fn) { listeners[event] = fn; } },
-    URL, URLSearchParams, Date, console, TruenameEditor, clockReading,
+    URL, URLSearchParams, Date: ClockDate, console, TruenameEditor, clockReading,
     ResizeObserver: class { observe() {} },
     requestAnimationFrame(fn) { fn(); },
     presentation: { root: 53, bpm: 180, position: "middle" },
@@ -59,7 +66,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
       show(value) { this.container.textContent = value?.kind || ""; }
     },
     TunePlayer: class {
-      constructor(onEnded) { player = this; this.onEnded = onEnded; this.plays = 0; this.playing = false; this.context = { state: "suspended" }; }
+      constructor(onEnded) { player = this; this.onEnded = onEnded; this.plays = 0; this.playing = false; this.context = { state: "suspended", suspend() { this.state = "suspended"; return Promise.resolve(); } }; }
       unlock() { this.context.state = "running"; return Promise.resolve(); }
       setVolume(value) { this.volume = value; }
       setEvolution(value) { this.evolving = value; }
@@ -203,4 +210,60 @@ test("a pending clock tick retains the complete previous reading", async () => {
   assert.deepEqual(snapshot(), before);
   app.release(); await flush();
   assert.equal(app.element("#value-display").textContent, "text");
+});
+
+test("pause freezes Count, preserves mute and resumes at its next number", async () => {
+  const app = page(); await flush();
+  const pause = app.element("#pause-toggle");
+  assert.equal(pause.hidden, false);
+  pause.click(); await flush();
+  assert.equal(pause.attributes["aria-pressed"], "true");
+  assert.equal(app.player.context.state, "suspended");
+  app.timers.find(i => Math.abs(i.delay - 150) < 1).fn(); await flush();
+  app.timers.find(i => i.delay === 2000).fn(); await flush();
+  assert.equal(app.element("#count-value").value, "42");
+  app.element("#sound-toggle").click();
+  assert.equal(app.player.context.state, "suspended", "Unmuting cannot resume transport");
+  app.element("#sound-toggle").click();
+  pause.click(); await flush();
+  assert.equal(app.element("#count-value").value, "43");
+  assert.equal(app.player.volume, 0);
+  assert.equal(app.player.context.state, "running");
+});
+
+test("Clock freezes pending and periodic updates and catches up on resume", async () => {
+  const app = page("http://localhost/?mode=clock"); await flush();
+  const snapshot = ["#clock-date", "#clock-hours", "#clock-count", "#source-name"].map(i => app.element(i).textContent);
+  app.hold("count");
+  app.timers.find(i => i.delay <= 1000).fn(); await flush();
+  app.element("#pause-toggle").click();
+  const requests = app.calls.length;
+  app.release(); await flush();
+  app.elapse(60000);
+  app.timers.filter(i => i.delay <= 1000).at(-1).fn(); await flush();
+  assert.equal(app.calls.length, requests);
+  assert.deepEqual(["#clock-date", "#clock-hours", "#clock-count", "#source-name"].map(i => app.element(i).textContent), snapshot);
+  app.hold(null);
+  app.element("#pause-toggle").click(); await flush();
+  assert.ok(app.calls.length > requests);
+  assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_type, "datetime");
+  assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_value, clockReading(app.date, 5, false, false).value);
+  assert.equal(app.player.context.state, "running");
+});
+
+test("pause is hidden in Name and retained when returning to Count or Clock", async () => {
+  const app = page(); await flush();
+  app.element("#pause-toggle").click();
+  app.switch("name"); await flush();
+  assert.equal(app.element("#pause-toggle").hidden, true);
+  assert.equal(app.player.context.state, "running");
+  app.switch("clock"); await flush();
+  assert.equal(app.element("#pause-toggle").hidden, false);
+  assert.equal(app.element("#pause-toggle").attributes["aria-pressed"], "true");
+  assert.equal(app.player.context.state, "suspended");
+  app.switch("count"); await flush();
+  const calls = app.calls.length;
+  app.timers.filter(i => i.delay <= 1000).at(-1).fn(); await flush();
+  assert.equal(app.calls.length, calls);
+  assert.equal(app.element("#count-value").value, "123");
 });
