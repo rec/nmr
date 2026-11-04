@@ -29,6 +29,7 @@ dev = [
     "ruff>=0.14,<1",
     "pyupgrade>=3.21.2",
     "ty>=0.0.14",
+    "reccy ; python_full_version >= '3.13'",
 ]
 
 [tool.coverage.run]
@@ -61,3 +62,6 @@ include = [
     ".python-version",
     ".github/workflows/check.yml",
 ]
+
+[tool.uv.sources]
+reccy = { git = "ssh://git@github.com/rec/reccy.git", branch = "main" }
