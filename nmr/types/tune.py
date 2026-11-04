@@ -238,25 +238,36 @@ class Tune(BaseModel, TypeNamer, frozen=True):
     ) -> list[dict[str, float | int]]:
         """Convert exact events only after checking the browser's preview limits."""
         if not 20 <= bpm <= 400:
-            raise ValueError("Playback tempo must be between 20 and 400 BPM")
+            raise ValueError(
+                f"Playback tempo must be between 20 and 400 BPM; got {bpm} BPM"
+            )
         events = self.events(root, position)
         result = []
-        for event in events:
+        violations = []
+        for number, event in enumerate(events, 1):
             pitch = int(event["pitch"])
             onset = Fraction(str(event["onset"])) * 60 / bpm
             duration = Fraction(str(event["duration"])) * 60 / bpm
             if not 0 <= pitch <= 127:
-                raise ValueError(
-                    "Playback requires all positioned pitches in MIDI range 0..127"
+                violations.append(
+                    f"note {number} positioned pitch is {pitch}; "
+                    "allowed MIDI range is 0..127"
                 )
-            if onset + duration > 120 or duration < Fraction(1, 100):
-                raise ValueError(
-                    "Playback limit: at most 120 seconds, "
-                    "with notes at least 0.01 seconds long"
+            if (end := onset + duration) > 120:
+                violations.append(
+                    f"note {number} ends at {end} seconds "
+                    f"({float(end):.12g} s); maximum end time is 120 seconds"
+                )
+            if duration < Fraction(1, 100):
+                violations.append(
+                    f"note {number} duration is {duration} seconds "
+                    f"({float(duration):.12g} s); minimum duration is 0.01 seconds"
                 )
             result.append(
                 {"pitch": pitch, "onset": float(onset), "duration": float(duration)}
             )
+        if violations:
+            raise ValueError("Playback limit: " + "; ".join(violations))
         return result
 
     @staticmethod

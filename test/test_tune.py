@@ -204,6 +204,50 @@ def test_playback_preserves_events_and_refuses_unrenderable_tunes() -> None:
         tune.playback(bpm=0)
 
 
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        (
+            "@1000",
+            "Playback limit: note 1 ends at 500 seconds (500 s); "
+            "maximum end time is 120 seconds",
+        ),
+        (
+            "@1/1024",
+            "Playback limit: note 1 duration is 1/2048 seconds "
+            "(0.00048828125 s); minimum duration is 0.01 seconds",
+        ),
+    ],
+)
+def test_playback_reports_only_broken_duration_rules(text: str, expected: str) -> None:
+    with pytest.raises(ValueError) as error:
+        Tune.from_text(text).playback()
+    assert str(error.value) == expected
+
+
+def test_playback_reports_all_offending_notes_and_rules() -> None:
+    with pytest.raises(ValueError) as error:
+        Tune.from_text("@1000 200@1/1024 -400@1/1024").playback(position="start")
+    message = str(error.value)
+    for number in [1, 2, 3]:
+        assert f"note {number} ends at " in message
+    for number, pitch in [(2, 260), (3, -140)]:
+        assert f"note {number} positioned pitch is {pitch}" in message
+        assert f"note {number} duration is 1/2048 seconds" in message
+    assert "MIDI range is 0..127" in message
+    assert "note 2 ends at 1024001/2048 seconds" in message
+    assert "note 3 ends at 512001/1024 seconds" in message
+
+
+def test_playback_reports_invalid_tempo_value() -> None:
+    with pytest.raises(ValueError, match="tempo.*got 401 BPM"):
+        Tune.from_text("@1").playback(bpm=401)
+
+
+def test_playback_accepts_exact_duration_limits() -> None:
+    assert Tune.from_text("@1/48 @11999/48").playback(bpm=125)[-1]["duration"] == 119.99
+
+
 def test_work_limits_do_not_repair_the_tune() -> None:
     for index in [-1, 2**4096]:
         with pytest.raises(ValueError):
