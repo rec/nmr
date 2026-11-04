@@ -33,6 +33,8 @@ def suffixes(cost: int, durations: list[Fraction]) -> list[list[Note]]:
         for gap in gaps:
             gap_weight = 1 + duration_cost(gap) if gap else 0
             for duration in durations:
+                if duration < Fraction(1, 24):
+                    continue
                 remaining = (
                     cost
                     - 1
@@ -47,12 +49,14 @@ def suffixes(cost: int, durations: list[Fraction]) -> list[list[Note]]:
 
 
 def test_rational_series_matches_every_small_tune_in_order() -> None:
-    tables = tune_counts(5)
+    tables = tune_counts(6)
     index = 0
-    for cost in range(1, 6):
+    for cost in range(1, 7):
         assert tables["starts"][cost] == index
         durations = durations_through(cost - 1)
         for duration in durations:
+            if duration < Fraction(1, 24):
+                continue
             rest = cost - 1 - duration_cost(duration)
             for suffix in suffixes(rest, durations):
                 tune = Tune(notes=[Note(duration=duration), *suffix])
@@ -72,6 +76,12 @@ def test_duration_rational_series_matches_independent_group_counts() -> None:
         assert tables["duration_starts"][cost] == sum(
             duration_cost(i) < cost for i in durations
         )
+        assert tables["note_duration"][cost] == sum(
+            duration_cost(i) == cost and i >= Fraction(1, 24) for i in durations
+        )
+        assert tables["note_duration_starts"][cost] == sum(
+            duration_cost(i) < cost and i >= Fraction(1, 24) for i in durations
+        )
 
 
 def test_more_simple_notes_outrank_fewer_complex_notes() -> None:
@@ -86,6 +96,8 @@ def test_out_of_limit_tunes_keep_their_indices_in_the_mathematical_order() -> No
     with pytest.raises(ValueError, match="256 attacked"):
         Tune.from_index(tables["starts"][257])
     # Last first-duration block at cost 514 starts with duration weight 513.
-    index = tables["starts"][514] + tables["after_gap"][513] - tables["duration"][513]
+    index = (
+        tables["starts"][514] + tables["after_gap"][513] - tables["note_duration"][513]
+    )
     with pytest.raises(ValueError, match="duration weight"):
         Tune.from_index(index)

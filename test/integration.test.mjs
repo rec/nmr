@@ -7,7 +7,7 @@ import { clockReading } from "../nmr/web/clock-time.mjs";
 const source = fs.readFileSync(new URL("../nmr/web/app.js", import.meta.url), "utf8").replace(/^import .*;\n/gm, "");
 const runnerSource = fs.readFileSync(new URL("../nmr/web/count-runner.mjs", import.meta.url), "utf8").replace("export class", "class");
 const flush = () => new Promise(setImmediate);
-function page(address = "http://localhost/?mode=count&index=42&inc=1") {
+function page(address = "http://localhost/?mode=count&index=42&inc=1", duration = 0.1) {
   let url = new URL(address);
   const elements = new Map();
   const radios = ["name", "count", "clock"].map((value) => ({ value, addEventListener(event, fn) { this[event] = fn; } }));
@@ -25,6 +25,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
   };
   const calls = [];
   const timers = [];
+  let now = 0;
   const listeners = {};
   let player;
   let hold;
@@ -47,7 +48,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
     configured: Promise.resolve({ types: { int: "Integer", cards: "Cards" }, words: ["the", "of", "and"] }),
     request(action, payload) {
       calls.push({ action, payload });
-      const result = action === "preview_truename" ? { playback: [{ onset: 0, duration: 0.1 }], score: { value: payload.value } }
+      const result = action === "preview_truename" ? { playback: [{ onset: 0, duration }], score: { value: payload.value } }
         : { index: payload.source_type ? "123" : payload.value, truename: "the", browsed: { type: "int", value: "42" }, display: { kind: "text" } };
       if (hold === action) return new Promise((resolve) => { app.release = () => resolve(result); });
       return Promise.resolve(result);
@@ -66,7 +67,8 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1") {
       finish() { this.playing = false; this.onEnded(); }
     },
     drawScore(container, value) { container.textContent = value.value; }, highlightScore() {},
-    setTimeout(fn, delay) { timers.push({ fn, delay }); return timers.length; }, clearTimeout() {},
+    performance: { now: () => now },
+    setTimeout(fn, delay) { timers.push({ fn() { now += delay; fn(); }, delay }); return timers.length; }, clearTimeout() {},
   });
   return app;
 }
@@ -144,6 +146,22 @@ test("Count advances before audio is unlocked and mute only changes the volume",
   assert.equal(app.player.volume, 0);
   assert.equal(app.element("#sound-toggle").attributes["aria-pressed"], "true");
   assert.equal(app.element("#count-value").value, "43");
+});
+
+test("muted Count waits for a long tune without overflowing browser timers", async () => {
+  const duration = 40 * 24 * 60 * 60;
+  const app = page(undefined, duration); await flush();
+  const first = app.timers.find((i) => i.delay === 2147483647);
+  assert.ok(first);
+  first.fn(); await flush();
+  assert.equal(app.element("#count-value").value, "42");
+  assert.equal(app.timers.some((i) => i.delay === 2000), false);
+  const remainder = app.timers.at(-1);
+  assert.equal(remainder.delay, (duration + 0.05) * 1000 - first.delay);
+  remainder.fn(); await flush();
+  app.timers.find((i) => i.delay === 2000).fn(); await flush();
+  assert.equal(app.element("#count-value").value, "43");
+  assert.ok(app.timers.every((i) => i.delay <= 2147483647));
 });
 
 test("entering Clock defaults to All types and toggles between date/time and its live count", async () => {

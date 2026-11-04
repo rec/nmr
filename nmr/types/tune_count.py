@@ -63,44 +63,92 @@ def pitch_cost(step: int) -> int:
     return max(0, abs(step) - FREE_STEPS) * STEP_COST
 
 
+def note_duration_function() -> tuple[list[int], list[int]]:
+    """Remove durations below 1/24 beat from the unrestricted duration series.
+
+    For numerator bit length h+1, binary durations below the cutoff have
+    denominator exponent h+5 (partially) or >=h+6 (entirely). Durations with
+    a factor of three are excluded at exponents >=h+4.
+    With t=z**(NUMERATOR_COST+BINARY_COST), the respective numerator counts
+    have series C=(1-t-t²)/((1-2t)(1+t)), A=(1-t)/(1-2t),
+    and B=(1-t)/((1-2t)(1+t)).
+    """
+    n, q = duration_function()
+    diagonal = NUMERATOR_COST + BINARY_COST
+    binary_q = polynomial_sum([1], power(BINARY_COST, -1))
+    removed_q = polynomial_product(
+        binary_q,
+        polynomial_sum([1], power(diagonal, -2)),
+        polynomial_sum([1], power(diagonal)),
+    )
+    removed_n = polynomial_sum(
+        polynomial_product(
+            power(5 * BINARY_COST),
+            binary_q,
+            polynomial_sum([1], power(diagonal, -1), power(2 * diagonal, -1)),
+        ),
+        polynomial_product(
+            power(6 * BINARY_COST),
+            polynomial_sum([1], power(2 * diagonal, -1)),
+        ),
+        polynomial_product(
+            power(4 * BINARY_COST + THIRD_COST),
+            polynomial_sum([1], power(diagonal, -1)),
+        ),
+    )
+    numerator = polynomial_sum(
+        polynomial_product(n, removed_q),
+        [-i for i in polynomial_product(removed_n, q)],
+    )
+    return numerator, polynomial_product(q, removed_q)
+
+
 @lru_cache(maxsize=1)
 def tune_counts(limit: int) -> dict[str, list[int]]:
     """Count completions at each stage, all by rational series recurrences.
 
-    D=N/Q, P=(2*FREE_STEPS+1)+2*z**STEP_COST/(1-z**STEP_COST).
+    D=N/Q counts gaps, M/R counts sounding durations >=1/24 beat.
+    P=(2*FREE_STEPS+1)+2*z**STEP_COST/(1-z**STEP_COST).
     G=1+z**REST_COST*D.
-    H=1/(1-z**ATTACK_COST*D*P*G) counts possibly empty note suffixes.
-    The three completion series are H, D*H and G*D*H.
+    H=1/(1-z**ATTACK_COST*M/R*P*G) counts possibly empty note suffixes.
+    The three completion series are H, M/R*H and G*M/R*H.
     """
     n, q = duration_function()
+    m, r = note_duration_function()
     pitch_n = polynomial_sum([2 * FREE_STEPS + 1], power(STEP_COST, 1 - 2 * FREE_STEPS))
     pitch_q = polynomial_sum([1], power(STEP_COST, -1))
     gap_n = polynomial_sum(q, polynomial_product(power(REST_COST), n))
-    suffix_n = polynomial_product(q, q, pitch_q)
+    suffix_n = polynomial_product(r, q, pitch_q)
     denominator = polynomial_sum(
         suffix_n,
-        polynomial_product(power(ATTACK_COST, -1), n, pitch_n, gap_n),
+        polynomial_product(power(ATTACK_COST, -1), m, pitch_n, gap_n),
     )
     tables = {
         "duration": coefficients(n, q, limit),
+        "note_duration": coefficients(m, r, limit),
         "suffix": coefficients(suffix_n, denominator, limit),
         "after_gap": coefficients(
-            polynomial_product(n, q, pitch_q), denominator, limit
+            polynomial_product(m, q, pitch_q), denominator, limit
         ),
         "after_step": coefficients(
-            polynomial_product(n, pitch_q, gap_n), denominator, limit
+            polynomial_product(m, pitch_q, gap_n), denominator, limit
         ),
     }
     # Strictly preceding layers: z*T/(1-z) and z*D/(1-z).
     cumulative_q = [1, -1]
     tables["starts"] = coefficients(
-        polynomial_product(power(ATTACK_COST + 1), n, q, pitch_q),
+        polynomial_product(power(ATTACK_COST + 1), m, q, pitch_q),
         polynomial_product(denominator, cumulative_q),
         limit + 1,
     )
     tables["duration_starts"] = coefficients(
         polynomial_product(power(1), n),
         polynomial_product(q, cumulative_q),
+        limit + 1,
+    )
+    tables["note_duration_starts"] = coefficients(
+        polynomial_product(power(1), m),
+        polynomial_product(r, cumulative_q),
         limit + 1,
     )
     return tables

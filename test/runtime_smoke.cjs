@@ -150,7 +150,7 @@ const { loadPyodide } = require("pyodide");
     JSON.parse(previewTruename('{"value":"the"}')));
   assert.deepEqual(JSON.parse(previewTruename('{"value":"name:tune:the"}')),
     JSON.parse(previewTruename('{"value":"tune:the"}')));
-  const ode = JSON.parse(recognize('{"value":"tune:world view","mode":"truename"}'));
+  const ode = JSON.parse(recognize('{"value":"tune:world there","mode":"truename"}'));
   assert.equal(ode.browsed.type, "tune");
   assert.equal(ode.browsed.value, "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
   assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,

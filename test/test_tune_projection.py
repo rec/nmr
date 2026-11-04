@@ -80,7 +80,7 @@ def test_projection_preserves_work_and_playback_refusals() -> None:
     truename = engine.encode(str(2**4096), "int").truename
     with pytest.raises(ValueError, match="work limit"):
         engine.to_tune(truename)
-    request = {"operation": "encode", "type_name": "tune", "value": "@1000"}
+    request = {"operation": "encode", "type_name": "tune", "value": "@1 200@1"}
     result = json.loads(bridge.preview_item(json.dumps(request)))
-    assert result["value"] == "@1000"
+    assert result["value"] == "@1 200@1"
     assert "Playback limit" in result["playback_error"]

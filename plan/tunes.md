@@ -273,12 +273,19 @@ For the default attack, step, and rest costs of one, define:
 
     P(z) = 5+2z/(1-z)        # five free steps, then two at each positive cost
     G(z) = 1+z*D(z)           # zero or positive gap
-    H(z) = 1/(1-z*D(z)*P(z)*G(z))
-    T(z) = z*D(z)*H(z)       # nonempty tunes
+    M(z) = D(z) - E(z)       # sounding durations >= 1/24 beat
+    H(z) = 1/(1-z*M(z)*P(z)*G(z))
+    T(z) = z*M(z)*H(z)       # nonempty tunes
 
-The completion series are `H` after a duration, `D*H` after a gap, and `G*D*H`
+For the default weights, put `t=z^5`. The excluded-duration series is
+`E(z) = (z^5*(1-z)*(1-t-t^2) + z^6*(1-t^2) + z^7*(1-t)) / ((1-z)*(1-2t)*(1+t))`.
+It removes short sounding notes without changing the ordering of allowed tunes
+or restricting gaps. Quarter notes retain their original low complexity.
+
+The completion series are `H` after a duration, `M*H` after a gap, and `G*M*H`
 after a step. Strictly preceding layer counts are coefficients of `z*T/(1-z)`;
-preceding duration layers use `z*D/(1-z)`. All are rational. Expand each `N/Q`
+preceding duration layers use `z*M/(1-z)` for notes and `z*D/(1-z)` for gaps.
+All are rational. Expand each `N/Q`
 with `Q[0]=1` using the fixed linear recurrence:
 
     coefficient[c] = N[c] - sum(Q[j]*coefficient[c-j], j >= 1)
@@ -313,7 +320,8 @@ Small fixtures to verify independently during implementation:
 | 9 | `@1 @1 -1@1` |
 | 359 | `@1/3` |
 | 2591 | `@2` |
-| 6983144 | `@4` |
+| 2593 | `@1 @1 @1 @1 @1 @1` |
+| 6981998 | `@4` |
 
 ## Integration, usability, and limits
 
@@ -396,8 +404,9 @@ an attractive example length.
 The codec refuses work beyond 256 attacked notes, 20,000 input characters,
 duration weight 512, total complexity 4,096, or a 4,096-bit tune index. These are
 operational bounds, not changes to the mathematical domain. Browser playback additionally requires
-20–400 BPM, centered MIDI pitches in 0–127, total length at most 120 seconds,
-and individual notes at least 0.01 seconds long. A playback refusal leaves the
+20–400 BPM and centered MIDI pitches in 0–127, with no total-duration limit.
+The codec requires sounding notes of at least 1/24 beat (a triplet 64th note),
+while gaps retain the unrestricted rhythm enumeration. A playback refusal leaves the
 normalized phrase available for truename generation.
 
 The editor exposes successive semitone steps, durations, and gaps before notes,
@@ -414,14 +423,14 @@ The first four, eight, and sixteen notes produce these full-prefix payloads:
 
 | Notes | Payload words | Payload |
 | --- | --- | --- |
-| 4 | 4 | `skip sin basic own` |
-| 8 | 10 | `call drop shell john tin bind ran demo poet pen` |
-| 16 | 19 | `bid snap rice horn act bra coat was herb sport maui deck bytes had cells folk dies juan away` |
+| 4 | 4 | `quick risk cape spray` |
+| 8 | 10 | `based said jazz hell sure sport purse tent meter stay` |
+| 16 | 19 | `yet strap cloud am buyer jewel nose neck heard fog lung live gang cox jeep nice rid fee lady` |
 
 Python tests check independent duration enumeration through weight 24, large
 duration indices, initial tune fixtures, arbitrary-index inverses, repeated simple
 notes, centering, ties, capacity, and resource refusals. Independent exhaustive
-enumeration through cost five checks every index and every within-layer choice
+enumeration through cost six checks every index and every within-layer choice
 against the rational recurrence. Shared format fixtures
 cover all prefix scopes and preserve earlier type names. The WebAssembly smoke
 check exercises those fixtures, custom words, exact events, and playback limits.

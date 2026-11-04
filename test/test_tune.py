@@ -48,8 +48,14 @@ def test_duration_layers_match_independent_reduced_enumeration() -> None:
     for index, value in enumerate(values):
         assert duration_index(value) == index
         assert duration_value(index) == value
+    for index, value in enumerate(i for i in values if i >= Fraction(1, 24)):
+        assert duration_index(value, sounding=True) == index
+        assert duration_value(index, sounding=True) == value
     for index in [2**80, 2**120 + 17]:
         assert duration_index(duration_value(index)) == index
+        duration = duration_value(index, sounding=True)
+        assert duration >= Fraction(1, 24)
+        assert duration_index(duration, sounding=True) == index
     for value in [Fraction(1, 2**512), Fraction(2**128)]:
         assert duration_value(duration_index(value)) == value
 
@@ -103,7 +109,8 @@ def test_normalization_preserves_attacks_and_merges_rests() -> None:
         (9, "@1 @1 -1@1"),
         (359, "@1/3"),
         (2591, "@2"),
-        (6983144, "@4"),
+        (2593, "@1 @1 @1 @1 @1 @1"),
+        (6981998, "@4"),
     ],
 )
 def test_tune_index_fixtures(index: int, text: str) -> None:
@@ -112,8 +119,16 @@ def test_tune_index_fixtures(index: int, text: str) -> None:
 
 
 def test_arbitrary_indices_have_exact_inverses() -> None:
-    for index in [*range(500), 2**120, 2**255 - 1, 2**600 + 17]:
+    for index in [
+        *range(500),
+        *range(2588, 2610),
+        156065872,
+        2**120,
+        2**255 - 1,
+        2**600 + 17,
+    ]:
         tune = Tune.from_index(index)
+        assert all(i.duration >= Fraction(1, 24) for i in tune.notes)
         assert tune.index() == index
         assert Tune.from_text(tune.text()) == tune
 
@@ -195,7 +210,7 @@ def test_playback_preserves_events_and_refuses_unrenderable_tunes() -> None:
             assert audible["duration"] == float(
                 Fraction(str(exact["duration"])) * 60 / bpm
             )
-    for text in ["@1 200@1", "@1000", "@1/1024"]:
+    for text in ["@1 200@1"]:
         other = Tune.from_text(text)
         with pytest.raises(ValueError, match="Playback"):
             other.playback()
@@ -204,39 +219,21 @@ def test_playback_preserves_events_and_refuses_unrenderable_tunes() -> None:
         tune.playback(bpm=0)
 
 
-@pytest.mark.parametrize(
-    "text,expected",
-    [
-        (
-            "@1000",
-            "Playback limit: note 1 ends at 500 seconds (500 s); "
-            "maximum end time is 120 seconds",
-        ),
-        (
-            "@1/1024",
-            "Playback limit: note 1 duration is 1/2048 seconds "
-            "(0.00048828125 s); minimum duration is 0.01 seconds",
-        ),
-    ],
-)
-def test_playback_reports_only_broken_duration_rules(text: str, expected: str) -> None:
-    with pytest.raises(ValueError) as error:
-        Tune.from_text(text).playback()
-    assert str(error.value) == expected
+@pytest.mark.parametrize("duration", ["1/32", "1/48", "1/1024", "3/128"])
+def test_notes_below_triplet_sixty_fourths_are_rejected(duration: str) -> None:
+    with pytest.raises(ValueError, match=f"at least 1/24 beat; got {duration}"):
+        Tune.from_text(f"@{duration}")
+    with pytest.raises(ValueError, match="at least 1/24 beat"):
+        Note(duration=Fraction(duration))
 
 
 def test_playback_reports_all_offending_notes_and_rules() -> None:
     with pytest.raises(ValueError) as error:
-        Tune.from_text("@1000 200@1/1024 -400@1/1024").playback(position="start")
+        Tune.from_text("@1000 200@1/24 -400@1/24").playback(position="start")
     message = str(error.value)
-    for number in [1, 2, 3]:
-        assert f"note {number} ends at " in message
     for number, pitch in [(2, 260), (3, -140)]:
         assert f"note {number} positioned pitch is {pitch}" in message
-        assert f"note {number} duration is 1/2048 seconds" in message
     assert "MIDI range is 0..127" in message
-    assert "note 2 ends at 1024001/2048 seconds" in message
-    assert "note 3 ends at 512001/1024 seconds" in message
 
 
 def test_playback_reports_invalid_tempo_value() -> None:
@@ -244,8 +241,11 @@ def test_playback_reports_invalid_tempo_value() -> None:
         Tune.from_text("@1").playback(bpm=401)
 
 
-def test_playback_accepts_exact_duration_limits() -> None:
-    assert Tune.from_text("@1/48 @11999/48").playback(bpm=125)[-1]["duration"] == 119.99
+def test_playback_accepts_long_tunes_and_fast_minimum_notes() -> None:
+    tune = Tune.from_text("@1000 r@1/1024 @1/24")
+    assert Tune.from_index(tune.index()) == tune
+    assert tune.playback()[1]["onset"] > 500
+    assert tune.playback(bpm=400)[1]["duration"] == float(Fraction(1, 160))
 
 
 def test_work_limits_do_not_repair_the_tune() -> None:

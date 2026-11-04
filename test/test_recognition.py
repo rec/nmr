@@ -160,7 +160,7 @@ def test_truename_playback_defaults_to_relative_with_explicit_absolute_option() 
 
 def test_ode_to_joy_truename_plays_the_original_melody_by_default() -> None:
     result = json.loads(
-        bridge.preview_truename('{"value":"tune:world view","root":53,"bpm":180}')
+        bridge.preview_truename('{"value":"tune:world there","root":53,"bpm":180}')
     )
     assert result["value"] == "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1"
     assert len(result["playback"]) == 8

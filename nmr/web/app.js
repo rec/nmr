@@ -182,10 +182,20 @@ function playCurrent() {
     // Browsers suspend audio before the first gesture; muted Count still advances.
     if (player.context.state !== "running") {
       const duration = Math.max(0, ...music.playback.map((i) => i.onset + i.duration));
-      return new Promise((resolve) => setTimeout(() => {
-        if (!retain.checked) clearPlayback();
-        resolve();
-      }, (duration + 0.05) * 1000));
+      return new Promise((resolve) => {
+        const deadline = performance.now() + (duration + 0.05) * 1000;
+        const finish = () => {
+          const remaining = deadline - performance.now();
+          if (remaining > 0) {
+            // Browser timers overflow above a signed 32-bit millisecond delay.
+            setTimeout(finish, Math.min(remaining, 2147483647));
+            return;
+          }
+          if (!retain.checked) clearPlayback();
+          resolve();
+        };
+        finish();
+      });
     }
     if (!player.playing) { if (!retain.checked) clearPlayback(); return; }
     return new Promise((resolve) => { ended = resolve; });

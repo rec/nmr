@@ -18,7 +18,7 @@ from nmr.web.music_notation import TimeSignature, score_plan
 def test_scores_preserve_attacks_pitches_rests_and_exact_timing(
     bottom: int, position: Literal["start", "middle", "end"]
 ) -> None:
-    tune = Tune.from_text("@5 2@3/2 r@1/3 -1@2/3 @1/16 4@1/32")
+    tune = Tune.from_text("@5 2@3/2 r@1/3 -1@2/3 @1/16 4@1/24")
     meter = TimeSignature(top=3, bottom=bottom)
     score = score_plan(tune, 53, position, meter)
     assert score["clef"] == "treble"

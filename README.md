@@ -110,7 +110,7 @@ expands; save the canonical output instead.
 | `chess` | Legal SAN/UCI sequence or PGN main line from the standard starting position; output uses UCI. |
 | `go` | Legal Go sequence from an empty 19×19 (default), 9×9, or 13×13 board. |
 | `cards` | Every ordering of a 52-card deck, described by changed-position cycles; `()` is the ordered deck. |
-| `tune` | Short monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
+| `tune` | Monophonic melody and rhythm, using successive semitone steps and exact beat durations. |
 | `string` | Unicode text, preserving case and allowed spaces; excludes U+0000–001F, U+007F–009F, and surrogates. The empty string is supported. No Unicode normalization is applied. |
 
 String character indices count `a`–`z`, then `A`–`Z`, then the remaining allowed
@@ -197,8 +197,8 @@ Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:case bunch job thank
-nmr --value 'tune:case bunch job thank'
+# tune:must mess ton band
+nmr --value 'tune:must mess ton band'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -206,7 +206,8 @@ The first note starts with `@duration`. Later steps are signed semitone differen
 from the previous sounding note; omit a zero step. `r@duration` adds a rest.
 Durations are exact beats, with reduced denominators containing powers of two and
 at most one factor of three. Thus `1/6` is allowed, `1/9` is not, and `3/9` becomes
-`1/3`. Transposition, playback tempo, and the center note do not change a truename;
+`1/3`. Sounding notes must last at least `1/24` beat, a triplet 64th note;
+rests may be shorter. Transposition, playback tempo, and the center note do not change a truename;
 octave distances, beat scaling, and repeated attacks do. Adjacent rests merge,
 trailing rests disappear, and a phrase must start with a sounding note.
 
@@ -229,7 +230,8 @@ before release. They are not runtime switches: changing them changes truenames.
 Current codec work limits are 256 attacked notes, 20,000 text characters,
 duration weight 512, total complexity 4,096, and tune indices of 4,096 bits.
 A refusal reports a work limit and never substitutes another tune. Browser previews allow 20–400 BPM,
-MIDI pitches 0–127, at most 120 seconds, and notes at least 0.01 seconds long.
+and MIDI pitches 0–127. Playback has no limit on total tune duration;
+the minimum note length is in beats and follows the selected tempo.
 A tune can receive a truename even when its preview is unavailable. Measured 4-, 8-, and
 16-note motifs with the default vocabulary take 4, 10, and 19 payload words in
 the examples in `plan/tunes.md`; these are measurements, not general bounds.

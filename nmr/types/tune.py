@@ -25,6 +25,10 @@ class Note(BaseModel, frozen=True):
         if value == 0 and info.field_name == "gap":
             return value
         duration_parts(value)
+        if info.field_name == "duration" and value < MIN_NOTE_DURATION:
+            raise ValueError(
+                f"Note duration must be at least 1/24 beat; got {value} beats"
+            )
         return value
 
 
@@ -111,7 +115,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
         tables = tune_count.tune_counts(MAX_COST)
         remaining = cost - tune_count.ATTACK_COST
         rank, remaining = rank_duration(
-            self.notes[0].duration, remaining, tables["suffix"]
+            self.notes[0].duration, remaining, tables["suffix"], sounding=True
         )
         for note in self.notes[1:]:
             remaining -= tune_count.ATTACK_COST
@@ -127,7 +131,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
                 )
                 rank += addition
             addition, remaining = rank_duration(
-                note.duration, remaining, tables["suffix"]
+                note.duration, remaining, tables["suffix"], sounding=True
             )
             rank += addition
         assert remaining == 0
@@ -160,7 +164,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
         cost = bisect_right(tables["starts"], index) - 1
         rank = index - tables["starts"][cost]
         duration, rank, remaining = unrank_duration(
-            rank, cost - tune_count.ATTACK_COST, tables["suffix"]
+            rank, cost - tune_count.ATTACK_COST, tables["suffix"], sounding=True
         )
         notes = [Note(duration=duration)]
         while remaining:
@@ -190,7 +194,7 @@ class Tune(BaseModel, TypeNamer, frozen=True):
                     rank - count, remaining - tune_count.REST_COST, tables["after_gap"]
                 )
             duration, rank, remaining = unrank_duration(
-                rank, remaining, tables["suffix"]
+                rank, remaining, tables["suffix"], sounding=True
             )
             notes.append(Note(step=step, gap=gap, duration=duration))
         assert rank == 0
@@ -253,16 +257,6 @@ class Tune(BaseModel, TypeNamer, frozen=True):
                     f"note {number} positioned pitch is {pitch}; "
                     "allowed MIDI range is 0..127"
                 )
-            if (end := onset + duration) > 120:
-                violations.append(
-                    f"note {number} ends at {end} seconds "
-                    f"({float(end):.12g} s); maximum end time is 120 seconds"
-                )
-            if duration < Fraction(1, 100):
-                violations.append(
-                    f"note {number} duration is {duration} seconds "
-                    f"({float(duration):.12g} s); minimum duration is 0.01 seconds"
-                )
             result.append(
                 {"pitch": pitch, "onset": float(onset), "duration": float(duration)}
             )
@@ -300,23 +294,25 @@ def gap_cost(value: Fraction) -> int:
 
 
 def rank_duration(
-    value: Fraction, budget: int, completions: list[int]
+    value: Fraction, budget: int, completions: list[int], sounding: bool = False
 ) -> tuple[int, int]:
     tables = tune_count.tune_counts(MAX_COST)
+    kind = "note_duration" if sounding else "duration"
     weight = duration_cost(value)
-    rank = sum(tables["duration"][i] * completions[budget - i] for i in range(weight))
-    ordinal = duration_index(value) - tables["duration_starts"][weight]
+    rank = sum(tables[kind][i] * completions[budget - i] for i in range(weight))
+    ordinal = duration_index(value, sounding) - tables[kind + "_starts"][weight]
     remaining = budget - weight
     return rank + ordinal * completions[remaining], remaining
 
 
 def unrank_duration(
-    rank: int, budget: int, completions: list[int]
+    rank: int, budget: int, completions: list[int], sounding: bool = False
 ) -> tuple[Fraction, int, int]:
     tables = tune_count.tune_counts(MAX_COST)
+    kind = "note_duration" if sounding else "duration"
     for weight in range(budget + 1):
         suffixes = completions[budget - weight]
-        count = tables["duration"][weight] * suffixes
+        count = tables[kind][weight] * suffixes
         if rank >= count:
             rank -= count
             continue
@@ -324,7 +320,7 @@ def unrank_duration(
         if weight > MAX_WEIGHT:
             raise ValueError("Tune work limit: duration weight exceeds 512")
         return (
-            duration_value(tables["duration_starts"][weight] + ordinal),
+            duration_value(tables[kind + "_starts"][weight] + ordinal, sounding),
             rank,
             budget - weight,
         )
@@ -355,7 +351,11 @@ def duration_parts(value: Fraction) -> tuple[int, int, int, int]:
     return u, a, b, h
 
 
-def group_count(lower: int, upper: int, a: int, b: int) -> int:
+def group_count(lower: int, upper: int, a: int, b: int, sounding: bool = False) -> int:
+    if sounding:
+        lower = max(lower, ((1 << a) * 3**b + 23) // 24)
+    if lower > upper:
+        return 0
     count = upper - lower + 1
     if a:
         count -= upper // 2 - (lower - 1) // 2
@@ -366,10 +366,13 @@ def group_count(lower: int, upper: int, a: int, b: int) -> int:
     return count
 
 
-def duration_index(value: Fraction) -> int:
+def duration_index(value: Fraction, sounding: bool = False) -> int:
+    if sounding and value < MIN_NOTE_DURATION:
+        raise ValueError(f"Note duration must be at least 1/24 beat; got {value} beats")
     u, a, b, h = duration_parts(value)
     weight = duration_cost(value)
-    index = tune_count.tune_counts(MAX_COST)["duration_starts"][weight]
+    kind = "note_duration_starts" if sounding else "duration_starts"
+    index = tune_count.tune_counts(MAX_COST)[kind][weight]
     for i in range(h + 1):
         for j in (0, 1):
             exponent, remainder = divmod(
@@ -379,15 +382,16 @@ def duration_index(value: Fraction) -> int:
             if exponent < 0 or remainder:
                 continue
             if (i, j) == (h, b):
-                return index + group_count(1 << h, u - 1, a, b)
-            index += group_count(1 << i, (1 << (i + 1)) - 1, exponent, j)
+                return index + group_count(1 << h, u - 1, a, b, sounding)
+            index += group_count(1 << i, (1 << (i + 1)) - 1, exponent, j, sounding)
     raise AssertionError("Reduced duration group is missing")
 
 
-def duration_value(index: int) -> Fraction:
+def duration_value(index: int, sounding: bool = False) -> Fraction:
     if index < 0:
         raise ValueError("Expected a nonnegative duration index")
-    layers = tune_count.tune_counts(MAX_COST)["duration_starts"]
+    kind = "note_duration_starts" if sounding else "duration_starts"
+    layers = tune_count.tune_counts(MAX_COST)[kind]
     if index >= layers[MAX_WEIGHT + 1]:
         raise ValueError("Tune work limit: duration weight exceeds 512")
     lower, upper = (
@@ -411,14 +415,14 @@ def duration_value(index: int) -> Fraction:
             if a < 0 or remainder:
                 continue
             start, end = 1 << h, (1 << (h + 1)) - 1
-            count = group_count(start, end, a, b)
+            count = group_count(start, end, a, b, sounding)
             if index >= count:
                 index -= count
                 continue
             lower, upper = start - 1, end
             while upper - lower > 1:
                 middle = (lower + upper) // 2
-                if group_count(start, middle, a, b) <= index:
+                if group_count(start, middle, a, b, sounding) <= index:
                     lower = middle
                 else:
                     upper = middle
@@ -426,6 +430,7 @@ def duration_value(index: int) -> Fraction:
     raise AssertionError("Duration index has no group")
 
 
+MIN_NOTE_DURATION = Fraction(1, 24)
 MAX_NOTES = 256
 MAX_WEIGHT = 512
 MAX_INDEX_BITS = 4096
