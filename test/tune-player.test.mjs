@@ -24,9 +24,9 @@ class AudioContext {
   addEventListener() {}
   node(kind) { const node = new AudioNode(kind); this.nodes.push(node); return node; }
   createGain() { const node = this.node("gain"); node.gain = new Parameter(1); return node; }
-  createBiquadFilter() { const node = this.node("filter"); node.frequency = new Parameter(); node.Q = new Parameter(); return node; }
   createStereoPanner() { const node = this.node("pan"); node.pan = new Parameter(); return node; }
   createDelay() { const node = this.node("delay"); node.delayTime = new Parameter(); return node; }
+  createWaveShaper() { return this.node("shape"); }
   createPeriodicWave(real, imag, options) { return { real, imag, options }; }
   createOscillator() {
     const node = this.node("oscillator");
@@ -70,7 +70,7 @@ test("playback positions follow the audio clock through rests and clear on stop 
   assert.ok(Math.abs(positions.at(-1) - 0.75) < 1e-9, "A paused audio clock does not advance the highlight");
   voices(player)[0].onended();
   assert.equal(frames.size, 1);
-  voices(player)[1].onended();
+  for (const voice of voices(player).slice(1)) voice.onended();
   assert.equal(positions.at(-1), null);
   assert.equal(frames.size, 0);
   player.play([{ pitch: 53, onset: 0, duration: 1 }]);
@@ -92,26 +92,26 @@ test("volume uses decibel spacing with unity at 120 and tune envelopes reach ful
   assert.deepEqual(envelope.events.filter((i) => i[0] === "ramp").map((i) => i[1]), [1, 0]);
 });
 
-test("evolution changes harmonics across tunes while preserving note times and envelopes", () => {
+test("both timbres preserve note pitches, times and envelopes in either Evolve state", () => {
   const { player } = synth();
   const event = { pitch: 60, onset: 0.25, duration: 1 };
   player.play([event]);
-  const first = voices(player).at(-1);
-  assert.equal(first.started, 10.3);
-  assert.equal(first.stopped, 11.3);
-  assert.deepEqual(first.connections[0].gain.events, [
-    ["set", 0, 10.3], ["ramp", 1, 10.3 + 0.005],
-    ["set", 1, 11.295], ["ramp", 0, 11.3],
-  ]);
+  const first = voices(player).slice();
+  assert.deepEqual(first.map(i => i.type), ["triangle", "sawtooth"]);
+  for (const voice of first) {
+    assert.equal(voice.started, 10.3);
+    assert.equal(voice.stopped, 11.3);
+    assert.deepEqual(voice.connections[0].gain.events, [
+      ["set", 0, 10.3], ["ramp", 1, 10.3 + 0.005],
+      ["set", 1, 11.295], ["ramp", 0, 11.3],
+    ]);
+  }
+  player.setEvolution(false);
   player.context.currentTime = 100;
   player.play([event]);
-  const second = voices(player).at(-1);
-  assert.notDeepEqual(Array.from(second.wave.imag), Array.from(first.wave.imag));
-  assert.equal(second.stopped - second.started, 1);
-  assert.equal(second.frequency.value, first.frequency.value);
-  for (const voice of [first, second]) {
-    assert.equal(voice.wave.options.disableNormalization, true);
-    assert.ok(Array.from(voice.wave.imag).reduce((a, b) => a + Math.abs(b), 0) <= 1);
+  for (const voice of voices(player).slice(-2)) {
+    assert.equal(voice.stopped - voice.started, 1);
+    assert.equal(voice.frequency.value, first[0].frequency.value);
   }
 });
 
@@ -129,14 +129,16 @@ test("shared modulation survives tune boundaries and switching evolution does no
   assert.equal(player.evolved.gain.value, 0);
   assert.ok(modulators.every((i) => i.stopped === undefined));
   player.play([{ pitch: 53, onset: 0, duration: 1 }]);
-  assert.equal(voices(player).at(-1).wave, undefined);
-  assert.equal(voices(player).at(-1).type, "triangle");
+  assert.deepEqual(voices(player).slice(-2).map(i => i.type), ["triangle", "sawtooth"]);
+  const held = voices(player).slice(-2);
   player.setEvolution(true);
   assert.equal(player.output.gain.value, 0);
   assert.equal(player.dry.gain.value, 0);
-  assert.equal(player.evolved.gain.value, 0.9);
+  assert.equal(player.evolved.gain.value, Math.SQRT2);
+  assert.deepEqual(voices(player).slice(-2), held);
+  assert.ok(held.every(i => i.stopped === 11.05));
   assert.equal(player.context.nodes.filter((i) => i.kind === "delay").length, 1);
-  assert.equal(player.context.nodes.filter((i) => i.kind === "filter").length, 1);
+  assert.equal(player.context.nodes.filter((i) => i.kind === "shape").length, 2);
   assert.equal(player.context.nodes.filter((i) => i.kind === "pan").length, 1);
   const echo = shared.find((i) => i.kind === "delay");
   assert.equal(echo.delayTime.value, 0.19);

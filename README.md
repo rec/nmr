@@ -351,12 +351,13 @@ Settings also contains volume, root, position, time signature, and playing-note
 color. Existing playback, notation, and codec work limits still apply and are
 reported in the status region. VexFlow and its licensed fonts are bundled locally.
 
-Evolve is enabled by default. Harmonic mixtures change with the audio clock;
-shared slow modulation varies brightness, stereo position, and a quiet 190 ms
-echo across tune boundaries. Note pitches, onsets, durations, and volume envelopes
+Evolve is enabled by default. A level-compensated triangle-to-sawtooth blend
+changes timbre continuously over a 12-second cycle, including during held notes.
+Slower native modulation varies stereo position and a quiet 190 ms echo across
+tune boundaries. Note pitches, onsets, durations, and volume envelopes
 are unchanged. Echo tails can continue after a note ends; mute silences the
 effects as well as the notes. Disabling Evolve smoothly bypasses the effects and
-uses the plain triangle waveform for subsequent notes.
+uses the plain triangle waveform, including during the current note.
 
 New share links use separate mode and type parameters, an index and increment,
 and a Name value when applicable. Back and Forward restore the new link state.
@@ -438,6 +439,11 @@ make it available through `NODE_PATH`, build `dist/web`, and run
 Chrome, or `NMR_BROWSER_CHANNEL=chromium` with Playwright's Chromium installed.
 The workflow in `.github/workflows/check.yml` runs WebAssembly checks automatically
 and offers browser interactions as a manual workflow-dispatch job.
+
+For native audio regression checks, run `node test/tune-audio.cjs` with Chrome
+installed on macOS, or supply its executable path as the first argument.
+This renders 48 kHz WAV files in a temporary directory and checks Evolve levels
+and held-note variation, including switching Evolve during playback.
 
 See [the implementation plan](plan/nmr.md) for the contract, design rationale,
 and resolved first-release decisions.
