@@ -114,11 +114,11 @@ function writeURL(push = false) {
   window.history[push ? "pushState" : "replaceState"](null, "", url);
 }
 function refresh(push = false, reading = null) {
+  if (!ready) return;
   const pausedAtRequest = paused;
   const revision = ++version;
   current = null;
   writeURL(push);
-  if (!ready) return;
   let payload;
   let action;
   if (mode === "name") {
@@ -326,6 +326,7 @@ function tick() {
   }
   setTimeout(tick, 1000 - Date.now() % 1000);
 }
+readURL();
 configured.then((info) => {
   for (const [path, detail] of Object.entries(info.types)) {
     const option = document.createElement("option");

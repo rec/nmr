@@ -7,7 +7,7 @@ import { clockReading } from "../nmr/web/clock-time.mjs";
 const source = fs.readFileSync(new URL("../nmr/web/app.js", import.meta.url), "utf8").replace(/^import .*;\n/gm, "");
 const runnerSource = fs.readFileSync(new URL("../nmr/web/count-runner.mjs", import.meta.url), "utf8").replace("export class", "class");
 const flush = () => new Promise(setImmediate);
-function page(address = "http://localhost/?mode=count&index=42&inc=1", duration = 0.1) {
+function page(address = "http://localhost/?mode=count&index=42&inc=1", duration = 0.1, configuration = Promise.resolve({ types: { int: "Integer", cards: "Cards" }, words: ["the", "of", "and"] })) {
   let url = new URL(address);
   const elements = new Map();
   const radios = ["name", "count", "clock"].map((value) => ({ value, addEventListener(event, fn) { this[event] = fn; } }));
@@ -52,7 +52,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
     ResizeObserver: class { observe() {} },
     requestAnimationFrame(fn) { fn(); },
     presentation: { root: 53, bpm: 180, position: "middle" },
-    configured: Promise.resolve({ types: { int: "Integer", cards: "Cards" }, words: ["the", "of", "and"] }),
+    configured: configuration,
     request(action, payload) {
       calls.push({ action, payload });
       const result = action === "preview_truename" ? { playback: [{ onset: 0, duration }], score: { value: payload.value } }
@@ -266,4 +266,27 @@ test("pause is hidden in Name and retained when returning to Count or Clock", as
   app.timers.filter(i => i.delay <= 1000).at(-1).fn(); await flush();
   assert.equal(app.calls.length, calls);
   assert.equal(app.element("#count-value").value, "123");
+});
+
+for (const mode of ["clock", "count", "name"]) test(`${mode} URL applies its layout before runtime configuration`, async () => {
+  let configure;
+  const configuration = new Promise(resolve => { configure = resolve; });
+  const address = `http://localhost/?mode=${mode}&type=int&index=42&inc=7&value=the`;
+  const app = page(address, 0.1, configuration);
+  assert.equal(app.element("#workspace h1").textContent, mode[0].toUpperCase() + mode.slice(1));
+  assert.equal(app.element("#workspace").dataset.mode, mode);
+  assert.equal(app.radios.find(i => i.checked).value, mode);
+  assert.equal(app.element("#name-editor").hidden, mode !== "name");
+  assert.equal(app.element("#count-value").hidden, mode !== "count");
+  assert.equal(app.element("#clock-reading").hidden, mode !== "clock");
+  assert.equal(app.element("#pause-toggle").hidden, mode === "name");
+  await flush();
+  assert.equal(app.url.href, address, "Startup must preserve values until options and editor exist");
+  assert.equal(app.calls.length, 0, "No codec requests before configuration");
+  configure({ types: { int: "Integer" }, words: ["the", "of", "and"] });
+  await flush();
+  assert.equal(app.element("#type").value, "int");
+  assert.equal(app.element("#count-increment").value, "7");
+  if (mode === "name") assert.equal(app.element("#typed").textContent.trim(), "the");
+  assert.ok(app.calls.length > 0);
 });
