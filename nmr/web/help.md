@@ -16,10 +16,13 @@ of that type. Changing Type preserves the numeric index. Finite types wrap.
 
 ## Count and Clock
 
-Count uses an exact integer and the Increment in Settings. It plays, waits two
-seconds after completion, and increments continuously, including while muted. Clock generates its
+Count uses an exact integer and the Increment in Settings. It plays, waits the
+Delay between tunes (s), and increments continuously, including while muted.
+The delay defaults to two seconds and is shared with Clock. Clock generates its
 index from Time or DateTime and decodes it within the selected Type, or globally.
-Time only, Display UTC, and Clock interval are in Settings.
+Clock plays the first tune immediately, lets it finish, waits the shared delay,
+then plays the tune for the next new whole second. The display keeps updating
+each second. Time only and Display UTC are in Settings.
 Entering Clock selects All types. Date and time occupy two lines; click that area
 to show the live count, and click again to return to date/time. You can select a
 specific Type afterward.

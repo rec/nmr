@@ -13,7 +13,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
   const radios = ["name", "count", "clock"].map((value) => ({ value, addEventListener(event, fn) { this[event] = fn; } }));
   const element = (id) => {
     if (!elements.has(id)) elements.set(id, {
-      value: id === "#count-increment" ? "1" : id === "#score-top" || id === "#score-bottom" ? "4" : id === "#clock-interval" ? "5" : "",
+      value: id === "#count-increment" ? "1" : id === "#score-top" || id === "#score-bottom" ? "4" : id === "#playback-delay" ? "2" : "",
       checked: ["#retain-playback", "#evolve"].includes(id), textContent: "", dataset: {}, validity: { valid: true }, style: { setProperty() {} },
       hidden: id === "#clock-count",
       attributes: {},
@@ -39,6 +39,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
     get url() { return url; },
     elapse(milliseconds) { wallTime += milliseconds; },
     get date() { return new Date(wallTime); },
+    tick() { timers.filter(i => i.name === "tick").at(-1).fn(); },
     switch(mode) { radios.find((i) => i.value === mode).change(); },
     hold(action) { hold = action; },
     load(address) { url = new URL(address); listeners.popstate(); },
@@ -75,7 +76,7 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
     },
     drawScore(container, value) { container.textContent = value.value; }, highlightScore() {},
     performance: { now: () => now },
-    setTimeout(fn, delay) { timers.push({ fn() { now += delay; fn(); }, delay }); return timers.length; }, clearTimeout() {},
+    setTimeout(fn, delay) { timers.push({ name: fn.name, fn() { now += delay; fn(); }, delay }); return timers.length; }, clearTimeout() {},
   });
   return app;
 }
@@ -240,14 +241,14 @@ test("Clock freezes pending and periodic updates and catches up on resume", asyn
   const requests = app.calls.length;
   app.release(); await flush();
   app.elapse(60000);
-  app.timers.filter(i => i.delay <= 1000).at(-1).fn(); await flush();
+  app.tick(); await flush();
   assert.equal(app.calls.length, requests);
   assert.deepEqual(["#clock-date", "#clock-hours", "#clock-count", "#source-name"].map(i => app.element(i).textContent), snapshot);
   app.hold(null);
   app.element("#pause-toggle").click(); await flush();
   assert.ok(app.calls.length > requests);
   assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_type, "datetime");
-  assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_value, clockReading(app.date, 5, false, false).value);
+  assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_value, clockReading(app.date, false, false).value);
   assert.equal(app.player.context.state, "running");
 });
 
@@ -263,7 +264,7 @@ test("pause is hidden in Name and retained when returning to Count or Clock", as
   assert.equal(app.player.context.state, "suspended");
   app.switch("count"); await flush();
   const calls = app.calls.length;
-  app.timers.filter(i => i.delay <= 1000).at(-1).fn(); await flush();
+  app.tick(); await flush();
   assert.equal(app.calls.length, calls);
   assert.equal(app.element("#count-value").value, "123");
 });
@@ -289,4 +290,47 @@ for (const mode of ["clock", "count", "name"]) test(`${mode} URL applies its lay
   assert.equal(app.element("#count-increment").value, "7");
   if (mode === "name") assert.equal(app.element("#typed").textContent.trim(), "the");
   assert.ok(app.calls.length > 0);
+});
+
+for (const seconds of [0, 0.627, 2.5]) test(`Clock finishes a tune, waits ${seconds}s, then selects the next whole second`, async () => {
+  const app = page("http://localhost/?mode=clock", 10);
+  app.elapse(250 - app.date.getMilliseconds());
+  app.element("#playback-delay").value = String(seconds);
+  app.element("#playback-delay").change();
+  await flush();
+  const previews = () => app.calls.filter(i => i.action === "preview_truename").length;
+  assert.equal(previews(), 1, "First tune starts without waiting for a boundary");
+  for (let i = 0; i < 3; i++) { app.elapse(1000); app.tick(); await flush(); }
+  assert.equal(previews(), 1, "Second ticks cannot interrupt a long tune");
+  app.elapse(123);
+  app.timers.find(i => i.name === "finish").fn(); await flush();
+  const next = Math.floor((app.date.getTime() + seconds * 1000) / 1000) * 1000 + 1000;
+  app.elapse(next - 1 - app.date.getTime());
+  app.tick(); await flush();
+  assert.equal(previews(), 1, "No playback before the next new second after the delay");
+  app.elapse(1);
+  app.tick(); await flush();
+  assert.equal(previews(), 2);
+  assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_value, clockReading(new Date(next)).value);
+});
+
+test("Count uses the same configurable delay after completion", async () => {
+  const app = page(); await flush();
+  app.element("#playback-delay").value = "3.5";
+  app.element("#playback-delay").change();
+  app.timers.find(i => i.name === "finish").fn(); await flush();
+  assert.ok(app.timers.some(i => i.delay === 3500));
+  assert.equal(app.element("#count-value").value, "42");
+  app.timers.find(i => i.delay === 3500).fn(); await flush();
+  assert.equal(app.element("#count-value").value, "43");
+});
+
+test("entering Clock lets an existing tune finish before the shared delay", async () => {
+  const app = page(); await flush();
+  app.switch("clock"); await flush();
+  assert.equal(app.calls.filter(i => i.action === "preview_truename").length, 1);
+  app.timers.find(i => i.name === "finish").fn(); await flush();
+  app.elapse(3000);
+  app.tick(); await flush();
+  assert.equal(app.calls.filter(i => i.action === "preview_truename").length, 2);
 });

@@ -1,11 +1,12 @@
 /* Mode changes stop the runner; transport pause retains its next iteration. */
 export class CountRunner {
-  constructor(play, advance, onError, schedule = (callback, delay) => setTimeout(callback, delay), cancel = (timer) => clearTimeout(timer)) {
+  constructor(play, advance, onError, delay = () => 2000, schedule = (callback, delay) => setTimeout(callback, delay), cancel = (timer) => clearTimeout(timer)) {
     this.play = play;
     this.advance = advance;
     this.onError = onError;
     this.schedule = schedule;
     this.cancel = cancel;
+    this.delay = delay;
     this.running = false;
     this.playing = null;
     this.timer = null;
@@ -51,7 +52,7 @@ export class CountRunner {
         this.advanceNext = true;
         this.step();
       };
-      this.timer = this.schedule(next, 2000);
+      this.timer = this.schedule(next, this.delay());
     }, (error) => {
       this.playing = null;
       this.stop();

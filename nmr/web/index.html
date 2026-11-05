@@ -47,10 +47,9 @@
         <label class="settings-row">Keep last played music <input id="retain-playback" type="checkbox" checked /></label>
         <label class="settings-row">Time only <input id="clock-time-only" type="checkbox" /></label>
         <label class="settings-row">Display UTC <input id="clock-display-utc" type="checkbox" /></label>
-        <label class="settings-row">Clock interval <select id="clock-interval">
-          <option value="5">5 seconds</option><option value="10">10 seconds</option>
-          <option value="60">1 minute</option><option value="3600">60 minutes</option>
-        </select></label>
+        <label class="settings-row">Delay between tunes (s)
+          <input id="playback-delay" type="number" min="0" step="any" value="2" required />
+        </label>
         <label class="settings-row">Playing note color <input id="score-highlight-color" type="color" value="#008000" /></label>
         <div class="settings-row">
           <label for="count-increment">Increment</label>

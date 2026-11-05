@@ -26,7 +26,7 @@ const sourceName = document.querySelector("#source-name");
 const sound = document.querySelector("#sound-toggle");
 const pause = document.querySelector("#pause-toggle");
 const increment = document.querySelector("#count-increment");
-const interval = document.querySelector("#clock-interval");
+const delay = document.querySelector("#playback-delay");
 const timeOnly = document.querySelector("#clock-time-only");
 const displayUTC = document.querySelector("#clock-display-utc");
 const retain = document.querySelector("#retain-playback");
@@ -40,6 +40,8 @@ const message = document.querySelector("#message");
 let muted = true;
 let paused = false;
 let clockSnapshot = null;
+let clockNextSecond = null;
+let playbackDelay = Number(delay.value) * 1000;
 let mode = "name";
 let editor;
 let version = 0;
@@ -80,7 +82,7 @@ const runner = new CountRunner(playCurrent, () => {
   if (mode !== "count") return;
   field.value = String(BigInt(field.value) + BigInt(increment.value));
   refresh();
-}, report);
+}, report, () => playbackDelay);
 player?.setVolume(0, 0);
 player?.setEvolution(evolve.checked);
 
@@ -130,7 +132,7 @@ function refresh(push = false, reading = null) {
     if (!/^[0-9]+$/.test(field.value)) { display.clear(); sourceName.textContent = ""; message.textContent = ""; loading = Promise.resolve(null); return; }
     payload = { value: field.value, type_name: type.value, ...settings() };
     if (mode === "clock") {
-      reading ||= paused && clockSnapshot || clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+      reading ||= paused && clockSnapshot || clockReading(new Date(), timeOnly.checked, displayUTC.checked);
       payload.source_type = reading.type;
       payload.source_value = reading.value;
     }
@@ -206,10 +208,14 @@ function playCurrent() {
     }
     if (!player.playing) { if (!retain.checked) clearPlayback(); return; }
     return new Promise((resolve) => { ended = resolve; });
-  }).finally(() => { playback = null; });
+  }).finally(() => {
+    playback = null;
+    if (mode === "clock") clockNextSecond = Math.floor((Date.now() + playbackDelay) / 1000) + 1;
+  });
   return playback;
 }
 function activate(push = false) {
+  clockNextSecond = null;
   runner.stop();
   workspace.dataset.mode = mode;
   heading.textContent = mode[0].toUpperCase() + mode.slice(1);
@@ -222,7 +228,7 @@ function activate(push = false) {
   if (player && paused) (mode === "name" ? player.unlock() : player.context.suspend()).catch(report);
   refresh(push);
   if (mode === "count" && ready && !paused && increment.value && increment.validity.valid) runner.start();
-  if (mode === "clock" && ready && !paused) playCurrent().catch(report);
+  if (mode === "clock" && ready && !paused && !playback) playCurrent().catch(report);
 }
 function readURL() {
   const query = new URL(window.location.href).searchParams;
@@ -313,16 +319,22 @@ nameField.addEventListener("paste", (event) => {
   event.preventDefault();
   if (editor?.load(event.clipboardData.getData("text/plain"))) refresh();
 });
-for (const input of [scoreTop, scoreBottom, timeOnly, displayUTC, interval]) input.addEventListener("change", () => {
+delay.addEventListener("change", () => {
+  if (delay.validity.valid) playbackDelay = Number(delay.value) * 1000;
+});
+for (const input of [scoreTop, scoreBottom, timeOnly, displayUTC]) input.addEventListener("change", () => {
   if (scoreTop.validity.valid) refresh();
 });
 for (const input of [document.querySelector("#tune-root"), document.querySelector("#tune-position")]) input.addEventListener("change", () => refresh());
 window.addEventListener("popstate", readURL);
 function tick() {
   if (mode === "clock" && ready && !paused) {
-    const reading = clockReading(new Date(), Number(interval.value), timeOnly.checked, displayUTC.checked);
+    const reading = clockReading(new Date(), timeOnly.checked, displayUTC.checked);
     refresh(false, reading);
-    if (reading.due && !playback) playCurrent().catch(report);
+    if (!playback && (clockNextSecond !== null && reading.second >= clockNextSecond)) {
+      clockNextSecond = null;
+      playCurrent().catch(report);
+    }
   }
   setTimeout(tick, 1000 - Date.now() % 1000);
 }

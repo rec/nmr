@@ -13,7 +13,7 @@ function counting() {
   const runner = new CountRunner(() => {
     played.push(value);
     return new Promise((resolve) => { finish = resolve; });
-  }, () => { value += 3n; }, (error) => errors.push(error), (callback, delay) => {
+  }, () => { value += 3n; }, (error) => errors.push(error), () => 2000, (callback, delay) => {
     assert.equal(delay, 2000);
     timer = callback;
     return callback;
@@ -126,4 +126,18 @@ test("resuming a paused playing tune does not restart it", async () => {
   app.timer(); await flush();
   assert.deepEqual(app.played, [0n, 3n]);
   app.runner.stop(); app.finish();
+});
+
+test("the current delay setting is read after each tune completes", async () => {
+  let delay = 500;
+  const timers = [];
+  const runner = new CountRunner(() => Promise.resolve(), () => {}, assert.fail, () => delay, (fn, milliseconds) => {
+    timers.push({ fn, milliseconds });
+  }, () => {});
+  runner.start(); await flush();
+  assert.equal(timers[0].milliseconds, 500);
+  delay = 1250;
+  timers[0].fn(); await flush();
+  assert.equal(timers[1].milliseconds, 1250);
+  runner.stop();
 });

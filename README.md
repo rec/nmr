@@ -329,7 +329,8 @@ vocabulary completion with Space, Left/Right, and Up/Down. Select a Type to edit
 a short name, or select All types for full names.
 
 Count continuously iterates an exact nonnegative integer. It plays the current index,
-waits two seconds after the tune finishes, increments, and plays again. Increment
+waits the configurable delay after the tune finishes, increments, and plays again.
+Delay between tunes (s) defaults to two seconds and is shared with Clock. Increment
 is a compact positive-integer setting in Settings. Changing Type preserves the
 index and decodes it in the selected type. Finite types wrap using the codecs'
 existing browsing rules; the source index is preserved.
@@ -338,7 +339,9 @@ Clock derives an index relative to Time or DateTime, controlled by Time only in
 Settings. Entering Clock selects All types by default. It decodes that index
 globally under All types or within the selected
 Type otherwise, including non-temporal types. Display UTC affects presentation;
-the source uses UTC. Clock interval controls playback boundaries.
+the source uses UTC. Clock plays its first tune immediately. After each tune
+finishes, it waits the shared delay, then selects the tune for the next new
+whole second. The clock display continues updating during playback and the wait.
 
 The current object's bounded display supports chess moves and promotions, Go
 moves, Pass and Undo, card interchanges, and the bundled world map. Interactive
