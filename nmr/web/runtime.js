@@ -19,8 +19,8 @@ worker.onmessage = ({ data }) => {
   if (data.error) task.reject(new Error(data.error));
   else task.resolve(data.result);
 };
-worker.onerror = () => {
-  const error = new Error("Could not start the local truename engine. Reload to try again.");
+worker.onerror = (event) => {
+  const error = event.error || new Error(event.message);
   failure = error;
   console.error(error);
   for (const task of pending.values()) task.reject(error);
