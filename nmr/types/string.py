@@ -1,8 +1,9 @@
-"""Letter-first Unicode strings ranked by length and diagonal character tuples."""
+"""Unicode strings ranked by total character cost, with common letters first."""
 
+from bisect import bisect_right
+from functools import lru_cache
 from string import ascii_lowercase, ascii_uppercase
 
-from ..pack_numbers import Packer
 from ..type_name import TypeNamer
 from .bounded import bounded
 
@@ -13,25 +14,60 @@ class String(TypeNamer):
 
     @staticmethod
     def str_to_index(value: str) -> int:
-        if not value:
-            return 0
         digits = [character_index(i) for i in value]
-        packed = Packer(count=len(digits)).pack(*digits)
-        return ((2 * packed + 1) << len(digits)) - 1
+        remaining = sum((1 + i // len(LETTERS)).bit_length() for i in digits)
+        counts, starts = string_counts(remaining)
+        index = starts[remaining]
+        for digit in digits:
+            for weight, (lower, upper) in enumerate(CHARACTER_GROUPS, 1):
+                if weight > remaining:
+                    break
+                index += max(0, min(digit, upper) - lower) * counts[remaining - weight]
+            remaining -= (1 + digit // len(LETTERS)).bit_length()
+        return index
 
     @staticmethod
     def index_to_str(index: int, browse: bool = False) -> str:
         if index < 0:
             raise ValueError("Expected a nonnegative string index")
-        number = index + 1
-        length = (number & -number).bit_length() - 1
-        packed = (number >> length) // 2
-        if not length:
-            if packed and not browse:
-                raise ValueError("Noncanonical empty string")
-            return ""
-        digits = Packer(count=length).unpack(packed)
-        return "".join(character_from_index(i, browse) for i in digits)
+        # The 52 cost-one letters alone provide at least 32**cost strings.
+        counts, starts = string_counts((index.bit_length() + 4) // 5)
+        remaining = bisect_right(starts, index) - 1
+        rank = index - starts[remaining]
+        result = []
+        while remaining:
+            for weight, (lower, upper) in enumerate(CHARACTER_GROUPS, 1):
+                if weight > remaining:
+                    break
+                completions = counts[remaining - weight]
+                block = (upper - lower) * completions
+                if rank >= block:
+                    rank -= block
+                    continue
+                offset, rank = divmod(rank, completions)
+                result.append(character_from_index(lower + offset))
+                remaining -= weight
+                break
+            else:
+                raise AssertionError("String completion count is inconsistent")
+        return "".join(result)
+
+
+@lru_cache(maxsize=1)
+def string_counts(limit: int) -> tuple[list[int], list[int]]:
+    """Count exact-cost strings and strictly preceding layers, including empty."""
+    counts = [1]
+    starts = [0, 1]
+    for cost in range(1, limit + 1):
+        counts.append(
+            sum(
+                (b - a) * counts[cost - w]
+                for w, (a, b) in enumerate(CHARACTER_GROUPS, 1)
+                if w <= cost
+            )
+        )
+        starts.append(starts[-1] + counts[-1])
+    return counts, starts
 
 
 def character_index(character: str) -> int:
@@ -56,3 +92,7 @@ LOW_CHARACTERS = LETTERS + "".join(
     chr(i) for i in range(0x20, 0x100) if not 0x7F <= i < 0xA0 and chr(i) not in LETTERS
 )
 SIZE = 0x110000 - 0x800 - 0x41
+CHARACTER_GROUPS = [
+    (len(LETTERS) * (2 ** (w - 1) - 1), min(SIZE, len(LETTERS) * (2**w - 1)))
+    for w in range(1, (1 + (SIZE - 1) // len(LETTERS)).bit_length() + 1)
+]

@@ -224,6 +224,48 @@
       "value": "(1 2 3)",
       "scope": "",
       "truename": "up night"
+    },
+    {
+      "type": "string",
+      "input": "",
+      "value": "",
+      "scope": null,
+      "truename": "string:the"
+    },
+    {
+      "type": "string",
+      "input": "aa",
+      "value": "aa",
+      "scope": null,
+      "truename": "string:what"
+    },
+    {
+      "type": "string",
+      "input": "dfasdfasdf",
+      "value": "dfasdfasdf",
+      "scope": null,
+      "truename": "string:the dance ion moved told grain"
+    },
+    {
+      "type": "string",
+      "input": "dfasdfasdf",
+      "value": "dfasdfasdf",
+      "scope": "data",
+      "truename": "data:from mask flux post youth lung"
+    },
+    {
+      "type": "string",
+      "input": "dfasdfasdf",
+      "value": "dfasdfasdf",
+      "scope": "data:id",
+      "truename": "id:a faith vault surf trial month"
+    },
+    {
+      "type": "string",
+      "input": "dfasdfasdf",
+      "value": "dfasdfasdf",
+      "scope": "",
+      "truename": "date help vast cash heavy poker"
     }
   ]
 }

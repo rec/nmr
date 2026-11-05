@@ -798,23 +798,35 @@ buildable installation-free decoder, but no public URL or PyPI release was creat
 
 ### String fallback
 
-`data:id:string` occupies slot 2 under `data:id`. It preserves case, allowed whitespace,
+`data:id:string` preserves case, allowed whitespace,
 and Unicode composition exactly, including the empty string. It excludes
 U+0000–001F, U+007F–009F (including DELETE), and surrogate code points U+D800–DFFF.
 The character order is `a`–`z` (0–25), `A`–`Z` (26–51), the remaining allowed
 U+0020–00FF code points in ascending order (52–190), then U+0100 upward, skipping
 surrogates. The alphabet has 1,111,999 characters.
 
-For a nonempty string of length `n`, let `p` be the shared `Packer(count=n)`
-diagonal rank of its character indices. Its string index is
-`((2*p + 1) << n) - 1`. The empty string has index zero. Decoding reads `n` from
-the trailing zero bits of `index + 1`, then unpacks the remaining tuple rank.
-This is the trailing-binary length tag, and distinguishes `a`, `aa`, and
-`aaa`, whose character tuples all rank zero. Strict decoding rejects invalid
-character indices and noncanonical empty-string aliases; browsing wraps invalid
-character indices modulo the alphabet size and maps empty-string aliases to empty.
-Vocabulary capacity still limits truename size. `dfasdfasdf` now has the truename
-`string:she dump stan learn river`.
+Character index `c` costs `1 + floor(log2(1 + floor(c / 52)))`. All 52 ASCII
+letters cost one. Strings are ranked first by the sum of their character costs,
+then lexicographically by character index within each cost layer. This places
+longer common text ahead of rare single code points without removing Unicode
+values or changing character order. For example, every ten-letter ASCII string
+precedes the private-use character U+E7DA, which costs eleven.
+
+For weight `w`, the character-index interval is
+`[52*(2**(w-1)-1), min(SIZE, 52*(2**w-1)))`. There are fifteen such groups.
+Set `count[0]=1` for the empty suffix, and compute
+`count[k]=sum(group_size[w]*count[k-w], w<=k)`. Cumulative counts locate the
+total-cost layer. Within a layer, ranking sums preceding character blocks;
+unranking selects the block and its character by division. Both directions
+use exact integers and never enumerate earlier strings. The 52 cost-one letters
+give an upper bound on decoding cost from the index's bit length.
+
+The empty string has index zero, `a` has index one, `aa` has index 53, and `aaa`
+has index 2861. Every nonnegative index names exactly one string; strict and
+Browse decoding agree, with no empty aliases or character wrapping. Vocabulary
+capacity still limits truename size. `dfasdfasdf` now has the truename
+`string:the dance ion moved told grain` (six payload words). The revised
+enumeration replaces the earlier length-tag mapping and changes string truenames.
 
 The GUI leaves an empty field empty, but explicit library/CLI String encoding
 supports the empty string. String is the fallback for otherwise unrecognized

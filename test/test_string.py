@@ -1,10 +1,15 @@
-"""Letter-first characters, diagonal tuples, and distinct string lengths."""
+"""Weighted Unicode strings with direct, gapless ranking and unranking."""
 
 import pytest
 
 from nmr.nmr import Nmr
-from nmr.pack_numbers import Packer
-from nmr.types.string import SIZE, String, character_from_index, character_index
+from nmr.types.string import (
+    LETTERS,
+    SIZE,
+    String,
+    character_from_index,
+    character_index,
+)
 
 
 @pytest.mark.parametrize(
@@ -61,22 +66,47 @@ def test_character_order_and_skipped_ranges(character: str, index: int) -> None:
 
 
 def test_string_length_distinguishes_zero_rank_characters() -> None:
-    assert [String.str_to_index(i) for i in ["", "a", "aa", "aaa"]] == [0, 1, 3, 7]
+    assert [String.str_to_index(i) for i in ["", "a", "aa", "aaa"]] == [0, 1, 53, 2861]
 
 
-def test_equal_length_strings_follow_diagonal_order() -> None:
-    values = ["aa", "ba", "ab", "ca", "bb", "ac"]
-    assert [String.str_to_index(i) for i in values] == [3, 11, 19, 27, 35, 43]
+def test_equal_cost_strings_follow_character_order() -> None:
+    values = ["aa", "ab", "ac", "ba", "bb", "ca", " ", "!"]
+    assert [String.str_to_index(i) for i in values] == [
+        53,
+        54,
+        55,
+        105,
+        106,
+        157,
+        2757,
+        2758,
+    ]
 
 
-def test_common_letters_produce_short_names() -> None:
-    truename = Nmr().encode("dfasdfasdf", "string").truename
-    assert len(truename.partition(":")[2].split()) <= 5
+def test_every_string_through_cost_two_has_its_exact_position() -> None:
+    expected = [
+        "",
+        *LETTERS,
+        *[a + b for a in LETTERS for b in LETTERS],
+        *[character_from_index(i) for i in range(52, 156)],
+    ]
+    for index, value in enumerate(expected):
+        assert String.str_to_index(value) == index
+        assert String.index_to_str(index) == value
 
 
-@pytest.mark.parametrize("index", [0, 1, 2, 3, 0xD800, 2**120, 2**1000])
+def test_longer_common_text_precedes_private_use_characters() -> None:
+    assert String.str_to_index("helloworld") < String.str_to_index("\ue7da")
+    assert String.str_to_index("Z" * 10) < String.str_to_index("\ue7da")
+
+
+@pytest.mark.parametrize(
+    "index", [0, 1, 2, 3, 0xD800, 228965, 2**120, 2**1000, 2**12000]
+)
 def test_browsing_always_constructs_an_allowed_string(index: int) -> None:
     value = String.index_to_str(index, browse=True)
+    assert String.str_to_index(value) == index
+    assert String.index_to_str(index) == value
     assert String.index_to_str(String.str_to_index(value)) == value
     assert all(
         ord(i) >= 0x20 and not 0x7F <= ord(i) < 0xA0 and not 0xD800 <= ord(i) < 0xE000
@@ -84,14 +114,10 @@ def test_browsing_always_constructs_an_allowed_string(index: int) -> None:
     )
 
 
-def test_browsing_wraps_out_of_range_characters_and_repairs_empty_aliases() -> None:
-    index = ((2 * Packer(count=2).pack(SIZE, 1) + 1) << 2) - 1
-    with pytest.raises(ValueError, match="canonical domain"):
-        String.index_to_str(index)
-    assert String.index_to_str(index, browse=True) == "ab"
-    with pytest.raises(ValueError, match="Noncanonical empty"):
-        String.index_to_str(2)
-    assert String.index_to_str(2, browse=True) == ""
+def test_empty_string_has_only_one_index() -> None:
+    assert String.index_to_str(0) == ""
+    assert String.index_to_str(2, browse=True) == "b"
+    assert all(String.index_to_str(i, browse=True) for i in range(1, 3000))
 
 
 def test_strings_do_not_normalize_case_or_unicode() -> None:

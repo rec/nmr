@@ -115,10 +115,15 @@ expands; save the canonical output instead.
 
 String character indices count `a`–`z`, then `A`–`Z`, then the remaining allowed
 U+0020–00FF characters in code-point order, then higher Unicode scalar values.
-Character tuples use the shared diagonal enumeration by total sum; the length
-is encoded with a trailing-binary length tag. For example,
-`dfasdfasdf` is `string:she dump stan learn river`. Browsing wraps character
-indices outside the alphabet and repairs noncanonical empty-string indices.
+Strings are ordered by total character cost, then lexicographically by those
+character indices. Character index `c` costs
+`1 + floor(log2(1 + floor(c / 52)))`: all ASCII letters cost one, while later
+characters cost progressively more. Longer common-letter strings therefore
+precede rare single characters. Exact completion counts support direct ranking
+and unranking. Every nonnegative index is canonical, including one empty string
+at zero; Browse uses the same mapping. For example, `dfasdfasdf` is
+`string:the dance ion moved told grain`. This ordering changes previous string
+truenames; other type mappings are unchanged.
 
 Time and DateTime use whole seconds. Fractional-second input is
 rejected, not rounded. Coordinates select a cube face, round each projected
