@@ -71,7 +71,7 @@ main {
   padding: 0 24px 12px;
   height: min(100dvh, 740px);
   display: grid;
-  grid-template-rows: minmax(0, 96px) minmax(0, 240px) minmax(0, 240px) minmax(0, 100px) 20px 44px;
+  grid-template-rows: minmax(0, 96px) minmax(0, 240px) minmax(0, 240px) minmax(0, 100px) 20px;
   gap: 8px;
 }
 h1 {
@@ -121,14 +121,12 @@ h3 { margin: 0 0 12px; font-size: 16px; font-weight: 500; }
 }
 
 main > * { min-width: 0; min-height: 0; }
-#page-controls { display: flex; justify-content: center; align-items: center; border-top: 1px solid #bdc9bc; padding-top: 6px; }
-.mode-row { display: flex; align-items: center; justify-content: center; gap: 8px 20px; font-size: clamp(12px, 2.8vw, 18px); }
-#modes { display: flex; gap: 12px; border: 0; padding: 0; margin: 0; }
-#modes legend { position: absolute; clip-path: inset(50%); width: 1px; height: 1px; overflow: hidden; }
-.mode-row label { display: inline-flex; gap: 6px; align-items: center; }
-input[type="radio"], input[type="checkbox"] { display: inline-block; width: 18px; height: 18px; margin: 0; padding: 0; accent-color: #245d50; }
+input[type="checkbox"] { display: inline-block; width: 18px; height: 18px; margin: 0; padding: 0; accent-color: #245d50; }
 select { font: inherit; color: inherit; max-width: 100%; border: 1px solid #9aac9d; border-radius: 6px; padding: 4px 8px; background: #f6f4ed; text-align: center; }
-#type { width: clamp(90px, 15vw, 140px); }
+#type { position: fixed; top: 16px; left: 20px; z-index: 10; width: clamp(90px, 15vw, 140px); }
+#mode-toggle { border: 0; border-radius: 6px; padding: 0 8px; background: transparent; color: inherit; font: inherit; letter-spacing: inherit; line-height: inherit; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 6px; cursor: pointer; }
+#mode-toggle:hover { background: #e7ece3; }
+#mode-toggle:focus-visible { outline: 2px solid #245d50; outline-offset: 2px; }
 #source-region { overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
 #source-region > * { width: 100%; min-height: 0; max-height: 100%; overflow: auto; padding-block: 4px; }
 #source-name { margin: 0; font-size: clamp(26px, 4vw, 40px); line-height: 1.2; overflow-wrap: anywhere; }
@@ -150,8 +148,7 @@ select { font: inherit; color: inherit; max-width: 100%; border: 1px solid #9aac
   main { padding: 0 12px 12px; }
   #settings-controls { top: 4px; right: 8px; gap: 0; }
   #pause-toggle, #sound-toggle, #settings-toggle, #help-toggle { width: 32px; height: 32px; }
-  .mode-row { gap: 8px; }
-  #modes { gap: 8px; }
+  #type { top: 4px; left: 8px; }
   h1 { font-size: 81.6px; }
   .card-layout { padding: 8px; }
   .card-deck { gap: 2px; }

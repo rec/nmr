@@ -11,7 +11,8 @@ import { drawScore, highlightScore } from "./music-notation.mjs";
 
 const workspace = document.querySelector("#workspace");
 const heading = workspace.querySelector("h1");
-const modes = document.querySelectorAll('[name="mode"]');
+const modeToggle = document.querySelector("#mode-toggle");
+const modes = ["clock", "count", "name"];
 const type = document.querySelector("#type");
 const field = document.querySelector("#count-value");
 const nameField = document.querySelector("#name-editor");
@@ -43,7 +44,7 @@ let clockSnapshot = null;
 let clockResumeAt = null;
 let clockNextSecond = null;
 let playbackDelay = Number(delay.value) * 1000;
-let mode = "name";
+let mode = "clock";
 let editor;
 let version = 0;
 let current = null;
@@ -225,8 +226,8 @@ function activate(push = false) {
   }
   runner.stop();
   workspace.dataset.mode = mode;
-  heading.textContent = mode[0].toUpperCase() + mode.slice(1);
-  for (const radio of modes) radio.checked = radio.value === mode;
+  modeToggle.textContent = mode[0].toUpperCase() + mode.slice(1);
+  modeToggle.title = `Switch to ${modes[(modes.indexOf(mode) + 1) % modes.length]}`;
   nameField.hidden = mode !== "name";
   field.hidden = mode !== "count";
   clockReadingButton.hidden = mode !== "clock";
@@ -239,7 +240,7 @@ function activate(push = false) {
 }
 function readURL() {
   const query = new URL(window.location.href).searchParams;
-  mode = ["name", "count", "clock"].includes(query.get("mode")) ? query.get("mode") : "name";
+  mode = modes.includes(query.get("mode")) ? query.get("mode") : "clock";
   type.value = query.get("type") || "";
   const index = query.get("index") || "0";
   field.value = /^[0-9]+$/.test(index) ? index : "0";
@@ -249,8 +250,8 @@ function readURL() {
   editor?.load(query.get("value") || "");
   activate();
 }
-for (const radio of modes) radio.addEventListener("change", () => {
-  mode = radio.value;
+modeToggle.addEventListener("click", () => {
+  mode = modes[(modes.indexOf(mode) + 1) % modes.length];
   if (mode === "clock") type.value = "";
   activate(true);
 });

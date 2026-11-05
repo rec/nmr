@@ -1,6 +1,7 @@
 # nmr
 
-Choose **Name**, **Count**, or **Clock**. The page keeps its layout as you change
+The page starts in **Clock** when the URL has no mode. Click the underlined title
+to cycle through **Clock**, **Count**, and **Name**. The page keeps its layout as you change
 modes. Long values scroll inside their regions.
 
 ## Name
@@ -11,7 +12,7 @@ choose suggestions. Paste a complete name to load it.
 
 ## Type
 
-Choose **All types** for full names, or a specific Type for short names and objects
+Use the menu at the top left to choose **All types** for full names, or a specific Type for short names and objects
 of that type. Changing Type preserves the numeric index. Finite types wrap.
 
 ## Count and Clock

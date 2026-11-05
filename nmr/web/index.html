@@ -13,6 +13,7 @@
     <script type="module" src="app.js"></script>
   </head>
   <body>
+    <select id="type" aria-label="Type"><option value="">All types</option></select>
     <header id="settings-controls">
       <button id="pause-toggle" type="button" aria-label="Pause" title="Pause" aria-pressed="false" hidden disabled>
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -94,16 +95,16 @@
         </div>
       </div>
     </header>
-    <main id="workspace" data-mode="name">
-      <h1>Name</h1>
+    <main id="workspace" data-mode="clock">
+      <h1><button id="mode-toggle" type="button" title="Switch to count">Clock</button></h1>
       <section id="source-region" aria-label="Current source">
         <input id="count-value" aria-label="Count" type="text" inputmode="numeric" pattern="[0-9]+" value="0" autocomplete="off" spellcheck="false" hidden />
-        <button id="clock-reading" type="button" aria-label="Show count" hidden>
+        <button id="clock-reading" type="button" aria-label="Show count">
           <time id="clock-time"><span id="clock-date"></span><span id="clock-hours"></span></time>
           <span id="clock-count" hidden></span>
         </button>
-        <div id="name-editor" role="textbox" tabindex="0" aria-label="True name" aria-autocomplete="inline"><span id="typed"></span><span class="name-caret" aria-hidden="true"></span><span id="guessed"></span></div>
-        <p id="source-name" hidden></p>
+        <div id="name-editor" role="textbox" tabindex="0" aria-label="True name" aria-autocomplete="inline" hidden><span id="typed"></span><span class="name-caret" aria-hidden="true"></span><span id="guessed"></span></div>
+        <p id="source-name"></p>
       </section>
       <section id="value-display" aria-label="Current object"></section>
       <section id="playback-area" aria-label="Playing music">
@@ -111,16 +112,7 @@
         <div id="playing-score" aria-label="Playing music notation"></div>
       </section>
       <p id="message" role="status"></p>
-      <footer id="page-controls">
-      <div class="mode-row">
-        <fieldset id="modes"><legend>Mode</legend>
-          <label><input type="radio" name="mode" value="name" checked /> Name</label>
-          <label><input type="radio" name="mode" value="count" /> Count</label>
-          <label><input type="radio" name="mode" value="clock" /> Clock</label>
-        </fieldset>
-        <label>Type <select id="type" aria-label="Type"><option value="">All types</option></select></label>
-      </div>
-      </footer>
+
     </main>
   </body>
 </html>

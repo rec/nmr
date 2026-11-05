@@ -10,7 +10,6 @@ const flush = () => new Promise(setImmediate);
 function page(address = "http://localhost/?mode=count&index=42&inc=1", duration = 0.1, configuration = Promise.resolve({ types: { int: "Integer", cards: "Cards" }, words: ["the", "of", "and"] })) {
   let url = new URL(address);
   const elements = new Map();
-  const radios = ["name", "count", "clock"].map((value) => ({ value, addEventListener(event, fn) { this[event] = fn; } }));
   const element = (id) => {
     if (!elements.has(id)) elements.set(id, {
       value: id === "#count-increment" ? "1" : id === "#score-top" || id === "#score-bottom" ? "4" : id === "#playback-delay" ? "2" : "",
@@ -34,18 +33,18 @@ function page(address = "http://localhost/?mode=count&index=42&inc=1", duration 
   const listeners = {};
   let player;
   let hold;
-  const app = { element, calls, radios, timers, listeners,
+  const app = { element, calls, timers, listeners,
     get player() { return player; },
     get url() { return url; },
     elapse(milliseconds) { wallTime += milliseconds; },
     get date() { return new Date(wallTime); },
     tick() { timers.filter(i => i.name === "tick").at(-1).fn(); },
-    switch(mode) { radios.find((i) => i.value === mode).change(); },
+    switch(mode) { for (let i = 0; i < 3 && element("#workspace").dataset.mode !== mode; i++) element("#mode-toggle").click(); },
     hold(action) { hold = action; },
     load(address) { url = new URL(address); listeners.popstate(); },
   };
   vm.runInNewContext(runnerSource + "\n" + source, {
-    document: { querySelector: element, querySelectorAll: () => radios, createElement: () => ({}) },
+    document: { querySelector: element, querySelectorAll: () => [], createElement: () => ({}) },
     window: { location: { get href() { return url.href; } }, history: {
       replaceState(a, b, next) { url = new URL(next); }, pushState(a, b, next) { url = new URL(next); },
     }, addEventListener(event, fn) { listeners[event] = fn; } },
@@ -131,7 +130,7 @@ test("Name accepts truenames and Back restores mode, type and exact index", asyn
   app.load("http://localhost/?mode=count&type=cards&index=999999999999999999999&inc=7"); await flush();
   assert.equal(app.element("#count-value").value, "999999999999999999999");
   assert.equal(app.element("#count-increment").value, "7");
-  assert.equal(app.element("#workspace h1").textContent, "Count");
+  assert.equal(app.element("#mode-toggle").textContent, "Count");
   assert.equal(app.element("#source-name").textContent, "the");
 });
 
@@ -323,9 +322,8 @@ for (const mode of ["clock", "count", "name"]) test(`${mode} URL applies its lay
   const configuration = new Promise(resolve => { configure = resolve; });
   const address = `http://localhost/?mode=${mode}&type=int&index=42&inc=7&value=the`;
   const app = page(address, 0.1, configuration);
-  assert.equal(app.element("#workspace h1").textContent, mode[0].toUpperCase() + mode.slice(1));
+  assert.equal(app.element("#mode-toggle").textContent, mode[0].toUpperCase() + mode.slice(1));
   assert.equal(app.element("#workspace").dataset.mode, mode);
-  assert.equal(app.radios.find(i => i.checked).value, mode);
   assert.equal(app.element("#name-editor").hidden, mode !== "name");
   assert.equal(app.element("#count-value").hidden, mode !== "count");
   assert.equal(app.element("#clock-reading").hidden, mode !== "clock");
@@ -382,4 +380,20 @@ test("entering Clock lets an existing tune finish before the shared delay", asyn
   app.elapse(3000);
   app.tick(); await flush();
   assert.equal(app.calls.filter(i => i.action === "preview_truename").length, 2);
+});
+
+test("A bare URL starts in Clock and the title cycles through Count, Name, and Clock", async () => {
+  const app = page("http://localhost/");
+  assert.equal(app.element("#mode-toggle").textContent, "Clock");
+  assert.equal(app.element("#clock-reading").hidden, false);
+  await flush();
+  for (const mode of ["count", "name", "clock"]) {
+    app.element("#mode-toggle").click();
+    await flush();
+    assert.equal(app.element("#workspace").dataset.mode, mode);
+    assert.equal(app.url.searchParams.get("mode"), mode);
+    assert.equal(app.element("#pause-toggle").hidden, mode === "name");
+  }
+  app.listeners.popstate();
+  assert.equal(app.element("#mode-toggle").textContent, "Clock");
 });
