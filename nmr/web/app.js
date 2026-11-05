@@ -40,6 +40,7 @@ const message = document.querySelector("#message");
 let muted = true;
 let paused = false;
 let clockSnapshot = null;
+let clockResumeAt = null;
 let clockNextSecond = null;
 let playbackDelay = Number(delay.value) * 1000;
 let mode = "name";
@@ -117,6 +118,7 @@ function writeURL(push = false) {
 }
 function refresh(push = false, reading = null) {
   if (!ready) return;
+  if (mode === "clock" && clockResumeAt !== null) return;
   const pausedAtRequest = paused;
   const revision = ++version;
   current = null;
@@ -166,6 +168,7 @@ function refresh(push = false, reading = null) {
 }
 function playCurrent() {
   if (paused && mode !== "name") return Promise.resolve();
+  if (mode === "clock" && clockResumeAt !== null) return Promise.resolve();
   const revision = version;
   if (!player) return Promise.reject(new Error("Audio is unavailable."));
   const unlocked = muted ? Promise.resolve() : player.unlock();
@@ -216,6 +219,10 @@ function playCurrent() {
 }
 function activate(push = false) {
   clockNextSecond = null;
+  if (mode !== "clock" && clockResumeAt !== null) {
+    clockResumeAt = null;
+    player?.unlock().catch(report);
+  }
   runner.stop();
   workspace.dataset.mode = mode;
   heading.textContent = mode[0].toUpperCase() + mode.slice(1);
@@ -263,7 +270,7 @@ sound.addEventListener("click", () => {
   muted = !muted;
   sound.setAttribute("aria-pressed", String(muted));
   player.setVolume(muted ? 0 : 1, 0.02);
-  if (!muted && !(paused && mode !== "name")) player.unlock().catch(report);
+  if (!muted && !(paused && mode !== "name") && clockResumeAt === null) player.unlock().catch(report);
 });
 pause.addEventListener("click", () => {
   paused = !paused;
@@ -271,14 +278,16 @@ pause.addEventListener("click", () => {
   pause.setAttribute("aria-label", paused ? "Play" : "Pause");
   pause.title = paused ? "Play" : "Pause";
   if (paused) {
+    clockResumeAt = null;
     runner.pause();
     player?.context.suspend().catch(report);
   } else {
-    player?.unlock().catch(report);
     if (mode === "clock") {
-      refresh();
-      if (!playback) playCurrent().catch(report);
+      version++;
+      const now = Date.now();
+      clockResumeAt = now + 1000 - now % 1000;
     } else if (mode === "count") {
+      player?.unlock().catch(report);
       if (runner.running) runner.resume();
       else if (increment.value && increment.validity.valid && /^[0-9]+$/.test(field.value)) runner.start();
     }
@@ -329,9 +338,14 @@ for (const input of [document.querySelector("#tune-root"), document.querySelecto
 window.addEventListener("popstate", readURL);
 function tick() {
   if (mode === "clock" && ready && !paused) {
+    const resuming = clockResumeAt !== null && Date.now() >= clockResumeAt;
+    if (resuming) {
+      clockResumeAt = null;
+      player?.unlock().catch(report);
+    }
     const reading = clockReading(new Date(), timeOnly.checked, displayUTC.checked);
     refresh(false, reading);
-    if (!playback && (clockNextSecond !== null && reading.second >= clockNextSecond)) {
+    if (!playback && (resuming || clockNextSecond !== null && reading.second >= clockNextSecond)) {
       clockNextSecond = null;
       playCurrent().catch(report);
     }

@@ -246,10 +246,59 @@ test("Clock freezes pending and periodic updates and catches up on resume", asyn
   assert.deepEqual(["#clock-date", "#clock-hours", "#clock-count", "#source-name"].map(i => app.element(i).textContent), snapshot);
   app.hold(null);
   app.element("#pause-toggle").click(); await flush();
+  assert.equal(app.calls.length, requests);
+  assert.equal(app.player.context.state, "suspended");
+  app.elapse(1000 - app.date.getTime() % 1000);
+  app.tick(); await flush();
   assert.ok(app.calls.length > requests);
   assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_type, "datetime");
   assert.equal(app.calls.filter(i => i.action === "count").at(-1).payload.source_value, clockReading(app.date, false, false).value);
   assert.equal(app.player.context.state, "running");
+});
+
+for (const milliseconds of [0, 1, 500, 999]) test(`Clock resumes on the next second when Play is clicked at ${milliseconds}ms`, async () => {
+  const app = page("http://localhost/?mode=clock"); await flush();
+  app.element("#pause-toggle").click();
+  const before = app.element("#clock-hours").textContent;
+  app.elapse(5000 - app.date.getTime() % 1000 + milliseconds);
+  const start = app.date.getTime();
+  const calls = app.calls.length;
+  app.element("#pause-toggle").click(); await flush();
+  app.element("#sound-toggle").click();
+  assert.equal(app.player.context.state, "suspended");
+  assert.equal(app.calls.length, calls);
+  assert.equal(app.element("#clock-hours").textContent, before);
+  app.elapse(999 - milliseconds);
+  app.tick(); await flush();
+  assert.equal(app.calls.length, calls, "No update just before the boundary");
+  app.elapse(1);
+  app.tick(); await flush();
+  assert.equal(app.player.context.state, "running");
+  const reading = app.calls.filter(i => i.action === "count").at(-1);
+  assert.equal(reading.payload.source_value, clockReading(new Date(start + 1000 - milliseconds)).value);
+});
+
+test("pausing again cancels a Clock restart waiting for the next second", async () => {
+  const app = page("http://localhost/?mode=clock"); await flush();
+  app.element("#pause-toggle").click();
+  app.element("#pause-toggle").click();
+  app.element("#pause-toggle").click();
+  const calls = app.calls.length;
+  app.elapse(2000);
+  app.tick(); await flush();
+  assert.equal(app.calls.length, calls);
+  assert.equal(app.player.context.state, "suspended");
+});
+
+for (const mode of ["name", "count"]) test(`switching to ${mode} cancels a pending Clock resume without leaving audio suspended`, async () => {
+  const app = page("http://localhost/?mode=clock"); await flush();
+  app.element("#pause-toggle").click();
+  app.element("#pause-toggle").click();
+  assert.equal(app.player.context.state, "suspended");
+  app.switch(mode); await flush();
+  assert.equal(app.player.context.state, "running");
+  assert.equal(app.element("#workspace").dataset.mode, mode);
+  assert.equal(app.player.volume, 0, "Changing mode preserves mute");
 });
 
 test("pause is hidden in Name and retained when returning to Count or Clock", async () => {
