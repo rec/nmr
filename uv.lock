@@ -570,7 +570,7 @@ wheels = [
 [[package]]
 name = "reccy"
 version = "0.2.0"
-source = { git = "ssh://git@github.com/rec/reccy.git?branch=main#59054d52dcdb87662c34e1a5cd3189b67564573a" }
+source = { git = "ssh://git@github.com/rec/reccy.git?branch=main#e23e4261f352b635ab33fdba6f3d9d548e7e826b" }
 dependencies = [
     { name = "pint", marker = "python_full_version >= '3.13'" },
     { name = "pydantic", marker = "python_full_version >= '3.13'" },
