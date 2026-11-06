@@ -1,0 +1,7 @@
+words = []
+
+count = 0
+
+case_sensitive = false
+
+center_on_zoot = true
