@@ -30,6 +30,7 @@ dev = [
     "pyupgrade>=3.21.2",
     "ty>=0.0.14",
     "reccy ; python_full_version >= '3.13'",
+    "pytest-regressions>=2.11.0",
 ]
 
 [tool.coverage.run]
