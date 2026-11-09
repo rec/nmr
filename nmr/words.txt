@@ -1,5 +1,6 @@
 # Vocabulary selected from google-10000-english.txt, in its original order.
-# The default alphabet uses the first 1628 words.
+# The article a is displayed as an before a vowel letter by the bundled vocabulary.
+# The default alphabet uses the first 1627 words.
 
 the
 of
@@ -38,7 +39,6 @@ have
 new
 more
 
-an
 was
 we
 will

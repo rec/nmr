@@ -53,10 +53,11 @@ def test_vocabulary_export_and_info(tmp_path: Path) -> None:
     output, errors = io.StringIO(), io.StringIO()
     assert Main(vocabulary_info=True).run(io.StringIO(), output, errors) == 0
     info = json.loads(output.getvalue())
-    assert info["words"] == 1628
+    assert info["words"] == 1627
     target = tmp_path / "words.txt"
     assert Main(export_words=target).run(io.StringIO(), output, errors) == 0
-    assert Words(target).identifier == info["identifier"]
+    assert Words(target).words == Words().words
+    assert Words(target).identifier != info["identifier"]
 
 
 def test_json_pipeline_exposes_canonical_value_and_type() -> None:
@@ -71,7 +72,7 @@ def test_json_pipeline_exposes_canonical_value_and_type() -> None:
     assert result["value"] == "2000-02-29"
     assert result["type"] == "date"
     assert result["canonical"] is True
-    assert result["truename"] == "date:or most"
+    assert result["truename"] == "date:or each"
     assert "name" not in result
 
 

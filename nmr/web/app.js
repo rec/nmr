@@ -362,7 +362,7 @@ configured.then((info) => {
     option.title = detail;
     type.append(option);
   }
-  editor = new TruenameEditor(info.words);
+  editor = new TruenameEditor(info.words, info.article_variants);
   ready = true;
   readURL();
   nameField.dataset.ready = "true";

@@ -11,7 +11,7 @@ from pathlib import Path
 from .count_words import CountWords
 
 FILE = Path(__file__).with_name("words.txt")
-COUNT_FOR_FILE = 1628
+COUNT_FOR_FILE = 1627
 
 
 class Words:
@@ -21,6 +21,9 @@ class Words:
         count: int | None = None,
         ignore_case: bool = True,
     ) -> None:
+        self.article_variants = words is None or (
+            isinstance(words, Path) and words.resolve() == FILE.resolve()
+        )
         self.ignore_case = ignore_case
         if words is None:
             words = FILE
@@ -57,7 +60,8 @@ class Words:
     @cached_property
     def identifier(self) -> str:
         contents = json.dumps(
-            ["nmr-vocabulary-1", self.ignore_case, self.words],
+            ["nmr-vocabulary-1", self.ignore_case, self.words]
+            + (["vowel-letter-article-1"] if self.article_variants else []),
             ensure_ascii=False,
             separators=(",", ":"),
         )
@@ -88,10 +92,23 @@ class Words:
                 digit += index <= digit
             bisect.insort(used, digit)
             digits.append(digit)
-        return [self.words[i] for i in reversed(digits)]
+        words = [self.words[i] for i in reversed(digits)]
+        if self.article_variants:
+            words = [
+                "an"
+                if w == "a" and i + 1 < len(words) and words[i + 1][0] in "aeiou"
+                else w
+                for i, w in enumerate(words)
+            ]
+        return words
 
     def from_truename(self, truename: Sequence[str]) -> int:
-        words = [self.normalize(i) for i in truename]
+        words = [
+            "a"
+            if self.article_variants and self.normalize(i) == "an"
+            else self.normalize(i)
+            for i in truename
+        ]
         if not words:
             raise ValueError("A truename needs at least one word")
         if len(words) != len(set(words)):
@@ -107,7 +124,12 @@ class Words:
         return self.count_words(len(words) - 1) + total
 
     def is_truename(self, words: Sequence[str]) -> bool:
-        tokens = [self.normalize(i) for i in words]
+        tokens = [
+            "a"
+            if self.article_variants and self.normalize(i) == "an"
+            else self.normalize(i)
+            for i in words
+        ]
         return (
             bool(tokens)
             and len(tokens) == len(set(tokens))

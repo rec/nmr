@@ -19,7 +19,7 @@ const { loadPyodide } = require("pyodide");
   const previewItem = runtime.globals.get("preview_item");
   const info = JSON.parse(configure("{}"));
   const fixture = JSON.parse(fs.readFileSync("test/format.json", "utf8"));
-  assert.equal(info.count, 1628);
+  assert.equal(info.count, 1627);
   assert.equal(info.identifier, fixture.vocabulary);
   assert.equal("data:text" in info.types, false);
   assert.ok("data:id:string" in info.types);
@@ -27,14 +27,14 @@ const { loadPyodide } = require("pyodide");
   assert.equal("meta:list" in info.types, false);
   assert.equal("list" in info.types, false);
   const qualified = JSON.parse(convert(JSON.stringify({
-    operation: "decode", value: ":play:game:chess:in when",
+    operation: "decode", value: ":play:game:chess:in get",
   })));
-  assert.equal(qualified.truename, "chess:in when");
+  assert.equal(qualified.truename, "chess:in get");
   assert.equal(qualified.type, "chess");
   assert.equal(qualified.canonical, true);
   assert.equal(JSON.parse(convert(JSON.stringify({
-    operation: "decode", value: "play:game:your note",
-  }))).truename, "game:your note");
+    operation: "decode", value: "play:game:your tax",
+  }))).truename, "game:your tax");
   for (const sample of fixture.cases) {
     const encoded = JSON.parse(
       convert(
@@ -150,7 +150,7 @@ const { loadPyodide } = require("pyodide");
     JSON.parse(previewTruename('{"value":"the"}')));
   assert.deepEqual(JSON.parse(previewTruename('{"value":"name:tune:the"}')),
     JSON.parse(previewTruename('{"value":"tune:the"}')));
-  const ode = JSON.parse(recognize('{"value":"tune:world there","mode":"truename"}'));
+  const ode = JSON.parse(recognize('{"value":"tune:world those","mode":"truename"}'));
   assert.equal(ode.browsed.type, "tune");
   assert.equal(ode.browsed.value, "@1 @1 1@1 2@1 @1 -2@1 -1@1 -2@1");
   assert.equal(JSON.parse(previewTruename(JSON.stringify({ value: ode.truename }))).value,

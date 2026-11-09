@@ -1,6 +1,7 @@
 /* A vocabulary-only cursor: accepted text followed by one suggested word. */
 export class TruenameEditor {
-  constructor(words) {
+  constructor(words, articleVariants = false) {
+    this.articleVariants = articleVariants;
     this.words = words;
     this.prefix = "";
     this.typed = "";
@@ -18,11 +19,17 @@ export class TruenameEditor {
     return this.choice.slice(this.current.length);
   }
   get text() {
-    return this.prefix + this.typed;
+    const full = this.format(this.typed + this.guessed);
+    return this.prefix + full.slice(0, full.length - this.guessed.length);
   }
   get accepted() {
     const words = this.typed.slice(0, this.typed.lastIndexOf(" ") + 1).trimEnd();
-    return words ? this.prefix + words : "";
+    return words ? this.prefix + this.format(words) : "";
+  }
+  format(text) {
+    if (!this.articleVariants) return text;
+    const words = text.split(" ");
+    return words.map((word, i) => word === "a" && /^[aeiou]/.test(words[i + 1] || "") ? "an" : word).join(" ");
   }
   suggest() {
     const options = this.options;
@@ -32,7 +39,8 @@ export class TruenameEditor {
     const colon = value.lastIndexOf(":");
     const prefix = value.slice(0, colon + 1).trim().toLowerCase();
     if (!/^(?::)?(?:[a-z]+:)*$/.test(prefix)) return false;
-    const tokens = value.slice(colon + 1).trim().toLowerCase().split(/\s+/).filter(Boolean);
+    let tokens = value.slice(colon + 1).trim().toLowerCase().split(/\s+/).filter(Boolean);
+    if (this.articleVariants) tokens = tokens.map((word) => word === "an" ? "a" : word);
     const used = new Set();
     for (const word of tokens.slice(0, -1)) {
       if (!this.words.includes(word) || used.has(word)) return false;

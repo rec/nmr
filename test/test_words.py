@@ -2,7 +2,7 @@ import itertools
 
 import pytest
 
-from nmr.words import Words
+from nmr.words import FILE, Words
 
 
 def test_all_small_permutations_are_bijective() -> None:
@@ -56,3 +56,36 @@ def test_restored_words_follow_google_frequency_order(
     words = Words().words
     position = words.index(word)
     assert words[position - 1 : position + 2] == (before, word, after)
+
+
+@pytest.mark.parametrize(
+    "following, article",
+    [
+        ("alpha", "an"),
+        ("egg", "an"),
+        ("in", "an"),
+        ("of", "an"),
+        ("use", "an"),
+        ("stand", "a"),
+        ("home", "a"),
+    ],
+)
+def test_bundled_article_spelling_roundtrips(following: str, article: str) -> None:
+    engine = Words()
+    index = engine.from_truename(["a", following])
+    assert engine.to_truename(index) == [article, following]
+    assert engine.from_truename([article, following]) == index
+    assert engine.to_truename(engine.from_truename(["a"])) == ["a"]
+    assert "an" not in engine.words
+    assert not engine.is_truename(["a", "an"])
+    with pytest.raises(ValueError, match="repeat"):
+        engine.from_truename(["a", "an"])
+
+
+def test_custom_vocabulary_keeps_literal_articles() -> None:
+    engine = Words(["a", "an", "alpha"])
+    for words in [["a", "alpha"], ["an", "alpha"], ["a", "an"]]:
+        assert engine.to_truename(engine.from_truename(words)) == words
+    bundled = Words()
+    assert Words(FILE, count=bundled.count).identifier == bundled.identifier
+    assert bundled.identifier != Words(bundled.words).identifier

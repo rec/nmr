@@ -202,8 +202,8 @@ Tunes use the `tune` prefix. For example:
 
 ```sh
 nmr --operation encode --type tune --value '@1 2@1/2 r@1/3 -1@2/3'
-# tune:must mess ton band
-nmr --value 'tune:must mess ton band'
+# tune:made sell thin table
+nmr --value 'tune:made sell thin table'
 # @1 2@1/2 r@1/3 -1@2/3
 ```
 
@@ -260,8 +260,13 @@ nmr --word-file private.txt --export-words normalized-private.txt
 ```
 
 `--word-count N` selects the first N validated words. The default vocabulary uses
-1,628 words. `--vocabulary-info` gives its SHA-256 identifier; a recipient can
-require it with `--expect-vocabulary IDENTIFIER`. The identifier includes word
+1,627 words. `--vocabulary-info` gives its SHA-256 identifier; a recipient can
+require it with `--expect-vocabulary IDENTIFIER`.
+
+The bundled vocabulary treats **a/an** as one entry: it displays **an** before
+a vowel letter (`a`, `e`, `i`, `o`, `u`), and **a** otherwise or at the end.
+This spelling rule applies only to the bundled list; exported or custom word
+lists use literal words. The identifier includes this rule as well as word
 order and case policy. Export the normalized ordered list and share it through an
 already trusted channel. Custom vocabulary tools are available through the CLI
 and Python library; the minimal browser uses the default vocabulary.

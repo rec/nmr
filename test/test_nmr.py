@@ -43,9 +43,9 @@ def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) ->
     engine = Nmr()
     result = engine.encode("e4 e5 Nf3", prefix)
     assert result.type == "chess"
-    assert result.truename == "chess:in when"
+    assert result.truename == "chess:in get"
     for browse in (False, True):
-        decoded = engine.decode(prefix + ":in when", browse=browse)
+        decoded = engine.decode(prefix + ":in get", browse=browse)
         assert decoded == result
 
 
@@ -53,13 +53,13 @@ def test_full_and_partial_paths_read_and_print_as_short_prefixes(prefix: str) ->
 def test_category_scopes_are_shortened_without_changing_the_payload(scope: str) -> None:
     engine = Nmr()
     result = engine.encode("e4 e5 Nf3", "chess", scope)
-    assert result.truename == "game:your note"
-    assert engine.decode(scope + ":your note") == result
+    assert result.truename == "game:your tax"
+    assert engine.decode(scope + ":your tax") == result
 
 
 def test_wrong_parent_categories_are_rejected() -> None:
     with pytest.raises(ValueError, match="Unknown"):
-        Nmr().decode("data:chess:in when")
+        Nmr().decode("data:chess:in get")
 
 
 @pytest.mark.parametrize(
@@ -148,3 +148,15 @@ def test_time_category_scope_stays_distinct_from_the_type(
 def test_time_short_prefix_cannot_be_used_as_a_datetime_category_scope() -> None:
     with pytest.raises(ValueError, match="does not contain"):
         Nmr().encode("2000-02-29T12:34", "datetime", scope="time")
+
+
+def test_bundled_article_is_canonical_and_invertible() -> None:
+    from nmr.types.integer import Int
+
+    engine = Nmr()
+    value = Int.index_to_str(engine.from_truename(["a", "alpha", "stand"]))
+    result = engine.encode(value, "int")
+    assert result.truename == "int:an alpha stand"
+    assert engine.decode(result.truename) == result
+    with pytest.raises(ValueError, match="Noncanonical"):
+        engine.decode("int:a alpha stand")

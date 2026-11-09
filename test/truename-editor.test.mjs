@@ -178,3 +178,24 @@ test("keeps all accepted words unique through mixed editing", () => {
     }
   }
 });
+
+
+test("bundled articles display by vowel letter and cannot repeat through their alias", () => {
+  const editor = new TruenameEditor(["a", "alpha", "stand"], true);
+  assert.equal(editor.load("a"), true);
+  choose(editor, "alpha");
+  assert.equal(editor.text, "an ");
+  assert.equal(editor.accepted, "a");
+  choose(editor, "stand");
+  assert.equal(editor.text, "a ");
+  assert.equal(editor.load("an alpha"), true);
+  assert.equal(editor.text, "an alpha ");
+  assert.equal(editor.accepted, "an alpha");
+  assert.equal(editor.load("a stand"), true);
+  assert.equal(editor.accepted, "a stand");
+  assert.equal(editor.load("a an alpha"), false);
+  assert.equal(editor.options.includes("a"), false);
+  const custom = new TruenameEditor(["a", "an", "alpha"]);
+  assert.equal(custom.load("a an alpha"), true);
+  assert.equal(custom.accepted, "a an alpha");
+});

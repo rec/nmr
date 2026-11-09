@@ -92,6 +92,7 @@ def configure(settings_json: str) -> str:
         "types": engine.types(),
         "identifier": engine.identifier,
         "words": engine.words,
+        "article_variants": engine.article_variants,
         "count": engine.count,
     }
     _engine = engine
