@@ -1,0 +1,33 @@
+# What else deserves a truename?
+
+**Try an opaque sRGB color first. Investigate molecular structures in parallel as a design question.** A friend can recognize a swatch immediately and its entire domain fits in three payload words with the bundled vocabulary. Chemistry has a stronger need for an agreed identity, and a much harder inverse problem. These choices extend the [earlier candidate list](new-types.md). The [current registry](../nmr/registry.py) already includes tunes, strings, games, addresses and several identifiers.
+
+## Objects people could recognize on decoding
+
+| Candidate | Who would use the name? | What exactly would come back? | First test |
+| --- | --- | --- | --- |
+| **Opaque sRGB color** | A designer telling a printer or collaborator which digital swatch they chose. | Three ordered eight-bit channels. Expand short hex, so `#abc` and `#aabbcc` recover the same triple. The swatch describes a digital color; paper and ink affect its appearance. | Show the swatch and hex together. Compare speaking its name with reading six hex digits. There are 16,777,216 possible triples. [W3C hex notation](https://www.w3.org/TR/css-color-4/#hex-notation) |
+| **Molecular structure entered as SMILES** | A chemistry teacher sharing the exact structure on a worksheet, or a chemist labelling a structure diagram. | A labelled molecular graph. `CCO` and `OCC` should share one name for ethanol. `COC` has the same elemental formula but different connectivity and needs a different name. | Start with this three-input test, then attempt the inverse described below. [Daylight SMILES tutorial](https://daylight.com/meetings/summerschool98/course/dave/smiles-bonds.html) |
+| **A chord voicing** | A pianist sending the exact chord they found to a bandmate. | An ascending set of simultaneous pitches, each with its octave, in twelve-tone equal temperament. C3–G3–E4 and C3–E3–G3 are different voicings. Keypress order and instrument timbre disappear. | Start with the 88 piano keys. A subset rank can favor common three- and four-note voicings. Ask the recipient to play the pitches back. The existing Tune type describes successive attacks. [Tune identity](../doc/tunes.md) |
+| **A bridge deal** | A club player sharing a memorable four-hand deal for replay. | A partition of the 52 distinct cards into four labelled hands of 13. Reordering one hand preserves identity. Exchanging North and South usually changes it. Dealer, auction, vulnerability and play history are outside this object. | Rank the four hands by combinations. Compare its length with the existing deck name, which also encodes the order within each hand. Let a player decide whether a complete deal is short enough to dictate. [Existing deck ordering](../nmr/types/cards.py) |
+| **A 3×3×3 cube position** | A speedcuber sharing the starting state of a practice solve with someone who used a different scramble. | The reachable arrangement and orientations of corners and edges relative to a fixed center-color frame. Turning the whole cube in your hands preserves its name. Different move sequences can reach the same state. | Require the solved cube and a move followed by its inverse to agree. A lone flipped edge must fail. Prove that every permitted index produces a reachable state before offering iteration. |
+
+### What would make the SMILES proposal credible?
+
+Choose an explicit first domain, such as connected, neutral, acyclic structures using a small declared set of elements and ordinary valences. State how implicit hydrogen is inferred. Inputs carrying unsupported charge, isotope or stereochemical information should receive a refusal. For a broader domain, decide how stereochemistry, aromatic representations, disconnected components and tautomers affect equality before choosing an output spelling. [Daylight SMILES theory](https://daylight.com/dayhtml/doc/theory/theory.smiles.html)
+
+Canonicalizing an input graph solves only the forward identity question. Encoding a canonical SMILES as an ordinary String would recover the spelling, but browsing arbitrary string indices would produce mostly nonstructures. The difficult experiment is to enumerate a small domain of graphs, remove atom-numbering duplicates, and recover a valid graph directly from its rank. Check every graph up to a modest atom count in both directions, then measure name lengths for structures a teacher actually uses. A graph hash cannot supply that inverse.
+
+## Identifiers people already exchange
+
+These candidates have inexpensive decoding but a higher bar for human appeal. The recipient recovers the identifier locally. Bibliographic metadata, recordings and evidence of assignment would each require a separate source.
+
+| Candidate | Useful handoff | Identity and feasibility |
+| --- | --- | --- |
+| **ORCID iD** | A researcher dictating their persistent identifier to a collaborator preparing a submission. | Preserve all 15 body digits, including leading zeroes, and regenerate the final check character, which may be X. The official URI and hyphenated input should agree. Define the domain as structurally valid codes and label assignment as unknown when browsing. Compare the name with simply sending the URI. [ORCID identifier specification](https://support.orcid.org/hc/en-us/articles/360006897674-Structure-of-the-ORCID-Identifier) |
+| **International Standard Recording Code (ISRC)** | A performer or mastering engineer distinguishing a particular recording in a release catalogue. | Rank the five prefix characters, two year digits and five designation digits in their permitted alphabets. Recover the standardized code with its zeroes intact. Two codes must remain distinct even if the associated recordings sound alike. A useful test is handing off a studio recording and a live version of the same song. [International ISRC Agency](https://isrc.ifpi.org/isrc-standard/isrc-structure) |
+| **IP network prefix** | Two operators discussing the exact network block on a call. | Encode family, prefix length and significant address bits. Sample identity: `2001:db8::/32`. A host address already has a codec. Decide whether input with nonzero host bits is rejected or normalized, and show the canonical network explicitly. All prefixes of a given width form a finite rankable layer. [IPv6 prefix representation](https://www.rfc-editor.org/rfc/rfc4291#section-2.3) · [Existing IP codec](../nmr/types/ip_address.py) |
+
+Before allocating a tree slot, collect one real handoff for the candidate. Record both scoped and full name lengths, what a stranger recovered, and whether they would use the name a second time. For a catalogue code, include a direct comparison with the identifier people already exchange.
+
+Additional work beyond the prompt: None.
